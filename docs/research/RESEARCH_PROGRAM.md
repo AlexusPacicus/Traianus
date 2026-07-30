@@ -1,4 +1,4 @@
-# 🔬 Research Programme: Spatial State Governance & R&D Roadmap
+# Research Programme: Spatial State Governance & R&D Roadmap
 
 > **Engineering Specifications for the Deterministic Computational Substrate.**
 

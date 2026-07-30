@@ -7,55 +7,66 @@ Philosophy: Append-Only. Architectural decisions are stacked sequentially to gua
 Historical Context & Evolutionary Trajectory:
 The early entries (ADR-001 through ADR-007) capture rapid prototyping for a deterministic knowledge organizer during a hackathon. To eliminate data randomness and system drift, architectural focus shifted from application features to core state persistence. Subsequent entries (ADR-010 through ADR-025) record this evolution into a foundational, immutable control plane.
 Note on Ledger Sequence: Discontinued numbers (006, 008, 009, 011–013) represent internal exploration drafts and interface trade-offs from the initial hackathon phase that were merged or discarded prior to substrate consolidation.
-🗺️ Index of Architectural Decisions
+## Index of Architectural Decisions
+
 ### ADR-001: Separation of Planes (Control Plane vs. External Payloads)
 * **Context:** Raw entity payloads processed by external representation providers introduce structural unpredictability if granted routing authority over execution flows.
 * **Decision:** Enforce decoupling between the Spatial Control Plane (strongly-typed linear algebra and state execution) and the Data Ingress Layer. Once coordinate vectors $v \in \mathbb{R}^d$ are ingested, external entity payloads lose execution authority within the substrate.
 * **Status:** Approved / Active.
+
 ### ADR-002: Silent Denial and Internal Telemetry (Refactored for Operator Observability)
 * **Context:** Schema validation failures or out-of-boundary parameters can inject error traces back into the caller, exposing system internals or freezing user interfaces.
 * **Decision:** Implement dual-channel Silent Denial. External HTTP callers receive a synthetic success response (200 OK) to prevent client lockups. Concurrently, any structural drift or validation failure is atomically persisted to manifold_nodes as an internal telemetry node under lifecycle_state = 'telemetry_error', granting local forensic sovereignty to the operator.
 * **Status:** Approved / Active.
+
 ### ADR-003: Dual Ingress Layer (Payload-First + Local Web Speech API)
 * **Context:** Restricting perimeter ingestion exclusively to typed text minimizes friction, but may limit low-energy input states.
 * **Decision:** Implement a text/payload-first interface with an optional toggle for native browser-based Web Speech transcription. Raw audio files are rejected at server ingress (RawDump), keeping all speech-to-text transcription on local client hardware.
 * **Status:** Approved / Active.
+
 ### ADR-004: Client-Side Persistence Mirroring (IndexedDB)
 * **Context:** Direct synchronous disk writes on every client interaction introduce I/O blocking bottlenecks in observation clients.
 * **Decision:** Maintain a local IndexedDB instance on the client acting as an optimistic mirror of the backend storage layout.
 * **Status:** Approved / Active.
+
 ### ADR-005: Vector Variance Routing Over Heuristics
 * **Context:** Boolean decision rules with manually injected magic numbers introduce fragile heuristics that violate deterministic validation paradigms.
-* **Decision:** State transitions are determined by computing the statistical variance ($\sigma^2$) of scalar projections (dot products) between the L_{2} -normalized input vector v and active geodetic axes $B_{n}$ . The critical threshold auto-calibrates at boot by measuring intrinsic baseline space dispersion.
+* **Decision:** State transitions are determined by computing the statistical variance ($\sigma^2$) of scalar projections (dot products) between the $L_2$-normalized input vector $\mathbf{v}$ and active geodetic axes $B_n$. The critical threshold auto-calibrates at boot by measuring intrinsic baseline space dispersion.
 * **Status:** Approved / Active.
+
 ### ADR-007: Physical Symmetry and Single-Token Factor Integrity
 * **Context:** Multi-character string factors or mean pooling over multi-token extractions introduce length bias and asymmetric attention weights within residual streams.
 * **Decision:** Enforcement of 1-token physical symmetry. The toon_factor field in data contracts must consist of exactly 1 Unicode character (len == 1). Multi-character pseudo-tokens are destroyed at the Ingress Customs boundary.
 * **Status:** Approved / Active.
+
 ### ADR-010: Native On-Premise Execution with Reference Edge Hardware Benchmark
 * **Context:** Cloud extraction APIs violate data sovereignty, introduce network latency, and create vendor lock-in.
 * **Decision:** All vector inference and control plane operations execute on local hardware. Baseline consumer edge hardware (≤8GB RAM) serves as the reference benchmark testbed environment for PoC validation, not as an architectural software limit.
 * **Status:** Approved / Active.
+
 ### ADR-014: Spectral Approach Against Linear Compression Errors
 * **Context:** Applying rigid max() functions over multi-axis projections hides semantic and geometric overlap across dimensions.
 * **Decision:** Replace rigid multi-class categorization with a Spectral Approach. If entry variance falls below the dynamic threshold, the system preserves the complete multichannel analytical signature inside projections_json.
 * **Status:** Approved / Active.
+
 ### ADR-015: Space Accretion via Orthogonal Canonical Injection
 * **Context:** Adding new computational dimensions to static spaces yields noisy projections due to a lack of anchor points for emergent concepts.
 * **Decision:** Hyperspace expansion (N→N+1) executes via hot-swapping computational linear algebra. The control plane zero-pads existing vectors and injects a pure canonical unit vector ([0,0,...,1]), guaranteeing mathematical orthogonality.
 * **Status:** Approved / Active.
+
 ### ADR-016: Non-Generative Vector Inference
 * **Context:** Running generative language models gagged by formal grammars to act as coordinate oracles consumes excessive resources and retains probabilistic risks.
 * **Decision:** Deprecate generative LLMs in the control plane. Vector coordinates are obtained via non-generative local representation providers, shifting execution entirely to deterministic linear algebra.
 * **Status:** Approved / Active.
+
 ### ADR-017: Dynamic Geodetic Axes Derived from Corpus Variance
-* **Context:** Static geodetic axes anchored on Natural Semantic Metalanguage (NSM) primitives guarantee safe initial bootstrap (S_{0} ), but induce projection drift over time as domain complexity grows.
+* **Context:** Static geodetic axes anchored on Natural Semantic Metalanguage (NSM) primitives guarantee safe initial bootstrap ($S_0$), but induce projection drift over time as domain complexity grows.
 * **Decision:** Transition from fixed bootstrap primitives to dynamic geodetic axes extracted directly from corpus variance. Non-blocking background workers execute iterative min-max greedy farthest-point calculations over consolidated embeddings.
 * **Status:** Proposed / Funded R&D Scope (WP1). PoC Boundary: Current PoC executes static NSM-anchored axes. Dynamic corpus-derived axis recalculation is deferred to WP1.
 
 ### ADR-018: Dynamic Dimension-k Discovery via Persistent Homology
 * **Context:** Maintaining a fixed constant dimension k=8 inherited from bootstrap primitives acts as an arbitrary hyperparameter once initial corpus density is surpassed.
-* **Decision:** Compute persistent homology over point-cloud coordinates. Topological persistence lifespans in Dimension 1 (H_{1} ) determine the dynamic value of k.
+* **Decision:** Compute persistent homology over point-cloud coordinates. Topological persistence lifespans in Dimension 1 ($H_1$) determine the dynamic value of $k$.
 * **Status:** Proposed / Funded R&D Scope (WP2). PoC Boundary: Current PoC fixes k=8. Dynamic k-discovery via H_{1} persistent homology is deferred to WP2.
 
 ### ADR-019: Native Integration of GUDHI C++ Library
@@ -70,54 +81,53 @@ Note on Ledger Sequence: Discontinued numbers (006, 008, 009, 011–013) represe
 
 ### ADR-021: Total Representation Provider Agnosticism
 * **Context:** Tightly coupling a control plane to a specific neural model family risks state corruption and vendor lock-in when models are updated or recalibrated.
-* **Decision:** The Spatial Control Plane operates exclusively on L_{2} -normalized coordinate vectors $v \in \mathbb{R}^d$ . It ingests vectors from dense neural models, sparse lexical encoders (BM25), symbolic ontologies, or direct physical sensors without modifying or relying on external model weights.
+* **Decision:** The Spatial Control Plane operates exclusively on $L_2$-normalized coordinate vectors $v \in \mathbb{R}^d$. It ingests vectors from dense neural models, sparse lexical encoders (BM25), symbolic ontologies, or direct physical sensors without modifying or relying on external model weights.
 * **Status:** Approved / Active Core Principle.
 
 ### ADR-022: Dual Interaction Loop and Dual-Key Consolidation
 * **Context:** Unilateral state consolidation—whether driven by autonomous mathematical models or direct external client writes—violates control plane integrity and breaches state determinism.
 * **Decision:** Enforce a Dual Interaction Loop governed by Dual-Key Concurrency:
-Perspective Projection (Outward): External inspection layers evaluate read-only perspective projections $O_n = P_\theta(S_n)$ generated by the control plane, generating zero side effects on persistent storage.
-Dual-Key Consolidation (Inward): State transition to the consolidated state ($S_n \to S_{n+1}$) requires the concurrent satisfaction of two orthogonal validation criteria:
-Topological Key (Algebraic Constraint): Evaluated by the control plane. Scalar projection mass variance must satisfy the dynamic circuit-breaker threshold ($\sigma^2 \geq \sigma^2_{\text{dynamic}}$).
-Ethical Key (Sovereignty Constraint): Injected via explicit Human-in-the-Loop (HITL) operator intervention (revision_milestone = 1).
-If an entity satisfies only one key, the substrate retains it in quarantine (lifecycle_state = 'incubating'), preventing both unvalidated mathematical drift and operator mutation.
-Invariants:
-Key Symmetry: Neither key possesses unilateral authority to consolidate state ($S_n \to S_{n+1}$).
-Quarantine Enforcement: Partially validated entities remain structurally preserved in storage without executing topology accretion.
+  * **Perspective Projection (Outward):** External inspection layers evaluate read-only perspective projections $O_n = P_\theta(S_n)$ generated by the control plane, generating zero side effects on persistent storage.
+  * **Dual-Key Consolidation (Inward):** State transition to the consolidated state ($S_n \to S_{n+1}$) requires the concurrent satisfaction of two orthogonal validation criteria:
+    * **Topological Key (Algebraic Constraint):** Evaluated by the control plane. Scalar projection mass variance must satisfy the dynamic circuit-breaker threshold ($\sigma^2 \geq \sigma^2_{\text{dynamic}}$).
+    * **Ethical Key (Sovereignty Constraint):** Injected via explicit Human-in-the-Loop (HITL) operator intervention (`revision_milestone = 1`).
+  * **If an entity satisfies only one key,** the substrate retains it in quarantine (`lifecycle_state = 'incubating'`), preventing both unvalidated mathematical drift and operator mutation.
+* **Invariants:**
+  * **Key Symmetry:** Neither key possesses unilateral authority to consolidate state ($S_n \to S_{n+1}$).
+  * **Quarantine Enforcement:** Partially validated entities remain structurally preserved in storage without executing topology accretion.
 * **Status:** Approved / Active Core Principle.
 
 ### ADR-023: Computational Spatial State Substrate
 * **Context:** Previous state descriptions introduced continuous density approximations or probabilistic similarity metrics. To preserve determinism, provider agnosticism, and low RAM overhead (≤8GB), the control plane defines state as a discrete spatial substrate.
-* **Decision:** The computational state $S_{n}$ is represented as a finite simplicial complex:
-$S_n = (V_n, E_n, K_n)$
-Vertices ($V_{n}$ ): L_{2} -normalized coordinate vectors in $R_{d}$ .
-Adjacency Relation ($E_{n}$ ): $E_{n}$ ⊆$V_{n}$ ×$V_{n}$ where $(v_i, v_j) \in E_n$ iff $d(v_i, v_j) \leq \epsilon$.
-Simplicial Faces ($K_{n}$ ): Higher-order simplices formed by sets of mutually adjacent vertices.
-Probabilistic density metrics and soft similarity weights are excluded from the state substrate.
-Invariants:
-Substrate Isolation: The simplicial complex represents the computational state. It is neither the external phenomenon nor its observation.
-Boundary Separation: Representation providers generate coordinates; observation layers inspect state. Traianus governs the intermediate deterministic substrate.
+* **Decision:** The computational state $S_n$ is represented as a finite simplicial complex:
+  $$S_n = (V_n, E_n, K_n)$$
+  * **Vertices ($V_n$):** $L_2$-normalized coordinate vectors in $\mathbb{R}^d$.
+  * **Adjacency Relation ($E_n$):** $E_n \subseteq V_n \times V_n$ where $(v_i, v_j) \in E_n$ iff $d(v_i, v_j) \leq \epsilon$.
+  * **Simplicial Faces ($K_n$):** Higher-order simplices formed by sets of mutually adjacent vertices.
+  * Probabilistic density metrics and soft similarity weights are excluded from the state substrate.
+* **Invariants:**
+  * **Substrate Isolation:** The simplicial complex represents the computational state. It is neither the external phenomenon nor its observation.
+  * **Boundary Separation:** Representation providers generate coordinates; observation layers inspect state. Traianus governs the intermediate deterministic substrate.
 * **Status:** Approved / Active Core Principle.
 
 ### ADR-024: Projection Independence and Perspective Isolation
 * **Context:** Coupling state evolution to observation mechanisms creates spatial distortion and violates state determinism.
-* **Decision:** The computational state $S_{n}$ is invariant to observation. External inspection layers (e.g., Ulpia, RefApps) operate as read-only projections:
-$O_n = P_\theta(S_n)$
-where θ represents the perspective parameters of the observer. Mutating an observation perspective $P_{θ}$ does not alter the underlying spatial state $S_{n}$ . Transitions in $S_{n}$ occur through valid input vectors $v_{n}$ and dual-key consolidation (ADR-022).
-Invariants:
-Perspective Non-Interference: Reading or projecting $S_{n}$ generates zero side effects on persistent storage.
-Local Impact Isolation: Interactions performed over localized projections ($O_{\text{n,local}}$) generate vector mutations bounded by distance threshold $\epsilon$. State changes remain topologically confined to the affected neighborhood ($U \subset V_n$).
+* **Decision:** The computational state $S_n$ is invariant to observation. External inspection layers (e.g., Ulpia, RefApps) operate as read-only projections:
+  $$O_n = P_\theta(S_n)$$
+  where $\theta$ represents the perspective parameters of the observer. Mutating an observation perspective $P_\theta$ does not alter the underlying spatial state $S_n$. Transitions in $S_n$ occur through valid input vectors $v_n$ and dual-key consolidation (ADR-022).
+* **Invariants:**
+  * **Perspective Non-Interference:** Reading or projecting $S_n$ generates zero side effects on persistent storage.
+  * **Local Impact Isolation:** Interactions performed over localized projections ($O_{\text{n,local}}$) generate vector mutations bounded by distance threshold $\epsilon$. State changes remain topologically confined to the affected neighborhood ($U \subset V_n$).
 * **Status:** Approved / Active Core Principle.
 
 ### ADR-025: Non-Negotiable System State Invariants
 * **Context:** System evolution across functional scopes (WP1–WP4) introduces risk of architectural drift. The control plane requires invariant rules preserved across optimizations, language bindings, or hardware targets.
 * **Decision:** We establish five non-negotiable State Invariants:
-Monotonic Append-Only Evolution: State evolution $S_n \to S_{n+1}$ is append-only. Historical vertices, deterministic edges, and simplicial faces in persistent storage are immutable.
-Zero Observation Mutagenicity: Observation operators act as read-only functions ($O_n = P_\theta(S_n)$). Inspecting or projecting space generates zero side effects on $S_{n}$ .
-External Provider Isolation: External representation providers function as coordinate generators ($v_{n}$ ∈$R_{d}$ ). They possess zero topology execution rights.
-Mandatory Control Plane Centrality: Spatial transitions route through the Spatial Control Plane and satisfy Dual-Key Consolidation ($\text{Key}_{\text{Topological}} \land \text{Key}_{\text{Ethical}}$).
-Bitwise State Determinism: Given an identical initial state S_{0} and an identical sequence of valid input vectors V, the resulting simplicial complex $S_n = (V_n, E_n, K_n)$ is bitwise identical across execution environments.
-Invariants:
-Testing Baseline: Integration test suites must validate these five invariants on every build pipeline.
-Scope Protection: Protects the system against unmonitored external agency or unsafe concurrency patterns.
+  1. **Monotonic Append-Only Evolution:** State evolution $S_n \to S_{n+1}$ is append-only. Historical vertices, deterministic edges, and simplicial faces in persistent storage are immutable.
+  2. **Zero Observation Mutagenicity:** Observation operators act as read-only functions ($O_n = P_\theta(S_n)$). Inspecting or projecting space generates zero side effects on $S_n$.
+  3. **External Provider Isolation:** External representation providers function as coordinate generators ($v_n \in \mathbb{R}^d$). They possess zero topology execution rights.
+  4. **Mandatory Control Plane Centrality:** Spatial transitions route through the Spatial Control Plane and satisfy Dual-Key Consolidation ($\text{Key}_{\text{Topological}} \land \text{Key}_{\text{Ethical}}$).
+  5. **Bitwise State Determinism:** Given an identical initial state $S_0$ and an identical sequence of valid input vectors $V$, the resulting simplicial complex $S_n = (V_n, E_n, K_n)$ is bitwise identical across execution environments.
+* **Testing Baseline:** Integration test suites must validate these five invariants on every build pipeline.
+* **Scope Protection:** Protects the system against unmonitored external agency or unsafe concurrency patterns.
 * **Status:** Approved / Active Core Principle.

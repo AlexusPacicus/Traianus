@@ -52,5 +52,7 @@ The continuous spatial state of high-dimensional coordinate representations can 
 ### 4.2 Corollaries
 
 * **RH-1 (Provider Agnosticism):** State governance is invariant to the origin of coordinate vectors $\mathbf{v} \in \mathbb{R}^d$. Input from neural embeddings, sparse lexical models (BM25), symbolic ontologies, or physical sensors is hypothesized to yield deterministic state transitions using identical control plane logic.
+
 * **RH-2 (Bitwise State Determinism):** Given an identical initial state $S_0$ and sequence of valid input vectors $V$, state transitions $S_{n+1} = f(S_n, \mathbf{v}_n)$ yield bitwise identical simplicial complexes $S_n$ across distinct execution environments.
+
 * **RH-3 (Local Edge Execution):** Complete spatial state governance operates offline on consumer edge hardware ($\le 8\text{GB}$ RAM) within a sub-millisecond execution envelope ($<1\text{ms}$).

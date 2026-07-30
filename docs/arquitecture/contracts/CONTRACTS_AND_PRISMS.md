@@ -99,11 +99,15 @@ class RefinedEntity(BaseModel):
 ```
 
 ### 4.1 Silent Denial and Internal Telemetry (ADR-002)
-External Behavior: Upon validation failure or non-conforming structural drift, the system suppresses technical stack traces toward external callers to prevent interface lockups and information leakage.
-Telemetry Persistence: The failure is logged atomically in the local database as an internal system telemetry node under lifecycle_state = 'telemetry_error', granting the operator local observability over pipeline faults (ADR-002).
+
+* **External Behavior:** Upon validation failure or non-conforming structural drift, the system suppresses technical stack traces toward external callers to prevent interface lockups and information leakage.
+
+* **Telemetry Persistence:** The failure is logged atomically in the local database as an internal system telemetry node under `lifecycle_state = 'telemetry_error'`, granting the operator local observability over pipeline faults (ADR-002).
 
 ## 5. Contract Execution Guarantees
-Contract Rule	Claim	Mechanism	Boundary
-Ingress Type Isolation	Preserves control plane latency (<1ms).	RawDump validates type == 'text/plain' at perimeter endpoint.	Filters MIME headers; deep payload processing executes downstream.
-Multichannel Integrity	Preserves 100% of directional projection spectrum.	Stores complete float array $p \in \mathbb{R}^k$ in `RefinedEntity.projections`.	Avoids lossy scalar compression or category assignment.
-Silent Denial (ADR-002)	Prevents external technical information leaks.	Suppresses HTTP tracebacks, persisting internal system node under 'telemetry_error'.	Hides stack traces from external callers; requires local log inspection for forensics.
+
+| Contract Rule | Claim | Mechanism | Boundary |
+| :--- | :--- | :--- | :--- |
+| **Ingress Type Isolation** | Preserves control plane latency (<1ms). | `RawDump` validates `type == 'text/plain'` at perimeter endpoint. | Filters MIME headers; deep payload processing executes downstream. |
+| **Multichannel Integrity** | Preserves 100% of directional projection spectrum. | Stores complete float array $p \in \mathbb{R}^k$ in `RefinedEntity.projections`. | Avoids lossy scalar compression or category assignment. |
+| **Silent Denial (ADR-002)** | Prevents external technical information leaks. | Suppresses HTTP tracebacks, persisting internal system node under `'telemetry_error'`. | Hides stack traces from external callers; requires local log inspection for forensics. |

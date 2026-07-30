@@ -19,17 +19,24 @@ Traianus does not represent reality, nor does it construct representations of re
 Traianus establishes an independent Spatial Control Plane where structural state execution is computationally decoupled from both representation providers and observation layers.
 
 ### Ontological Consequences
-Content Agnosticism: Input vector coordinates ($v \in \mathbb{R}^d$) are computationally equivalent regardless of their physical or domain origin — whether a text embedding, a LiDAR point cloud, a computer vision descriptor, an acoustic spectrogram, a biomedical signal, or a robotic sensor state.
-Domain Independence: Reality exists outside Traianus. Representation exists outside Traianus. Observation exists outside Traianus. The substrate activates when a valid coordinate representation is presented.
-Reference Scope: Sovereign personal knowledge constitutes its initial reference application (RefApp-01), not its structural limit.
+
+* **Content Agnosticism:** Input vector coordinates ($v \in \mathbb{R}^d$) are computationally equivalent regardless of their physical or domain origin — whether a text embedding, a LiDAR point cloud, a computer vision descriptor, an acoustic spectrogram, a biomedical signal, or a robotic sensor state.
+
+* **Domain Independence:** Reality exists outside Traianus. Representation exists outside Traianus. Observation exists outside Traianus. The substrate activates when a valid coordinate representation is presented.
+
+* **Reference Scope:** Sovereign personal knowledge constitutes its initial reference application (RefApp-01), not its structural limit.
 
 ## 4. Official Taxonomy
-Reality: The external physical or domain phenomenon being measured. Reality exists entirely outside Traianus.
-Representation Provider: The external pipeline (e.g., neural models, sparse lexical encoders like BM25, physical sensors, symbolic encoders) mapping reality into coordinates
-$v \in \mathbb{R}^d$ . The substrate consumes representations; it never generates them natively.
-Spatial Control Plane (Traianus Substrate): The deterministic execution layer that governs state transitions ($S_{n+1} = f(S_n, v_n)$) over the discrete simplicial complex $S_n = (V_n, E_n, K_n)$ purely through linear algebra, dynamic variance thresholding, and transactional state persistence (ADR-023).
-Observation Layer (Ulpia / RefApps): Perspective projections ($O_n = P_\theta(S_n)$). External interactions within this layer provide the human-in-the-loop (HITL) feedback necessary to satisfy the Ethical Key for state consolidation (ADR-022, ADR-024).
-Ulpia: The native mathematical observation framework and research programme in observation theory. It contains zero rendering logic, acting as the native perspective projection engine ($O_n = P_\theta(S_n)$) over which domain RefApps operate.
+
+* **Reality:** The external physical or domain phenomenon being measured. Reality exists entirely outside Traianus.
+
+* **Representation Provider:** The external pipeline (e.g., neural models, sparse lexical encoders like BM25, physical sensors, symbolic encoders) mapping reality into coordinates $v \in \mathbb{R}^d$. The substrate consumes representations; it never generates them natively.
+
+* **Spatial Control Plane (Traianus Substrate):** The deterministic execution layer that governs state transitions ($S_{n+1} = f(S_n, v_n)$) over the discrete simplicial complex $S_n = (V_n, E_n, K_n)$ purely through linear algebra, dynamic variance thresholding, and transactional state persistence (ADR-023).
+
+* **Observation Layer (Ulpia / RefApps):** Perspective projections ($O_n = P_\theta(S_n)$). External interactions within this layer provide the human-in-the-loop (HITL) feedback necessary to satisfy the Ethical Key for state consolidation (ADR-022, ADR-024).
+
+* **Ulpia:** The native mathematical observation framework and research programme in observation theory. It contains zero rendering logic, acting as the native perspective projection engine ($O_n = P_\theta(S_n)$) over which domain RefApps operate.
 
 ## 5. Canonical Substitution Table (Fossil Purge)
 The following substitutions are mandatory across all Identity, Hypothesis, and Philosophy documents. Fossil terms are permitted exclusively in the PoC Technical Implementation column of README.md §4 and in installation scripts (flake.nix).
@@ -45,24 +52,35 @@ The following substitutions are mandatory across all Identity, Hypothesis, and P
 
 ## 6. Boundaries & Non-Goals
 ### 6.1 What Traianus Is NOT
-Not a Large Language Model (LLM): Performs zero probabilistic text completion or token generation.
 
-Not a Vector Database: Does not merely index static embeddings for top-K similarity retrieval; functions as an active spatial control plane.
+* **Not a Large Language Model (LLM):** Performs zero probabilistic text completion or token generation.
 
-Not a Graph Database: Avoids manual triple extraction (subject-predicate-object) or static rigid schemas.
+* **Not a Vector Database:** Does not merely index static embeddings for top-K similarity retrieval; functions as an active spatial control plane.
 
-Not an Execution Agent Framework: Executes no autonomous external tools, API calls, or unmonitored background actions.
+* **Not a Graph Database:** Avoids manual triple extraction (subject-predicate-object) or static rigid schemas.
 
-Not a User Application or UI Framework: Traianus contains zero rendering, layout, or user interface code. External inspection layers (e.g., Ulpia / RefApps) act as optional observation clients.
+* **Not an Execution Agent Framework:** Executes no autonomous external tools, API calls, or unmonitored background actions.
+
+* **Not a User Application or UI Framework:** Traianus contains zero rendering, layout, or user interface code. External inspection layers (e.g., Ulpia / RefApps) act as optional observation clients.
 
 ### 6.2 Operational Invariants
-Zero External Dependencies at Runtime: The core executes offline on local architecture without requiring external cloud APIs or runtime network connectivity.
-Reproducibility Over Performance: Given identical vector input and initial state, the output state must be identical every time ($S_{n+1} = f(S_n, v_n)$).
-Provider Agnosticism: Upgrading or replacing the representation provider must not corrupt or reset the existing geometric state.
+
+* **Zero External Dependencies at Runtime:** The core executes offline on local architecture without requiring external cloud APIs or runtime network connectivity.
+
+* **Reproducibility Over Performance:** Given identical vector input and initial state, the output state must be identical every time ($S_{n+1} = f(S_n, v_n)$).
+
+* **Provider Agnosticism:** Upgrading or replacing the representation provider must not corrupt or reset the existing geometric state.
 
 ## 7. Core System Invariants
-| Core Invariant | Execution Mechanism | Boundary |
-| --- | --- | --- |
-| Provider Agnosticism | Operates strictly on $L_2$-normalized coordinate vectors $v \in \mathbb{R}^d$ . | Agnostic to vector origins; zero modification of external provider weights or parameters. |
-| Deterministic State Execution | State transitions governed purely by algebraic rules ($S_{n+1} = f(S_n, v_n)$) and dynamic variance thresholding. | Zero probabilistic token completion or LLM execution within the control plane. |
-| Local Runtime Sovereignty | Local-first state persistence and spatial execution. | Operates offline; zero runtime cloud API dependency allowed. |
+
+* **Provider Agnosticism:**
+  * **Execution Mechanism:** Operates strictly on $L_2$-normalized coordinate vectors $v \in \mathbb{R}^d$.
+  * **Boundary:** Agnostic to vector origins; zero modification of external provider weights or parameters.
+
+* **Deterministic State Execution:**
+  * **Execution Mechanism:** State transitions governed purely by algebraic rules ($S_{n+1} = f(S_n, v_n)$) and dynamic variance thresholding.
+  * **Boundary:** Zero probabilistic token completion or LLM execution within the control plane.
+
+* **Local Runtime Sovereignty:**
+  * **Execution Mechanism:** Local-first state persistence and spatial execution.
+  * **Boundary:** Operates offline; zero runtime cloud API dependency allowed.
