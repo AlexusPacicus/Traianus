@@ -1,6 +1,9 @@
 # Architectural Decision Records (ADR Ledger)
+
 Objective: Document immutable engineering trade-offs to prevent emotional refactoring, architectural drift, or scope creep.
+
 Philosophy: Append-Only. Architectural decisions are stacked sequentially to guarantee structural traceability.
+
 Historical Context & Evolutionary Trajectory:
 The early entries (ADR-001 through ADR-007) capture rapid prototyping for a deterministic knowledge organizer during a hackathon. To eliminate data randomness and system drift, architectural focus shifted from application features to core state persistence. Subsequent entries (ADR-010 through ADR-025) record this evolution into a foundational, immutable control plane.
 Note on Ledger Sequence: Discontinued numbers (006, 008, 009, 011–013) represent internal exploration drafts and interface trade-offs from the initial hackathon phase that were merged or discarded prior to substrate consolidation.
@@ -31,8 +34,7 @@ Note on Ledger Sequence: Discontinued numbers (006, 008, 009, 011–013) represe
 * **Status:** Approved / Active.
 ### ADR-010: Native On-Premise Execution with Reference Edge Hardware Benchmark
 * **Context:** Cloud extraction APIs violate data sovereignty, introduce network latency, and create vendor lock-in.
-* **Decision:** All vector inference and control plane operations execute on local hardware. Baseline consumer edge hardware (
-≤8GB RAM) serves as the reference benchmark testbed environment for PoC validation, not as an architectural software limit.
+* **Decision:** All vector inference and control plane operations execute on local hardware. Baseline consumer edge hardware (≤8GB RAM) serves as the reference benchmark testbed environment for PoC validation, not as an architectural software limit.
 * **Status:** Approved / Active.
 ### ADR-014: Spectral Approach Against Linear Compression Errors
 * **Context:** Applying rigid max() functions over multi-axis projections hides semantic and geometric overlap across dimensions.
@@ -50,22 +52,27 @@ Note on Ledger Sequence: Discontinued numbers (006, 008, 009, 011–013) represe
 * **Context:** Static geodetic axes anchored on Natural Semantic Metalanguage (NSM) primitives guarantee safe initial bootstrap (S_{0} ), but induce projection drift over time as domain complexity grows.
 * **Decision:** Transition from fixed bootstrap primitives to dynamic geodetic axes extracted directly from corpus variance. Non-blocking background workers execute iterative min-max greedy farthest-point calculations over consolidated embeddings.
 * **Status:** Proposed / Funded R&D Scope (WP1). PoC Boundary: Current PoC executes static NSM-anchored axes. Dynamic corpus-derived axis recalculation is deferred to WP1.
+
 ### ADR-018: Dynamic Dimension-k Discovery via Persistent Homology
 * **Context:** Maintaining a fixed constant dimension k=8 inherited from bootstrap primitives acts as an arbitrary hyperparameter once initial corpus density is surpassed.
 * **Decision:** Compute persistent homology over point-cloud coordinates. Topological persistence lifespans in Dimension 1 (H_{1} ) determine the dynamic value of k.
 * **Status:** Proposed / Funded R&D Scope (WP2). PoC Boundary: Current PoC fixes k=8. Dynamic k-discovery via H_{1} persistent homology is deferred to WP2.
+
 ### ADR-019: Native Integration of GUDHI C++ Library
 * **Context:** Computing simplicial complexes and persistent homology in pure Python scales at O(N^{3}), creating latency bottlenecks on edge hardware.
 * **Decision:** Integrate compiled GUDHI C++ bindings into traianus.tda to populate SimplexTree structures for zero-cloud topological data analysis.
 * **Status:** Proposed / Funded R&D Scope (WP2). PoC Boundary: Python approximations used in PoC. Native C++ GUDHI integration is deferred to WP2.
+
 ### ADR-020: System Clock Eradication and Geodetic Metric Integration
 * **Context:** Relational databases organize history via linear timestamps (t), introducing artificial continuity that fractures high-dimensional topological spaces.
 * **Decision:** Disconnect the system clock from state retrieval and routing. Temporal movement is replaced by Riemannian geometry: displacement within the manifold is computed as a density metric tensor integral ($D_{\text{somatic}} = \int \sqrt{g_{ij} \, dx^i \, dx^j}$). Internal database timestamps (sys_internal_timestamp) function solely as low-level disk I/O indices and replication delta markers.
 * **Status:** Active Core Principle in PoC / Full Metric Engine in Funded R&D Scope (WP3).
+
 ### ADR-021: Total Representation Provider Agnosticism
 * **Context:** Tightly coupling a control plane to a specific neural model family risks state corruption and vendor lock-in when models are updated or recalibrated.
 * **Decision:** The Spatial Control Plane operates exclusively on L_{2} -normalized coordinate vectors $v \in \mathbb{R}^d$ . It ingests vectors from dense neural models, sparse lexical encoders (BM25), symbolic ontologies, or direct physical sensors without modifying or relying on external model weights.
 * **Status:** Approved / Active Core Principle.
+
 ### ADR-022: Dual Interaction Loop and Dual-Key Consolidation
 * **Context:** Unilateral state consolidation—whether driven by autonomous mathematical models or direct external client writes—violates control plane integrity and breaches state determinism.
 * **Decision:** Enforce a Dual Interaction Loop governed by Dual-Key Concurrency:
@@ -78,9 +85,9 @@ Invariants:
 Key Symmetry: Neither key possesses unilateral authority to consolidate state ($S_n \to S_{n+1}$).
 Quarantine Enforcement: Partially validated entities remain structurally preserved in storage without executing topology accretion.
 * **Status:** Approved / Active Core Principle.
+
 ### ADR-023: Computational Spatial State Substrate
-* **Context:** Previous state descriptions introduced continuous density approximations or probabilistic similarity metrics. To preserve determinism, provider agnosticism, and low RAM overhead (
-≤8GB), the control plane defines state as a discrete spatial substrate.
+* **Context:** Previous state descriptions introduced continuous density approximations or probabilistic similarity metrics. To preserve determinism, provider agnosticism, and low RAM overhead (≤8GB), the control plane defines state as a discrete spatial substrate.
 * **Decision:** The computational state $S_{n}$ is represented as a finite simplicial complex:
 $S_n = (V_n, E_n, K_n)$
 Vertices ($V_{n}$ ): L_{2} -normalized coordinate vectors in $R_{d}$ .
@@ -91,6 +98,7 @@ Invariants:
 Substrate Isolation: The simplicial complex represents the computational state. It is neither the external phenomenon nor its observation.
 Boundary Separation: Representation providers generate coordinates; observation layers inspect state. Traianus governs the intermediate deterministic substrate.
 * **Status:** Approved / Active Core Principle.
+
 ### ADR-024: Projection Independence and Perspective Isolation
 * **Context:** Coupling state evolution to observation mechanisms creates spatial distortion and violates state determinism.
 * **Decision:** The computational state $S_{n}$ is invariant to observation. External inspection layers (e.g., Ulpia, RefApps) operate as read-only projections:
@@ -100,6 +108,7 @@ Invariants:
 Perspective Non-Interference: Reading or projecting $S_{n}$ generates zero side effects on persistent storage.
 Local Impact Isolation: Interactions performed over localized projections ($O_{\text{n,local}}$) generate vector mutations bounded by distance threshold $\epsilon$. State changes remain topologically confined to the affected neighborhood ($U \subset V_n$).
 * **Status:** Approved / Active Core Principle.
+
 ### ADR-025: Non-Negotiable System State Invariants
 * **Context:** System evolution across functional scopes (WP1–WP4) introduces risk of architectural drift. The control plane requires invariant rules preserved across optimizations, language bindings, or hardware targets.
 * **Decision:** We establish five non-negotiable State Invariants:
