@@ -4,9 +4,9 @@
 Purpose: This document establishes the constitutional boundaries, taxonomy, non-goals, and invariant principles governing Traianus.
 Domain: System identity, governance boundaries, and canonical terminology.
 Explicit Delegations:
-For state machine mathematics and persistence schemas, see docs/arquitecture/Project_arquitecture.md.
+For state machine mathematics and persistence schemas, see docs/architecture/Project_architecture.md.
 For scientific foundations and theoretical grounding, see docs/research/RESEARCH_HYPOTHESIS.md.
-For engineering decision records, see docs/arquitecture/ADR/ADR.md.
+For engineering decision records, see docs/architecture/ADR/ADR.md.
 
 ## 2. Canonical Definition
 Traianus is an open-source Deterministic Computational Substrate for Autonomous Spatial State Governance.

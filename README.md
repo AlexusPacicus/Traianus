@@ -118,11 +118,11 @@ pytest tests/test_control_plane.py
 
 * **Research Programme** (`docs/research/RESEARCH_PROGRAM.md`): R&D roadmap, WP1-WP4 specifications, deliverables, and risk matrix.
 
-* **Project Architecture** (`docs/arquitecture/Project_arquitecture.md`): Mathematical state machine formulation $S_n = (V_n, E_n, K_n)$ and transactional persistence layer.
+* **Project Architecture** (`docs/architecture/Project_architecture.md`): Mathematical state machine formulation $S_n = (V_n, E_n, K_n)$ and transactional persistence layer.
 
-* **ADR Ledger** (`docs/arquitecture/ADR/ADR.md`): Immutable append-only log of architectural decision trade-offs (ADR-001 to ADR-025).
+* **ADR Ledger** (`docs/architecture/ADR/ADR.md`): Immutable append-only log of architectural decision trade-offs (ADR-001 to ADR-025).
 
-* **Data Contracts** (`docs/arquitecture/contracts/CONTRACTS_AND_PRISMS.md`): Pydantic schema specifications (RawDump, RefinedEntity) and Zero Trust ingress firewall.
+* **Data Contracts** (`docs/architecture/contracts/CONTRACTS_AND_PRISMS.md`): Pydantic schema specifications (RawDump, RefinedEntity) and Zero Trust ingress firewall.
 
 ## License
 

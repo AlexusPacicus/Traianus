@@ -26,7 +26,9 @@ If an entity satisfies only one key, the substrate retains it in quarantine (`li
 
 ### 3.1 Mathematical Formulation of System State ($S_n$)
 Traianus executes as a discrete, deterministic state machine. Following ADR-023, the computational state at ordinal sequence step $n$ ($n \in \mathbb{N}$) is defined as a finite simplicial complex:
+
 $S_n = (V_n, E_n, K_n)$
+
 Where:
 $V_n \subset \mathbb{R}^d$ — Finite set of $L_2$-normalized coordinate vectors (vertices).
 $E_n \subseteq V_n \times V_n$ — Deterministic adjacency edges formed strictly where $d(\mathbf{v}_i, \mathbf{v}_j) \leq \epsilon$.
@@ -35,35 +37,43 @@ The active spatial basis matrix $B_n \in \mathbb{R}^{d \times k}$ is maintained 
 
 ### 3.2 Deterministic Transition Function
 Given a sequence input $e_n$ (containing a coordinate vector $v \in \mathbb{R}^d$ emitted by an external representation provider), the state transition follows:
+
 $S_{n+1} = f(S_n, e_n)$
+
 Given an identical initial state $S_0$ and sequence $E = \{e_0, e_1, \dots, e_k\}$, f yields exactly the same state $S_{k+1}$ without stochastic variation. The index n represents the discrete transition ordinal, completely decoupled from wall-clock time (ADR-020).
 
 ### 3.3 Control Plane Subsystems & Topology Flow
 
 ```text
-┌──────────────────────────────────────────────────────────────────────────────────┐
-│ 3. Observation Layer (Ulpia Native Mathematical Observation / RefApps) │
-│ Evaluates perspective projections On = Pθ(Sn) & feeds back HITL validations │
-└────────────────────────────────────────┬─────────────────────────────────────────┘
- │
- ▼ (External Input Payload / Action)
-┌──────────────────────────────────────────────────────────────────────────────────┐
-│ Ingress Customs Gate (DUA) │
-│ Synchronous Zero-Trust firewall validating payload integrity prior to ingestion. │
-└────────────────────────────────────────┬─────────────────────────────────────────┘
- │
- ▼ (Coordinates v ∈ ℝᵈ from External Provider)
-┌──────────────────────────────────────────────────────────────────────────────────┐
-│ 2. Spatial Control Plane (Traianus Substrate) │
-│ ├── Spectral Variance Circuit Breaker (L₂ projection & dynamic thresholding) │
-│ └── Orthogonalization & Basis Engine (Dynamic axis extraction & accretion) │
-└────────────────────────────────────────┬─────────────────────────────────────────┘
- │
- ▼ (State Transition Sn → Sn+1)
-┌──────────────────────────────────────────────────────────────────────────────────┐
-│ Local Transactional Persistence Substrate │
-│ Transactional logging, state serialization, and immutable delta storage. │
-└──────────────────────────────────────────────────────────────────────────────────┘
++--------------------------------------------------------------------+
+| 3. Observation Layer (Ulpia Native Mathematical Observation /      |
+|    RefApps)                                                         |
+| Evaluates perspective projections O_n = P_t(S_n) & feeds back      |
+| HITL validations                                                    |
++------------------------------------------+-------------------------+
+                                           |
+                                           v (External Input Payload / Action)
++--------------------------------------------------------------------+
+| Ingress Customs Gate (DUA)                                          |
+| Synchronous Zero-Trust firewall validating payload integrity prior  |
+| to ingestion.                                                       |
++------------------------------------------+-------------------------+
+                                           |
+                                           v (Coordinates v in R^d from External Provider)
++--------------------------------------------------------------------+
+| 2. Spatial Control Plane (Traianus Substrate)                      |
+| |-- Spectral Variance Circuit Breaker (L2 projection & dynamic     |
+| |   thresholding)                                                   |
+| |-- Orthogonalization & Basis Engine (Dynamic axis extraction &    |
+| |   accretion)                                                      |
++------------------------------------------+-------------------------+
+                                           |
+                                           v (State Transition S_n -> S_{n+1})
++--------------------------------------------------------------------+
+| Local Transactional Persistence Substrate                           |
+| Transactional logging, state serialization, and immutable delta    |
+| storage.                                                            |
++--------------------------------------------------------------------+
 ```
 * **Ingress Customs Gate (DUA):** Synchronous integrity firewall filtering non-conforming payloads prior to coordinate processing.
 
@@ -71,10 +81,10 @@ Given an identical initial state $S_0$ and sequence $E = \{e_0, e_1, \dots, e_k\
   * Computes $L_2$-normalized orthogonal scalar projections onto active basis axes $B_n$.
   * Evaluates mass variance $\sigma^2$ against the critical dynamic threshold $\sigma^2_{\text{dynamic}}$ (ADR-017).
   * Routing Execution Logic:
-    * $\sigma^2 \geq \sigma^2_{\text{dynamic}}$ AND revision_milestone = 1 ⟹ Transition to `'consolidated'`.
-    * $\sigma^2 < \sigma^2_{\text{dynamic}}$ ⟹ Transition to `'incubating'` while preserving full multichannel projection spectrum in `projections_json`.
+    * $\sigma^2 \geq \sigma^2_{\text{dynamic}}$ AND revision_milestone = 1 $\Rightarrow$ Transition to `'consolidated'`.
+    * $\sigma^2 < \sigma^2_{\text{dynamic}}$ $\Rightarrow$ Transition to `'incubating'` while preserving full multichannel projection spectrum in `projections_json`.
 
-* **Orthogonalization & Calibration Subsystem:** Dynamic axis calculation and space accretion (N→N+1) via greedy farthest-point projection (ADR-017).
+* **Orthogonalization & Calibration Subsystem:** Dynamic axis calculation and space accretion (N $\to$ N+1) via greedy farthest-point projection (ADR-017).
 
 ## 4. Persistence Substrate Schema (manifold_nodes)
 The canonical relational table maintaining entity state persistence within the transactional log:
