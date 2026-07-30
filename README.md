@@ -1,17 +1,10 @@
 # 🏛️ Traianus
 
-Open-source deterministic computational substrate for autonomous spatial state governance.
-Preserving state continuity and structural routing through deterministic operations, independently of representation models.
+An offline-first, open-source computational substrate investigating whether spatial state continuity and structural routing can be governed independently of external representation models and observation layers.
 
-> **"Traianus does not define how reality is represented. It governs spatial state from coordinate vectors v∈R 
-d
-  emitted by external representation providers."**
-
-Traianus is an offline-first, open-source Deterministic Computational Substrate for Autonomous Spatial State Governance investigating whether spatial state continuity can be maintained as an independent computational layer, fully decoupled from both external representation providers and observation layers.
+> **"Traianus does not define how reality is represented. It operates upon coordinate vectors $\mathbf{v} \in \mathbb{R}^d$ emitted by external providers to govern spatial state deterministically."**
 
 The current Proof of Concept (PoC) uses sovereign personal knowledge strictly as its initial reference application (RefApp-01).
-
----
 
 ## The 3-Tier Architectural Model
 
