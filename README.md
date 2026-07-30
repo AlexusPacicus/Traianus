@@ -1,19 +1,40 @@
 # Traianus
 
-An offline-first, open-source computational substrate investigating whether spatial state continuity and structural routing can be governed independently of external representation models and observation layers.
+An offline-first, open-source computational substrate that governs spatial state deterministically over coordinate vectors — independently of how those vectors are produced.
+
+Every system that manages knowledge inherits a hidden coupling: the way it *represents* concepts is fused with the way it *stores and evolves* them. Change the representation (swap an embedding model for a symbolic encoder, or a vision pipeline for a text extractor), and the stored state breaks. Traianus cuts this knot by introducing a **spatial control plane** — a deterministic state machine that operates purely on coordinate vectors $\mathbf{v} \in \mathbb{R}^d$, without caring how those vectors are produced.
+
+This separation makes three promises possible:
+- **Provider agnosticism** — swap representation providers without disrupting state
+- **Deterministic auditability** — every state transition $S_{n+1} = f(S_n, v_n)$ is reproducible bit for bit
+- **Offline sovereignty** — the entire substrate runs on consumer local hardware ($\le 8$ GB RAM) with no runtime cloud dependency
+
+Current status: Proof of Concept (PoC) using sovereign personal knowledge as its initial reference application (RefApp-01).
 
 > **"Traianus does not define how reality is represented. It operates upon coordinate vectors $\mathbf{v} \in \mathbb{R}^d$ emitted by external providers to govern spatial state deterministically."**
 
-The current Proof of Concept (PoC) uses sovereign personal knowledge strictly as its initial reference application (RefApp-01).
+## 1. System Boundaries & Non-Goals
 
-## The 3-Tier Architectural Model
+To position this infrastructure precisely within the systems landscape, Traianus is explicitly NOT:
+
+* **Not a Large Language Model (LLM):** Performs zero probabilistic text completion or token generation.
+
+* **Not a Vector Database:** Does not merely index static embeddings for top-k similarity retrieval; functions as an active spatial control plane.
+
+* **Not a Graph Database:** Avoids manual triple extraction (subject-predicate-object) or static rigid schemas.
+
+* **Not an Execution Agent Framework:** Executes no autonomous external tools, API calls, or unmonitored background actions.
+
+* **Not a User Application or UI Framework:** Contains zero rendering, layout, or user interface code. External inspection layers (Ulpia / RefApps) act strictly as optional observation clients.
+
+## 2. The 3-Tier Architectural Model
 
 Traianus strictly enforces a three-tier separation of concerns, where each tier answers a fundamentally distinct question:
 
 ```text
 1. Representation Layer
    Question: "How is a world entity mapped into coordinates v ∈ ℝᵈ?"
-   Providers: 
+   Providers:
      • Neural embedding models (Text, Multimodal)
      • Sparse lexical encoders (BM25, TF-IDF, SPLADE)
      • Symbolic & logical encoders (OWL, RDF, Graph Kernels)
@@ -39,21 +60,7 @@ Traianus strictly enforces a three-tier separation of concerns, where each tier 
 * **Spatial Control Plane:** Executes deterministic state transitions $S_{n+1} = f(S_n, v_n)$ over the discrete simplicial complex $S_n = (V_n, E_n, K_n)$ purely through linear algebra and transactional persistence (ADR-023).
 * **Observation Layer:** Evaluates read-only perspective projections $O_n = P_\theta(S_n)$. Powered natively by Ulpia as the mathematical observation framework and consumed by domain reference applications. External interactions provide the human-in-the-loop (HITL) feedback necessary to satisfy the Ethical Key for state consolidation (ADR-022).
 
-## 1. System Boundaries & Non-Goals
-
-To position this infrastructure precisely within the systems landscape, Traianus is explicitly NOT:
-
-* **Not a Large Language Model (LLM):** Performs zero probabilistic text completion or token generation.
-
-* **Not a Vector Database:** Does not merely index static embeddings for top-k similarity retrieval; functions as an active spatial control plane.
-
-* **Not a Graph Database:** Avoids manual triple extraction (subject-predicate-object) or static rigid schemas.
-
-* **Not an Execution Agent Framework:** Executes no autonomous external tools, API calls, or unmonitored background actions.
-
-* **Not a User Application or UI Framework:** Contains zero rendering, layout, or user interface code. External inspection layers (Ulpia / RefApps) act strictly as optional observation clients.
-
-## 2. Decoupled Architecture & State Function
+## 3. Decoupled Architecture & State Function
 
 Given an external entity mapping $v \in \mathbb{R}^d$, the state transition function executes deterministically within the control plane:
 
@@ -67,7 +74,7 @@ Where $S_n = (V_n, E_n, K_n)$ represents the discrete simplicial complex at step
 
 External observation layers evaluate read-only perspective projections $O_n = P_\theta(S_n)$ without mutating state $S_n$ (ADR-024).
 
-## 3. Scientific Hypotheses
+## 4. Scientific Hypotheses
 
 * **RH-0 (Primary Hypothesis):** Traianus investigates whether deterministic computational state can be maintained independently of the mechanisms used to represent external reality.
 
@@ -75,9 +82,9 @@ External observation layers evaluate read-only perspective projections $O_n = P_
 
 * **RH-2 (Determinism & Auditability):** Dynamic variance thresholding aims to guarantee reproducible execution paths ($S_{n+1} = f(S_n, v_n)$) bit for bit.
 
-* **RH-3 (Local Edge Execution):** Operates offline on consumer local hardware (≤8GB RAM) without requiring runtime cloud API connectivity.
+* **RH-3 (Local Edge Execution):** Operates offline on consumer local hardware ($\le 8$ GB RAM) without requiring runtime cloud API connectivity.
 
-## 4. Quickstart
+## 5. Quickstart
 
 ### Prerequisites
 
@@ -103,7 +110,7 @@ pip install -e .
 pytest tests/test_control_plane.py
 ```
 
-## 5. Documentation Ledger
+## 6. Documentation Ledger
 
 * **Project Identity** (`docs/identity/PROJECT_IDENTITY.md`): System boundaries, canonical definitions, non-goals, and official taxonomy.
 
@@ -119,4 +126,4 @@ pytest tests/test_control_plane.py
 
 ## License
 
-GPL-3.0-or-later. See `pyproject.toml` for the full license declaration.
+GPL-3.0-or-later. See `pyproject.toml` and `LICENSE` for the full license declaration.
