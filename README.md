@@ -77,7 +77,33 @@ External observation layers evaluate read-only perspective projections $O_n = P_
 
 * **RH-3 (Local Edge Execution):** Operates offline on consumer local hardware (≤8GB RAM) without requiring runtime cloud API connectivity.
 
-## 4. Documentation Ledger
+## 4. Quickstart
+
+### Prerequisites
+
+* **Nix** with flakes enabled (see [nixos.wiki/wiki/Flakes](https://nixos.wiki/wiki/Flakes))
+* **SQLite** (bundled automatically in the Nix shell)
+
+### Running
+
+```bash
+# Enter the development shell (installs all dependencies)
+nix develop
+
+# Run the test suite
+pytest tests/test_control_plane.py
+```
+
+### Without Nix
+
+Ensure Python 3.11+ and the dependencies listed in `pyproject.toml` are installed, then run:
+
+```bash
+pip install -e .
+pytest tests/test_control_plane.py
+```
+
+## 5. Documentation Ledger
 
 * **Project Identity** (`docs/identity/PROJECT_IDENTITY.md`): System boundaries, canonical definitions, non-goals, and official taxonomy.
 
