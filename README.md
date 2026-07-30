@@ -116,3 +116,7 @@ pytest tests/test_control_plane.py
 * **ADR Ledger** (`docs/arquitecture/ADR/ADR.md`): Immutable append-only log of architectural decision trade-offs (ADR-001 to ADR-025).
 
 * **Data Contracts** (`docs/arquitecture/contracts/CONTRACTS_AND_PRISMS.md`): Pydantic schema specifications (RawDump, RefinedEntity) and Zero Trust ingress firewall.
+
+## License
+
+GPL-3.0-or-later. See `pyproject.toml` for the full license declaration.

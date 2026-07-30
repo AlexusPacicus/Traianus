@@ -8,7 +8,7 @@
 
 # Purpose
 
-Traianus currently investigates whether semantic organization can be implemented as an independent deterministic computational layer.
+Traianus currently investigates whether spatial state governance can be implemented as an independent deterministic computational layer.
 
 During the development of the architecture, additional questions emerged regarding the nature of geometric structures, observation and projection. These questions constitute a separate research programme and are intentionally postponed until the completion of the current roadmap.
 

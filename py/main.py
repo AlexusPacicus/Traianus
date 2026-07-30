@@ -143,7 +143,7 @@ def async_spectral_processor(ingestion_id: int, raw_text: str):
         if not geodetic_matrix:
             raise RuntimeError(
                 "[Traianus Core] Critical infrastructure failure: geodetic_axes table is empty. "
-                "Run py/inicializacion_geodesica.py to bootstrap the geodetic baseline before ingestion."
+                "Run py/geodesic_bootstrap.py to bootstrap the geodetic baseline before ingestion."
             )
 
         dim_db = get_current_dimension_db()
@@ -312,7 +312,7 @@ async def get_manifold_nodes():
     except Exception:
         return {"status": "SUCCESS", "nodes": []}
 
-@app.get("/telemetria")
+@app.get("/telemetry")
 async def get_telemetry_logs():
     try:
         with sqlite3.connect(DB_PATH) as conn:
@@ -332,7 +332,7 @@ async def get_telemetry_logs():
     except Exception as e:
         raise HTTPException(status_code=500, detail=str(e))
 
-@app.get("/relaciones")
+@app.get("/relations")
 async def get_relations():
     try:
         with sqlite3.connect(DB_PATH) as conn:
@@ -346,7 +346,7 @@ async def get_relations():
     except Exception as e:
         raise HTTPException(status_code=500, detail=str(e))
 
-@app.post("/relaciones")
+@app.post("/relations")
 async def forge_relation(relation: HitlRelation):
     try:
         nodes = sorted([relation.source, relation.target])
@@ -368,7 +368,7 @@ async def forge_relation(relation: HitlRelation):
 # INTERACTIVE LOGOGRAPHIC GENESIS (ADR-015)
 # =====================================================================
 
-@app.post("/mutar/{new_symbol}")
+@app.post("/mutate/{new_symbol}")
 async def logographic_genesis(new_symbol: str):
     try:
         with sqlite3.connect(DB_PATH) as conn:
@@ -417,8 +417,8 @@ async def logographic_genesis(new_symbol: str):
 
         return {
             "status": "SUCCESS",
-            "mensaje": f"Logographic Genesis completed. Hyperspace expanded to {new_dimension}D.",
-            "nuevo_eje": f"{new_symbol}_CUSTOM"
+    "message": f"Logographic Genesis completed. Hyperspace expanded to {new_dimension}D.",
+    "new_axis": f"{new_symbol}_CUSTOM"
         }
     except HTTPException:
         raise

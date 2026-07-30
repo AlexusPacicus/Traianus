@@ -216,11 +216,11 @@ def test_logographic_genesis_endpoint(isolate_test_database):
               serialize_vector(np.ones(384)), "{}"))
         conn.commit()
 
-    response = client.post("/mutar/\u2605")
+    response = client.post("/mutate/\u2605")
     assert response.status_code == 200
     res_data = response.json()
     assert res_data["status"] == "SUCCESS"
-    assert res_data["nuevo_eje"] == "\u2605_CUSTOM"
+    assert res_data["new_axis"] == "\u2605_CUSTOM"
 
     with sqlite3.connect(isolate_test_database) as conn:
         cursor = conn.cursor()
@@ -271,7 +271,7 @@ def test_get_manifold_nodes_and_telemetry_isolation(isolate_test_database):
     assert nodes_data[0]["id"] == "NODE_1"
     assert nodes_data[0]["toon_factor"] == "\u25b2"
 
-    res_telemetry = client.get("/telemetria")
+    res_telemetry = client.get("/telemetry")
     assert res_telemetry.status_code == 200
     telemetry_data = res_telemetry.json()
     assert len(telemetry_data) == 1
@@ -300,12 +300,12 @@ def test_adr002_silent_denial_logs_on_processor_failure(isolate_test_database, m
 
 def test_relaciones_endpoints(isolate_test_database):
     payload = {"source": "NODE_A", "target": "NODE_B", "state": "consolidated"}
-    res_post = client.post("/relaciones", json=payload)
+    res_post = client.post("/relations", json=payload)
     assert res_post.status_code == 200
     assert res_post.json()["status"] == "SUCCESS"
     assert res_post.json()["id"] == "edge-NODE_A-NODE_B"
 
-    res_get = client.get("/relaciones")
+    res_get = client.get("/relations")
     assert res_get.status_code == 200
     edges = res_get.json()
     assert len(edges) == 1
