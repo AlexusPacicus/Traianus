@@ -44,6 +44,7 @@ class RefinedEntity(BaseModel):
 
 class ConsolidationBody(BaseModel):
     text: str
+    ethical_key: Literal[True] = Field(..., description="Explicit Ethical Key validation. Must be `true` to consolidate (ADR-022).")
 
 class HitlRelation(BaseModel):
     source: str
@@ -93,16 +94,25 @@ def serialize_vector(vector: np.ndarray) -> bytes:
     return vector.astype(np.float64).tobytes()
 
 def get_geodetic_matrix_db() -> dict:
+    """
+    Loads the geodetic baseline from SQLite.
+
+    Returns {axis_id: {"symbol": str, "vector": np.ndarray}} keyed by the
+    unique axis id (e.g. `AXIS_1`). Reconstructing keys from `simbolo`/`tag`
+    via string concatenation is ambiguous (tags carry a leading underscore,
+    e.g. `_SOMETHING_HAPPENS`), which collapsed the projection spectrum to a
+    single key when parsed with `key.split("_")[1]`.
+    """
     matrix = {}
     with sqlite3.connect(DB_PATH) as conn:
         conn.execute("PRAGMA journal_mode=WAL;")
         cursor = conn.cursor()
         try:
-            cursor.execute("SELECT simbolo, tag, vector_blob FROM geodesic_axes ORDER BY id")
+            cursor.execute("SELECT id, simbolo, tag, vector_blob FROM geodesic_axes ORDER BY id")
             rows = cursor.fetchall()
-            for symbol, tag, blob in rows:
+            for axis_id, symbol, tag, blob in rows:
                 vec = np.frombuffer(blob, dtype=np.float64)
-                matrix[f"{symbol}_{tag}"] = vec
+                matrix[axis_id] = {"symbol": symbol, "vector": vec}
         except sqlite3.OperationalError:
             pass
     return matrix
@@ -125,7 +135,7 @@ def auto_calibrate_critical_threshold() -> float:
     matrix = get_geodetic_matrix_db()
     if not matrix:
         raise RuntimeError("[Traianus Core] Error: Geodetic matrix empty. Aborting autocalibration.")
-    vectors = list(matrix.values())
+    vectors = [entry["vector"] for entry in matrix.values()]
     base_variances = []
     for axis_vector in vectors:
         projections = [float(np.dot(axis_vector, other_vec)) for other_vec in vectors]
@@ -158,14 +168,16 @@ def async_spectral_processor(ingestion_id: int, raw_text: str):
         norm_idea_vector = padded_vector / norm if norm > 0 else padded_vector
 
         projections = {}
-        for key, axis in geodetic_matrix.items():
-            axis_tag = key.split("_")[1]
-            projections[axis_tag] = float(np.dot(norm_idea_vector, axis))
+        for axis_id, axis_entry in geodetic_matrix.items():
+            projections[axis_id] = float(np.dot(norm_idea_vector, axis_entry["vector"]))
 
         variance = float(np.var(list(projections.values())))
 
-        dominant_attractor = max(geodetic_matrix.keys(), key=lambda k: np.dot(norm_idea_vector, geodetic_matrix[k]))
-        toon_symbol = dominant_attractor.split("_")[0]
+        dominant_attractor = max(
+            geodetic_matrix.keys(),
+            key=lambda k: np.dot(norm_idea_vector, geodetic_matrix[k]["vector"]),
+        )
+        toon_symbol = geodetic_matrix[dominant_attractor]["symbol"]
 
         lifecycle_state: LifecycleState = "pending_approval"
         action_potential = float(variance * 10.0)
@@ -253,15 +265,17 @@ async def consolidate_sovereignty(node_id: str, body: ConsolidationBody):
         norm_idea_vector = padded_vector / norm if norm > 0 else padded_vector
 
         projections = {}
-        for key, axis in geodetic_matrix.items():
-            axis_tag = key.split("_")[1]
-            projections[axis_tag] = float(np.dot(norm_idea_vector, axis))
+        for axis_id, axis_entry in geodetic_matrix.items():
+            projections[axis_id] = float(np.dot(norm_idea_vector, axis_entry["vector"]))
 
         variance = float(np.var(list(projections.values())))
         dynamic_threshold = auto_calibrate_critical_threshold()
 
-        dominant_attractor = max(geodetic_matrix.keys(), key=lambda k: np.dot(norm_idea_vector, geodetic_matrix[k]))
-        toon_symbol = dominant_attractor.split("_")[0]
+        dominant_attractor = max(
+            geodetic_matrix.keys(),
+            key=lambda k: np.dot(norm_idea_vector, geodetic_matrix[k]["vector"]),
+        )
+        toon_symbol = geodetic_matrix[dominant_attractor]["symbol"]
 
         if variance >= dynamic_threshold:
             new_state: LifecycleState = "consolidated"
@@ -276,10 +290,11 @@ async def consolidate_sovereignty(node_id: str, body: ConsolidationBody):
             cursor.execute("""
                 UPDATE manifold_nodes
                 SET text = ?, toon_factor = ?, lifecycle_state = ?, action_potential = ?,
-                    revision_milestone = 1, vector_blob = ?, projections_json = ?
+                    revision_milestone = ?, vector_blob = ?, projections_json = ?
                 WHERE id = ?
             """, (body.text, toon_symbol, new_state, action_pot,
-                  serialize_vector(norm_idea_vector), json.dumps(projections), node_id))
+                  int(body.ethical_key), serialize_vector(norm_idea_vector),
+                  json.dumps(projections), node_id))
 
         return {"status": "SUCCESS", "new_state": new_state}
     except Exception as e:

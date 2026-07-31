@@ -84,7 +84,7 @@ def isolate_test_database(tmp_path, monkeypatch):
             vec[idx] = 1.0
             cursor.execute(
                 "INSERT INTO geodesic_axes (id, simbolo, tag, vector_blob) VALUES (?, ?, ?, ?)",
-                (f"AXIS_{idx+1}", f"\u25b2_{idx+1}", f"_AXIS_{idx+1}", serialize_vector(vec))
+                (f"AXIS_{idx+1}", chr(0x25B2 + idx), f"_AXIS_{idx+1}", serialize_vector(vec))
             )
         conn.commit()
 
@@ -186,7 +186,7 @@ def test_consolidate_sovereignty_endpoint(isolate_test_database):
               serialize_vector(np.zeros(384)), "{}"))
         conn.commit()
 
-    response = client.post("/nodos/NODE_100/consolidar", json={"text": "Consolidated human edited text"})
+    response = client.post("/nodos/NODE_100/consolidar", json={"text": "Consolidated human edited text", "ethical_key": True})
     assert response.status_code == 200
     assert response.json()["status"] == "SUCCESS"
     assert response.json()["new_state"] in ["consolidated", "incubating"]
@@ -350,3 +350,81 @@ def test_schema_alignment_and_action_potential_field_adr020(isolate_test_databas
     assert "action_potential" in columns
     assert "revision_milestone" in columns
     assert "sys_internal_timestamp" in columns
+
+
+# =====================================================================
+# CYCLE 5: REGRESSION TESTS (review findings)
+# =====================================================================
+
+
+def test_regression_double_underscore_axis_key_does_not_collapse_spectrum(isolate_test_database):
+    """
+    Regression test for the axis key parsing bug.
+
+    Production bootstrap tags carry a leading underscore (e.g. `_SOMETHING_HAPPENS`)
+    and are joined to the symbol with `_`, producing keys like `▲__SOMETHING_HAPPENS`.
+    The old `key.split("_")[1]` returned `''` for every axis, collapsing the
+    projection spectrum to a single value and forcing the Topological Key
+    variance to always be zero. The previous fixture hid this because its
+    symbol field (`▲_1`) made `split("_")[1]` return distinct values.
+    """
+    with sqlite3.connect(isolate_test_database) as conn:
+        cursor = conn.cursor()
+        cursor.execute("DELETE FROM geodesic_axes")
+        prod_tags = [
+            "SOMETHING", "SOMETHING_HAPPENS", "BE_IN_A_PLACE", "BE_GOOD",
+            "THINK", "KNOW", "VERY", "PART_OF",
+        ]
+        for i, tag in enumerate(prod_tags):
+            vec = np.zeros(384, dtype=np.float64)
+            vec[i] = 1.0
+            cursor.execute(
+                "INSERT INTO geodesic_axes (id, simbolo, tag, vector_blob) VALUES (?, ?, ?, ?)",
+                (f"AXIS_{i+1}", f"\u25b2{i+1}", f"_{tag}", serialize_vector(vec))
+            )
+        cursor.execute("INSERT INTO ingestion_queue (payload, status) VALUES (?, ?)",
+                       ("Regression spectrum text", "PENDING"))
+        ingestion_id = cursor.lastrowid
+        conn.commit()
+
+    async_spectral_processor(ingestion_id, "Regression spectrum text")
+
+    with sqlite3.connect(isolate_test_database) as conn:
+        cursor = conn.cursor()
+        cursor.execute(
+            "SELECT action_potential, projections_json FROM manifold_nodes WHERE id = ?",
+            (f"NODE_{ingestion_id}",)
+        )
+        row = cursor.fetchone()
+
+    assert row is not None
+    projections = json.loads(row[1])
+    assert len(projections) == 8
+    assert len(set(projections.values())) > 1
+    assert row[0] > 0.0
+
+
+def test_consolidation_requires_explicit_ethical_key(isolate_test_database):
+    with sqlite3.connect(isolate_test_database) as conn:
+        cursor = conn.cursor()
+        cursor.execute("""
+            INSERT INTO manifold_nodes
+            (id, text, toon_factor, lifecycle_state, action_potential, revision_milestone, vector_blob, projections_json)
+            VALUES (?, ?, ?, ?, ?, ?, ?, ?)
+        """, ("NODE_200", "Pending node", "\u25b2", "pending_approval", 0.1, 0,
+              serialize_vector(np.zeros(384)), "{}"))
+        conn.commit()
+
+    response = client.post("/nodos/NODE_200/consolidar", json={"text": "no ethical confirmation"})
+    assert response.status_code == 422
+
+    with sqlite3.connect(isolate_test_database) as conn:
+        cursor = conn.cursor()
+        cursor.execute(
+            "SELECT lifecycle_state, revision_milestone FROM manifold_nodes WHERE id = ?",
+            ("NODE_200",)
+        )
+        row = cursor.fetchone()
+
+    assert row[0] == "pending_approval"
+    assert row[1] == 0
