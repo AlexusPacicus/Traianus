@@ -1,10 +1,10 @@
 import sqlite3
 import numpy as np
 import json
-from typing import Optional, List, Literal
+from typing import List, Literal
 from fastapi import FastAPI, BackgroundTasks, HTTPException
 from fastapi.middleware.cors import CORSMiddleware
-from pydantic import BaseModel, Field, ValidationError
+from pydantic import BaseModel, Field
 from sentence_transformers import SentenceTransformer
 
 app = FastAPI(title="Project Traianus - Deterministic Customs v5")
@@ -43,8 +43,8 @@ class RefinedEntity(BaseModel):
     projections: List[float] = Field(..., description="Full multi-axis projection spectrum array.")
 
 class ConsolidationBody(BaseModel):
-    text: str
-    ethical_key: Literal[True] = Field(..., description="Explicit Ethical Key validation. Must be `true` to consolidate (ADR-022).")
+    text: str = Field(..., description="Structured entity payload content in plain text.")
+    ethical_key: bool = Field(..., description="Explicit Ethical Key (HITL) human operator confirmation. Required; omitted or false keeps the node out of consolidation (ADR-022).")
 
 class HitlRelation(BaseModel):
     source: str
@@ -277,12 +277,20 @@ async def consolidate_sovereignty(node_id: str, body: ConsolidationBody):
         )
         toon_symbol = geodetic_matrix[dominant_attractor]["symbol"]
 
-        if variance >= dynamic_threshold:
+        topological_key_passed = variance >= dynamic_threshold
+        ethical_key_passed = body.ethical_key
+
+        # Dual-Key Consolidation (ADR-022):
+        # State consolidation requires concurrent satisfaction of the
+        # Topological Key AND the Ethical Key.
+        if topological_key_passed and ethical_key_passed:
             new_state: LifecycleState = "consolidated"
             action_pot = 1.0
         else:
             new_state: LifecycleState = "incubating"
             action_pot = float(variance * 10.0)
+
+        revision_milestone_val = 1 if ethical_key_passed else 0
 
         with sqlite3.connect(DB_PATH) as conn:
             conn.execute("PRAGMA journal_mode=WAL;")
@@ -292,11 +300,18 @@ async def consolidate_sovereignty(node_id: str, body: ConsolidationBody):
                 SET text = ?, toon_factor = ?, lifecycle_state = ?, action_potential = ?,
                     revision_milestone = ?, vector_blob = ?, projections_json = ?
                 WHERE id = ?
-            """, (body.text, toon_symbol, new_state, action_pot,
-                  int(body.ethical_key), serialize_vector(norm_idea_vector),
-                  json.dumps(projections), node_id))
+            """, (body.text, toon_symbol, new_state, action_pot, revision_milestone_val,
+                  serialize_vector(norm_idea_vector), json.dumps(projections), node_id))
 
-        return {"status": "SUCCESS", "new_state": new_state}
+        return {
+            "status": "SUCCESS",
+            "new_state": new_state,
+            "dual_key_status": {
+                "topological_key": topological_key_passed,
+                "ethical_key": ethical_key_passed,
+                "consolidated": topological_key_passed and ethical_key_passed,
+            },
+        }
     except Exception as e:
         raise HTTPException(status_code=500, detail=str(e))
 

@@ -190,6 +190,10 @@ def test_consolidate_sovereignty_endpoint(isolate_test_database):
     assert response.status_code == 200
     assert response.json()["status"] == "SUCCESS"
     assert response.json()["new_state"] in ["consolidated", "incubating"]
+    assert response.json()["dual_key_status"]["ethical_key"] is True
+    assert response.json()["dual_key_status"]["consolidated"] == (
+        response.json()["new_state"] == "consolidated"
+    )
 
     with sqlite3.connect(isolate_test_database) as conn:
         cursor = conn.cursor()
@@ -427,4 +431,36 @@ def test_consolidation_requires_explicit_ethical_key(isolate_test_database):
         row = cursor.fetchone()
 
     assert row[0] == "pending_approval"
+    assert row[1] == 0
+
+
+def test_consolidation_with_false_ethical_key_stays_incubating(isolate_test_database):
+    with sqlite3.connect(isolate_test_database) as conn:
+        cursor = conn.cursor()
+        cursor.execute("""
+            INSERT INTO manifold_nodes
+            (id, text, toon_factor, lifecycle_state, action_potential, revision_milestone, vector_blob, projections_json)
+            VALUES (?, ?, ?, ?, ?, ?, ?, ?)
+        """, ("NODE_201", "Pending node", "\u25b2", "pending_approval", 0.1, 0,
+              serialize_vector(np.zeros(384)), "{}"))
+        conn.commit()
+
+    response = client.post(
+        "/nodos/NODE_201/consolidar",
+        json={"text": "no human confirmation", "ethical_key": False},
+    )
+    assert response.status_code == 200
+    assert response.json()["new_state"] == "incubating"
+    assert response.json()["dual_key_status"]["ethical_key"] is False
+    assert response.json()["dual_key_status"]["consolidated"] is False
+
+    with sqlite3.connect(isolate_test_database) as conn:
+        cursor = conn.cursor()
+        cursor.execute(
+            "SELECT lifecycle_state, revision_milestone FROM manifold_nodes WHERE id = ?",
+            ("NODE_201",)
+        )
+        row = cursor.fetchone()
+
+    assert row[0] == "incubating"
     assert row[1] == 0
