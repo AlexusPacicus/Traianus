@@ -1,11 +1,9 @@
 # Normative Test Specification Template (SPEC)
 
 > **Usage:** every SPEC lives in `docs/development/tests/SPEC-*.md` and
-> PRECEDES the tests it implements (Spec-First, METHODOLOGY.md Phase 3
-> before Phase 4). Grounding:
-> docs/development/methodology/METHODOLOGY.md:57-58 — "Translation of the
-> contracts and architecture rules into an explicit matrix of
-> unit/integration tests".
+> PRECEDES the tests it implements (Spec-First: the specification precedes
+> the tests). Grounding: the contracts and architecture rules are translated
+> into an explicit matrix of unit/integration tests.
 
 ## Normative convention (RFC 2119)
 

@@ -4,10 +4,6 @@ Structure guardians — Spec-First and 1:1 traceability (Phase 3).
 Normative: docs/development/tests/SPEC-template.md
 Coverage: (the guardians verify the rest of the harness; they themselves are
 the meta-traceability tool, they do not implement domain requirements).
-
-Grounding: docs/development/methodology/METHODOLOGY.md:57-58 — "Translation
-of the contracts and architecture rules into an explicit matrix of
-unit/integration tests" (Phase 3 precedes Phase 4).
 """
 import ast
 import os

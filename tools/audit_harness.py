@@ -43,7 +43,7 @@ def run_audit():
     #    6 high-contrast notes written in NSM primitives (variance >>
     #    threshold 0.004292) and 14 low-contrast thematic/narrative notes
     #    (variance << threshold). Expected rate ~30% (ideal [10%, 40%], within
-    #    the gate [5%, 95%]) — see TRAIANUS_AUDIT.md §C1.
+    #    the gate [5%, 95%]) — C1 regression guard.
     corpus = [
         # --- High contrast with a geodetic axis (expected: PASS) ---
         "Something happens.",

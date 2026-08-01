@@ -1,9 +1,9 @@
 """
 Documentary Claims Registry (Phase 4).
 
-Grounding: TRAIANUS_AUDIT.md:35 — "making the claims match the code". Each claim
-from Traianus sources is declared here with a state: ACTIVE (verified by test),
-RED (not met; disposition CODE_FIX|DOC_FIX), WP (explicit scope exclusion in PoC).
+Each claim from Traianus sources is declared here with a state: ACTIVE
+(verified by test), RED (not met; disposition CODE_FIX|DOC_FIX), WP (explicit
+scope exclusion in PoC).
 
 The SPEC for this package is docs/development/tests/SPEC-afirmaciones.md.
 """
@@ -54,7 +54,7 @@ CLAIMS = {
         "must": "The doc → SPEC → test chain has no gaps: every ACTIVE claim has a test and every test references its SPEC.",
     },
     "CL-LIT1": {
-        "source": "AGENTS.md §2.4",
+        "source": "Topological_Grounding convention",
         "state": "ACTIVE",
         "must": "Topological_Grounding citations exist character-by-character in the cited source file.",
     },
@@ -64,12 +64,10 @@ CLAIMS = {
 LITERAL_QUOTES = [
     ("docs/architecture/ADR/ADR.md",
      "Integration test suites must validate these five invariants on every build pipeline."),
-    ("docs/development/methodology/METHODOLOGY.md",
-     "PHASE 3: TDD Specification (Invariant Matrix)"),
-    ("TRAIANUS_AUDIT.md",
-     "making the claims match the code"),
-    ("TRAIANUS_AUDIT.md",
-     "injecting a fake encoder"),
+    ("docs/architecture/Project_architecture.md",
+     "Deterministic adjacency edges formed strictly where $d(\\mathbf{v}_i, \\mathbf{v}_j) \\leq \\epsilon$"),
+    ("traianus/app.py",
+     "for j, other in enumerate(vectors) if j != i"),
 ]
 
 

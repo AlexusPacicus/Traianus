@@ -6,7 +6,7 @@ Every system that manages knowledge inherits a hidden coupling: the way it *repr
 
 This separation makes three promises possible:
 - **Provider agnosticism** — swap representation providers without disrupting state
-- **Deterministic auditability** — every state transition $S_{n+1} = f(S_n, v_n)$ is reproducible bit for bit
+- **Deterministic auditability** — every state transition $S_{n+1} = f(S_n, v_n)$ is reproducible given identical input vectors
 - **Offline sovereignty** — the entire substrate runs on consumer local hardware ($\le 8$ GB RAM) with no runtime cloud dependency
 
 Current status: Proof of Concept (PoC) v1.0 using sovereign personal knowledge as its initial reference application (RefApp-01). See [IMPLEMENTATION_STATUS.md](./IMPLEMENTATION_STATUS.md) for the transparent declaration of what is implemented vs. what is R&D roadmap.
@@ -82,7 +82,7 @@ External observation layers evaluate read-only perspective projections $O_n = P_
 
 * **RH-1 (Provider Agnosticism):** The spatial control plane routes and governs spatial state without modifying or relying on internal representation provider weights or semantics.
 
-* **RH-2 (Determinism & Auditability):** Dynamic variance thresholding aims to guarantee reproducible execution paths ($S_{n+1} = f(S_n, v_n)$) bit for bit.
+* **RH-2 (Determinism & Auditability):** Dynamic variance thresholding aims to guarantee reproducible execution paths ($S_{n+1} = f(S_n, v_n)$) given identical inputs.
 
 * **RH-3 (Local Edge Execution):** Operates offline on consumer local hardware ($\le 8$ GB RAM) without requiring runtime cloud API connectivity.
 
