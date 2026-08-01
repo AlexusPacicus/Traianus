@@ -9,7 +9,7 @@ This separation makes three promises possible:
 - **Deterministic auditability** — every state transition $S_{n+1} = f(S_n, v_n)$ is reproducible bit for bit
 - **Offline sovereignty** — the entire substrate runs on consumer local hardware ($\le 8$ GB RAM) with no runtime cloud dependency
 
-Current status: Proof of Concept (PoC) using sovereign personal knowledge as its initial reference application (RefApp-01).
+Current status: Proof of Concept (PoC) v1.0 using sovereign personal knowledge as its initial reference application (RefApp-01). See [IMPLEMENTATION_STATUS.md](./IMPLEMENTATION_STATUS.md) for the transparent declaration of what is implemented vs. what is R&D roadmap.
 
 > **"Traianus does not define how reality is represented. It operates upon coordinate vectors $\mathbf{v} \in \mathbb{R}^d$ emitted by external providers to govern spatial state deterministically."**
 
@@ -57,7 +57,7 @@ Traianus strictly enforces a three-tier separation of concerns, where each tier 
    Framework & Clients: Ulpia (Native Mathematical Observation Framework), RefApp-01 (Knowledge), RefApp-02 (Cybersecurity), RefApp-03 (Telemetry).
 ```
 * **Representation Layer:** Operates outside Traianus. External providers map entities into coordinate vectors $v \in \mathbb{R}^d$.
-* **Spatial Control Plane:** Executes deterministic state transitions $S_{n+1} = f(S_n, v_n)$ over the discrete simplicial complex $S_n = (V_n, E_n, K_n)$ purely through linear algebra and transactional persistence (ADR-023).
+* **Spatial Control Plane:** Executes deterministic state transitions $S_{n+1} = f(S_n, v_n)$ over the discrete simplicial complex $S_n = (V_n, E_n, K_n)$ purely through linear algebra and transactional persistence (ADR-023). The executable PoC v1.0 in `traianus/` currently operates over the skeleton $S_n = (V_n, E_n)$, with a sub-millisecond projection kernel (0.01ms kernel / ~13ms total pipeline including neural embedding).
 * **Observation Layer:** Evaluates read-only perspective projections $O_n = P_\theta(S_n)$. Powered natively by Ulpia as the mathematical observation framework and consumed by domain reference applications. External interactions provide the human-in-the-loop (HITL) feedback necessary to satisfy the Ethical Key for state consolidation (ADR-022).
 
 ## 3. Decoupled Architecture & State Function
@@ -71,6 +71,8 @@ Where $S_n = (V_n, E_n, K_n)$ represents the discrete simplicial complex at step
 * $V_n$ — Vertices (coordinate vectors)
 * $E_n$ — Deterministic edges (adjacency relations)
 * $K_n$ — Simplicial faces (higher-order structures)
+
+> **Note:** *Higher-order simplicial faces (K_n) and multi-provider dynamic switching form part of the active R&D roadmap in `docs/research/`.* The executable PoC v1.0 of `traianus/` governs the lower-dimensional skeleton $S_n = (V_n, E_n)$; higher-order structures $K_n$ are not executed by the current release.
 
 External observation layers evaluate read-only perspective projections $O_n = P_\theta(S_n)$ without mutating state $S_n$ (ADR-024).
 
@@ -97,8 +99,11 @@ External observation layers evaluate read-only perspective projections $O_n = P_
 # Enter the development shell (installs all dependencies)
 nix develop
 
-# Run the test suite
-pytest tests/test_control_plane.py
+# 1. Bootstrap the geodetic baseline (offline, all-MiniLM-L6-v2 cached)
+traianus-bootstrap
+
+# 2. Run the test suite (hermetic partition, no model required)
+pytest tests/ -m "not model"
 ```
 
 ### Without Nix
@@ -107,7 +112,16 @@ Ensure Python 3.11+ and the dependencies listed in `pyproject.toml` are installe
 
 ```bash
 pip install -e .
-pytest tests/test_control_plane.py
+traianus-bootstrap
+pytest tests/ -m "not model"
+```
+
+### Start the control plane locally
+
+The FastAPI server binds only to the local loopback (Zero-Trust, no external network):
+
+```bash
+uvicorn traianus.app:app --host 127.0.0.1 --port 8000
 ```
 
 ## 6. Documentation Ledger

@@ -47,7 +47,7 @@ This research programme specifies the R&D roadmap, work packages, and multi-prov
 | **R-01** | Topological filtration stalls control plane. | $O(N^3)$ complexity on large point clouds during $H_1$ persistence computation. | Cap filtration radius $\epsilon_{\max}$ and offload calculation to background threads. |
 | **R-02** | Basis drift causes spatial collapse. | Angular collapse during dynamic greedy farthest-point recalculation. | Roll back to previous basis state $\mathbf{B}_{n-1}$ if total variance drops below $\sigma^2_{\min}$. |
 | **R-03** | Synchronization state divergence. | Out-of-order delta execution during offline multi-device sync. | Append-only delta logs with state-based CRDT resolution in transactional storage log. |
-| **R-04** | Build non-reproducibility. | Unpinned native C++ compilation dependencies (`GUDHI` / `glibc`). | Enforce hash pinning of C++ libraries within declarative `flake.nix`. |
+| **R-04** | Build non-reproducibility. | Unpinned native C++ compilation dependencies (`GUDHI` / `glibc`). | `flake.nix` pins nixpkgs to a revision with known hash (`github:NixOS/nixpkgs/148bab9c…`, 2026-08-01), which pins the transitive C++ dependencies (`GUDHI`/`glibc`); generate and commit `flake.lock` with `nix flake lock` on a Nix host (Step 4.1). |
 
 ---
 

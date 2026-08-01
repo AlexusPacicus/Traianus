@@ -1,0 +1,63 @@
+name: CI
+
+on:
+  push:
+    branches: [main]
+  pull_request:
+
+jobs:
+  test-hermetic:
+    name: Hermetic tests (no model)
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v4
+      - uses: actions/setup-python@v5
+        with:
+          python-version: "3.11"
+      - name: Install dependencies
+        run: |
+          python -m pip install --upgrade pip
+          pip install -r requirements.txt
+          pip install -e .
+      - name: Hermetic suite (Phases 0–5)
+        run: |
+          HF_HUB_OFFLINE=1 pytest tests/ -m "not model" -q
+
+  test-e2e-model:
+    name: E2E with real model (@pytest.mark.model partition)
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v4
+      - uses: actions/setup-python@v5
+        with:
+          python-version: "3.11"
+      - name: Install dependencies
+        run: |
+          python -m pip install --upgrade pip
+          pip install -r requirements.txt
+          pip install -e .
+      - name: Hugging Face model cache
+        uses: actions/cache@v4
+        with:
+          path: ~/.cache/huggingface
+          key: hf-cache-all-MiniLM-L6-v2
+      - name: Model prefetch (one time; offline if already cached)
+        run: |
+          python - <<'EOF'
+          import os
+          os.environ["HF_HUB_OFFLINE"] = "1"
+          from sentence_transformers import SentenceTransformer
+          try:
+              SentenceTransformer("all-MiniLM-L6-v2", local_files_only=True)
+          except Exception:
+              # First run on a clean runner: the HF cache is empty,
+              # a single download is allowed to populate the job cache.
+              os.environ["HF_HUB_OFFLINE"] = "0"
+              SentenceTransformer("all-MiniLM-L6-v2")
+          EOF
+      - name: E2E suite (Phase 6, @pytest.mark.model)
+        run: |
+          HF_HUB_OFFLINE=1 pytest tests/ -m "model" -q
+      - name: Audit harness (C1 guard)
+        run: |
+          HF_HUB_OFFLINE=1 python tools/audit_harness.py

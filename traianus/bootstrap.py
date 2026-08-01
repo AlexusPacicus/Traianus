@@ -1,10 +1,23 @@
 import sqlite3
+import os
 import numpy as np
 from sentence_transformers import SentenceTransformer
 
 print("[Traianus] Loading SentenceTransformer model for geodetic extraction...")
 
-model = SentenceTransformer("all-MiniLM-L6-v2")
+# =====================================================================
+# OFFLINE GUARD (audit M3): bootstrap is the first run that used to
+# download the model from the HF Hub. With the offline guard it requires
+# local prefetch; the geodetic extraction becomes reproducible and sovereign.
+# =====================================================================
+os.environ.setdefault("HF_HUB_OFFLINE", "1")
+
+
+def build_encoder():
+    return SentenceTransformer("all-MiniLM-L6-v2", local_files_only=True)
+
+
+model = build_encoder()
 DB_PATH = "traianus.db"
 
 NSM_PRIMES = [
@@ -99,12 +112,13 @@ def anchor_in_sqlite(octagon_data):
         )
     """)
 
-    cursor.execute("DELETE FROM geodesic_axes")
-
+    # H4 (F2.3): the geodetic basis is a regenerable derived artifact.
+    # DELETE is prohibited; re-anchoring uses INSERT OR IGNORE to avoid
+    # destroying the existing basis when re-running bootstrap.
     for rank, (key, data) in enumerate(octagon_data.items()):
         axis_id = f"AXIS_{rank + 1}"
         cursor.execute(
-            "INSERT INTO geodesic_axes (id, simbolo, tag, vector_blob) VALUES (?, ?, ?, ?)",
+            "INSERT OR IGNORE INTO geodesic_axes (id, simbolo, tag, vector_blob) VALUES (?, ?, ?, ?)",
             (axis_id, data["symbol"], data["tag"], serialize_vector(data["vector"])),
         )
 
@@ -114,6 +128,11 @@ def anchor_in_sqlite(octagon_data):
     print(f"[SUCCESS] Geodetic baseline of {len(octagon_data)} axes anchored.")
 
 
-if __name__ == "__main__":
+def main():
+    """Entry point of `traianus-bootstrap`: extracts and anchors the geodetic baseline."""
     octagon = extract_pure_octagon()
     anchor_in_sqlite(octagon)
+
+
+if __name__ == "__main__":
+    main()
