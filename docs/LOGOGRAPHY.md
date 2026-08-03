@@ -26,6 +26,7 @@
 
 ## 🛡️ 5. Audit & Neuro-Symbolic Firewall (`docs/` and `tools/`)
 * **[STATE_CONSOLIDATION_2026-08-01.md](./STATE_CONSOLIDATION_2026-08-01.md):** Consolidation of the 2026-08-01 cycle — git state, AGENTS.md invariant matrix, Doc-Drift catalog D1–D10, and routable recommendations R1–R5.
+* **[STATE_CONSOLIDATION_2026-08-03.md](./STATE_CONSOLIDATION_2026-08-03.md):** Consolidation of the 2026-08-03 restoration cycle — restoration of the OpenCode governance layer (config, AGENTS.md, agents/commands/skills) from `ea43df6^`, empirical verification and findings W1–W4.
 * **[TRAIANUS_AUDIT.md](../TRAIANUS_AUDIT.md):** Static and empirical technical audit report (Finding C1, H1–H5) + 2026-08-01 cycle remediation status.
 * **[README_CODE_ENGINE.md](../README_CODE_ENGINE.md):** TridenGuard V4 Compiler Specification (5 Radicals and 3 Physical Gates).
 * **[audit_harness.py](../tools/audit_harness.py):** Hermetic empirical harness — C1 regression guard (consolidation rate in `[5%, 95%]`) over ephemeral SQLite.
