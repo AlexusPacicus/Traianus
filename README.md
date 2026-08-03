@@ -88,41 +88,57 @@ External observation layers evaluate read-only perspective projections $O_n = P_
 
 ## 5. Quickstart
 
-### Prerequisites
+Minimal quickstart with `venv + pip` — Nix is an optional alternative, not a requirement.
 
-* **Nix** with flakes enabled (see [nixos.wiki/wiki/Flakes](https://nixos.wiki/wiki/Flakes))
-* **SQLite** (bundled automatically in the Nix shell)
-
-### Running
+### 1. Minimal setup (venv + pip)
 
 ```bash
-# Enter the development shell (installs all dependencies)
-nix develop
+# Isolated environment (Python 3.10+, see pyproject.toml)
+python -m venv .venv
+source .venv/bin/activate
 
-# 1. Bootstrap the geodetic baseline (offline, all-MiniLM-L6-v2 cached)
-traianus-bootstrap
-
-# 2. Run the test suite (hermetic partition, no model required)
-pytest tests/ -m "not model"
-```
-
-### Without Nix
-
-Ensure Python 3.11+ and the dependencies listed in `pyproject.toml` are installed, then run:
-
-```bash
+# Install the package and the `traianus-bootstrap` script
 pip install -e .
+# Test extra (pytest, pytest-asyncio, httpx) to run the suite
+pip install -e ".[test]"
+
+# Prefetch the offline model (all-MiniLM-L6-v2). The bootstrap and the
+# server use local_files_only=True: the model must be cached locally
+# before the first server boot.
 traianus-bootstrap
+```
+
+> Nix with flakes (`nix develop`) remains an alternative, but the `venv + pip` path above is the canonical minimal quickstart.
+
+### 2. Start the server (Zero-Trust, localhost only)
+
+```bash
+TRAIANUS_TOKEN=your-secret uvicorn traianus.app:app --host 127.0.0.1 --port 8000
+```
+
+* The FastAPI server binds exclusively to the loopback `127.0.0.1` — no external network exposure.
+* `TRAIANUS_TOKEN` is **mandatory** for the protected routes: `/ingesta`, `/consolidar`, `/mutate`, `/relations`, `/telemetry`. Fail-closed: if it is not defined in the environment, every protected route responds `401`.
+
+### 3. Environment variables
+
+| Variable | Required | Type | Default | Description |
+| --- | --- | --- | --- | --- |
+| `TRAIANUS_TOKEN` | Yes | string | — | Operator token for mutating endpoints (`/ingesta`, `/consolidar`, `/mutate`, `/relations`, `/telemetry`). Read per-request, so it can be rotated without a restart. |
+| `TRAIANUS_EPSILON_EDGE` | No | float | `0.8` | ε threshold for deterministic E_n adjacency (‖v_i − v_j‖₂ ≤ ε) during consolidation (ADR-023/H5). Server-side constant, configurable at boot only. |
+
+### 4. Hermetic tests (no model, offline)
+
+```bash
 pytest tests/ -m "not model"
 ```
 
-### Start the control plane locally
-
-The FastAPI server binds only to the local loopback (Zero-Trust, no external network):
+### 5. E2E tests with the real model
 
 ```bash
-uvicorn traianus.app:app --host 127.0.0.1 --port 8000
+pytest tests/ -m "model"
 ```
+
+Requires the model cached locally (prefetch with `traianus-bootstrap`). The `model` marker is registered in `pyproject.toml`.
 
 ## 6. Documentation Ledger
 
