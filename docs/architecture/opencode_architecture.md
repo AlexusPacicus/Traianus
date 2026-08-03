@@ -12,7 +12,7 @@ This document specifies the **OpenCode configuration topology** of the Traianus/
 
 1. The root configuration (`opencode.jsonc`): model, governance instructions and MCP server.
 2. The topology of the 5 `subagent` agents and their Zero-Trust permission matrix.
-3. The interface contract of the MCP validator `tridenguard-validator` v1.1.0.
+3. The interface contract of the MCP validator `tridenguard-validator` v1.2.0.
 4. The `AGENTS.md` invariants that condition the operation of the agents.
 
 It is not an OpenCode usage tutorial; it is the architectural contract that **must not be broken** when editing this configuration.
@@ -73,7 +73,7 @@ The MCP validator implements this rule as an **executable deterministic gate** o
 - **Protocol:** MCP over stdio, line-delimited JSON-RPC 2.0 (`2024-11-05`).
 - **Lifecycle:** OpenCode starts the process when loading the configuration; the server serves `initialize`, `ping`, `tools/list` and `tools/call` until EOF on `stdin`.
 - **Exposed tool:** `validate_proposal` (only one). Details in §7.
-- **Version:** `SERVER_VERSION = "1.1.0"`.
+- **Version:** `SERVER_VERSION = "1.2.0"`.
 
 ---
 
@@ -127,11 +127,11 @@ No documentation or planning agent holds execution permission; only the code exe
 
 ### 6.2 MCP validator gates
 
-`validate_proposal` implements 3 deterministic gates (plus input sanitization):
+`validate_proposal` (v1.2.0) implements 3 deterministic gates plus input sanitization:
 
 1. **Safety Gate:** if `Safety_Abort != "NONE"` → `BLOCKED_BY_SAFETY_GATE`.
-2. **Zero-Trust Gate:** if the `Implementation_Block` contains a forbidden network token (`fetch(`, `axios`, `urllib.request`, `import requests`) → `ABORTED_VIOLATES_ZERO_TRUST`.
-3. **Grounding Gate:** for `REFACTOR`/`FIX`/`AUDIT` with `target_file`, the `Topological_Grounding` quote must exist character by character in the file; otherwise → `ABORTED_GROUNDING_FAILED`.
+2. **Zero-Trust Gate:** if the `Implementation_Block` contains any of the 21 forbidden network tokens (`fetch(`, `axios`, `urllib.request`, `import requests`, `httpx`, `socket`, `urllib3`, `subprocess`, `curl`, `wget`, `aiohttp`, `importlib`, `os.system`, `os.popen`, `requests.`, `http.client`, `webbrowser`, `telnet`, `nc `, `ftp`, `xmlrpc`) → `ABORTED_VIOLATES_ZERO_TRUST`. NUL bytes (`\x00` raw or JSON-escaped `\u0000`) are sanitized before processing (SEC-M-09).
+3. **Grounding Gate (Dual Boundary Pattern):** for `REFACTOR`/`FIX`/`AUDIT` with `target_file`, verification is physical and byte-level — canonicalize the path (`Path.resolve(strict=True)`), require containment within the repository root (`is_relative_to(REPO_ROOT)`), and match the `Topological_Grounding` quote as an exact UTF-8 binary subsequence over `read_bytes()` of the target file; failures are denied silently (no target path or OS details in the decision) → `ABORTED_GROUNDING_FAILED`.
 
 Only if the three gates pass: `VALIDATED` / `EXECUTE_SAFE` with `and_gate_ok: True`. Invalid JSON input → `QUARANTINED` / `INVALID_JSON`.
 
@@ -139,7 +139,7 @@ Only if the three gates pass: `VALIDATED` / `EXECUTE_SAFE` with `and_gate_ok: Tr
 
 1. **Audit Synchronization:** consult `TRAIANUS_AUDIT.md` before refactoring `traianus/app.py`.
 2. **Variance Threshold Correction (C1):** always exclude the self-projection ($i = j$, value $1.0$) when calibrating `auto_calibrate_critical_threshold()`.
-3. **Zero-Trust and Network Security:** block external requests (`fetch()`, `axios`, `urllib.request`, `requests`); Uvicorn/FastAPI on `127.0.0.1`; no wildcard CORS with credentials.
+3. **Zero-Trust and Network Security:** block external requests (`fetch()`, `axios`, `urllib.request`, `requests`, `httpx`, `socket`, `urllib3`, `subprocess`, `curl`, `wget`, `aiohttp`, `importlib`, `os.system`, `os.popen`); Uvicorn/FastAPI on `127.0.0.1`; no wildcard CORS with credentials; byte-level Dual Boundary verification (path canonicalization, repo-root containment, UTF-8 binary subsequence over `read_bytes()`, `\x00` sanitization, silent denial).
 4. **Literal Grounding Guarantee:** the quote in `Topological_Grounding` must exist exactly in the source (equivalent to the validator's Grounding Gate).
 5. **Immutable Persistence (*Append-Only*):** `UPDATE`/`DELETE` over the node history is prohibited; new revisions with increasing `seq`.
 
@@ -149,7 +149,7 @@ Only if the three gates pass: `VALIDATED` / `EXECUTE_SAFE` with `and_gate_ok: Tr
 
 ### 7.1 JSON-RPC lifecycle
 
-- `initialize` → `protocolVersion: "2024-11-05"`, `capabilities.tools.listChanged: false`, `serverInfo: {name: "tridenguard-validator", version: "1.1.0"}`.
+- `initialize` → `protocolVersion: "2024-11-05"`, `capabilities.tools.listChanged: false`, `serverInfo: {name: "tridenguard-validator", version: "1.2.0"}`.
 - `ping` → `{}`.
 - `tools/list` → `{tools: [validate_proposal]}`.
 - `tools/call` (name = `validate_proposal`) → result with `content[0].text` = JSON decision.
@@ -201,7 +201,7 @@ When editing `opencode.jsonc` or `.opencode/agents/*.md`:
 - [`CONTRACTS_AND_PRISMS.md`](./contracts/CONTRACTS_AND_PRISMS.md) — Pydantic contracts and Zero-Trust customs.
 - [`ADR.md`](./ADR/ADR.md) — append-only ledger of decisions (ADR-001 to ADR-025).
 - [`README_CODE_ENGINE.md`](../../README_CODE_ENGINE.md) — TridenGuard V4 compiler (5 Radicals and 3 Gates).
-- [`tools/tridenguard_validator.py`](../../tools/tridenguard_validator.py) — MCP server v1.1.0 (source of the §7 contract).
+- [`tools/tridenguard_validator.py`](../../tools/tridenguard_validator.py) — MCP server v1.2.0 (source of the §7 contract).
 - [`docs/development/bitacora.md`](../development/bitacora.md) — Entries #008 (hardening), #009 (this specification) and #012 (2026-08-01 logography sync).
 - [`docs/STATE_CONSOLIDATION_2026-08-01.md`](../STATE_CONSOLIDATION_2026-08-01.md) — 2026-08-01 cycle consolidation (git state, AGENTS.md invariants, Doc-Drift catalog D1–D10, recommendations R1–R5).
 - **Note (R2):** `TRAIANUS_AUDIT.md` is referenced in `opencode.jsonc:6` and in this specification (§3.2, §6.3 and previous reference), and it **exists in the working tree** after the 2026-08-01 rename from `TRAIANUS_AUDITORIA_ES.md` (Doc-Drift D1 resolution).
@@ -213,5 +213,5 @@ When editing `opencode.jsonc` or `.opencode/agents/*.md`:
 - **Pytest (historical, Entry #008):** cycle #008 closed with `python3 -m pytest tests/ -q` → **34 passed**.
 - **Pytest (current state, 2026-08-01):** `python3 -m pytest tests/ -q` → **174 passed / 2 skipped** (cycles #010–#011; refer to `docs/development/tests/TEST_OVERVIEW.md` §7 and to `docs/STATE_CONSOLIDATION_2026-08-01.md`).
 - **C1 harness:** `python3 tools/audit_harness.py` → **✅ C1 GUARD PASSED IN GREEN** (consolidation rate 30% within [5%, 95%]); re-verified 2026-08-01.
-- **MCP smoke:** handshake `initialize` → `serverInfo` `tridenguard-validator` v1.1.0 OK; `tools/list` exposes `validate_proposal`.
+- **MCP smoke:** handshake `initialize` → `serverInfo` `tridenguard-validator` v1.2.0 OK; `tools/list` exposes `validate_proposal`.
 - **This specification:** path `docs/architecture/opencode_architecture.md` registered in `docs/LOGOGRAPHY.md` (section 3) and in `docs/development/bitacora.md` (Entry #009).

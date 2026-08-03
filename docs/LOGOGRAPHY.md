@@ -16,7 +16,7 @@
 * **[Project_architecture.md](./architecture/Project_architecture.md):** Mathematical formulation of state $S_n = (V_n, E_n, K_n)$ and transactional persistence.
 * **[CONTRACTS_AND_PRISMS.md](./architecture/contracts/CONTRACTS_AND_PRISMS.md):** Pydantic Contracts (`RawDump`, `RefinedEntity`) and Zero-Trust Customs.
 * **[ADR.md](./architecture/ADR/ADR.md):** *Append-only* ledger of Architecture Decision Records (ADR-001 to ADR-025).
-* **[opencode_architecture.md](./architecture/opencode_architecture.md):** OpenCode repository configuration specification (agents, Zero-Trust permissions, MCP tridenguard-validator v1.1.0).
+* **[opencode_architecture.md](./architecture/opencode_architecture.md):** OpenCode repository configuration specification (agents, Zero-Trust permissions, MCP tridenguard-validator v1.2.0).
 
 ## ⚙️ 4. Development & Methodology (`docs/development/`)
 * **[METHODOLOGY.md](./development/methodology/METHODOLOGY.md):** Specification of the 4-phase neuro-symbolic flow (Analysis, ASD, TDD Specification, and Red/Green/Refactor Cycle).
@@ -27,6 +27,7 @@
 ## 🛡️ 5. Audit & Neuro-Symbolic Firewall (`docs/` and `tools/`)
 * **[STATE_CONSOLIDATION_2026-08-01.md](./STATE_CONSOLIDATION_2026-08-01.md):** Consolidation of the 2026-08-01 cycle — git state, AGENTS.md invariant matrix, Doc-Drift catalog D1–D10, and routable recommendations R1–R5.
 * **[STATE_CONSOLIDATION_2026-08-03.md](./STATE_CONSOLIDATION_2026-08-03.md):** Consolidation of the 2026-08-03 restoration cycle — restoration of the OpenCode governance layer (config, AGENTS.md, agents/commands/skills) from `ea43df6^`, empirical verification and findings W1–W4.
+* **[Dual Boundary Pattern — Deterministic Execution via Binary Verification.md](./Dual%20Boundary%20Pattern_%20Deterministic%20Execution%20via%20Binary%20Verification.md):** Physical byte-level execution verification — path canonicalization (`Path.resolve(strict=True)`), repo-root containment (`is_relative_to`), UTF-8 binary subsequence matching over `read_bytes()`, `\x00` sanitization, and silent denial.
 * **[TRAIANUS_AUDIT.md](../TRAIANUS_AUDIT.md):** Static and empirical technical audit report (Finding C1, H1–H5) + 2026-08-01 cycle remediation status.
 * **[README_CODE_ENGINE.md](../README_CODE_ENGINE.md):** TridenGuard V4 Compiler Specification (5 Radicals and 3 Physical Gates).
 * **[audit_harness.py](../tools/audit_harness.py):** Hermetic empirical harness — C1 regression guard (consolidation rate in `[5%, 95%]`) over ephemeral SQLite.
@@ -40,7 +41,9 @@
 * **`tests/bloques/{ingesta,consolidacion,relaciones,mutacion,observabilidad,bootstrap}/`:** Per-block skeleton — `test_genericos`, `test_especificos`, `test_e2e` (Phases 2, 5, and 6).
 * **`tests/meta/`:** Structure guardians (`_spec_lib.py` + `test_guardianes_estructura.py`): SPECs parse, normative headers, 1:1 MUST↔test traceability, no orphans.
 * **`tests/afirmaciones/`:** Documentary claims (Phase 4) — `claims_registry.py` (CL-C41, CL-I5, CL-I61, CL-I62, CL-R1, CL-R2, CL-WP1, CL-TR1, CL-LIT1) with states ACTIVE/RED/WP; **CL-I62 ACTIVE** (CODE_FIX applied: provider dimension > basis → HTTP 422; verified by `test_afirmaciones_CL_I62_*` in `test_cl_i62_dimension_provider.py`).
-* **`tests/security/`:** Zero-Trust Gate (SEC-M-01..06) on `tools/tridenguard_validator.py` (Phase 5) + MCP stdio JSON-RPC server.
+* **`tests/security/`:** Zero-Trust Gate (SEC-M-01..12) on `tools/tridenguard_validator.py` (Phase 5) + MCP stdio JSON-RPC server.
+* **`tests/security/test_tridenguard_dual_boundary.py`:** Dual Boundary Gate (SEC-M-08..12) — canonical path containment (`..` traversal and symlink escapes via `Path.resolve(strict=True)` + `is_relative_to`), `\x00` sanitization (raw and JSON-escaped `\u0000`), 21-token network denylist, UTF-8 binary subsequence grounding over `read_bytes()`, and silent denial (no path/OS leakage).
+* **`tests/security/test_opencode_permissions.py`:** Config perimeter (SEC-M-13) — the `opencode.jsonc` bash permission matrix MUST NOT grant a `git *` wildcard allow; only explicit read/inspection subcommands (status, diff, log, show, rev-parse, grep, blame, ls-files, add) MAY be allowed; deny primitives persist.
 * **`tests/e2e/`:** C1 Guard (G10) ported from harness — consolidation rate in [5%, 95%] with real model (Phase 6); per-block `test_e2e.py` implement `@pytest.mark.model` journeys.
 * **`tests/fixtures/nsm_axes_8.json`:** Real axes (8×384) exported for L1 tests.
 * **CI:** `.github/workflows/ci.yml` — 2 jobs: hermetic (`pytest tests/ -m "not model"`, no model/offline) and real-model E2E (`pytest tests/ -m "model"` + `tools/audit_harness.py`, model cached via `actions/cache` + HF prefetch).
