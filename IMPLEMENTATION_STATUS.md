@@ -2,9 +2,7 @@
 
 > **Purpose:** Transparent declaration of the correspondence between the R&D theoretical framework and the executable PoC v1.0. Everything declared as implemented must be verifiable in `traianus/`; everything that remains a hypothesis is declared as R&D roadmap in `docs/research/`.
 
-**Date:** 2026-08-01 · **Scope:** `traianus/` (executable substrate) vs `docs/research/` (long-term hypotheses)
-
----
+**Date:** 2026-08-01 · **Scope:** `traianus/` (executable substrate) vs `docs/research/` (long-term hypotheses)---
 
 ## 0. Status Legend
 
@@ -26,12 +24,13 @@
 | **Zero-Trust perimeter & C1 gate** | 🟢 100% Implemented | `traianus/` | Fail-closed auth `x-traianus-token` (`traianus/app.py:66-69`); enumerated CORS, no wildcard (`traianus/app.py:30-38`); ingress restricted to `text/plain` (`traianus/app.py:55`, `traianus/app.py:370-371`); dynamic variance threshold calibrated excluding self-projection, observed consolidation rate 30-45% (`traianus/app.py:249-265`, `tools/audit_harness.py`). |
 | **Latency** | 🟢 Measured | `traianus/` | Sub-millisecond projection kernel (0.01 ms kernel / ~13 ms total pipeline including neural embedding, PyTorch on CPU). |
 | **Provider agnosticism (RH-1)** | 🟡 Partial | `traianus/` + `docs/research/` | Dimension mismatch handled explicitly: zero-padding when `d_db > d_in`; HTTP 422 rejection when `d_in > d_db` (`traianus/app.py:284-292`); multi-provider dynamic switching remains active R&D (RH-1, `docs/research/RESEARCH_HYPOTHESIS.md`). |
+| **Observation layer ($O_n = P_\theta(S_n)$)** | 🟢 Contract + 🔵 Client | `traianus/` + `docs/observation/` | Read-only perspective projections declared in ADR-022/ADR-024; zero-side-effect reads verified (G5/OB, ADR-025 #2). The Ulpia client itself is roadmap (no UI code). See `docs/observation/ULPIA_OVERVIEW.md`. |
 
 ---
 
 ## 2. Scope Boundary: PoC v1.0 vs R&D Roadmap
 
-* **PoC v1.0 executes** the deterministic spatial skeleton $S_n = (V_n, E_n)$: vertices as an immutable append-only log and deterministic ε-adjacency edges, both governed by transactional persistence and the Zero-Trust perimeter.
+* **PoC v1.0 executes** the deterministic spatial skeleton $S_n = (V_n, E_n)$: vertices as an immutable append-only log and deterministic ε-adjacency edges, both governed by transactional persistence and the Zero-Trust perimeter. The observation contract $O_n = P_\theta(S_n)$ (ADR-022/ADR-024) is exposed by read-only endpoints; the Ulpia client rendering layer is roadmap.
 * **Higher-order simplicial faces (K_n) and multi-provider dynamic switching form part of the active R&D roadmap** declared in `docs/research/` (WP2, RH-1) and are *not* claimed as implemented.
 
 ---

@@ -15,8 +15,11 @@
 ## 🏗️ 3. Architecture & Engineering (`docs/architecture/`)
 * **[Project_architecture.md](./architecture/Project_architecture.md):** Mathematical formulation of state $S_n = (V_n, E_n, K_n)$ and transactional persistence.
 * **[CONTRACTS_AND_PRISMS.md](./architecture/contracts/CONTRACTS_AND_PRISMS.md):** Pydantic Contracts (`RawDump`, `RefinedEntity`) and Zero-Trust Customs.
-* **[ADR.md](./architecture/ADR/ADR.md):** *Append-only* ledger of Architecture Decision Records (ADR-001 to ADR-025).
+* **[ADR.md](./architecture/ADR/ADR.md):** *Append-only* ledger of Architecture Decision Records (ADR-001 to ADR-027).
 * **[opencode_architecture.md](./architecture/opencode_architecture.md):** OpenCode repository configuration specification (agents, Zero-Trust permissions, MCP tridenguard-validator v1.2.0).
+
+## 👁️ 3b. Observation (`docs/observation/`)
+* **[ULPIA_OVERVIEW.md](./observation/ULPIA_OVERVIEW.md):** Native mathematical observation framework — Layer 3 ($O_n = P_\theta(S_n)$), ADR-022/ADR-024 projection independence, zero-side-effect reads, and implementation status.
 
 ## ⚙️ 4. Development & Methodology (`docs/development/`)
 * **[METHODOLOGY.md](./development/methodology/METHODOLOGY.md):** Specification of the 4-phase neuro-symbolic flow (Analysis, ASD, TDD Specification, and Red/Green/Refactor Cycle).
@@ -47,4 +50,4 @@
 * **`tests/e2e/`:** C1 Guard (G10) ported from harness — consolidation rate in [5%, 95%] with real model (Phase 6); per-block `test_e2e.py` implement `@pytest.mark.model` journeys.
 * **`tests/fixtures/nsm_axes_8.json`:** Real axes (8×384) exported for L1 tests.
 * **CI:** `.github/workflows/ci.yml` — 2 jobs: hermetic (`pytest tests/ -m "not model"`, no model/offline) and real-model E2E (`pytest tests/ -m "model"` + `tools/audit_harness.py`, model cached via `actions/cache` + HF prefetch).
-* **[TEST_OVERVIEW.md](./development/tests/TEST_OVERVIEW.md):** Living document of the suite — measured state (174 passed / 2 skipped), bootstrap map, G1–G9 catalog, blocks × categories, claims, meta-guardians, and Spec-First contribution guide.
+* **[TEST_OVERVIEW.md](./development/tests/TEST_OVERVIEW.md):** Living document of the suite — measured state (204 passed / 2 skipped full; 197 passed / 2 skipped / 7 deselected hermetic), bootstrap map, G1–G9 catalog, blocks × categories, claims, meta-guardians, and Spec-First contribution guide.
