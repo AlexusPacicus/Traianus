@@ -110,3 +110,24 @@ def test_no_test_function_is_orphan():
                 if not any(cid in haystack for cid in covered):
                     orphans.append(f"{path}::{node.name} does not reference any Coverage ID")
     assert not orphans, "\n".join(orphans)
+
+
+def test_generics_registry_is_well_formed():
+    """Every block references only defined generics; the catalog is G1-G9.
+
+    This is the non-tautological counterpart of the per-block
+    `*_generics_registry_matches` tests: it guards the REGISTRY structure
+    (no unknown blocks, no invented generics) instead of mirroring a literal.
+    """
+    from helpers.endpoint_registry import BLOCKS, GENERIC_DEFINITIONS, GENERICS_BY_BLOCK
+
+    defined = set(GENERIC_DEFINITIONS)
+    assert defined == {f"G{i}" for i in range(1, 10)}, (
+        f"GENERIC_DEFINITIONS catalog must be exactly G1..G9, got {sorted(defined)}"
+    )
+    assert len(BLOCKS) == len(set(BLOCKS)), "BLOCKS must not contain duplicates"
+    for block, generics in GENERICS_BY_BLOCK.items():
+        assert block in BLOCKS, f"unknown block {block!r} in GENERICS_BY_BLOCK"
+        assert set(generics) <= defined, (
+            f"block {block!r} references undefined generic(s): {set(generics) - defined}"
+        )

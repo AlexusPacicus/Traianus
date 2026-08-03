@@ -1,6 +1,7 @@
 import sqlite3
 import os
 import secrets
+from contextlib import asynccontextmanager
 import numpy as np
 import json
 from typing import List, Literal
@@ -20,7 +21,28 @@ os.environ.setdefault("HF_HUB_OFFLINE", "1")
 def build_encoder():
     return SentenceTransformer("all-MiniLM-L6-v2", local_files_only=True)
 
-app = FastAPI(title="Project Traianus - Deterministic Customs v5")
+
+def _startup_create_schema():
+    """Creates the relational schema on the active DB_PATH at server boot.
+
+    Import is side-effect free by design: `traianus.app` does NOT open a
+    database or load the encoder at import time (hermeticity, L1). Both
+    artifacts are created lazily — the schema on server startup, the encoder
+    on first `get_model()` call.
+    """
+    init_db()
+
+
+@asynccontextmanager
+async def lifespan(_app: FastAPI):
+    _startup_create_schema()
+    yield
+
+
+app = FastAPI(
+    title="Project Traianus - Deterministic Customs v5",
+    lifespan=lifespan,
+)
 
 # =====================================================================
 # ENUMERATED CORS (audit H3): no wildcard. Only the local observation
@@ -37,7 +59,19 @@ app.add_middleware(
     allow_headers=["*"],
 )
 
-model = build_encoder()
+# Lazy encoder (hermetic import, L1): the model is NOT built at import time.
+# Import of `traianus.app` is side-effect free; `get_model()` loads the encoder
+# on first use and caches it. Unit tests run without the model (fake injected).
+_model = None
+
+
+def get_model():
+    global _model
+    if _model is None:
+        _model = build_encoder()
+    return _model
+
+
 DB_PATH = "traianus.db"
 
 # =====================================================================
@@ -171,14 +205,38 @@ def init_relational_tables():
             conn.execute("DROP TABLE manifold_nodes_legacy")
         conn.execute("""
             CREATE TABLE IF NOT EXISTS manifold_edges (
-                id TEXT PRIMARY KEY,
+                id TEXT NOT NULL,
+                seq INTEGER NOT NULL,
                 source TEXT NOT NULL,
                 target TEXT NOT NULL,
-                state TEXT NOT NULL
+                state TEXT NOT NULL,
+                sys_internal_timestamp DATETIME DEFAULT CURRENT_TIMESTAMP,
+                PRIMARY KEY (id, seq)
             )
         """)
-
-init_relational_tables()
+        # Schema migration for pre-H4 DBs: each existing edge becomes its
+        # revision seq=1. History is preserved (append-only invariant #1).
+        legacy_edge_cols = [
+            row[1] for row in conn.execute("PRAGMA table_info(manifold_edges)").fetchall()
+        ]
+        if legacy_edge_cols and "seq" not in legacy_edge_cols:
+            conn.execute("ALTER TABLE manifold_edges RENAME TO manifold_edges_legacy")
+            conn.execute("""
+                CREATE TABLE manifold_edges (
+                    id TEXT NOT NULL,
+                    seq INTEGER NOT NULL,
+                    source TEXT NOT NULL,
+                    target TEXT NOT NULL,
+                    state TEXT NOT NULL,
+                    sys_internal_timestamp DATETIME DEFAULT CURRENT_TIMESTAMP,
+                    PRIMARY KEY (id, seq)
+                )
+            """)
+            conn.execute("""
+                INSERT INTO manifold_edges (id, seq, source, target, state)
+                SELECT id, 1, source, target, state FROM manifold_edges_legacy
+            """)
+            conn.execute("DROP TABLE manifold_edges_legacy")
 
 def init_db():
     """Initializes relational tables at the active DB_PATH.
@@ -205,6 +263,17 @@ def next_node_seq(conn: sqlite3.Connection, node_id: str) -> int:
     row = conn.execute(
         "SELECT COALESCE(MAX(seq), 0) + 1 FROM manifold_nodes WHERE id = ?",
         (node_id,),
+    ).fetchone()
+    return int(row[0])
+
+def next_edge_seq(conn: sqlite3.Connection, edge_id: str) -> int:
+    """
+    Next revision sequence for an edge in the append-only log (H4).
+    For a new id returns 1; for an existing one, MAX(seq) + 1.
+    """
+    row = conn.execute(
+        "SELECT COALESCE(MAX(seq), 0) + 1 FROM manifold_edges WHERE id = ?",
+        (edge_id,),
     ).fetchone()
     return int(row[0])
 
@@ -270,7 +339,7 @@ def auto_calibrate_critical_threshold() -> float:
 
 def async_spectral_processor(ingestion_id: int, raw_text: str):
     try:
-        native_vector = model.encode(raw_text)
+        native_vector = get_model().encode(raw_text)
         geodetic_matrix = get_geodetic_matrix_db()
         if not geodetic_matrix:
             raise RuntimeError(
@@ -317,6 +386,13 @@ def async_spectral_processor(ingestion_id: int, raw_text: str):
             revision_milestone=False,
             projections=list(projections.values()),
         )
+        # L5 (audit): persist what we validate. projections_json is derived
+        # from the VALIDATED projections (RefinedEntity.projections), not from
+        # the raw dict, so the contract is the single source of truth.
+        projections_json = json.dumps({
+            axis_id: float(value)
+            for axis_id, value in zip(geodetic_matrix.keys(), validated_entity.projections)
+        })
 
         with sqlite3.connect(DB_PATH) as conn:
             conn.execute("PRAGMA journal_mode=WAL;")
@@ -330,7 +406,7 @@ def async_spectral_processor(ingestion_id: int, raw_text: str):
                 node_id, seq, raw_text, toon_symbol,
                 validated_entity.lifecycle_state, action_potential,
                 int(validated_entity.revision_milestone),
-                serialize_vector(norm_idea_vector), json.dumps(projections)
+                serialize_vector(norm_idea_vector), projections_json
             ))
             conn.execute("UPDATE ingestion_queue SET status = 'PROCESSED' WHERE id = ?", (ingestion_id,))
 
@@ -382,7 +458,7 @@ async def frontend_ingestion_endpoint(dump: RawDump, background_tasks: Backgroun
 @app.post("/nodos/{node_id}/consolidar", dependencies=[Depends(require_token)])
 async def consolidate_sovereignty(node_id: str, body: ConsolidationBody):
     try:
-        native_vector = model.encode(body.text)
+        native_vector = get_model().encode(body.text)
         geodetic_matrix = get_geodetic_matrix_db()
 
         dim_db = get_current_dimension_db()
@@ -527,7 +603,13 @@ async def get_relations():
         with sqlite3.connect(DB_PATH) as conn:
             conn.execute("PRAGMA journal_mode=WAL;")
             cursor = conn.cursor()
-            cursor.execute("SELECT id, source, target, state FROM manifold_edges")
+            cursor.execute("""
+                SELECT id, source, target, state
+                FROM manifold_edges e
+                WHERE state != 'removed'
+                  AND seq = (SELECT MAX(seq) FROM manifold_edges e2 WHERE e2.id = e.id)
+                ORDER BY id
+            """)
             rows = cursor.fetchall()
         return [
             {"id": r[0], "source": r[1], "target": r[2], "state": r[3]}
@@ -557,11 +639,14 @@ async def forge_relation(relation: HitlRelation):
                         status_code=404,
                         detail=f"Node {endpoint} not found. Dangling edge rejected (L2).",
                     )
+            # H4: edges are an append-only revision log. Re-forging an edge
+            # INSERTS a new revision with increasing seq; the previous one is
+            # never overwritten (no UPDATE / ON CONFLICT DO UPDATE).
+            seq = next_edge_seq(conn, edge_id)
             cursor.execute("""
-                INSERT INTO manifold_edges (id, source, target, state)
-                VALUES (?, ?, ?, ?)
-                ON CONFLICT(id) DO UPDATE SET state = excluded.state
-            """, (edge_id, relation.source, relation.target, relation.state))
+                INSERT INTO manifold_edges (id, seq, source, target, state)
+                VALUES (?, ?, ?, ?, ?)
+            """, (edge_id, seq, relation.source, relation.target, relation.state))
 
         return {"status": "SUCCESS", "id": edge_id, "state": relation.state}
     except HTTPException:
@@ -625,11 +710,15 @@ def rebuild_epsilon_edges(epsilon: float) -> list[dict]:
 def persist_epsilon_edges(epsilon: float, conn: sqlite3.Connection | None = None) -> int:
     """Persists deterministic E_n as auto-edge-<src>-<tgt> rows (RE-09, ADR-023/H5).
 
-    Replaces ONLY the previous auto-edge-* subset (DELETE by id prefix);
-    manual edge-* rows are preserved (H4). Excludes telemetry_error nodes.
+    Append-only (H4): never UPDATE/DELETE. State transitions are recorded as
+    new revisions with increasing seq:
+      * a newly adjacent pair (or one previously 'removed') INSERTS state='auto';
+      * a pair that is no longer ε-adjacent INSERTS a tombstone state='removed'.
+    The current view (get_relations) exposes MAX(seq) per id and excludes
+    'removed'. Manual edge-* rows are preserved. Excludes telemetry_error nodes.
     If `conn` is provided, operates inside that transaction (no commit — the
     caller owns the transaction); otherwise opens its own connection and
-    commits. Returns the number of auto edges persisted.
+    commits. Returns the number of currently adjacent auto edges.
     """
     owns_conn = conn is None
     if owns_conn:
@@ -638,19 +727,38 @@ def persist_epsilon_edges(epsilon: float, conn: sqlite3.Connection | None = None
         conn.execute("PRAGMA journal_mode=WAL;")
         nodes = _current_node_vectors(conn)
         edges = _compute_epsilon_edges(nodes, epsilon)
-        conn.execute("DELETE FROM manifold_edges WHERE id LIKE 'auto-edge-%'")
-        conn.executemany(
-            "INSERT INTO manifold_edges (id, source, target, state) VALUES (?, ?, ?, ?)",
-            [
-                (
-                    f"auto-edge-{e['source']}-{e['target']}",
-                    e["source"],
-                    e["target"],
-                    "auto",
+        desired = {f"auto-edge-{e['source']}-{e['target']}" for e in edges}
+
+        prev = {
+            r[0]: (r[1], r[2], r[3])
+            for r in conn.execute("""
+                SELECT id, source, target, state
+                FROM manifold_edges e
+                WHERE id LIKE 'auto-edge-%'
+                  AND seq = (SELECT MAX(seq) FROM manifold_edges e2 WHERE e2.id = e.id)
+            """).fetchall()
+        }
+
+        for edge in edges:
+            edge_id = f"auto-edge-{edge['source']}-{edge['target']}"
+            if prev.get(edge_id) is None or prev[edge_id][2] != "auto":
+                seq = next_edge_seq(conn, edge_id)
+                conn.execute(
+                    "INSERT INTO manifold_edges (id, seq, source, target, state) "
+                    "VALUES (?, ?, ?, ?, ?)",
+                    (edge_id, seq, edge["source"], edge["target"], "auto"),
                 )
-                for e in edges
-            ],
-        )
+
+        for edge_id in prev:
+            if edge_id not in desired:
+                seq = next_edge_seq(conn, edge_id)
+                source, target, _ = prev[edge_id]
+                conn.execute(
+                    "INSERT INTO manifold_edges (id, seq, source, target, state) "
+                    "VALUES (?, ?, ?, ?, ?)",
+                    (edge_id, seq, source, target, "removed"),
+                )
+
         if owns_conn:
             conn.commit()
         return len(edges)

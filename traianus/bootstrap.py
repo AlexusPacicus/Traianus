@@ -3,8 +3,6 @@ import os
 import numpy as np
 from sentence_transformers import SentenceTransformer
 
-print("[Traianus] Loading SentenceTransformer model for geodetic extraction...")
-
 # =====================================================================
 # OFFLINE GUARD (audit M3): bootstrap is the first run that used to
 # download the model from the HF Hub. With the offline guard it requires
@@ -17,7 +15,18 @@ def build_encoder():
     return SentenceTransformer("all-MiniLM-L6-v2", local_files_only=True)
 
 
-model = build_encoder()
+# Lazy encoder (hermetic import, L1): importing `traianus.bootstrap` does
+# NOT build the model. `get_model()` loads it on first use and caches it.
+_model = None
+
+
+def get_model():
+    global _model
+    if _model is None:
+        _model = build_encoder()
+    return _model
+
+
 DB_PATH = "traianus.db"
 
 NSM_PRIMES = [
@@ -52,7 +61,7 @@ def serialize_vector(vector: np.ndarray) -> bytes:
 def extract_pure_octagon():
     print(f"[Traianus] Vectorizing {len(NSM_PRIMES)} concepts. Generating symmetric space...")
 
-    embeddings = model.encode(NSM_PRIMES)
+    embeddings = get_model().encode(NSM_PRIMES)
     norms = np.linalg.norm(embeddings, axis=1, keepdims=True)
     norms[norms == 0] = 1.0
     vectors_l2 = embeddings / norms

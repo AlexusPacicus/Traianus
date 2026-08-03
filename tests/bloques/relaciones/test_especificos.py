@@ -131,13 +131,14 @@ def test_relations_RE09_persist_epsilon_edges_semantics(isolate_db):
     """
     RE-09 MUST: persist_epsilon_edges(epsilon) persists deterministic E_n:
     writes auto-edge-<src>-<tgt> with state='auto', excludes nodes with
-    lifecycle_state='telemetry_error', replaces only the previous auto set,
-    and preserves manual edges (ADR-023/H5, H4).
+    lifecycle_state='telemetry_error', and preserves manual edges (ADR-023/H5, H4).
 
     Deterministic E_n (ADR-023/H5): (v_i, v_j) ∈ E_n iff ||v_i − v_j||₂ ≤ ε.
-    Reconstruction operates on current MAX(seq) revisions; the previous auto
-    set is replaced (H4: no UPDATE/DELETE on manual edges) and the returned
-    count == number of persisted auto edges.
+    Append-only (H4): auto edges that are no longer ε-adjacent receive a
+    tombstone revision state='removed' instead of being deleted; the current
+    view (MAX(seq), state != 'removed') then exposes no stale auto rows.
+    Reconstruction operates on current MAX(seq) revisions and the returned
+    count == number of currently adjacent auto edges.
     """
     main.DB_PATH = isolate_db
 
@@ -167,8 +168,8 @@ def test_relations_RE09_persist_epsilon_edges_semantics(isolate_db):
                   serialize_vector(vec), "{}"))
         # Prior manual (HITL) edge: must survive reconstruction.
         conn.execute(
-            "INSERT INTO manifold_edges (id, source, target, state) VALUES (?, ?, ?, ?)",
-            ("edge-NODE_A-NODE_B", "NODE_A", "NODE_B", "manual"),
+            "INSERT INTO manifold_edges (id, seq, source, target, state) VALUES (?, ?, ?, ?, ?)",
+            ("edge-NODE_A-NODE_B", 1, "NODE_A", "NODE_B", "manual"),
         )
         conn.commit()
 
@@ -206,14 +207,29 @@ def test_relations_RE09_persist_epsilon_edges_semantics(isolate_db):
 
     with sqlite3.connect(isolate_db) as conn:
         stale_auto = conn.execute(
-            "SELECT COUNT(*) FROM manifold_edges WHERE state = 'auto'"
+            "SELECT COUNT(*) FROM manifold_edges e "
+            "WHERE state = 'auto' "
+            "AND seq = (SELECT MAX(seq) FROM manifold_edges e2 WHERE e2.id = e.id)"
         ).fetchone()[0]
         manual_row2 = conn.execute(
             "SELECT id, state FROM manifold_edges WHERE id = 'edge-NODE_A-NODE_B'"
         ).fetchone()
+        tombstone = conn.execute(
+            "SELECT state FROM manifold_edges WHERE id = 'auto-edge-NODE_A-NODE_B' "
+            "ORDER BY seq DESC LIMIT 1"
+        ).fetchone()
+        edge_seqs = conn.execute(
+            "SELECT seq FROM manifold_edges WHERE id = 'auto-edge-NODE_A-NODE_B' ORDER BY seq"
+        ).fetchall()
 
     assert stale_auto == 0, (
         "RE-09 MUST: previous auto set is replaced (no stale auto rows)"
+    )
+    assert tombstone == ("removed",), (
+        "RE-09 MUST (H4): the stale auto edge is tombstoned (append-only), not deleted"
+    )
+    assert len(edge_seqs) == 2 and edge_seqs == [(1,), (2,)], (
+        "RE-09 MUST (H4): auto edge history keeps increasing seq revisions"
     )
     assert manual_row2 == ("edge-NODE_A-NODE_B", "manual"), (
         "RE-09 MUST: manual edge-* stays intact (H4)"

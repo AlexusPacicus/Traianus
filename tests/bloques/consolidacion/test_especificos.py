@@ -38,11 +38,9 @@ def test_consolidation_CO01_dual_key_consolidation(client, auth_headers, isolate
     )
     assert response.status_code == 200
     assert response.json()["status"] == "SUCCESS"
-    assert response.json()["new_state"] in ["consolidated", "incubating"]
+    assert response.json()["new_state"] == "consolidated"
     assert response.json()["dual_key_status"]["ethical_key"] is True
-    assert response.json()["dual_key_status"]["consolidated"] == (
-        response.json()["new_state"] == "consolidated"
-    )
+    assert response.json()["dual_key_status"]["consolidated"] is True
 
     with sqlite3.connect(isolate_db) as conn:
         cursor = conn.cursor()
@@ -163,7 +161,7 @@ def test_consolidation_CO06_inserts_new_revision(client, auth_headers, isolate_d
         headers=auth_headers,
     )
     assert consolidate.status_code == 200
-    assert consolidate.json()["new_state"] in ("consolidated", "incubating")
+    assert consolidate.json()["new_state"] == "consolidated"
 
     with sqlite3.connect(isolate_db) as conn:
         cursor = conn.cursor()

@@ -21,3 +21,4 @@ Ingress perimeter `/ingesta`, asynchronous spectral pipeline
 - **IN-09** MUST: The registry of generics applicable to the block matches the SPEC (endpoint_registry).
 - **IN-10** MUST: The block endpoints respond without 5xx or 401 when they receive a valid token.
 - **IN-11** MUST: The ingestion E2E journey with a real model completes offline (Phase 6, @pytest.mark.model).
+- **IN-12** MUST: The pipeline persists the VALIDATED RefinedEntity projections (save what you validate, L5).

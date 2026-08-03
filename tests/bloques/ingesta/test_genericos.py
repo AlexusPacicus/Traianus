@@ -11,12 +11,13 @@ Normative: docs/development/tests/SPEC-ingesta.md
 Coverage: IN09, IN10"""
 import pytest
 
-from helpers.endpoint_registry import GENERICS_BY_BLOCK, endpoints_for, generics_for
+from helpers.endpoint_registry import endpoints_for, generics_for
 
 
 def test_ingestion_IN09_generics_registry_matches():
+    # The registry must declare exactly the generics that apply to this block
+    # (SPEC-ingesta). A drift in GENERICS_BY_BLOCK fails here.
     assert set(generics_for("ingestion")) == {"G1", "G2", "G3", "G4", "G6", "G7"}
-    assert GENERICS_BY_BLOCK["ingestion"] == ["G1", "G2", "G3", "G4", "G6", "G7"]
 
 
 @pytest.mark.parametrize("method,path", endpoints_for("ingestion"))

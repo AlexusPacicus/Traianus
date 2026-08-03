@@ -131,3 +131,11 @@ Note on Ledger Sequence: Discontinued numbers (006, 008, 009, 011–013) represe
 * **Testing Baseline:** Integration test suites must validate these five invariants on every build pipeline.
 * **Scope Protection:** Protects the system against unmonitored external agency or unsafe concurrency patterns.
 * **Status:** Approved / Active Core Principle.
+
+### ADR-026: Edge History Append-Only and the Geodesic Basis as Derived Artifact
+* **Context:** Invariant #1 (ADR-025) requires monotonic append-only evolution of persistent state. Residual H4 findings showed two historical patterns violating the invariant: `manifold_edges` was upserted in place (`ON CONFLICT(id) DO UPDATE`), and `geodesic_axes` was `UPDATE`d during hyperspace expansion. A full append-only migration of the geodetic basis (option A) was discarded on cost and coherence grounds: the basis is not observed state history.
+* **Decision:**
+  1. **Edge history becomes append-only (option B, closed).** `manifold_edges` uses the composite primary key `(id, seq)` mirroring `manifold_nodes`. Each forged transition INSERTS a new revision with increasing `seq`; current-state reads (`GET /relations`) expose `MAX(seq)` per logical edge id and exclude `state = 'removed'`. The prior `ON CONFLICT(id) DO UPDATE` upsert is PROHIBITED. Stale `auto-edge-*` rows are never deleted: they receive a tombstone revision `state = 'removed'` (append-only, H4), so the edge history retains every transition. Manual `edge-*` rows are preserved.
+  2. **The geodetic basis is a derived artifact, not a versioned log (decision B).** `geodesic_axes` is computed deterministically at boot (`bootstrap.py:115-123`, `INSERT OR IGNORE`, no in-place update of history) and is therefore not versioned. The single `UPDATE geodesic_axes SET vector_blob = ... WHERE id = ?` in `logographic_genesis` (hyperspace expansion) is a cache/derivation refresh of the regenerable basis, NOT a mutation of observed state history; invariant #1 (ADR-025) applies to vertices, deterministic edges, and simplicial faces, not to this derived baseline.
+* **Testing Baseline:** G5 (append-only) validates `manifold_nodes` and `manifold_edges` (including tombstone revisions); it does NOT prohibit the documented `geodesic_axes` regeneration.
+* **Status:** Approved / Active Core Principle.

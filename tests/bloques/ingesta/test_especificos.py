@@ -6,7 +6,7 @@ Tests moved from tests/test_control_plane.py WITHOUT changing assertions.
 They cover: ingestion contract, MIME firewall (H2, 5+ rejected types),
 persistence failures (H1), spectral pipeline (ADR-002) and metric (M6).
 Normative: docs/development/tests/SPEC-ingesta.md
-Coverage: IN01, IN02, IN03, IN04, IN05, IN06, IN07, IN08"""
+Coverage: IN01, IN02, IN03, IN04, IN05, IN06, IN07, IN08, IN12"""
 import json
 import sqlite3
 
@@ -223,3 +223,38 @@ def test_ingestion_IN08_action_potential_is_variance(isolate_db):
     assert row is not None
     projections = json.loads(row[1])
     assert row[0] == pytest.approx(float(np.var(list(projections.values()))))
+
+
+def test_ingestion_IN12_persists_validated_projections(isolate_db, client, auth_headers, monkeypatch):
+    """
+    L5 regression: the persisted projections_json MUST be derived from the
+    VALIDATED RefinedEntity.projections (save what you validate), not from a
+    raw dict that bypasses the contract.
+    """
+    captured = {}
+    original = main.RefinedEntity
+
+    def capturing_entity(*args, **kwargs):
+        entity = original(*args, **kwargs)
+        captured["projections"] = list(entity.projections)
+        return entity
+
+    monkeypatch.setattr(main, "RefinedEntity", capturing_entity)
+
+    response = client.post(
+        "/ingesta",
+        json={"type": "text/plain", "text": "L5 validated projections probe"},
+        headers=auth_headers,
+    )
+    assert response.status_code == 200
+    node_id = f"NODE_{response.json()['ingestion_id']}"
+
+    with sqlite3.connect(isolate_db) as conn:
+        stored = json.loads(conn.execute(
+            "SELECT projections_json FROM manifold_nodes WHERE id = ?", (node_id,)
+        ).fetchone()[0])
+
+    assert "projections" in captured, "L5 MUST: RefinedEntity must be constructed"
+    assert list(stored.values()) == pytest.approx(captured["projections"]), (
+        "L5 MUST: persisted projections_json must equal the validated projections"
+    )

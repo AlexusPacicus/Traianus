@@ -54,10 +54,13 @@ SCHEMA_STATEMENTS = [
     """,
     """
     CREATE TABLE IF NOT EXISTS manifold_edges (
-        id TEXT PRIMARY KEY,
+        id TEXT NOT NULL,
+        seq INTEGER NOT NULL,
         source TEXT NOT NULL,
         target TEXT NOT NULL,
-        state TEXT NOT NULL
+        state TEXT NOT NULL,
+        sys_internal_timestamp DATETIME DEFAULT CURRENT_TIMESTAMP,
+        PRIMARY KEY (id, seq)
     )
     """,
 ]

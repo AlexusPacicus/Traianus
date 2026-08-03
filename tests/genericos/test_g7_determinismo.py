@@ -12,10 +12,25 @@ Coverage: G7
 import json
 import sqlite3
 
+import numpy as np
 import pytest
 
 import traianus.app as main
+from traianus.app import serialize_vector
 from helpers.endpoint_registry import BLOCKS
+
+
+def _seed_nodes(db_path):
+    """Seeds two current-state nodes so /relations can create a real edge."""
+    with sqlite3.connect(db_path) as conn:
+        for nid in ("NODE_A", "NODE_B"):
+            conn.execute("""
+                INSERT INTO manifold_nodes
+                (id, seq, text, toon_factor, lifecycle_state, action_potential, revision_milestone, vector_blob, projections_json)
+                VALUES (?, ?, ?, ?, ?, ?, ?, ?, ?)
+            """, (nid, 1, f"Seeded {nid}", "\u25b2", "incubating", 0.1, 0,
+                  serialize_vector(np.zeros(384)), "{}"))
+        conn.commit()
 
 
 @pytest.mark.parametrize("block", BLOCKS)
@@ -42,10 +57,18 @@ def test_g7_repetition_deterministic(block, client, auth_headers, isolate_db):
         # both consolidations with the same text produce identical projections
         assert r1[-1] == r2[-1]
     elif block == "relations":
+        # Seed both endpoints so the edge is actually created (the former
+        # test posted against dangling nodes and compared two empty lists).
+        _seed_nodes(isolate_db)
         payload = {"source": "NODE_A", "target": "NODE_B", "state": "consolidated"}
-        client.post("/relations", json=payload, headers=auth_headers)
+        first_post = client.post("/relations", json=payload, headers=auth_headers)
+        assert first_post.status_code == 200, "relations MUST create the seeded edge"
         first = client.get("/relations", headers=auth_headers).json()
-        client.post("/relations", json=payload, headers=auth_headers)
+        assert any(e["id"] == "edge-NODE_A-NODE_B" for e in first), (
+            "G7 MUST: the edge must exist, not an empty comparison"
+        )
+        second_post = client.post("/relations", json=payload, headers=auth_headers)
+        assert second_post.status_code == 200
         second = client.get("/relations", headers=auth_headers).json()
         assert first == second
     elif block == "mutation":

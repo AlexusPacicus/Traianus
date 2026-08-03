@@ -7,12 +7,13 @@ Normative: docs/development/tests/SPEC-mutacion.md
 Coverage: MU02, MU03"""
 import pytest
 
-from helpers.endpoint_registry import GENERICS_BY_BLOCK, endpoints_for, generics_for
+from helpers.endpoint_registry import endpoints_for, generics_for
 
 
 def test_mutation_MU02_generics_registry_matches():
+    # The registry must declare exactly the generics that apply to this block
+    # (SPEC-mutacion). A drift in GENERICS_BY_BLOCK fails here.
     assert set(generics_for("mutation")) == {"G1", "G3", "G5", "G8"}
-    assert GENERICS_BY_BLOCK["mutation"] == ["G1", "G3", "G5", "G8"]
 
 
 @pytest.mark.parametrize("method,path", endpoints_for("mutation"))

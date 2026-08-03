@@ -14,5 +14,6 @@ its MCP server over stdio JSON-RPC.
 - **SEC-M-02** MUST: Safety_Abort != NONE blocks with BLOCKED_BY_SAFETY_GATE.
 - **SEC-M-03** MUST NOT: Fragments with fetch/axios/urllib.request/import requests pass the gate; they are blocked with ABORTED_VIOLATES_ZERO_TRUST.
 - **SEC-M-04** MUST: For REFACTOR/FIX/AUDIT, the grounding must exist literally in the target file; otherwise ABORTED_GROUNDING_FAILED.
+- **SEC-M-07** MUST: For REFACTOR/FIX/AUDIT, a proposal without a target_file is rejected with ABORTED_GROUNDING_FAILED (no fail-open); a missing or unreadable target file is also a grounding failure.
 - **SEC-M-05** MUST: With valid literal grounding, the proposal returns VALIDATED/EXECUTE_SAFE with and_gate_ok.
 - **SEC-M-06** MUST: The MCP server (stdio JSON-RPC) responds initialize/tools-list/tools-call without corrupting the stdout channel.

@@ -7,12 +7,13 @@ Normative: docs/development/tests/SPEC-consolidacion.md
 Coverage: CO08, CO09"""
 import pytest
 
-from helpers.endpoint_registry import GENERICS_BY_BLOCK, endpoints_for, generics_for
+from helpers.endpoint_registry import endpoints_for, generics_for
 
 
 def test_consolidation_CO08_generics_registry_matches():
+    # The registry must declare exactly the generics that apply to this block
+    # (SPEC-consolidacion). A drift in GENERICS_BY_BLOCK fails here.
     assert set(generics_for("consolidation")) == {"G1", "G2", "G3", "G5", "G7", "G8"}
-    assert GENERICS_BY_BLOCK["consolidation"] == ["G1", "G2", "G3", "G5", "G7", "G8"]
 
 
 @pytest.mark.parametrize("method,path", endpoints_for("consolidation"))
