@@ -87,10 +87,11 @@ Given an identical initial state $S_0$ and sequence $E = \{e_0, e_1, \dots, e_k\
 * **Orthogonalization & Calibration Subsystem:** Dynamic axis calculation and space accretion (N $\to$ N+1) via greedy farthest-point projection (ADR-017).
 
 ## 4. Persistence Substrate Schema (manifold_nodes)
-The canonical relational table maintaining entity state persistence within the transactional log:
+The canonical relational table maintaining entity state persistence within the transactional log (append-only revision log, composite PK):
 ```sql
 CREATE TABLE IF NOT EXISTS manifold_nodes (
- id TEXT PRIMARY KEY,
+ id TEXT NOT NULL,
+ seq INTEGER NOT NULL,
  text TEXT NOT NULL,
  toon_factor TEXT NOT NULL,
  lifecycle_state TEXT NOT NULL,
@@ -98,12 +99,14 @@ CREATE TABLE IF NOT EXISTS manifold_nodes (
  revision_milestone INTEGER NOT NULL,
  vector_blob BLOB NOT NULL,
  projections_json TEXT NOT NULL,
-  sys_internal_timestamp DATETIME DEFAULT CURRENT_TIMESTAMP
+ sys_internal_timestamp DATETIME DEFAULT CURRENT_TIMESTAMP,
+ PRIMARY KEY (id, seq)
 );
 ```
 | Field | Logical Type | Technical Purpose |
 | :--- | :--- | :--- |
 | `id` | Unique Identifier | Deterministic primary key (`NODE_{ingestion_id}`). |
+| `seq` | Revision Sequence | Monotonically increasing revision number per `id`; current state = `MAX(seq)` per id. |
 | `text` | Plain Text / Payload | Structured entity payload content (`RawDump` / `RefinedEntity`). |
 | `toon_factor` | Single Character | Orthogonal Unicode symbol assigned via projection (`len == 1`). |
 | `lifecycle_state` | State Enum | Lifecycle attribute: `'pending_approval'`, `'consolidated'`, `'incubating'`, `'telemetry_error'`, or `'archived'`. |

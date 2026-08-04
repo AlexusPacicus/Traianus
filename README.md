@@ -105,6 +105,10 @@ pip install -e ".[test]"
 # Prefetch the offline model (all-MiniLM-L6-v2). The bootstrap and the
 # server use local_files_only=True: the model must be cached locally
 # before the first server boot.
+#
+# On a fresh machine, download the model once (one-time):
+#   python -c "from sentence_transformers import SentenceTransformer; SentenceTransformer('all-MiniLM-L6-v2')"
+# Then proceed with the bootstrap and server as usual.
 traianus-bootstrap
 ```
 
@@ -148,7 +152,7 @@ Requires the model cached locally (prefetch with `traianus-bootstrap`). The `mod
 
 * **Research Programme** (`docs/research/RESEARCH_PROGRAM.md`): R&D roadmap, WP1-WP4 specifications, deliverables, and risk matrix.
 
-* **Project Architecture** (`docs/architecture/Project_architecture.md`): Mathematical state machine formulation $S_n = (V_n, E_n, K_n)$ and transactional persistence layer.
+* **Project Architecture** (`docs/architecture/ARCHITECTURE.md`): Mathematical state machine formulation $S_n = (V_n, E_n, K_n)$ and transactional persistence layer.
 
 * **ADR Ledger** (`docs/architecture/ADR/ADR.md`): Immutable append-only log of architectural decision trade-offs (ADR-001 to ADR-027).
 

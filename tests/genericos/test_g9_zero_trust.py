@@ -12,12 +12,10 @@ Coverage: G9
 """
 import json
 import os
-import sys
 
 import pytest
 
-sys.path.insert(0, os.path.abspath("tools"))
-from tridenguard_validator import validate_proposal  # noqa: E402
+from traianus.security.validator import validate_proposal
 
 from helpers.endpoint_registry import BLOCKS
 

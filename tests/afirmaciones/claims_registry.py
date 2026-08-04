@@ -64,7 +64,7 @@ CLAIMS = {
 LITERAL_QUOTES = [
     ("docs/architecture/ADR/ADR.md",
      "Integration test suites must validate these five invariants on every build pipeline."),
-    ("docs/architecture/Project_architecture.md",
+    ("docs/architecture/ARCHITECTURE.md",
      "Deterministic adjacency edges formed strictly where $d(\\mathbf{v}_i, \\mathbf{v}_j) \\leq \\epsilon$"),
     ("traianus/app.py",
      "for j, other in enumerate(vectors) if j != i"),

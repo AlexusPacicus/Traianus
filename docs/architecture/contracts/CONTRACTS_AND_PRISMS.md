@@ -17,11 +17,11 @@ This document specifies the data contracts and validation boundaries governing T
 ## 2. Geodetic Baseline and L2 Bias Elimination
 
 ### 2.1 Canonical Bootstrap Basis ($\mathbf{B}_0 \in \mathbb{R}^{d \times k}$)
-To initialize the spatial control plane without domain or semantic bias, Traianus initializes the active spatial basis $\mathbf{B}_0$ as a set of $k$ mutually orthogonal, $L_2$-normalized canonical unit vectors:
+To initialize the spatial control plane without domain or semantic bias, Traianus initializes the active spatial basis $\mathbf{B}_0$ via farthest-point greedy selection over embeddings of 64 NSM primitives produced by MiniLM (all-MiniLM-L6-v2). The resulting basis is **not orthogonal**; it is a set of $k$ $L_2$-normalized vectors derived from semantic primitives:
 
-$$\mathbf{B}_0 = [\hat{\mathbf{b}}_1, \hat{\mathbf{b}}_2, \dots, \hat{\mathbf{b}}_k] \in \mathbb{R}^{d \times k}, \quad \text{where } \hat{\mathbf{b}}_i \cdot \hat{\mathbf{b}}_j = \delta_{ij}$$
+$$\mathbf{B}_0 = [\hat{\mathbf{b}}_1, \hat{\mathbf{b}}_2, \dots, \hat{\mathbf{b}}_k] \in \mathbb{R}^{d \times k}, \quad \text{where } \hat{\mathbf{b}}_i \cdot \hat{\mathbf{b}}_j \neq \delta_{ij} \text{ for } i \neq j$$
 
-The substrate assigns zero semantic tags, labels, or domain categorizations to the basis axes. The basis vectors serve exclusively as neutral geometric reference directions for evaluating mass projection and variance.
+Empirically observed off-diagonal cosine similarities: mean ≈ 0.23, max ≈ 0.34. The basis vectors serve as neutral geometric reference directions for evaluating projection variance. The substrate assigns zero semantic tags, labels, or domain categorizations to the basis axes.
 
 ### 2.2 Mathematical Mitigation of Frequency and Volume Bias
 * **Proposed Mechanism:** Aims to mitigate frequency bias, magnitude distortion, and scale discrepancies originating from external representation models or physical sensors.
@@ -108,6 +108,6 @@ class RefinedEntity(BaseModel):
 
 | Contract Rule | Claim | Mechanism | Boundary |
 | :--- | :--- | :--- | :--- |
-| **Ingress Type Isolation** | Preserves control plane latency (<1ms). | `RawDump` validates `type == 'text/plain'` at perimeter endpoint. | Filters MIME headers; deep payload processing executes downstream. |
+| **Ingress Type Isolation** | Filters non-text at perimeter. | `RawDump` validates `type == 'text/plain'` at perimeter endpoint. | Filters MIME headers; deep payload processing executes downstream. |
 | **Multichannel Integrity** | Preserves 100% of directional projection spectrum. | Stores complete float array $p \in \mathbb{R}^k$ in `RefinedEntity.projections`. | Avoids lossy scalar compression or category assignment. |
 | **Silent Denial (ADR-002)** | Prevents external technical information leaks. | Suppresses HTTP tracebacks, persisting internal system node under `'telemetry_error'`. | Hides stack traces from external callers; requires local log inspection for forensics. |
