@@ -74,8 +74,8 @@ Synced with the cycle commit (see `git log`). Resolution criterion: the fix is i
 | H1 | ✅ **Resolved** | `/ingesta` fails loudly with `503` on persistence failure (`raise HTTPException(status_code=503) ... from e`); regression `test_ingesta_returns_503_on_persistence_failure`. |
 | H2 | ✅ **Resolved** | `ALLOWED_INGRESS_TYPES = {"text/plain"}` as allowlist; 415 for everything else; regressions `test_ingesta_endpoint_rejects_non_plain_text_payloads` and `..._rejects_application_json_at_perimeter`. |
 | H3 | ✅ **Resolved** | CORS enumerated without wildcard (`ALLOWED_ORIGINS = ["http://localhost:5173", "http://127.0.0.1:5173"]`); operator token `require_token` on mutating routes; server documented on `127.0.0.1`; regressions `test_cors_origins_are_enumerated_no_wildcard` and `test_protected_endpoints_*`. |
-| H4 | 🟠 **Open (partial progress)** | `manifold_nodes` converted to append-only log: composite PK `(id, seq)`, every transition INSERTS a new revision, "current state" = `MAX(seq)` per id; `bootstrap.py` no `DELETE` (INSERT OR IGNORE); `traianus.db` migrated preserving 23 nodes as `seq=1`. **Pending:** `geodesic_axes` and `manifold_edges` still mutable (`UPDATE`/`ON CONFLICT DO UPDATE`); edges without node validation (see L2). Tests: `tests/test_append_only_log.py` (2 tests). |
-| H5 | 🟠 **Open** | `E_n` (ε-adjacency) and `K_n` (faces) still unimplemented; `manifold_edges` only written via manual `POST /relations`. |
+| H4 | ✅ **Resolved** | `manifold_nodes` AND `manifold_edges` converted to append-only revision logs (composite PK `(id, seq)`, every transition INSERTS a new revision, "current state" = `MAX(seq)` per id); `geodesic_axes` mutable ONLY inside `logographic_genesis` (ADR-025 decision B), `bootstrap.py` uses `INSERT OR IGNORE` (no DELETE); legacy migration preserves pre-existing rows as `seq=1`. Tests: `tests/genericos/test_g5_append_only.py`. |
+| H5 | ✅ **Resolved** | Deterministic E_n implemented: `_compute_epsilon_edges`/`rebuild_epsilon_edges`/`persist_epsilon_edges` (ε-adjacency, ||v_i − v_j||₂ ≤ ε, server-side `EPSILON_EDGE`), persisted as `auto-edge-*` rows with `removed` tombstones; K_n deferred to WP2 (ADR-018/019). Tests: relations block + ε-edge persistence. |
 | M1 | 🟡 **Open** | Bitwise determinism not guaranteeable across environments (torch float32 outputs); no model/torch pins. |
 | M2 | 🟡 **Open** | `<1ms` still false for `model.encode()` (~13 ms); no benchmark script. |
 | M3 | ✅ **Resolved** | `os.environ.setdefault("HF_HUB_OFFLINE", "1")` and `local_files_only=True` in `app.py` and `bootstrap.py`; regressions `test_encoder_constructed_offline_local_files_only` and `test_bootstrap_encoder_constructed_offline_local_files_only`. |
@@ -85,11 +85,11 @@ Synced with the cycle commit (see `git log`). Resolution criterion: the fix is i
 | M7 | ✅ **Resolved** | Consolidation INSERTS a new revision (original not destroyed, H4); missing node → `404` (`test_consolidar_missing_node_returns_404`). |
 | M8 | 🟡 **Open** | No CI; `flake.nix` without committed `flake.lock`. |
 | L1 | 🔵 **Open** | One-hot fixture persists in unit tests; harness (`tools/audit_harness.py`) adds real-base integration coverage (hermetic, no writes to `traianus.db`). Missing fake encoder injection in unit tests. |
-| L2 | 🔵 **Open** | Dangling and mutable edges; `/relations` without WAL pragma in some handlers. |
+| L2 | ✅ **Resolved** | Dangling edges rejected (`forge_relation` validates both endpoints → 404); edges are an append-only revision log (no UPDATE / ON CONFLICT DO UPDATE); every DB handler executes `PRAGMA journal_mode=WAL`. Tests: `tests/genericos/test_g3_wal.py`, relations block. |
 | L3 | 🔵 **Open** | Mixed languages in public API. |
 | L4 | 🔵 **Open** | NSM inventory with near-duplicates. |
-| L5 | 🔵 **Open** | `RefinedEntity` validated but not what gets saved. |
-| L6 | 🟡 **Open** | Only `dim_db > dim_in` handled; missing validation for other direction. |
+| L5 | ✅ **Resolved** | `RefinedEntity` validated `projections` are what gets persisted: `projections_json` derives from `validated_entity.projections` (the Pydantic contract is the single source of truth). |
+| L6 | ✅ **Resolved** | Provider dimension > basis rejected explicitly: HTTP 422 in `/nodos/{node_id}/consolidar`, `ValueError` in the spectral processor (`dim_in > dim_db`); the `dim_db > dim_in` padding direction preserved. Tests: `tests/afirmaciones/test_cl_i62_dimension_provider.py` (CL-I62). |
 
 **Decision on `traianus.db` (derived artifact):** the local DB is regenerated/migrated as a derived artifact (gitignored). Schema migration to `(id, seq)` preserves the 23 pre-existing rows as `seq=1` revisions — no data was deleted. Not committed.
 
