@@ -44,19 +44,17 @@ jobs:
           restore-keys: |
             ${{ runner.os }}-hf-all-MiniLM-L6-v2
       - name: Model prefetch (one time; offline if already cached)
-        env:
-          HF_HUB_OFFLINE: '0'
         run: |
           python - <<'EOF'
           from sentence_transformers import SentenceTransformer
           try:
+              # 1. Cache hit (restore-keys populated the HF cache): no network.
               SentenceTransformer("all-MiniLM-L6-v2", local_files_only=True)
           except Exception:
-              # First run on a clean runner: the HF cache is empty,
-              # a single download is allowed to populate the job cache.
-              # (HF_HUB_OFFLINE=0 is set at the step level, before any
-              # Python starts, so the HF client never locks into offline
-              # mode at import time.)
+              # 2. Cache miss (clean runner): allow exactly one download to
+              #    populate the job cache. HF_HUB_OFFLINE is NOT set here, so
+              #    the hub stays in online mode and the download succeeds.
+              #    Later steps enforce hermeticity with HF_HUB_OFFLINE=1.
               SentenceTransformer("all-MiniLM-L6-v2")
           EOF
       - name: E2E suite (Phase 6, @pytest.mark.model)
