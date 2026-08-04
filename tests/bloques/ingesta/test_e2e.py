@@ -4,7 +4,7 @@ BLOCK: ingestion — E2E with real model (Phase 6).
 
 Complete offline journey with all-MiniLM-L6-v2 (cached): the spectral pipeline
 creates a pending_approval node with a 384-dim L2 vector and 8 projections.
-Normative: docs/development/tests/SPEC-ingesta.md
+Normative: docs/archive/legacy_docs/development/tests/SPEC-ingesta.md
 Coverage: IN11"""
 import sqlite3
 

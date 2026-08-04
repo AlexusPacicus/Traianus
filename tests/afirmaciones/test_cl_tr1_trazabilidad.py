@@ -5,7 +5,7 @@ claim has a test and every test references its SPEC (full traceability).
 
 This is the meta-guardian of claims: derives actual coverage from
 test names (test_afirmaciones_CL_*) and compares with the registry.
-Normative: docs/development/tests/SPEC-afirmaciones.md
+Normative: docs/archive/legacy_docs/development/tests/SPEC-afirmaciones.md
 Coverage: CL-TR1"""
 import os
 import re

@@ -2,8 +2,8 @@
 This file verifies MUST/MUST NOT requirements from the SPEC (RFC 2119).
 BLOCK: observability — applicable generics (Phase 2).
 
-SPEC: docs/development/tests/SPEC-observabilidad.md
-Normative: docs/development/tests/SPEC-observabilidad.md
+SPEC: docs/archive/legacy_docs/development/tests/SPEC-observabilidad.md
+Normative: docs/archive/legacy_docs/development/tests/SPEC-observabilidad.md
 Coverage: OB07, OB08"""
 import pytest
 

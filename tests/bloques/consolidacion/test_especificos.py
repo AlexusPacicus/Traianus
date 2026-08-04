@@ -7,7 +7,7 @@ WITHOUT changing assertions. Cover: dual-key consolidation (ADR-022),
 key symmetry (CO-11), autocalibrated threshold (C1), 404 on missing
 node (M7), append-only (H4), and automatic E_n persistence
 (auto-edge-*, ADR-023/H5).
-Normative: docs/development/tests/SPEC-consolidacion.md
+Normative: docs/archive/legacy_docs/development/tests/SPEC-consolidacion.md
 Coverage: CO01, CO02, CO03, CO04, CO05, CO06, CO07, CO11, CO12"""
 import os
 import sqlite3

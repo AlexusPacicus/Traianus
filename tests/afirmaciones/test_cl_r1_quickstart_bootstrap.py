@@ -5,7 +5,7 @@ traianus-bootstrap (packaged script).
 
 State: ACTIVE. The README (§ Quickstart) documents startup via
 traianus-bootstrap (packaged script) and no longer refers to test_control_plane.py.
-Normative: docs/development/tests/SPEC-afirmaciones.md
+Normative: docs/archive/legacy_docs/development/tests/SPEC-afirmaciones.md
 Coverage: CL-R1"""
 import pytest
 

@@ -3,7 +3,7 @@ This file verifies MUST/MUST NOT requirements from the SPEC (RFC 2119).
 Claim CL-I61 (ADR-016): the control plane does not invoke generative LLMs
 (zero-LLM). It only uses SentenceTransformer as a deterministic embedding
 provider (not generative).
-Normative: docs/development/tests/SPEC-afirmaciones.md
+Normative: docs/archive/legacy_docs/development/tests/SPEC-afirmaciones.md
 Coverage: CL-I61"""
 from pathlib import Path
 

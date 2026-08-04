@@ -6,7 +6,7 @@ projections and resulting state MUST be identical (deterministic ops:
 np.dot / np.var). Unit tests run with deterministic fake encoder (L1),
 so repetition MUST produce byte-identical results.
 
-Normative: docs/development/tests/SPEC-global.md
+Normative: docs/archive/legacy_docs/development/tests/SPEC-global.md
 Coverage: G7
 """
 import json

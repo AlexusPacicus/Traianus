@@ -7,7 +7,7 @@ a valid token MUST respond 401 (fail-closed). Public read-only observation
 (GET /nodos) is allowed by design (Zero Observation Mutagenicity,
 ADR-025#2).
 
-Normative: docs/development/tests/SPEC-global.md
+Normative: docs/archive/legacy_docs/development/tests/SPEC-global.md
 Coverage: G1
 """
 import pytest

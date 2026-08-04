@@ -4,7 +4,7 @@ BLOCK: mutation — specific tests (Phase 2).
 
 Tests moved from tests/test_control_plane.py WITHOUT changing assertions.
 Cover: logographic genesis / dimensional expansion (ADR-015).
-Normative: docs/development/tests/SPEC-mutacion.md
+Normative: docs/archive/legacy_docs/development/tests/SPEC-mutacion.md
 Coverage: MU01"""
 import sqlite3
 

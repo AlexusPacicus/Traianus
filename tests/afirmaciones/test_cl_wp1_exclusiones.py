@@ -3,7 +3,7 @@ This file verifies MUST/MUST NOT requirements from the SPEC (RFC 2119).
 Claim CL-WP1: packages traianus.{core.basis,tda,metrics,replication} do NOT
 exist in the PoC (WP exclusion). The PoC substrate lives in traianus/app.py and
 traianus/bootstrap.py without representation subpackages.
-Normative: docs/development/tests/SPEC-afirmaciones.md
+Normative: docs/archive/legacy_docs/development/tests/SPEC-afirmaciones.md
 Coverage: CL-WP1"""
 from pathlib import Path
 

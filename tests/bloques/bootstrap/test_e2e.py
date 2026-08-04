@@ -5,7 +5,7 @@ BLOCK: bootstrap — E2E with real model (Phase 6).
 Full journey: the bootstrap extracts the geodesic octagon with the cached
 real model (M3 offline), anchors it in SQLite and the resulting geometry is
 realistic (off-diagonal cosine > 0, not orthonormal) and reproducible.
-Normative: docs/development/tests/SPEC-bootstrap.md
+Normative: docs/archive/legacy_docs/development/tests/SPEC-bootstrap.md
 Coverage: BO08"""
 import numpy as np
 import pytest

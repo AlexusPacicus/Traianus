@@ -4,7 +4,7 @@ BLOCK: consolidation — E2E with real model (Phase 6).
 
 Full journey: ingestion → consolidation with dual key (ADR-022) and final
 state coherent with the topological + ethical key measured at runtime.
-Normative: docs/development/tests/SPEC-consolidacion.md
+Normative: docs/archive/legacy_docs/development/tests/SPEC-consolidacion.md
 Coverage: CO10"""
 import pytest
 

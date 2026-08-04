@@ -5,7 +5,7 @@ Normative (RFC 2119): the encoder MUST be built with local_files_only=True
 and the environment MUST have HF_HUB_OFFLINE=1; the runtime MUST NOT download
 the model from HF Hub (offline sovereignty, edge ≤ 8 GB RAM).
 
-Normative: docs/development/tests/SPEC-global.md
+Normative: docs/archive/legacy_docs/development/tests/SPEC-global.md
 Coverage: G6
 """
 import os

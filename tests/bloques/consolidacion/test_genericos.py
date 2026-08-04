@@ -2,8 +2,8 @@
 This file verifies MUST/MUST NOT requirements from the SPEC (RFC 2119).
 BLOCK: consolidation — applicable generics (Phase 2).
 
-SPEC: docs/development/tests/SPEC-consolidacion.md
-Normative: docs/development/tests/SPEC-consolidacion.md
+SPEC: docs/archive/legacy_docs/development/tests/SPEC-consolidacion.md
+Normative: docs/archive/legacy_docs/development/tests/SPEC-consolidacion.md
 Coverage: CO08, CO09"""
 import pytest
 

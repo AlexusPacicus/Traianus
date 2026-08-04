@@ -1,7 +1,7 @@
 """
 Structure guardians — Spec-First and 1:1 traceability (Phase 3).
 
-Normative: docs/development/tests/SPEC-template.md
+Normative: docs/archive/legacy_docs/development/tests/SPEC-template.md
 Coverage: (the guardians verify the rest of the harness; they themselves are
 the meta-traceability tool, they do not implement domain requirements).
 """

@@ -7,7 +7,7 @@ create any database file at import time. The relational schema is created
 lazily by the FastAPI lifespan at server boot; the encoder is created
 lazily on the first `get_model()` call.
 
-Normative: docs/development/tests/SPEC-global.md
+Normative: docs/archive/legacy_docs/development/tests/SPEC-global.md
 Coverage: HERMETIC-IMPORT
 """
 import asyncio

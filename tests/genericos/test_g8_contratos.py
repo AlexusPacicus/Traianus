@@ -7,7 +7,7 @@ ValidationError (422 in API). The glyph (toon_factor) MUST be a single
 character (ADR-007). The action_potential metric MUST derive from the
 projection spectrum without magic constants (ADR-005, M6).
 
-Normative: docs/development/tests/SPEC-global.md
+Normative: docs/archive/legacy_docs/development/tests/SPEC-global.md
 Coverage: G8
 """
 import json

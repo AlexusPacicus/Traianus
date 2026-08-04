@@ -2,7 +2,7 @@
 This file verifies MUST/MUST NOT requirements from the SPEC (RFC 2119).
 Claim CL-C41 (C-4.1): /telemetry requires token and does not leak full stack
 traces to anonymous callers.
-Normative: docs/development/tests/SPEC-afirmaciones.md
+Normative: docs/archive/legacy_docs/development/tests/SPEC-afirmaciones.md
 Coverage: CL-C41"""
 import pytest
 

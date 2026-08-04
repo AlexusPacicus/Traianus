@@ -2,8 +2,8 @@
 This file verifies MUST/MUST NOT requirements from the SPEC (RFC 2119).
 BLOCK: relations — applicable generics (Phase 2).
 
-SPEC: docs/development/tests/SPEC-relaciones.md
-Normative: docs/development/tests/SPEC-relaciones.md
+SPEC: docs/archive/legacy_docs/development/tests/SPEC-relaciones.md
+Normative: docs/archive/legacy_docs/development/tests/SPEC-relaciones.md
 Coverage: RE04, RE05"""
 import pytest
 

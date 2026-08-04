@@ -5,7 +5,7 @@ Normative (RFC 2119): CORS policy MUST NOT use wildcard "*" combined
 with credentials; allowed origins MUST be explicitly enumerated
 (ALLOWED_ORIGINS). A foreign origin MUST NOT receive Access-Control-Allow-Origin.
 
-Normative: docs/development/tests/SPEC-global.md
+Normative: docs/archive/legacy_docs/development/tests/SPEC-global.md
 Coverage: G2
 """
 import pytest

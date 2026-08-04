@@ -7,7 +7,7 @@ ZERO_TRUST), MUST block Safety_Abort != NONE (BLOCKED_BY_SAFETY_GATE),
 and MUST verify literal grounding (character by character) for
 REFACTOR/FIX/AUDIT (ABORTED_GROUNDING_FAILED).
 
-Normative: docs/development/tests/SPEC-global.md
+Normative: docs/archive/legacy_docs/development/tests/SPEC-global.md
 Coverage: G9
 """
 import json

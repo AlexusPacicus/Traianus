@@ -5,7 +5,7 @@ tools/audit_harness.py harness to pytest E2E with the cached real model.
 
 The CLI harness remains intact (tools/audit_harness.py) for manual use;
 this test reproduces it deterministically in CI (@pytest.mark.model partition).
-Normative: docs/development/tests/SPEC-global.md
+Normative: docs/archive/legacy_docs/development/tests/SPEC-global.md
 Coverage: G10"""
 import os
 import sqlite3

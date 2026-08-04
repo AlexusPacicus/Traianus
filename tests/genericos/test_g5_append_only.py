@@ -6,7 +6,7 @@ append-only: every transition INSERTS a new revision with increasing `seq`;
 UPDATE/REPLACE/DELETE on manifold_nodes is PROHIBITED in production.
 Observation (GET) MUST NOT generate mutations (ADR-025#2).
 
-Normative: docs/development/tests/SPEC-global.md
+Normative: docs/archive/legacy_docs/development/tests/SPEC-global.md
 Coverage: G5
 """
 import ast

@@ -7,7 +7,7 @@ point to a file that exists physically in the repository. This guards the
 live `tridenguard-validator` MCP integration and the instruction files
 against silent breakage when tooling is moved or renamed.
 
-Normative: docs/development/tests/SPEC-template.md
+Normative: docs/archive/legacy_docs/development/tests/SPEC-template.md
 Coverage: CONFIG-INTEGRITY
 """
 import json

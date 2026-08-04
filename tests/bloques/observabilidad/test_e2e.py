@@ -4,7 +4,7 @@ BLOCK: observability — E2E with a real model (Phase 6).
 
 Full journey: /nodos excludes telemetry_error and returns MAX(seq);
 /telemetry requires the operator token (M5/ADR-025#2).
-Normative: docs/development/tests/SPEC-observabilidad.md
+Normative: docs/archive/legacy_docs/development/tests/SPEC-observabilidad.md
 Coverage: OB09"""
 import pytest
 

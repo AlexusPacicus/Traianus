@@ -12,7 +12,7 @@ validate on every build pipeline:
   4. Mandatory Control Plane Centrality (Dual-Key Consolidation)
   5. Bitwise State Determinism
 
-Normative: docs/development/tests/SPEC-global.md
+Normative: docs/archive/legacy_docs/development/tests/SPEC-global.md
 Coverage: INV1, INV2, INV3, INV4, INV5
 """
 import json

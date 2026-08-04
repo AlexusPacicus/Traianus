@@ -2,8 +2,8 @@
 This file verifies MUST/MUST NOT requirements from the SPEC (RFC 2119).
 BLOCK: mutation — applicable generics (Phase 2).
 
-SPEC: docs/development/tests/SPEC-mutacion.md
-Normative: docs/development/tests/SPEC-mutacion.md
+SPEC: docs/archive/legacy_docs/development/tests/SPEC-mutacion.md
+Normative: docs/archive/legacy_docs/development/tests/SPEC-mutacion.md
 Coverage: MU02, MU03"""
 import pytest
 

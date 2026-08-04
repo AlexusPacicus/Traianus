@@ -5,7 +5,7 @@ Claim CL-R2 (R-2 / M4): the README quickstart documents
 
 State: ACTIVE. The README (§ Quickstart) documents the uvicorn command with
 local binding: `uvicorn traianus.app:app --host 127.0.0.1 --port 8000`.
-Normative: docs/development/tests/SPEC-afirmaciones.md
+Normative: docs/archive/legacy_docs/development/tests/SPEC-afirmaciones.md
 Coverage: CL-R2"""
 import pytest
 

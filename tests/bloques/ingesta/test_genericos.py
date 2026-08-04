@@ -6,8 +6,8 @@ The G1–G9 catalog lives in tests/genericos/ and is parametrized by block.
 This file verifies the registry coherence and the endpoints smoke of the
 block (deep coverage lives in tests/genericos).
 
-SPEC: docs/development/tests/SPEC-ingesta.md
-Normative: docs/development/tests/SPEC-ingesta.md
+SPEC: docs/archive/legacy_docs/development/tests/SPEC-ingesta.md
+Normative: docs/archive/legacy_docs/development/tests/SPEC-ingesta.md
 Coverage: IN09, IN10"""
 import pytest
 

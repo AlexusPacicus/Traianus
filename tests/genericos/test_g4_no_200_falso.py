@@ -5,7 +5,7 @@ Normative (RFC 2119): on persistence or database failure, the
 API MUST NOT return a synthetic 200; MUST propagate a noisy 5xx
 (503 ingestion / 500 rest) to avoid silent data loss.
 
-Normative: docs/development/tests/SPEC-global.md
+Normative: docs/archive/legacy_docs/development/tests/SPEC-global.md
 Coverage: G4
 """
 import sqlite3

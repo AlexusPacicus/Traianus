@@ -10,7 +10,7 @@ import os
 import re
 
 ROOT = os.path.dirname(os.path.dirname(os.path.dirname(os.path.abspath(__file__))))
-SPEC_DIR = os.path.join(ROOT, "docs", "development", "tests")
+SPEC_DIR = os.path.join(ROOT, "docs", "archive", "legacy_docs", "development", "tests")
 
 SPEC_FILES = {
     "global": "SPEC-global.md",

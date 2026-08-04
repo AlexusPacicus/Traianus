@@ -4,7 +4,7 @@ BLOCK: mutation — E2E with real model (Phase 6).
 
 Full journey: /mutate/{symbol} expands the dimension N→N+1 (384→385),
 injects the canonical axis [0,...,1] and fills the nodes (ADR-015/H4).
-Normative: docs/development/tests/SPEC-mutacion.md
+Normative: docs/archive/legacy_docs/development/tests/SPEC-mutacion.md
 Coverage: MU04"""
 import sqlite3
 

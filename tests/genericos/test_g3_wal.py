@@ -10,7 +10,7 @@ The guard combines an AST scan over traianus/app.py and traianus/bootstrap.py
 with two behavioral companions (fresh-file bootstrap anchor and per-block
 endpoint journal mode).
 
-Normative: docs/development/tests/SPEC-global.md
+Normative: docs/archive/legacy_docs/development/tests/SPEC-global.md
 Coverage: G3
 """
 import ast

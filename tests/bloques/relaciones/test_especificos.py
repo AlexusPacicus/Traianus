@@ -6,7 +6,7 @@ Tests moved from tests/test_control_plane.py WITHOUT changing assertions.
 Cover: /relations endpoints (ADR-002/ADR-014/ADR-020), multichannel spectrum,
 schema alignment, edge integrity (L2), deterministic E_n (H5), and
 E_n persistence (auto-edge-*, ADR-023/H5 + H4).
-Normative: docs/development/tests/SPEC-relaciones.md
+Normative: docs/archive/legacy_docs/development/tests/SPEC-relaciones.md
 Coverage: RE01, RE02, RE03, RE07, RE08, RE09"""
 import json
 import sqlite3

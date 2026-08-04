@@ -4,7 +4,7 @@ BLOCK: bootstrap — block-specific tests (Phase 2).
 
 Tests moved from tests/test_control_plane.py WITHOUT changing assertions.
 They cover: vector utilities, data contracts and the offline guard (M3).
-Normative: docs/development/tests/SPEC-bootstrap.md
+Normative: docs/archive/legacy_docs/development/tests/SPEC-bootstrap.md
 Coverage: BO01, BO02, BO03, BO04, BO05"""
 import os
 

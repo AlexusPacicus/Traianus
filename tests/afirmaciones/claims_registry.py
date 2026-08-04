@@ -5,7 +5,7 @@ Each claim from Traianus sources is declared here with a state: ACTIVE
 (verified by test), RED (not met; disposition CODE_FIX|DOC_FIX), WP (explicit
 scope exclusion in PoC).
 
-The SPEC for this package is docs/development/tests/SPEC-afirmaciones.md.
+The SPEC for this package is docs/archive/legacy_docs/development/tests/SPEC-afirmaciones.md.
 """
 import os
 

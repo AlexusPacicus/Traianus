@@ -2,7 +2,7 @@
 This file verifies MUST/MUST NOT requirements from the SPEC (RFC 2119).
 Claim CL-I5 (I-5): the control plane does not embed a user interface
 (zero-UI). README declares it in "Not a User Application or UI Framework".
-Normative: docs/development/tests/SPEC-afirmaciones.md
+Normative: docs/archive/legacy_docs/development/tests/SPEC-afirmaciones.md
 Coverage: CL-I5"""
 from pathlib import Path
 

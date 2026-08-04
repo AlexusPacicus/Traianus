@@ -5,7 +5,7 @@ BLOCK: observability — specific tests (Phase 2).
 Tests moved from tests/test_control_plane.py WITHOUT changing assertions.
 Cover: enumerated CORS (H3), operator token (H3), telemetry isolation (M5),
 MAX(seq) filter, and real 5xx errors.
-Normative: docs/development/tests/SPEC-observabilidad.md
+Normative: docs/archive/legacy_docs/development/tests/SPEC-observabilidad.md
 Coverage: OB01, OB02, OB03, OB04, OB05, OB06"""
 import json
 import sqlite3

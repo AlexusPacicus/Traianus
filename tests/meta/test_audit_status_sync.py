@@ -6,7 +6,7 @@ match the verified working tree (AGENTS.md Invariant 1 — audit
 synchronization). String-containment assertions on row markers; new IDs are
 added to the mapping as their audit row flips to Resolved (Phase 2/3/4/7).
 
-Normative: docs/development/tests/SPEC-template.md
+Normative: docs/archive/legacy_docs/development/tests/SPEC-template.md
 Coverage: AUDIT-SYNC
 """
 import re

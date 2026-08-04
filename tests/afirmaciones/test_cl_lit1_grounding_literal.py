@@ -4,7 +4,7 @@ Claim CL-LIT1 (AGENTS.md §2.4): Topological_Grounding citations exist
 character-by-character in the cited source file.
 
 Verifies literal quotes declared in claims_registry.LITERAL_QUOTES.
-Normative: docs/development/tests/SPEC-afirmaciones.md
+Normative: docs/archive/legacy_docs/development/tests/SPEC-afirmaciones.md
 Coverage: CL-LIT1"""
 import pytest
 

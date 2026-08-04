@@ -6,7 +6,7 @@ is rejected or handled explicitly without breaking projections.
 State: ACTIVE. The pipeline handles both directions: if dim_db > dim_in it
 zero-pads; if dim_in > dim_db it explicitly rejects (422 in /consolidar and
 telemetry_error in the spectral processor of /ingesta) BEFORE projecting.
-Normative: docs/development/tests/SPEC-afirmaciones.md
+Normative: docs/archive/legacy_docs/development/tests/SPEC-afirmaciones.md
 Coverage: CL-I62"""
 import re
 import sqlite3

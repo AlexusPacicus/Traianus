@@ -2,8 +2,8 @@
 This file verifies MUST/MUST NOT requirements from the SPEC (RFC 2119).
 BLOCK: bootstrap — applicable generics (Phase 2).
 
-SPEC: docs/development/tests/SPEC-bootstrap.md
-Normative: docs/development/tests/SPEC-bootstrap.md
+SPEC: docs/archive/legacy_docs/development/tests/SPEC-bootstrap.md
+Normative: docs/archive/legacy_docs/development/tests/SPEC-bootstrap.md
 Coverage: BO06, BO07"""
 import pytest
 

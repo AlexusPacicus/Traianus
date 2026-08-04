@@ -72,7 +72,7 @@ Where $S_n = (V_n, E_n, K_n)$ represents the discrete simplicial complex at step
 * $E_n$ — Deterministic edges (adjacency relations)
 * $K_n$ — Simplicial faces (higher-order structures)
 
-> **Note:** *Higher-order simplicial faces (K_n) and multi-provider dynamic switching form part of the active R&D roadmap in `docs/research/`.* The executable PoC v1.0 of `traianus/` governs the lower-dimensional skeleton $S_n = (V_n, E_n)$; higher-order structures $K_n$ are not executed by the current release.
+> **Note:** *Higher-order simplicial faces (K_n) and multi-provider dynamic switching form part of the active R&D roadmap, preserved in `docs/archive/legacy_docs/research/`.* The executable PoC v1.0 of `traianus/` governs the lower-dimensional skeleton $S_n = (V_n, E_n)$; higher-order structures $K_n$ are not executed by the current release.
 
 External observation layers evaluate read-only perspective projections $O_n = P_\theta(S_n)$ without mutating state $S_n$ (ADR-024).
 
@@ -146,17 +146,17 @@ Requires the model cached locally (prefetch with `traianus-bootstrap`). The `mod
 
 ## 6. Documentation Ledger
 
-* **Project Identity** (`docs/identity/PROJECT_IDENTITY.md`): System boundaries, canonical definitions, non-goals, and official taxonomy.
-
-* **Research Hypothesis** (`docs/research/RESEARCH_HYPOTHESIS.md`): Theoretical grounding in Conceptual Spaces (Gärdenfors, 2000) and provider agnosticism corollaries.
-
-* **Research Programme** (`docs/research/RESEARCH_PROGRAM.md`): R&D roadmap, WP1-WP4 specifications, deliverables, and risk matrix.
+* **Project Identity** (`docs/PROJECT_IDENTITY.md`): System boundaries, canonical definitions, non-goals, and official taxonomy.
 
 * **Project Architecture** (`docs/architecture/ARCHITECTURE.md`): Mathematical state machine formulation $S_n = (V_n, E_n, K_n)$ and transactional persistence layer.
 
+* **Data Contracts** (`docs/architecture/contracts/CONTRACTS_AND_PRISMS.md`): Pydantic schema specifications (RawDump, RefinedEntity) and Zero Trust ingress firewall.
+
 * **ADR Ledger** (`docs/architecture/ADR/ADR.md`): Immutable append-only log of architectural decision trade-offs (ADR-001 to ADR-027).
 
-* **Data Contracts** (`docs/architecture/contracts/CONTRACTS_AND_PRISMS.md`): Pydantic schema specifications (RawDump, RefinedEntity) and Zero Trust ingress firewall.
+* **Governance & Audit** (`AGENTS.md`, `TRAIANUS_AUDIT.md`): Agent constitution with the mandatory proposal schema, and the technical audit report with remediation status.
+
+* **Research (archived)** (`docs/archive/legacy_docs/research/`): RESEARCH_HYPOTHESIS.md (grounding in Conceptual Spaces, Gärdenfors) and RESEARCH_PROGRAM.md (WP1-WP4 roadmap), preserved for historical reference.
 
 ## License
 

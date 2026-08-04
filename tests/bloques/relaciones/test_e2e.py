@@ -4,7 +4,7 @@ BLOCK: relations — E2E with a real model (Phase 6).
 
 Full journey: ingest two nodes → POST /relations (edge validated L2)
 → GET /relations returns it.
-Normative: docs/development/tests/SPEC-relaciones.md
+Normative: docs/archive/legacy_docs/development/tests/SPEC-relaciones.md
 Coverage: RE06"""
 import pytest
 

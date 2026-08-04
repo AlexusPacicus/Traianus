@@ -5,7 +5,7 @@ BLOCK: ingestion — block-specific tests (Phase 2 + Phase 5).
 Tests moved from tests/test_control_plane.py WITHOUT changing assertions.
 They cover: ingestion contract, MIME firewall (H2, 5+ rejected types),
 persistence failures (H1), spectral pipeline (ADR-002) and metric (M6).
-Normative: docs/development/tests/SPEC-ingesta.md
+Normative: docs/archive/legacy_docs/development/tests/SPEC-ingesta.md
 Coverage: IN01, IN02, IN03, IN04, IN05, IN06, IN07, IN08, IN12"""
 import json
 import sqlite3
