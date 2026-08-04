@@ -150,7 +150,7 @@ Requires the model cached locally (prefetch with `traianus-bootstrap`). The `mod
 
 * **Project Architecture** (`docs/architecture/Project_architecture.md`): Mathematical state machine formulation $S_n = (V_n, E_n, K_n)$ and transactional persistence layer.
 
-* **ADR Ledger** (`docs/architecture/ADR/ADR.md`): Immutable append-only log of architectural decision trade-offs (ADR-001 to ADR-025).
+* **ADR Ledger** (`docs/architecture/ADR/ADR.md`): Immutable append-only log of architectural decision trade-offs (ADR-001 to ADR-027).
 
 * **Data Contracts** (`docs/architecture/contracts/CONTRACTS_AND_PRISMS.md`): Pydantic schema specifications (RawDump, RefinedEntity) and Zero Trust ingress firewall.
 

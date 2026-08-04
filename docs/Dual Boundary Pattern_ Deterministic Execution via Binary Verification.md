@@ -1,7 +1,7 @@
 # **Dual Boundary Pattern: Deterministic Execution via Binary Verification**
 
 **Date:** 2026-08-03  
-**Scope:** Triarii (Browser-Native Sandbox) & TridenGuard/Traianus (MCP Control Plane)
+**Scope:** TridenGuard/Traianus (MCP Control Plane)
 
 ## **1\. The Problem: The Semantic Capability Vulnerability**
 
@@ -23,12 +23,12 @@ Execution constraints are not defined by system prompts or text-based allowlists
 Every authorized capability is a clause mapping:  
 Clause \= (Intent\_Identifier, Target\_Argument, Physical\_Domain, Boundary\_Constraint)
 
-| Component | Definition | Triarii Example | TridenGuard Example |
-| :---- | :---- | :---- | :---- |
-| **Intent\_Identifier** | The authorized tool or action class. | git\_add, fetch\_data | REFACTOR, FIX |
-| **Target\_Argument** | The parameter dictating the target. | path, url | target\_file, Topological\_Grounding |
-| **Physical\_Domain** | The host resource subsystem. | FILESYSTEM, NETWORK | AST\_MUTATION, BYTE\_INSPECTION |
-| **Boundary\_Constraint** | The absolute physical limit. | /absolute/path/exports/ | Existence within canonical file\_bytes |
+| Component | Definition | TridenGuard Example |
+| :---- | :---- | :---- |
+| **Intent\_Identifier** | The authorized tool or action class. | REFACTOR, FIX |
+| **Target\_Argument** | The parameter dictating the target. | target\_file, Topological\_Grounding |
+| **Physical\_Domain** | The host resource subsystem. | AST\_MUTATION, BYTE\_INSPECTION |
+| **Boundary\_Constraint** | The absolute physical limit. | Existence within canonical file\_bytes |
 
 ### **3.2 Physical and Binary Verification (Byte-Level Governance)**
 
@@ -50,12 +50,12 @@ Instead, the pattern mandates **Silent Denial**:
 
 This ruptures the feedback loop, as the attacker cannot determine if the exploit was structurally intercepted or simply failed logically.
 
-## **5\. Dual Application Matrix**
+## **5\. Deployment Context: TridenGuard/Traianus**
 
-| Context | Triarii (Browser WASM Sandbox) | TridenGuard/Traianus (Local MCP Server) |
-| :---- | :---- | :---- |
-| **Deployment** | Client-edge browser Web Worker via Pyodide. | Local Edge/Server via Model Context Protocol (MCP). |
-| **Primary Threat Vector** | Capability Laundering via Indirect Prompt Injections (IDPI). | Unverified codebase mutations and hallucinated refactoring. |
-| **Execution Boundary** | In-flight interception of JS tool call loops. | JSON-RPC validation before executing mutations. |
-| **Binary Verification** | Punycode network checks, path resolution. | UTF-8 byte subsequence grounding, AST checks. |
+| Dimension | TridenGuard/Traianus (Local MCP Server) |
+| :---- | :---- |
+| **Deployment** | Local Edge/Server via Model Context Protocol (MCP). |
+| **Primary Threat Vector** | Unverified codebase mutations and hallucinated refactoring. |
+| **Execution Boundary** | JSON-RPC validation before executing mutations. |
+| **Binary Verification** | UTF-8 byte subsequence grounding, AST checks. |
 

@@ -84,6 +84,21 @@ def test_import_has_no_model_or_db_side_effects():
     assert "HERMETIC-IMPORT-OK" in result.stdout
 
 
+def test_conftest_forces_hf_hub_offline():
+    """HERMETIC-IMPORT: the test harness MUST force HF_HUB_OFFLINE=1.
+
+    OSS Readiness Fase A hardening: `tests/conftest.py` MUST set
+    `os.environ.setdefault("HF_HUB_OFFLINE", "1")` before importing
+    `traianus.app`, so no pytest session can trigger a model download
+    from Hugging Face Hub (finding M3, deterministic execution).
+    """
+    conftest_path = ROOT / "tests" / "conftest.py"
+    src = conftest_path.read_text(encoding="utf-8")
+    assert 'os.environ.setdefault("HF_HUB_OFFLINE", "1")' in src
+    assert src.index('setdefault("HF_HUB_OFFLINE"') < src.index("import traianus.app")
+    assert os.environ.get("HF_HUB_OFFLINE") == "1"
+
+
 def test_server_boot_creates_schema_lazily(monkeypatch, tmp_path):
     """The FastAPI lifespan (server boot) creates the relational schema.
 

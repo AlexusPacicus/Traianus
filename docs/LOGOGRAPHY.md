@@ -15,8 +15,15 @@
 ## 🏗️ 3. Architecture & Engineering (`docs/architecture/`)
 * **[Project_architecture.md](./architecture/Project_architecture.md):** Mathematical formulation of state $S_n = (V_n, E_n, K_n)$ and transactional persistence.
 * **[CONTRACTS_AND_PRISMS.md](./architecture/contracts/CONTRACTS_AND_PRISMS.md):** Pydantic Contracts (`RawDump`, `RefinedEntity`) and Zero-Trust Customs.
-* **[ADR.md](./architecture/ADR/ADR.md):** *Append-only* ledger of Architecture Decision Records (ADR-001 to ADR-025).
+* **[ADR.md](./architecture/ADR/ADR.md):** *Append-only* ledger of Architecture Decision Records (ADR-001 to ADR-027).
 * **[opencode_architecture.md](./architecture/opencode_architecture.md):** OpenCode repository configuration specification (agents, Zero-Trust permissions, MCP tridenguard-validator v1.2.0).
+
+## 👁️ 3b. Observation (`docs/observation/`)
+* **[ULPIA_OVERVIEW.md](./observation/ULPIA_OVERVIEW.md):** Native mathematical observation framework — Layer 3 ($O_n = P_\theta(S_n)$), ADR-022/ADR-024 projection independence, zero-side-effect reads, and implementation status.
+
+## 🤖 3c. Agents & Operational Templates (`docs/agents/`)
+* **[agents_constitution.md](./agents/agents_constitution.md):** Primary document of the `docs/agents/` node — complete SRP matrix of 13 roles, 1:1 mirror layer, and the mandatory Pydantic proposal schema (Structured Outputs contract).
+* **[operational_templates.md](./agents/templates/operational_templates.md):** Operational templates (normative) — Template 1 (Mutation Proposal via `build_response_format` strict json_schema), Template 2 (Task Dispatch Order), Template 3 (Logbook Milestone Entry).
 
 ## ⚙️ 4. Development & Methodology (`docs/development/`)
 * **[METHODOLOGY.md](./development/methodology/METHODOLOGY.md):** Specification of the 4-phase neuro-symbolic flow (Analysis, ASD, TDD Specification, and Red/Green/Refactor Cycle).
@@ -41,10 +48,30 @@
 * **`tests/bloques/{ingesta,consolidacion,relaciones,mutacion,observabilidad,bootstrap}/`:** Per-block skeleton — `test_genericos`, `test_especificos`, `test_e2e` (Phases 2, 5, and 6).
 * **`tests/meta/`:** Structure guardians (`_spec_lib.py` + `test_guardianes_estructura.py`): SPECs parse, normative headers, 1:1 MUST↔test traceability, no orphans.
 * **`tests/afirmaciones/`:** Documentary claims (Phase 4) — `claims_registry.py` (CL-C41, CL-I5, CL-I61, CL-I62, CL-R1, CL-R2, CL-WP1, CL-TR1, CL-LIT1) with states ACTIVE/RED/WP; **CL-I62 ACTIVE** (CODE_FIX applied: provider dimension > basis → HTTP 422; verified by `test_afirmaciones_CL_I62_*` in `test_cl_i62_dimension_provider.py`).
-* **`tests/security/`:** Zero-Trust Gate (SEC-M-01..12) on `tools/tridenguard_validator.py` (Phase 5) + MCP stdio JSON-RPC server.
+* **`tests/security/`:** Zero-Trust Gate (SEC-M-01..18) on `tools/tridenguard_validator.py` (Phase 5) + MCP stdio JSON-RPC server.
+* **`tests/security/test_structured_outputs.py`:** Structured Outputs contract (SEC-M-14..18) — `build_response_format` strict json_schema shape/invariants, ordered `parse_proposal_json` pipeline, `JSONParsingError` on repaired-incomplete JSON, `parse_proposal` validation, and validator `INVALID_JSON`/safety-gate preservation.
 * **`tests/security/test_tridenguard_dual_boundary.py`:** Dual Boundary Gate (SEC-M-08..12) — canonical path containment (`..` traversal and symlink escapes via `Path.resolve(strict=True)` + `is_relative_to`), `\x00` sanitization (raw and JSON-escaped `\u0000`), 21-token network denylist, UTF-8 binary subsequence grounding over `read_bytes()`, and silent denial (no path/OS leakage).
 * **`tests/security/test_opencode_permissions.py`:** Config perimeter (SEC-M-13) — the `opencode.jsonc` bash permission matrix MUST NOT grant a `git *` wildcard allow; only explicit read/inspection subcommands (status, diff, log, show, rev-parse, grep, blame, ls-files, add) MAY be allowed; deny primitives persist.
 * **`tests/e2e/`:** C1 Guard (G10) ported from harness — consolidation rate in [5%, 95%] with real model (Phase 6); per-block `test_e2e.py` implement `@pytest.mark.model` journeys.
 * **`tests/fixtures/nsm_axes_8.json`:** Real axes (8×384) exported for L1 tests.
 * **CI:** `.github/workflows/ci.yml` — 2 jobs: hermetic (`pytest tests/ -m "not model"`, no model/offline) and real-model E2E (`pytest tests/ -m "model"` + `tools/audit_harness.py`, model cached via `actions/cache` + HF prefetch).
-* **[TEST_OVERVIEW.md](./development/tests/TEST_OVERVIEW.md):** Living document of the suite — measured state (174 passed / 2 skipped), bootstrap map, G1–G9 catalog, blocks × categories, claims, meta-guardians, and Spec-First contribution guide.
+* **[TEST_OVERVIEW.md](./development/tests/TEST_OVERVIEW.md):** Living document of the suite — measured state (204 passed / 2 skipped full; 197 passed / 2 skipped / 7 deselected hermetic), bootstrap map, G1–G9 catalog, blocks × categories, claims, meta-guardians, and Spec-First contribution guide.
+
+---
+
+## 📌 Milestones
+
+### [2026-08-04] — OSS Readiness Fase 0 closure (TA-03 / TA-04 / TA-05)
+
+- **TA-03 (Structured Outputs templates):** `docs/templates/operational_templates.md` moved to
+  `docs/agents/templates/operational_templates.md` and redesigned as the Structured Outputs
+  contract (Template 1 via `build_response_format` + strict json_schema, DoD table, legacy mode).
+- **TA-04:** `docs/agents/agents_constitution.md` created as the primary document of the
+  `docs/agents/` node (13-role SRP matrix).
+- **TA-05:** `AGENTS.md` restored to clean markdown (zero `MD`/`+ 1`/`[cite:` artifacts),
+  includes `@plan-architect`, references `tools/schemas/proposals.py` + `build_response_format`;
+  9 new agent files added to `.opencode/agents/` (14 total).
+- **Normative additions:** SEC-M-14..SEC-M-18 in `SPEC-security.md` (Structured Outputs
+  contract), `tools/schemas/parser.py` (`parse_proposal_json`/`parse_proposal`),
+  `tests/security/test_structured_outputs.py`.
+- **Verification:** hermetic suite 208 passed / 2 skipped / 7 deselected; `tests/meta` 13 passed.

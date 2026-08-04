@@ -35,3 +35,8 @@ denylist, UTF-8 binary subsequence matching, and silent denial.
 - **SEC-M-11** MUST: grounding is verified via exact UTF-8 binary subsequence over `read_bytes()`; files with non-UTF-8 bytes must not crash the gate (fail-closed).
 - **SEC-M-12** MUST: grounding/zero-trust failures are silent (no target path / OS details in the decision) and every decision keeps `status` + `final_decision`.
 - **SEC-M-13** MUST: the opencode.jsonc bash permission matrix MUST NOT grant 'git *' wildcard allow; only the explicit read/inspection subcommands (status, diff, log, show, rev-parse, grep, blame, ls-files, add) MAY be allowed, with all mutating/remote git subcommands requiring confirmation.
+- **SEC-M-14** MUST: `build_response_format(response_model, *, strict=True, name=None)` returns `{"type": "json_schema", "json_schema": {"name": <name>, "schema": response_model.model_json_schema(), "strict": <strict>}}`.
+- **SEC-M-15** MUST: in strict mode, the emitted JSON schema declares `additionalProperties: false` and a `required` list covering every property (no optional leak).
+- **SEC-M-16** MUST: `parse_proposal_json` follows the ordered pipeline (1 pure `json.loads` → 2 fenced/embedded extraction → 3 extraction + `json.loads` → 4 extraction + repair) and tracks `used_repair`.
+- **SEC-M-17** MUST: when repaired JSON yields a payload missing required fields, `parse_proposal` raises `JSONParsingError` (no semantic false positive).
+- **SEC-M-18** MUST: `parse_proposal` validates against `AgentMutationProposal` and logs `ValidationError` at DEBUG with `exc_info=True`; the validator integration maps parse failure to `INVALID_JSON` preserving SEC-M-01..12 outcomes.

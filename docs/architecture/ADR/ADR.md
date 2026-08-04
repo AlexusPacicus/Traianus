@@ -139,3 +139,17 @@ Note on Ledger Sequence: Discontinued numbers (006, 008, 009, 011–013) represe
   2. **The geodetic basis is a derived artifact, not a versioned log (decision B).** `geodesic_axes` is computed deterministically at boot (`bootstrap.py:115-123`, `INSERT OR IGNORE`, no in-place update of history) and is therefore not versioned. The single `UPDATE geodesic_axes SET vector_blob = ... WHERE id = ?` in `logographic_genesis` (hyperspace expansion) is a cache/derivation refresh of the regenerable basis, NOT a mutation of observed state history; invariant #1 (ADR-025) applies to vertices, deterministic edges, and simplicial faces, not to this derived baseline.
 * **Testing Baseline:** G5 (append-only) validates `manifold_nodes` and `manifold_edges` (including tombstone revisions); it does NOT prohibit the documented `geodesic_axes` regeneration.
 * **Status:** Approved / Active Core Principle.
+
+### ADR-027: Dual Boundary Pattern & Binary Verification Gate
+* **Date:** 2026-08-03
+* **Author / Responsible:** AlexusPacicus (I+D Marzo 2026 – Presente)
+* **Context:** The Zero-Trust governance layer (AGENTS.md §2, TRAIANUS_AUDIT.md H3) blocks agents from embedding external network primitives (`fetch`, `axios`, `urllib`, `requests`, `httpx`, `socket`, `subprocess`, `curl`, `wget`, `aiohttp`, `importlib`, `os.system`, `os.popen`). Semantic, plain-text substring checks on proposals are evadable (encoding tricks, obfuscated import paths, symlink escapes) and cannot guarantee that a mutated target file remains inside the repository boundary.
+* **Decision:** The validation gate operates on physical bytes, not on semantic lists:
+  1. **Spatial Canonicalization (`Target_File`):** every target path is resolved with `Path.resolve(strict=True)` and MUST remain inside the repository root (`is_relative_to`). Symlink escapes and `..` traversal are rejected at the boundary (no follow).
+  2. **Binary Subsequence Grounding:** literal grounding is verified as a UTF-8 subsequence over `read_bytes()` of the physical file, not via `in`-checks on a decoded string.
+  3. **Null-Byte Sanitization:** raw `\x00` and JSON-escaped `\u0000` fragments are sanitized and rejected (`ABORTED_VIOLATES_ZERO_TRUST`).
+  4. **Silent Denial:** rejected proposals return the gate decision without leaking the target path or OS details to the caller.
+* **Invariants:**
+  * **Physical Containment:** every mutation target is byte-canonicalized inside the repo root.
+  * **Fail-Closed:** a non-UTF-8 binary file or an unresolvable path aborts the proposal; there is no fail-open branch.
+* **Status:** Approved / Active.
