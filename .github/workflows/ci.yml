@@ -40,19 +40,23 @@ jobs:
         uses: actions/cache@v4
         with:
           path: ~/.cache/huggingface
-          key: hf-cache-all-MiniLM-L6-v2
+          key: ${{ runner.os }}-hf-all-MiniLM-L6-v2
+          restore-keys: |
+            ${{ runner.os }}-hf-all-MiniLM-L6-v2
       - name: Model prefetch (one time; offline if already cached)
+        env:
+          HF_HUB_OFFLINE: '0'
         run: |
           python - <<'EOF'
-          import os
-          os.environ["HF_HUB_OFFLINE"] = "1"
           from sentence_transformers import SentenceTransformer
           try:
               SentenceTransformer("all-MiniLM-L6-v2", local_files_only=True)
           except Exception:
               # First run on a clean runner: the HF cache is empty,
               # a single download is allowed to populate the job cache.
-              os.environ["HF_HUB_OFFLINE"] = "0"
+              # (HF_HUB_OFFLINE=0 is set at the step level, before any
+              # Python starts, so the HF client never locks into offline
+              # mode at import time.)
               SentenceTransformer("all-MiniLM-L6-v2")
           EOF
       - name: E2E suite (Phase 6, @pytest.mark.model)
