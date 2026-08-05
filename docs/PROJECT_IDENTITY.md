@@ -20,7 +20,7 @@ Traianus establishes an independent Spatial Control Plane where structural state
 
 ### Ontological Consequences
 
-* **Content Agnosticism:** Input vector coordinates ($v \in \mathbb{R}^d$) are computationally equivalent regardless of their physical or domain origin — whether a text embedding, a LiDAR point cloud, a computer vision descriptor, an acoustic spectrogram, a biomedical signal, or a robotic sensor state.
+* **Content Agnosticism:** Input vector coordinates ($v \in \mathbb{R}^d$) are computationally equivalent regardless of their textual origin. The substrate governs state over 384D L2-normalized text embeddings (all-MiniLM-L6-v2); representation providers beyond text are roadmap scope (WP).
 
 * **Domain Independence:** Reality exists outside Traianus. Representation exists outside Traianus. Observation exists outside Traianus. The substrate activates when a valid coordinate representation is presented.
 
@@ -30,7 +30,7 @@ Traianus establishes an independent Spatial Control Plane where structural state
 
 * **Reality:** The external physical or domain phenomenon being measured. Reality exists entirely outside Traianus.
 
-* **Representation Provider:** The external pipeline (e.g., neural models, sparse lexical encoders like BM25, physical sensors, symbolic encoders) mapping reality into coordinates $v \in \mathbb{R}^d$. The substrate consumes representations; it never generates them natively.
+* **Representation Provider:** The external pipeline mapping reality into coordinates $v \in \mathbb{R}^d$ — in the PoC, the text-embedding encoder (all-MiniLM-L6-v2, offline, pinned). The substrate consumes representations; it never generates them natively. Additional provider families are roadmap scope (WP, see IMPLEMENTATION_STATUS.md).
 
 * **Spatial Control Plane (Traianus Substrate):** The deterministic execution layer that governs state transitions ($S_{n+1} = f(S_n, v_n)$) over the discrete simplicial complex $S_n = (V_n, E_n, K_n)$ purely through linear algebra, dynamic variance thresholding, and transactional state persistence (ADR-023).
 
@@ -47,7 +47,7 @@ The following substitutions are mandatory across all Identity, Hypothesis, and P
 | Semantic Representation | Entity / Mathematical Representation | Traianus operates on the mathematical representation of reality in general. |
 | Ulpia (Frontend / UI) | Ulpia (Native Mathematical Observation Framework) | Native mathematical observation layer ($O_n = P_\theta(S_n)$). |
 | Visualize / Display / UI | Project / Observe / Inspect | Zero UI or rendering code in the Traianus core. |
-| Model Agnosticism | Provider Agnosticism | Encompasses neural models, sparse lexical encoders, physical sensors, audio, and symbolic encoders. |
+| Model Agnosticism | Provider Agnosticism | Encompasses the current text-embedding provider; additional providers are roadmap (WP), not current scope. |
 | Organizes representations | Preserves state continuity | Traianus does not "organize"; it executes deterministic state transitions ($S_{n+1} = f(S_n, v_n)$). |
 
 ## 6. Boundaries & Non-Goals

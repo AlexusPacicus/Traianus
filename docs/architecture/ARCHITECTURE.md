@@ -109,7 +109,7 @@ CREATE TABLE IF NOT EXISTS manifold_nodes (
 | `seq` | Revision Sequence | Monotonically increasing revision number per `id`; current state = `MAX(seq)` per id. |
 | `text` | Plain Text / Payload | Structured entity payload content (`RawDump` / `RefinedEntity`). |
 | `toon_factor` | Single Character | Orthogonal Unicode symbol assigned via projection (`len == 1`). |
-| `lifecycle_state` | State Enum | Lifecycle attribute: `'pending_approval'`, `'consolidated'`, `'incubating'`, `'telemetry_error'`, or `'archived'`. |
+| `lifecycle_state` | State Enum | Lifecycle attribute: `'pending_approval'`, `'consolidated'`, `'incubating'`, or `'telemetry_error'`. |
 | `action_potential` | Continuous Scalar | Action potential for decay via Riemannian metric density (ADR-020). |
 | `revision_milestone` | Boolean / Integer | Ethical Key validation marker for human-in-the-loop intervention (HITL). |
 | `vector_blob` | Dense Binary Array | Dense float64 BLOB storage of normalized vector $v \in \mathbb{R}^d$. |
