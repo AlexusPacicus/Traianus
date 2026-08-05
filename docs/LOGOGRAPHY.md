@@ -57,3 +57,10 @@
   contract), `traianus/security/schemas/parser.py` (`parse_proposal_json`/`parse_proposal`),
   `tests/security/test_structured_outputs.py`.
 - **Verification:** hermetic suite 208 passed / 2 skipped / 7 deselected; `tests/meta` 13 passed.
+
+### [2026-08-05] — Single-agent realignment (agent layer archived)
+
+- The `.opencode/agents/` role definitions (14 files) were archived to
+  `docs/exploring/legacy_docs/opencode/agents/` and are no longer loaded as live subagents.
+  Traianus is governed by a single executing agent; `AGENTS.md` §6 updated accordingly
+  (enforcement via `opencode.jsonc` global permissions + tridenguard validator MCP + SEC-M-13).
