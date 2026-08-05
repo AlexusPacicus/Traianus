@@ -54,6 +54,50 @@ def test_epsilon_edges_adjacency(isolate_db):
     count = main.persist_epsilon_edges(0.8)
     assert count == 1
 
+def test_consolidar_does_not_persist_auto_edges(client, ingesta, auth_headers, isolate_db):
+    """SPEC v0.2 §3.3 (M-a): E_n observacional — /consolidar NO persiste auto-edge-*."""
+    main.DB_PATH = isolate_db
+    vec = np.asarray(main._model.encode("Nodo común"), dtype=np.float64)
+    with sqlite3.connect(isolate_db) as conn:
+        for nid in ("NODE_A", "NODE_B"):
+            conn.execute("""
+                INSERT INTO manifold_nodes
+                (id, seq, text, toon_factor, lifecycle_state, action_potential, revision_milestone, vector_blob, projections_json)
+                VALUES (?, ?, ?, ?, ?, ?, ?, ?, ?)
+            """, (nid, 1, f"Nodo {nid}", "▲", "pending_approval", 0.1, 0, serialize_vector(vec), "{}"))
+        conn.commit()
+
+    res = client.post(
+        "/nodos/NODE_A/consolidar",
+        json={"text": "Nodo común", "ethical_key": True},
+        headers=auth_headers,
+    )
+    assert res.status_code == 200
+    with sqlite3.connect(isolate_db) as conn:
+        auto = conn.execute(
+            "SELECT id FROM manifold_edges WHERE id LIKE 'auto-edge-%'"
+        ).fetchall()
+    assert auto == []
+
+def test_relations_computes_auto_edges_on_read(client, auth_headers, isolate_db):
+    """SPEC v0.2 §3.3: /relations calcula E_n on read (observacional), sin persistir."""
+    main.DB_PATH = isolate_db
+    vec = np.asarray(main._model.encode("Nodo común"), dtype=np.float64)
+    with sqlite3.connect(isolate_db) as conn:
+        for nid in ("NODE_A", "NODE_B"):
+            conn.execute("""
+                INSERT INTO manifold_nodes
+                (id, seq, text, toon_factor, lifecycle_state, action_potential, revision_milestone, vector_blob, projections_json)
+                VALUES (?, ?, ?, ?, ?, ?, ?, ?, ?)
+            """, (nid, 1, f"Nodo {nid}", "▲", "pending_approval", 0.1, 0, serialize_vector(vec), "{}"))
+        conn.commit()
+
+    resp = client.get("/relations", headers=auth_headers)
+    assert resp.status_code == 200
+    edges = {e["id"]: e for e in resp.json()}
+    assert "auto-edge-NODE_A-NODE_B" in edges
+    assert edges["auto-edge-NODE_A-NODE_B"]["state"] == "auto"
+
 def test_axes_anchored_to_prosthetic_epoch(isolate_db):
     """SPEC v0.2 §3.1: los 8 ejes del geodetic basis están etiquetados PROSTHETIC_NSM_V1."""
     with sqlite3.connect(isolate_db) as conn:

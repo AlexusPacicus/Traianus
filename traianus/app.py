@@ -667,12 +667,9 @@ async def consolidate_sovereignty(node_id: str, body: ConsolidationBody):
                   serialize_vector(norm_idea_vector), json.dumps(projections),
                   _active_epoch()))
 
-            # H5/ADR-023 + RE-09/CO-12: persist deterministic E_n
-            # (auto-edge-*) over current MAX(seq) vectors, in the SAME
-            # transaction as the revision. Unconditional (both consolidated
-            # and incubating branches). Any sqlite3.Error propagates to the
-            # outer except -> HTTP 500 + rollback (H1/M5: no fake SUCCESS).
-            persist_epsilon_edges(EPSILON_EDGE, conn=conn)
+            # SPEC v0.2 §3.3 (M-a): E_n is a purely observational artifact.
+            # It is NOT written from the consolidation transaction; /relations
+            # computes the deterministic ε-adjacency on read.
 
         return {
             "status": "SUCCESS",
@@ -748,13 +745,24 @@ async def get_relations():
                 FROM manifold_edges e
                 WHERE state != 'removed'
                   AND seq = (SELECT MAX(seq) FROM manifold_edges e2 WHERE e2.id = e.id)
+                  AND id LIKE 'edge-%'
                 ORDER BY id
             """)
             rows = cursor.fetchall()
-        return [
+        manual = [
             {"id": r[0], "source": r[1], "target": r[2], "state": r[3]}
             for r in rows
         ]
+        auto = [
+            {
+                "id": f"auto-edge-{e['source']}-{e['target']}",
+                "source": e["source"],
+                "target": e["target"],
+                "state": "auto",
+            }
+            for e in rebuild_epsilon_edges(EPSILON_EDGE)
+        ]
+        return sorted(manual + auto, key=lambda r: r["id"])
     except Exception as e:
         raise HTTPException(status_code=500, detail=str(e))
 

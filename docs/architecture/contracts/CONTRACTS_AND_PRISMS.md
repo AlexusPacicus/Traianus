@@ -66,7 +66,7 @@ class RefinedEntity(BaseModel):
     )
     lifecycle_state: str = Field(
         ..., 
-        description="State attribute: 'pending_approval', 'consolidated', 'incubating', 'telemetry_error', or 'archived'."
+        description="State attribute: 'pending_approval', 'consolidated', 'incubating', or 'telemetry_error'."
     )
     revision_milestone: bool = Field(
         default=False, 
