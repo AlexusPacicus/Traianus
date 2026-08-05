@@ -1,8 +1,8 @@
-# SPEC-REFACTOR-v0.1 — Substrate Realignment & Machine-Checkable Invariants (Integrated)
+# SPEC-REFACTOR-v0.2 — Substrate Realignment & Machine-Checkable Invariants (Integrated)
 
-**Status:** Approved (v0.1)
+**Status:** Approved (v0.2)
 **Scope:** `traianus/`, `tests/`, `tools/audit_harness.py`, `docs/`
-**Narrative superseded:** ADR-017, ADR-022, ADR-023, ADR-I5 (see §1.4)
+**Narrative superseded:** ADR-017, ADR-022, ADR-023, ADR-007 (see §1.4)
 
 ## Objective
 
@@ -39,12 +39,12 @@ Embed an explicit amendment at the **top of the ADR ledger** (`docs/architecture
 
 #### Amendment — Superseding Amendment v0.1
 
-**Status:** Approved (prevails over ADR-017, ADR-022, ADR-023, ADR-I5)
+**Status:** Approved (prevails over ADR-017, ADR-022, ADR-023, ADR-007)
 
 1. **Substitution of ADR-017 (Geodesic Axes):** the 8 geodesic axes do not represent "quality dimensions of the human mind (Gärdenfors)". They are relabeled `PROSTHETIC_NSM_V1`: a provisional 384D bootstrap basis, disposable at WP1.
 2. **Substitution of ADR-022 (Dual-Key Gate C1):** the Topological Key (σ²) is not an "infallible algorithmic judge"; it is defined as a **Provisional Informational Geometric Score**. **The dual gate is preserved in v0.1: consolidation requires the simultaneous satisfaction of the Topological Key (σ² ≥ θ_dyn) AND the Ethical Key (HITL). Neither acts alone.** The score is reported as `PROVISIONAL_INFORMATIONAL_SCORE` but remains a necessary condition alongside human approval.
 3. **Substitution of ADR-023 (Local Adjacency E_n):** ε = 0.8 adjacency is declared a purely observational artifact for `/relations` (L2 distance). It does not govern runtime state transitions in v0.1.
-4. **Annulment of ADR-I5:** the theoretical justification about glyph processing inside transformers is dismissed — it does not correspond to the actual `text/plain` flow of the substrate.
+4. **Annulment of ADR-007:** the theoretical justification about glyph processing inside transformers (ADR-007, mislabeled "ADR-I5" in the v0.1 draft) is dismissed — it does not correspond to the actual `text/plain` flow of the substrate.
 
 ---
 
@@ -70,9 +70,10 @@ Embed an explicit amendment at the **top of the ADR ledger** (`docs/architecture
 
 ### 3.1 SQLite Persistence Schema (`traianus/app.py`, `bootstrap.py`)
 
-- `geodesic_axes`: add `epoch_provenance TEXT NOT NULL DEFAULT 'PROSTHETIC_NSM_V1'` and `created_at TIMESTAMP DEFAULT CURRENT_TIMESTAMP`.
+- `geodesic_axes`: add `epoch_provenance TEXT NOT NULL DEFAULT 'PROSTHETIC_NSM_V1'` and `created_at TIMESTAMP DEFAULT CURRENT_TIMESTAMP`. The table MUST support multiple epochs (one immutable row set per `epoch_provenance`): `/mutate` inserts a complete new basis tagged `PROSTHETIC_NSM_V2` without UPDATE on existing rows (M-a, §3.3).
 - `manifold_nodes`: add `epoch_provenance TEXT NOT NULL DEFAULT 'PROSTHETIC_NSM_V1'` — decisions (not only axes) are anchored to their base epoch.
-- Lifecycle: `CHECK (state IN ('pending_approval', 'incubating', 'consolidated'))`, mirrored in the `LifecycleState` Literal and the Pydantic contracts.
+- Lifecycle: `CHECK (state IN ('pending_approval', 'incubating', 'consolidated', 'telemetry_error'))`, mirrored in the `LifecycleState` Literal and the Pydantic contracts. `telemetry_error` is a legitimate persisted state: the spectral processor writes error revisions to `manifold_nodes` and `/telemetry` reads them. Excluding it from the CHECK would break the fail-loud ingestion path (H1) and the migration of existing `telemetry_error` rows.
+- **Dual-source DDL discipline:** every schema change MUST be mirrored character-by-character in `tests/helpers/db_factory.py` (`SCHEMA_STATEMENTS`, L1). SQLite cannot add a CHECK via ALTER — apply it as a table-rebuild migration (`ALTER TABLE ... RENAME` → recreate → copy → drop), following the existing `seq` migration pattern in `init_relational_tables`.
 
 ### 3.2 Pure Decision Kernel (`traianus/core.py`)
 
@@ -104,8 +105,8 @@ def evaluate_gate_v01(spectrum: list[float], ethical_key: bool, threshold: float
 ### 3.3 HTTP API Endpoints
 
 - **`/ingesta`:** require `Content-Type: text/plain` with a raw body (see §3.4); process `X-Idempotency-Key` (UNIQUE in `ingestion_queue`; retries return the same ingestion_id); validate input dimension v ∈ R^384.
-- **`/consolidar`:** expose `PROVISIONAL_INFORMATIONAL_SCORE` in the JSON response; dual-key semantics (both keys required).
-- **`/mutate`:** remove UPDATE statements; require a new `epoch_provenance` for append-only mutations; `persist_epsilon_edges` decoupled from the consolidation transaction (observational E_n, computed on read).
+- **`/consolidar`:** expose `PROVISIONAL_INFORMATIONAL_SCORE` inside the existing `dual_key_status` response namespace: `dual_key_status.topological_key` becomes `{status: "PROVISIONAL_INFORMATIONAL_SCORE", variance, threshold, passed}`; `dual_key_status.ethical_key` and `dual_key_status.consolidated` remain unchanged. Dual-key semantics (both keys required).
+- **`/mutate`:** no UPDATE statements. The endpoint inserts a COMPLETE new axis basis — the current axes re-padded to the expanded dimension plus the new canonical axis — tagged with a fresh `epoch_provenance` (`PROSTHETIC_NSM_V2`). The `PROSTHETIC_NSM_V1` rows remain immutable (M-a). Nodes keep their original `epoch_provenance`; cross-epoch comparisons are prohibited (M-f). `persist_epsilon_edges` decoupled from the consolidation transaction (observational E_n, computed on read).
 
 ### 3.4 Ingress Byte-Level Verification (Dual Boundary, minimal)
 
@@ -125,7 +126,7 @@ except UnicodeDecodeError as e:
 
 **Contract change:** `/ingesta` accepts a raw `text/plain` body (`Content-Type: text/plain`) instead of the JSON `RawDump` wrapper. The MIME allowlist check (H2) moves from the JSON `type` field to the `Content-Type` header.
 
-**Test-harness adaptation (BEFORE the DDL migrations):** there is no shared ingestion helper today — ~20 call sites repeat `client.post("/ingesta", json={"type": "text/plain", "text": ...}, headers=auth_headers)`. Create a single fixture in `tests/conftest.py` and migrate all call sites to it:
+**Test-harness adaptation (BEFORE the DDL migrations):** there is no shared ingestion helper today — 5 live call sites repeat `client.post("/ingesta", json={"type": "text/plain", "text": ...}, headers=auth_headers)`: `tests/test_substrate.py`, `tests/test_e2e.py`, `tests/test_security.py` (×2), `tools/audit_harness.py`. Create a single fixture in `tests/conftest.py` and migrate all of them to it:
 
 ```python
 def ingesta(client, auth_headers, text: str):
@@ -138,7 +139,7 @@ def ingesta(client, auth_headers, text: str):
 
 Affected live surfaces (must all migrate): `tests/test_substrate.py` (ingesta call sites), `tests/test_e2e.py` (C1 guard, `@pytest.mark.model`), and `tools/audit_harness.py`. The legacy per-block call sites (~20, previously `tests/bloques/*`, `tests/genericos/*`, `tests/e2e/`, `tests/afirmaciones/`) were archived by the flat-suite restructure to `docs/exploring/legacy_docs/tests/` and are no longer part of the live suite.
 
-**Principle 2 — Vector binary invariant before persistence.** Before writing to DB, the encoded vector is verified as a binary invariant: dimension == 384, dtype float32 (native model output), L2-normalized (‖v‖ = 1 within tolerance). A vector failing any check is rejected before it reaches `manifold_nodes`.
+**Principle 2 — Vector binary invariant at the encoding boundary.** The invariant is verified on the NATIVE encoder output (text/plain → vector), before normalization, padding, or serialization: dimension == 384, dtype float32 (native model output), finite values, non-zero norm. Storage keeps the current float64 serialization (`serialize_vector`) — a float32 check "before DB write" would be unverifiable after the float32→float64 cast. Dimension compliance at projection time is enforced against the active epoch basis (dim_in == dim_db; padding per L6). A vector failing any check is rejected before it reaches `manifold_nodes`.
 
 **Principle 3 — Fail-closed posture with immutable logs.**
 - Dry rejection: non-`text/plain` → 415; null/corrupt payload → 400; persistence failure → 503; missing/invalid token → 401. All with fixed, generic detail strings (no internal paths, no stack traces).
@@ -168,10 +169,14 @@ def test_claim_cl_prosthetic_basis_and_gate_status(client, auth_headers, isolate
     )
     body = resp.json()
     assert resp.status_code == 200
-    assert body["topological_key"]["status"] == "PROVISIONAL_INFORMATIONAL_SCORE"
-    assert body["state"] == (
-        "consolidated" if body["topological_key"]["passed"] and body["ethical_key"]
+    tk = body["dual_key_status"]["topological_key"]
+    assert tk["status"] == "PROVISIONAL_INFORMATIONAL_SCORE"
+    assert body["new_state"] == (
+        "consolidated" if tk["passed"] and body["dual_key_status"]["ethical_key"]
         else "incubating"
+    )
+    assert body["dual_key_status"]["consolidated"] == (
+        tk["passed"] and body["dual_key_status"]["ethical_key"]
     )
 ```
 
@@ -194,8 +199,8 @@ def test_claim_cl_prosthetic_basis_and_gate_status(client, auth_headers, isolate
 
 **Step 3 — Issue #1 (platform hygiene & CI)**
 
-- Configure `.github/workflows/ci.yml`.
-- Pin explicit versions in `pyproject.toml`.
+- Extend the existing `.github/workflows/ci.yml` (2 jobs: hermetic + real-model E2E with model cache).
+- Pin explicit versions in `pyproject.toml`, including the sentence-transformers model `revision=` and torch pins (M1 bitwise determinism).
 
 **Step 4 — WP0 experiment (empirical validation)**
 
@@ -212,3 +217,20 @@ def test_claim_cl_prosthetic_basis_and_gate_status(client, auth_headers, isolate
 - §3.3: E_n decoupled from the consolidation transaction (observational).
 - §3.4 (SEC-a): ingress byte-level verification added — raw `text/plain` body (breaking contract change), null-byte scan, strict UTF-8, vector binary invariant (384D, float32, L2) before DB write, dry fail-closed rejection (no Silent Denial synthetic success on HTTP — would re-introduce H1), "Neurons Propose, Rules Dispose" kept as the architectural authority principle, not a low-level check. Test-harness adaptation: new `ingesta()` fixture in `tests/conftest.py` (helper does not exist today), MIME allowlist moves to the `Content-Type` header, ~20 call sites + `tools/audit_harness.py` migrate.
 - §4: the verification test exercises the real API (path, auth, existing node, fixtures).
+
+---
+
+## Appendix B — Revision Annex (v0.2 justification)
+
+The v0.1 → v0.2 bump consolidates the eight principal-architect review findings. Each row records the v0.1 defect and its resolution applied in this version.
+
+| # | Finding (v0.1 defect) | Resolution in v0.2 |
+|---|---|---|
+| 1 | §3.1 `CHECK (state IN ('pending_approval','incubating','consolidated'))` omits `telemetry_error`, which the spectral processor persists in `manifold_nodes` (`async_spectral_processor`) and `/telemetry` reads. Enforcing the v0.1 CHECK would break the fail-loud H1 path and the migration of existing `telemetry_error` rows. | CHECK now includes `telemetry_error`; dual-source DDL discipline added (`tests/helpers/db_factory.py` mirror, table-rebuild migration for SQLite CHECK). |
+| 2 | M-a required an "append-only /mutate" but §3.1 specified no mechanism: no `seq`, no revision log, no epoch identity on `geodesic_axes`. The action was unimplementable as written. | `/mutate` redesigned as **epoch-append**: inserts a complete new basis tagged `PROSTHETIC_NSM_V2`; no UPDATE on existing rows; cross-epoch comparison prohibited (M-f). |
+| 3 | §3.4 P2 demanded a float32/384D/L2 invariant "before DB write", unverifiable because `serialize_vector` casts to float64 and `/mutate` expands dimensions. | Invariant moved to the **encoding boundary** (native float32 encoder output), before normalization/padding/serialization; dimension compliance enforced against the active epoch at projection time. |
+| 4 | "~20 ingesta call sites" is factually wrong: the live suite has 5 (`test_substrate`×1, `test_e2e`×1, `test_security`×2, `tools/audit_harness.py`×1). The ~20 live in archived `docs/exploring/legacy_docs/tests/`. | §3.4 fixture-migration scope corrected to the 5 live call sites. |
+| 5 | "ADR-I5" does not exist in the ADR ledger; the glyph justification is **ADR-007**. | §1.4 supersedes ADR-007 and notes the v0.1 mislabel. |
+| 6 | §4 asserted `body["topological_key"]` / `body["state"]`, but `/consolidar` returns `body["dual_key_status"]` / `body["new_state"]`. | §4 aligned to the existing `dual_key_status` namespace; score embedded as `dual_key_status.topological_key.{status, variance, threshold, passed}`. |
+| 7 | §3.1 did not mention the test-side DDL mirror or the SQLite table-rebuild mechanics required by a CHECK addition. | Both added (§3.1); `tests/helpers/db_factory.py` must mirror `traianus/app.py` character-for-character (L1). |
+| 8 | Step 3 said "Configure CI" when `.github/workflows/ci.yml` already exists; and no model `revision=` pin for M1. | Step 3 reworded to "extend the existing CI"; pinning now includes the sentence-transformers `revision=` and torch pins. |

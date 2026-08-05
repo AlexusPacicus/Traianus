@@ -31,7 +31,7 @@ class FakeSentenceTransformer:
             digest = hashlib.sha256(text.encode("utf-8")).digest()
             seed = int.from_bytes(digest[:8], "little")
             rng = np.random.default_rng(seed)
-            vec = rng.standard_normal(DIMENSION).astype(np.float64)
+            vec = rng.standard_normal(DIMENSION).astype(np.float32)
             norm = np.linalg.norm(vec)
             out.append(vec / norm if norm > 0 else vec)
         return out[0] if single else np.stack(out)

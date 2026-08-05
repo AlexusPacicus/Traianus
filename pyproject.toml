@@ -10,11 +10,12 @@ readme = "README.md"
 license = { text = "GPL-3.0-or-later" }
 requires-python = ">=3.10"
 dependencies = [
-    "fastapi>=0.110.0",
-    "uvicorn>=0.28.0",
-    "pydantic>=2.6.0",
-    "sentence-transformers>=2.5.0",
-    "numpy>=1.26.0"
+    "fastapi==0.115.6",
+    "uvicorn==0.34.0",
+    "pydantic==2.13.3",
+    "sentence-transformers==5.2.3",
+    "numpy==2.4.1",
+    "torch==2.11.0"
 ]
 
 [project.optional-dependencies]

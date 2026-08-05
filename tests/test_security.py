@@ -6,17 +6,51 @@ import json
 import pytest
 from traianus.security.validator import validate_proposal
 
-def test_zero_trust_ingress_allowlist(client, auth_headers):
-    """Rechaza payloads que no sean text/plain con HTTP 415."""
-    res_bad = client.post("/ingesta", json={"type": "application/json", "text": "{}"}, headers=auth_headers)
+def test_zero_trust_ingress_allowlist(client, ingesta, auth_headers):
+    """Rechaza payloads cuyo Content-Type no sea text/plain con HTTP 415."""
+    res_bad = client.post(
+        "/ingesta",
+        content="{}".encode("utf-8"),
+        headers={**auth_headers, "Content-Type": "application/json"},
+    )
     assert res_bad.status_code == 415
-    
-    res_good = client.post("/ingesta", json={"type": "text/plain", "text": "ok"}, headers=auth_headers)
+
+    res_good = ingesta("ok")
     assert res_good.status_code == 200
+
+def test_ingesta_rejects_null_bytes(client, auth_headers):
+    """Null byte (\x00) en el cuerpo -> 400 (verificación a nivel de byte, §3.4 P1)."""
+    res = client.post(
+        "/ingesta",
+        content=b"valid\x00text",
+        headers={**auth_headers, "Content-Type": "text/plain"},
+    )
+    assert res.status_code == 400
+
+def test_ingesta_rejects_invalid_utf8(client, auth_headers):
+    """Decodificación estricta UTF-8 fallida -> 400 (§3.4 P1)."""
+    res = client.post(
+        "/ingesta",
+        content=b"\xff\xfe\xfd",
+        headers={**auth_headers, "Content-Type": "text/plain"},
+    )
+    assert res.status_code == 400
+
+def test_ingesta_idempotency_returns_same_id(client, ingesta):
+    """X-Idempotency-Key: reintento devuelve el mismo ingestion_id (A-c, §3.3)."""
+    first = ingesta("idempotent note", idempotency_key="k-1")
+    second = ingesta("idempotent note", idempotency_key="k-1")
+    assert first.status_code == 200
+    assert second.status_code == 200
+    assert first.json()["ingestion_id"] == second.json()["ingestion_id"]
 
 def test_protected_routes_require_token(client):
     """Rutas mutantes devuelven 401 si falta el header x-traianus-token."""
-    res = client.post("/ingesta", json={"type": "text/plain", "text": "unauthorized"})
+    res = client.post(
+        "/ingesta",
+        content="unauthorized".encode("utf-8"),
+        headers={"Content-Type": "text/plain"},
+    )
     assert res.status_code == 401
 
 def test_tridenguard_validator_gate():

@@ -17,13 +17,9 @@ def realistic_db(tmp_path, monkeypatch):
     create_test_db(db_path, seed="realistic")
     return db_path
 
-def test_e2e_pipeline_journey(client, auth_headers):
+def test_e2e_pipeline_journey(client, ingesta, auth_headers):
     """Journey completo: Ingesta -> Cálculo de Vector L2 (384D) -> Proyección."""
-    res = client.post(
-        "/ingesta",
-        json={"type": "text/plain", "text": "Sovereign knowledge vector"},
-        headers=auth_headers
-    )
+    res = ingesta("Sovereign knowledge vector")
     assert res.status_code == 200
     
     nodes = client.get("/nodos", headers=auth_headers).json().get("nodes", [])

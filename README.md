@@ -5,13 +5,15 @@ An offline-first, open-source computational substrate that governs spatial state
 Every system that manages knowledge inherits a hidden coupling: the way it *represents* concepts is fused with the way it *stores and evolves* them. Change the representation (swap an embedding model for a symbolic encoder, or a vision pipeline for a text extractor), and the stored state breaks. Traianus cuts this knot by introducing a **spatial control plane** — a deterministic state machine that operates purely on coordinate vectors $\mathbf{v} \in \mathbb{R}^d$, without caring how those vectors are produced.
 
 This separation makes three promises possible:
-- **Provider agnosticism** — swap representation providers without disrupting state
+- **Deterministic text-embedding engine (384D)** — state is governed over L2-normalized `all-MiniLM-L6-v2` embeddings; other providers are roadmap (WP), not current scope
 - **Deterministic auditability** — every state transition $S_{n+1} = f(S_n, v_n)$ is reproducible given identical input vectors
 - **Offline sovereignty** — the entire substrate runs on consumer local hardware ($\le 8$ GB RAM) with no runtime cloud dependency
 
 Current status: Proof of Concept (PoC) v1.0 using sovereign personal knowledge as its initial reference application (RefApp-01). See [IMPLEMENTATION_STATUS.md](./IMPLEMENTATION_STATUS.md) for the transparent declaration of what is implemented vs. what is R&D roadmap.
 
 > **"Traianus does not define how reality is represented. It operates upon coordinate vectors $\mathbf{v} \in \mathbb{R}^d$ emitted by external providers to govern spatial state deterministically."**
+
+> **North star (SPEC-REFACTOR-v0.2 §1.3):** "The NSM basis is a provisional prosthesis; the destination is a basis derived from the data the substrate governs (WP1)."
 
 ## 1. System Boundaries & Non-Goals
 
@@ -34,15 +36,9 @@ Traianus strictly enforces a three-tier separation of concerns, where each tier 
 ```text
 1. Representation Layer
    Question: "How is a world entity mapped into coordinates v ∈ ℝᵈ?"
-   Providers:
-     • Neural embedding models (Text, Multimodal)
-     • Sparse lexical encoders (BM25, TF-IDF, SPLADE)
-     • Symbolic & logical encoders (OWL, RDF, Graph Kernels)
-     • Computer vision encoders (ViT, CLIP Vision, SAM)
-     • Audio & acoustic encoders (Whisper, Wav2Vec, Spectrograms)
-     • Physical sensor pipelines (LiDAR, IMU, GPS, Radar, Biomedical)
-     • Time-series & signal extractors (Fourier, Wavelets, PCA, IoT)
-     • Scientific feature extractors (Molecular structures, DNA sequences)
+   Providers (PoC):
+     • Text embedding model — all-MiniLM-L6-v2 (384D float32, offline, pinned)
+     • Future representation providers are roadmap scope (see IMPLEMENTATION_STATUS.md)
         │
         ▼  (Coordinates v ∈ ℝᵈ)
         │

@@ -7,6 +7,22 @@ Philosophy: Append-Only. Architectural decisions are stacked sequentially to gua
 Historical Context & Evolutionary Trajectory:
 The early entries (ADR-001 through ADR-007) capture rapid prototyping for a deterministic knowledge organizer during a hackathon. To eliminate data randomness and system drift, architectural focus shifted from application features to core state persistence. Subsequent entries (ADR-010 through ADR-025) record this evolution into a foundational, immutable control plane.
 Note on Ledger Sequence: Discontinued numbers (006, 008, 009, 011–013) represent internal exploration drafts and interface trade-offs from the initial hackathon phase that were merged or discarded prior to substrate consolidation.
+
+---
+
+## Amendment — Superseding Amendment v0.1 (SPEC-REFACTOR-v0.2 §1.4)
+
+**Status:** Approved (prevails over ADR-017, ADR-022, ADR-023, ADR-007)
+
+> This amendment is append-only: it prevails over the decisions below without erasing their historical traceability.
+
+1. **Substitution of ADR-017 (Geodesic Axes):** the 8 geodesic axes do not represent "quality dimensions of the human mind (Gärdenfors)". They are relabeled `PROSTHETIC_NSM_V1`: a provisional 384D bootstrap basis, disposable at WP1.
+2. **Substitution of ADR-022 (Dual-Key Gate C1):** the Topological Key (σ²) is not an "infallible algorithmic judge"; it is defined as a **Provisional Informational Geometric Score**. **The dual gate is preserved in v0.1: consolidation requires the simultaneous satisfaction of the Topological Key (σ² ≥ θ_dyn) AND the Ethical Key (HITL). Neither acts alone.** The score is reported as `PROVISIONAL_INFORMATIONAL_SCORE` but remains a necessary condition alongside human approval.
+3. **Substitution of ADR-023 (Local Adjacency E_n):** ε = 0.8 adjacency is declared a purely observational artifact for `/relations` (L2 distance). It does not govern runtime state transitions in v0.1.
+4. **Annulment of ADR-007:** the theoretical justification about glyph processing inside transformers (ADR-007, mislabeled "ADR-I5" in the v0.1 draft) is dismissed — it does not correspond to the actual `text/plain` flow of the substrate.
+
+---
+
 ## Index of Architectural Decisions
 
 ### ADR-001: Separation of Planes (Control Plane vs. External Payloads)

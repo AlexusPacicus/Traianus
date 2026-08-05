@@ -5,10 +5,12 @@ from contextlib import asynccontextmanager
 import numpy as np
 import json
 from typing import List, Literal
-from fastapi import FastAPI, BackgroundTasks, HTTPException, Header, Depends
+from fastapi import FastAPI, BackgroundTasks, HTTPException, Header, Depends, Request
 from fastapi.middleware.cors import CORSMiddleware
 from pydantic import BaseModel, Field
 from sentence_transformers import SentenceTransformer
+
+from traianus.core import evaluate_gate_v01
 
 # =====================================================================
 # OFFLINE GUARD (audit M3): offline sovereignty. Model must be prefetched
@@ -18,8 +20,12 @@ from sentence_transformers import SentenceTransformer
 os.environ.setdefault("HF_HUB_OFFLINE", "1")
 
 
+MODEL_ID = "all-MiniLM-L6-v2"
+MODEL_REVISION = "1110a243fdf4706b3f48f1d95db1a4f5529b4d41"
+
+
 def build_encoder():
-    return SentenceTransformer("all-MiniLM-L6-v2", local_files_only=True)
+    return SentenceTransformer(MODEL_ID, revision=MODEL_REVISION, local_files_only=True)
 
 
 def _startup_create_schema():
@@ -111,7 +117,6 @@ LifecycleState = Literal[
     "consolidated",
     "incubating",
     "telemetry_error",
-    "archived",
 ]
 
 class RawDump(BaseModel):
@@ -140,10 +145,33 @@ def init_relational_tables():
             CREATE TABLE IF NOT EXISTS ingestion_queue (
                 id INTEGER PRIMARY KEY AUTOINCREMENT,
                 payload TEXT NOT NULL,
+                idempotency_key TEXT UNIQUE,
                 status TEXT DEFAULT 'PENDING',
                 created_at DATETIME DEFAULT CURRENT_TIMESTAMP
             )
         """)
+        # Legacy migration (SPEC v0.2 §3.3 A-c): ALTER cannot add a UNIQUE
+        # constraint, so a legacy queue table is rebuilt (RENAME -> recreate ->
+        # copy -> drop), mirroring the manifold_nodes/edges seq migrations.
+        queue_cols = [
+            row[1] for row in conn.execute("PRAGMA table_info(ingestion_queue)").fetchall()
+        ]
+        if queue_cols and "idempotency_key" not in queue_cols:
+            conn.execute("ALTER TABLE ingestion_queue RENAME TO ingestion_queue_legacy")
+            conn.execute("""
+                CREATE TABLE ingestion_queue (
+                    id INTEGER PRIMARY KEY AUTOINCREMENT,
+                    payload TEXT NOT NULL,
+                    idempotency_key TEXT UNIQUE,
+                    status TEXT DEFAULT 'PENDING',
+                    created_at DATETIME DEFAULT CURRENT_TIMESTAMP
+                )
+            """)
+            conn.execute("""
+                INSERT INTO ingestion_queue (id, payload, status, created_at)
+                SELECT id, payload, status, created_at FROM ingestion_queue_legacy
+            """)
+            conn.execute("DROP TABLE ingestion_queue_legacy")
         # =================================================================
         # H4 — APPEND-ONLY NODE LOG (invariant #1 ADR-025 / §6.2)
         # Intent_Class: the node log is immutable; every state transition
@@ -168,8 +196,10 @@ def init_relational_tables():
                 revision_milestone INTEGER NOT NULL,
                 vector_blob BLOB NOT NULL,
                 projections_json TEXT NOT NULL,
+                epoch_provenance TEXT NOT NULL DEFAULT 'PROSTHETIC_NSM_V1',
                 sys_internal_timestamp DATETIME DEFAULT CURRENT_TIMESTAMP,
-                PRIMARY KEY (id, seq)
+                PRIMARY KEY (id, seq),
+                CHECK (lifecycle_state IN ('pending_approval', 'incubating', 'consolidated', 'telemetry_error'))
             )
         """)
         # Schema migration for pre-H4 DBs (derived artifact): each existing
@@ -190,8 +220,10 @@ def init_relational_tables():
                     revision_milestone INTEGER NOT NULL,
                     vector_blob BLOB NOT NULL,
                     projections_json TEXT NOT NULL,
+                    epoch_provenance TEXT NOT NULL DEFAULT 'PROSTHETIC_NSM_V1',
                     sys_internal_timestamp DATETIME DEFAULT CURRENT_TIMESTAMP,
-                    PRIMARY KEY (id, seq)
+                    PRIMARY KEY (id, seq),
+                    CHECK (lifecycle_state IN ('pending_approval', 'incubating', 'consolidated', 'telemetry_error'))
                 )
             """)
             conn.execute("""
@@ -203,6 +235,40 @@ def init_relational_tables():
                 FROM manifold_nodes_legacy
             """)
             conn.execute("DROP TABLE manifold_nodes_legacy")
+        # SPEC v0.2 §3.1 migration (v0.1 DBs): add `epoch_provenance` and the
+        # lifecycle CHECK. SQLite cannot ALTER-ADD a CHECK, so the table is
+        # rebuilt (RENAME -> recreate -> copy -> drop), backfilling the epoch.
+        v02_cols = [
+            row[1] for row in conn.execute("PRAGMA table_info(manifold_nodes)").fetchall()
+        ]
+        if v02_cols and "epoch_provenance" not in v02_cols:
+            conn.execute("ALTER TABLE manifold_nodes RENAME TO manifold_nodes_v01")
+            conn.execute("""
+                CREATE TABLE manifold_nodes (
+                    id TEXT NOT NULL,
+                    seq INTEGER NOT NULL,
+                    text TEXT NOT NULL,
+                    toon_factor TEXT NOT NULL,
+                    lifecycle_state TEXT NOT NULL,
+                    action_potential REAL NOT NULL,
+                    revision_milestone INTEGER NOT NULL,
+                    vector_blob BLOB NOT NULL,
+                    projections_json TEXT NOT NULL,
+                    epoch_provenance TEXT NOT NULL DEFAULT 'PROSTHETIC_NSM_V1',
+                    sys_internal_timestamp DATETIME DEFAULT CURRENT_TIMESTAMP,
+                    PRIMARY KEY (id, seq),
+                    CHECK (lifecycle_state IN ('pending_approval', 'incubating', 'consolidated', 'telemetry_error'))
+                )
+            """)
+            conn.execute("""
+                INSERT INTO manifold_nodes
+                (id, seq, text, toon_factor, lifecycle_state, action_potential,
+                 revision_milestone, vector_blob, projections_json)
+                SELECT id, seq, text, toon_factor, lifecycle_state, action_potential,
+                       revision_milestone, vector_blob, projections_json
+                FROM manifold_nodes_v01
+            """)
+            conn.execute("DROP TABLE manifold_nodes_v01")
         conn.execute("""
             CREATE TABLE IF NOT EXISTS manifold_edges (
                 id TEXT NOT NULL,
@@ -255,6 +321,34 @@ def init_db():
 def serialize_vector(vector: np.ndarray) -> bytes:
     return vector.astype(np.float64).tobytes()
 
+def _encode_vector(raw_text: str) -> np.ndarray:
+    """Encodes and validates at the encoding boundary (SPEC v0.2 §3.4 P2).
+
+    The binary invariant is verified on the NATIVE encoder output
+    (text/plain -> vector), BEFORE normalization, padding, or float64
+    serialization: 1-D, dimension == 384, dtype float32 (native model
+    output), finite values, non-zero norm. A vector failing any check is
+    rejected before it reaches manifold_nodes. Storage keeps the float64
+    serialization (serialize_vector); this check is the only place the
+    native float32 dtype is observable.
+    """
+    native_vector = get_model().encode(raw_text)
+    if not isinstance(native_vector, np.ndarray) or native_vector.ndim != 1:
+        raise ValueError("Provider output must be a 1-D vector.")
+    if native_vector.dtype != np.float32:
+        raise ValueError(
+            f"Provider output dtype {native_vector.dtype} != float32 (native model dtype)."
+        )
+    if native_vector.size != 384:
+        raise ValueError(
+            f"Provider dimension {native_vector.size} != 384 (ingress binary invariant)."
+        )
+    if not np.all(np.isfinite(native_vector)):
+        raise ValueError("Provider output contains non-finite values.")
+    if np.linalg.norm(native_vector) == 0.0:
+        raise ValueError("Provider output has zero norm.")
+    return native_vector
+
 def next_node_seq(conn: sqlite3.Connection, node_id: str) -> int:
     """
     Next revision sequence for a node in the append-only log (H4).
@@ -277,22 +371,41 @@ def next_edge_seq(conn: sqlite3.Connection, edge_id: str) -> int:
     ).fetchone()
     return int(row[0])
 
+def _active_epoch() -> str:
+    """Active epoch = most recently created epoch_provenance in geodesic_axes.
+
+    Cross-epoch comparisons are prohibited (M-f): the projection basis and
+    the node anchoring must both use the active epoch.
+    """
+    with sqlite3.connect(DB_PATH) as conn:
+        conn.execute("PRAGMA journal_mode=WAL;")
+        row = conn.execute(
+            "SELECT epoch_provenance FROM geodesic_axes "
+            "GROUP BY epoch_provenance ORDER BY MAX(created_at) DESC LIMIT 1"
+        ).fetchone()
+    return row[0] if row else "PROSTHETIC_NSM_V1"
+
 def get_geodetic_matrix_db() -> dict:
     """
     Loads the geodetic baseline from SQLite.
 
     Returns {axis_id: {"symbol": str, "vector": np.ndarray}} keyed by the
-    unique axis id (e.g. `AXIS_1`). Reconstructing keys from `simbolo`/`tag`
-    via string concatenation is ambiguous (tags carry a leading underscore,
-    e.g. `_SOMETHING_HAPPENS`), which collapsed the projection spectrum to a
-    single key when parsed with `key.split("_")[1]`.
+    unique axis id (e.g. `AXIS_1`) for the ACTIVE epoch only. Reconstructing
+    keys from `simbolo`/`tag` via string concatenation is ambiguous (tags carry
+    a leading underscore, e.g. `_SOMETHING_HAPPENS`), which collapsed the
+    projection spectrum to a single key when parsed with `key.split("_")[1]`.
     """
+    active_epoch = _active_epoch()
     matrix = {}
     with sqlite3.connect(DB_PATH) as conn:
         conn.execute("PRAGMA journal_mode=WAL;")
         cursor = conn.cursor()
         try:
-            cursor.execute("SELECT id, simbolo, tag, vector_blob FROM geodesic_axes ORDER BY id")
+            cursor.execute(
+                "SELECT id, simbolo, tag, vector_blob FROM geodesic_axes "
+                "WHERE epoch_provenance = ? ORDER BY id",
+                (active_epoch,),
+            )
             rows = cursor.fetchall()
             for axis_id, symbol, tag, blob in rows:
                 vec = np.frombuffer(blob, dtype=np.float64)
@@ -303,10 +416,15 @@ def get_geodetic_matrix_db() -> dict:
 
 def get_current_dimension_db() -> int:
     try:
+        active_epoch = _active_epoch()
         with sqlite3.connect(DB_PATH) as conn:
             conn.execute("PRAGMA journal_mode=WAL;")
             cursor = conn.cursor()
-            cursor.execute("SELECT vector_blob FROM geodesic_axes LIMIT 1")
+            cursor.execute(
+                "SELECT vector_blob FROM geodesic_axes "
+                "WHERE epoch_provenance = ? LIMIT 1",
+                (active_epoch,),
+            )
             row = cursor.fetchone()
         if row:
             axis_vector = np.frombuffer(row[0], dtype=np.float64)
@@ -339,7 +457,7 @@ def auto_calibrate_critical_threshold() -> float:
 
 def async_spectral_processor(ingestion_id: int, raw_text: str):
     try:
-        native_vector = get_model().encode(raw_text)
+        native_vector = _encode_vector(raw_text)
         geodetic_matrix = get_geodetic_matrix_db()
         if not geodetic_matrix:
             raise RuntimeError(
@@ -400,13 +518,14 @@ def async_spectral_processor(ingestion_id: int, raw_text: str):
             seq = next_node_seq(conn, node_id)
             conn.execute("""
                 INSERT INTO manifold_nodes
-                (id, seq, text, toon_factor, lifecycle_state, action_potential, revision_milestone, vector_blob, projections_json)
-                VALUES (?, ?, ?, ?, ?, ?, ?, ?, ?)
+                (id, seq, text, toon_factor, lifecycle_state, action_potential, revision_milestone, vector_blob, projections_json, epoch_provenance)
+                VALUES (?, ?, ?, ?, ?, ?, ?, ?, ?, ?)
             """, (
                 node_id, seq, raw_text, toon_symbol,
                 validated_entity.lifecycle_state, action_potential,
                 int(validated_entity.revision_milestone),
-                serialize_vector(norm_idea_vector), projections_json
+                serialize_vector(norm_idea_vector), projections_json,
+                _active_epoch(),
             ))
             conn.execute("UPDATE ingestion_queue SET status = 'PROCESSED' WHERE id = ?", (ingestion_id,))
 
@@ -442,23 +561,48 @@ def async_spectral_processor(ingestion_id: int, raw_text: str):
 # =====================================================================
 
 @app.post("/ingesta", dependencies=[Depends(require_token)])
-async def frontend_ingestion_endpoint(dump: RawDump, background_tasks: BackgroundTasks):
-    if dump.type not in ALLOWED_INGRESS_TYPES:
+async def frontend_ingestion_endpoint(
+    request: Request,
+    background_tasks: BackgroundTasks,
+    x_idempotency_key: str | None = Header(default=None),
+):
+    # Zero-Trust ingress allowlist (H2): the MIME check moved from the JSON
+    # `type` field to the Content-Type header (SPEC v0.2 §3.4, contract change).
+    content_type = request.headers.get("content-type", "").split(";")[0].strip()
+    if content_type not in ALLOWED_INGRESS_TYPES:
         raise HTTPException(status_code=415, detail="Only text/plain is accepted at ingress.")
+    # Byte-level verification (SEC-a / §3.4 P1): null-byte scan + strict UTF-8.
+    raw_bytes = await request.body()
+    if b"\x00" in raw_bytes:
+        raise HTTPException(status_code=400, detail="Invalid binary payload (null byte detected).")
+    try:
+        text = raw_bytes.decode("utf-8", errors="strict")
+    except UnicodeDecodeError as e:
+        raise HTTPException(status_code=400, detail="Invalid UTF-8 payload.") from e
     try:
         with sqlite3.connect(DB_PATH) as conn:
             conn.execute("PRAGMA journal_mode=WAL;")
-            cur = conn.execute("INSERT INTO ingestion_queue (payload) VALUES (?)", (dump.text,))
+            if x_idempotency_key:
+                row = conn.execute(
+                    "SELECT id FROM ingestion_queue WHERE idempotency_key = ?",
+                    (x_idempotency_key,),
+                ).fetchone()
+                if row is not None:
+                    return {"status": "accepted", "ingestion_id": row[0], "duplicate": True}
+            cur = conn.execute(
+                "INSERT INTO ingestion_queue (payload, idempotency_key) VALUES (?, ?)",
+                (text, x_idempotency_key),
+            )
             ingestion_id = cur.lastrowid
     except sqlite3.Error as e:
         raise HTTPException(status_code=503, detail="Ingress persistence unavailable.") from e
-    background_tasks.add_task(async_spectral_processor, ingestion_id, dump.text)
+    background_tasks.add_task(async_spectral_processor, ingestion_id, text)
     return {"status": "accepted", "ingestion_id": ingestion_id}
 
 @app.post("/nodos/{node_id}/consolidar", dependencies=[Depends(require_token)])
 async def consolidate_sovereignty(node_id: str, body: ConsolidationBody):
     try:
-        native_vector = get_model().encode(body.text)
+        native_vector = _encode_vector(body.text)
         geodetic_matrix = get_geodetic_matrix_db()
 
         dim_db = get_current_dimension_db()
@@ -483,7 +627,6 @@ async def consolidate_sovereignty(node_id: str, body: ConsolidationBody):
         for axis_id, axis_entry in geodetic_matrix.items():
             projections[axis_id] = float(np.dot(norm_idea_vector, axis_entry["vector"]))
 
-        variance = float(np.var(list(projections.values())))
         dynamic_threshold = auto_calibrate_critical_threshold()
 
         dominant_attractor = max(
@@ -492,20 +635,16 @@ async def consolidate_sovereignty(node_id: str, body: ConsolidationBody):
         )
         toon_symbol = geodetic_matrix[dominant_attractor]["symbol"]
 
-        topological_key_passed = variance >= dynamic_threshold
-        ethical_key_passed = body.ethical_key
-
-        # Dual-Key Consolidation (ADR-022):
-        # State consolidation requires concurrent satisfaction of the
-        # Topological Key AND the Ethical Key.
-        if topological_key_passed and ethical_key_passed:
-            new_state: LifecycleState = "consolidated"
-            action_pot = 1.0
-        else:
-            new_state: LifecycleState = "incubating"
-            action_pot = float(variance)
-
-        revision_milestone_val = 1 if ethical_key_passed else 0
+        # Dual-Key Consolidation (ADR-022, SPEC v0.2 §3.2): the pure kernel is
+        # the single authority for the decision. The Topological Key acts as a
+        # provisional informational geometric score; consolidation requires BOTH
+        # keys simultaneously (AND). Neither acts alone.
+        gate = evaluate_gate_v01(
+            list(projections.values()), body.ethical_key, dynamic_threshold
+        )
+        new_state: LifecycleState = gate["state"]
+        action_pot = 1.0 if new_state == "consolidated" else float(gate["topological_key"]["variance"])
+        revision_milestone_val = 1 if body.ethical_key else 0
 
         with sqlite3.connect(DB_PATH) as conn:
             conn.execute("PRAGMA journal_mode=WAL;")
@@ -521,11 +660,12 @@ async def consolidate_sovereignty(node_id: str, body: ConsolidationBody):
             cursor.execute("""
                 INSERT INTO manifold_nodes
                 (id, seq, text, toon_factor, lifecycle_state, action_potential,
-                 revision_milestone, vector_blob, projections_json)
-                VALUES (?, ?, ?, ?, ?, ?, ?, ?, ?)
+                 revision_milestone, vector_blob, projections_json, epoch_provenance)
+                VALUES (?, ?, ?, ?, ?, ?, ?, ?, ?, ?)
             """, (node_id, seq, body.text, toon_symbol, new_state, action_pot,
                   revision_milestone_val,
-                  serialize_vector(norm_idea_vector), json.dumps(projections)))
+                  serialize_vector(norm_idea_vector), json.dumps(projections),
+                  _active_epoch()))
 
             # H5/ADR-023 + RE-09/CO-12: persist deterministic E_n
             # (auto-edge-*) over current MAX(seq) vectors, in the SAME
@@ -538,9 +678,9 @@ async def consolidate_sovereignty(node_id: str, body: ConsolidationBody):
             "status": "SUCCESS",
             "new_state": new_state,
             "dual_key_status": {
-                "topological_key": topological_key_passed,
-                "ethical_key": ethical_key_passed,
-                "consolidated": topological_key_passed and ethical_key_passed,
+                "topological_key": gate["topological_key"],
+                "ethical_key": gate["ethical_key"],
+                "consolidated": new_state == "consolidated",
             },
         }
     except HTTPException:
@@ -773,58 +913,49 @@ async def logographic_genesis(new_symbol: str):
             conn.execute("PRAGMA journal_mode=WAL;")
             cursor = conn.cursor()
 
-            cursor.execute("SELECT id, vector_blob FROM geodesic_axes")
+            active_epoch = _active_epoch()
+            cursor.execute(
+                "SELECT id, simbolo, tag, vector_blob FROM geodesic_axes "
+                "WHERE epoch_provenance = ? ORDER BY id",
+                (active_epoch,),
+            )
             current_axes = cursor.fetchall()
             if not current_axes:
                 raise HTTPException(status_code=400, detail="Geodetic baseline not initialized.")
 
-            sample_vector = np.frombuffer(current_axes[0][1], dtype=np.float64)
+            sample_vector = np.frombuffer(current_axes[0][3], dtype=np.float64)
             current_dimension = len(sample_vector)
             new_dimension = current_dimension + 1
 
-            for axis_id, blob in current_axes:
+            # Epoch-append (SPEC v0.2 §3.3, M-a): never UPDATE existing rows.
+            # A COMPLETE new basis (re-padded axes + canonical axis) is inserted
+            # under a fresh epoch_provenance; the previous epoch stays immutable.
+            epoch_num = int(active_epoch.rsplit("_V", 1)[-1])
+            new_epoch = f"PROSTHETIC_NSM_V{epoch_num + 1}"
+
+            for axis_id, symbol, tag, blob in current_axes:
                 axis_vector = np.frombuffer(blob, dtype=np.float64)
                 axis_vector_pad = np.pad(axis_vector, (0, 1), mode='constant', constant_values=0.0)
                 cursor.execute(
-                    "UPDATE geodesic_axes SET vector_blob = ? WHERE id = ?",
-                    (serialize_vector(axis_vector_pad), axis_id)
+                    "INSERT INTO geodesic_axes (id, simbolo, tag, vector_blob, epoch_provenance) "
+                    "VALUES (?, ?, ?, ?, ?)",
+                    (axis_id, symbol, tag, serialize_vector(axis_vector_pad), new_epoch),
                 )
 
             new_axis = np.zeros(new_dimension)
             new_axis[-1] = 1.0
             new_id = f"T{len(current_axes) + 1}"
-
-            cursor.execute("""
-                INSERT INTO geodesic_axes (id, simbolo, tag, vector_blob)
-                VALUES (?, ?, ?, ?)
-            """, (new_id, new_symbol, "_CUSTOM", serialize_vector(new_axis)))
-
-            cursor.execute("""
-                SELECT id, seq, text, toon_factor, lifecycle_state, action_potential,
-                       revision_milestone, vector_blob, projections_json
-                FROM manifold_nodes m
-                WHERE seq = (SELECT MAX(seq) FROM manifold_nodes m2 WHERE m2.id = m.id)
-            """)
-            nodes = cursor.fetchall()
-            for node_id, cur_seq, ntext, toon, life, apot, rms, blob, pjson in nodes:
-                node_vector = np.frombuffer(blob, dtype=np.float64)
-                if len(node_vector) < new_dimension:
-                    node_vector_pad = np.pad(
-                        node_vector, (0, new_dimension - len(node_vector)),
-                        mode='constant', constant_values=0.0
-                    )
-                    # H4: dimensional expansion INSERTS a new revision
-                    # with padded vector; the previous revision remains intact.
-                    cursor.execute(
-                        "INSERT INTO manifold_nodes (id, seq, text, toon_factor, lifecycle_state, action_potential, revision_milestone, vector_blob, projections_json) VALUES (?, ?, ?, ?, ?, ?, ?, ?, ?)",
-                        (node_id, next_node_seq(conn, node_id), ntext, toon, life, apot, rms,
-                         serialize_vector(node_vector_pad), pjson)
-                    )
+            cursor.execute(
+                "INSERT INTO geodesic_axes (id, simbolo, tag, vector_blob, epoch_provenance) "
+                "VALUES (?, ?, ?, ?, ?)",
+                (new_id, new_symbol, "_CUSTOM", serialize_vector(new_axis), new_epoch),
+            )
 
         return {
             "status": "SUCCESS",
-    "message": f"Logographic Genesis completed. Hyperspace expanded to {new_dimension}D.",
-    "new_axis": f"{new_symbol}_CUSTOM"
+            "message": f"Logographic Genesis completed. Hyperspace expanded to {new_dimension}D.",
+            "new_epoch": new_epoch,
+            "new_axis": f"{new_symbol}_CUSTOM",
         }
     except HTTPException:
         raise

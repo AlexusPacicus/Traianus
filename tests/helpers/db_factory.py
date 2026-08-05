@@ -23,10 +23,13 @@ from traianus.app import serialize_vector
 SCHEMA_STATEMENTS = [
     """
     CREATE TABLE IF NOT EXISTS geodesic_axes (
-        id TEXT PRIMARY KEY,
+        id TEXT NOT NULL,
         simbolo TEXT NOT NULL,
         tag TEXT NOT NULL,
-        vector_blob BLOB NOT NULL
+        vector_blob BLOB NOT NULL,
+        epoch_provenance TEXT NOT NULL DEFAULT 'PROSTHETIC_NSM_V1',
+        created_at TIMESTAMP DEFAULT CURRENT_TIMESTAMP,
+        PRIMARY KEY (id, epoch_provenance)
     )
     """,
     """
@@ -40,14 +43,17 @@ SCHEMA_STATEMENTS = [
         revision_milestone INTEGER NOT NULL,
         vector_blob BLOB NOT NULL,
         projections_json TEXT NOT NULL,
+        epoch_provenance TEXT NOT NULL DEFAULT 'PROSTHETIC_NSM_V1',
         sys_internal_timestamp DATETIME DEFAULT CURRENT_TIMESTAMP,
-        PRIMARY KEY (id, seq)
+        PRIMARY KEY (id, seq),
+        CHECK (lifecycle_state IN ('pending_approval', 'incubating', 'consolidated', 'telemetry_error'))
     )
     """,
     """
     CREATE TABLE IF NOT EXISTS ingestion_queue (
         id INTEGER PRIMARY KEY AUTOINCREMENT,
         payload TEXT NOT NULL,
+        idempotency_key TEXT UNIQUE,
         status TEXT DEFAULT 'PENDING',
         created_at DATETIME DEFAULT CURRENT_TIMESTAMP
     )

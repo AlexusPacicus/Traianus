@@ -11,8 +11,12 @@ from sentence_transformers import SentenceTransformer
 os.environ.setdefault("HF_HUB_OFFLINE", "1")
 
 
+MODEL_ID = "all-MiniLM-L6-v2"
+MODEL_REVISION = "1110a243fdf4706b3f48f1d95db1a4f5529b4d41"
+
+
 def build_encoder():
-    return SentenceTransformer("all-MiniLM-L6-v2", local_files_only=True)
+    return SentenceTransformer(MODEL_ID, revision=MODEL_REVISION, local_files_only=True)
 
 
 # Lazy encoder (hermetic import, L1): importing `traianus.bootstrap` does
@@ -114,12 +118,41 @@ def anchor_in_sqlite(octagon_data):
 
     cursor.execute("""
         CREATE TABLE IF NOT EXISTS geodesic_axes (
-            id TEXT PRIMARY KEY,
+            id TEXT NOT NULL,
             simbolo TEXT NOT NULL,
             tag TEXT NOT NULL,
-            vector_blob BLOB NOT NULL
+            vector_blob BLOB NOT NULL,
+            epoch_provenance TEXT NOT NULL DEFAULT 'PROSTHETIC_NSM_V1',
+            created_at TIMESTAMP DEFAULT CURRENT_TIMESTAMP,
+            PRIMARY KEY (id, epoch_provenance)
         )
     """)
+
+    # SPEC v0.2 §3.1/§3.3 (M-a): geodesic_axes MUST support multiple epochs
+    # (one immutable row set per epoch_provenance), so the primary key is
+    # composite (id, epoch_provenance). SQLite cannot change a PK via ALTER:
+    # a legacy table (PK = id) is rebuilt, backfilling the epoch label.
+    axis_sql = cursor.execute(
+        "SELECT sql FROM sqlite_master WHERE type='table' AND name='geodesic_axes'"
+    ).fetchone()
+    if axis_sql and "PRIMARY KEY (id, epoch_provenance)" not in (axis_sql[0] or ""):
+        cursor.execute("ALTER TABLE geodesic_axes RENAME TO geodesic_axes_legacy")
+        cursor.execute("""
+            CREATE TABLE geodesic_axes (
+                id TEXT NOT NULL,
+                simbolo TEXT NOT NULL,
+                tag TEXT NOT NULL,
+                vector_blob BLOB NOT NULL,
+                epoch_provenance TEXT NOT NULL DEFAULT 'PROSTHETIC_NSM_V1',
+                created_at TIMESTAMP DEFAULT CURRENT_TIMESTAMP,
+                PRIMARY KEY (id, epoch_provenance)
+            )
+        """)
+        cursor.execute("""
+            INSERT INTO geodesic_axes (id, simbolo, tag, vector_blob)
+            SELECT id, simbolo, tag, vector_blob FROM geodesic_axes_legacy
+        """)
+        cursor.execute("DROP TABLE geodesic_axes_legacy")
 
     # H4 (F2.3): the geodetic basis is a regenerable derived artifact.
     # DELETE is prohibited; re-anchoring uses INSERT OR IGNORE to avoid

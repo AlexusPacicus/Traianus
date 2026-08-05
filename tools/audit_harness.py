@@ -77,10 +77,14 @@ def run_audit():
     os.environ.setdefault("TRAIANUS_TOKEN", token)
     headers = {"x-traianus-token": token}
     
-    # 4. Authenticated ingestion
+    # 4. Authenticated ingestion (raw text/plain, SPEC v0.2 §3.4 contract)
     accepted_count = 0
     for t in corpus:
-        res = client.post("/ingesta", json={"type": "text/plain", "text": t}, headers=headers)
+        res = client.post(
+            "/ingesta",
+            content=t.encode("utf-8"),
+            headers={**headers, "Content-Type": "text/plain"},
+        )
         if res.status_code == 200:
             accepted_count += 1
 
