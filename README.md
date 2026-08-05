@@ -72,7 +72,7 @@ Where $S_n = (V_n, E_n, K_n)$ represents the discrete simplicial complex at step
 * $E_n$ — Deterministic edges (adjacency relations)
 * $K_n$ — Simplicial faces (higher-order structures)
 
-> **Note:** *Higher-order simplicial faces (K_n) and multi-provider dynamic switching form part of the active R&D roadmap, preserved in `docs/archive/legacy_docs/research/`.* The executable PoC v1.0 of `traianus/` governs the lower-dimensional skeleton $S_n = (V_n, E_n)$; higher-order structures $K_n$ are not executed by the current release.
+> **Note:** *Higher-order simplicial faces (K_n) and multi-provider dynamic switching form part of the active R&D roadmap, preserved in `docs/exploring/legacy_docs/research/`.* The executable PoC v1.0 of `traianus/` governs the lower-dimensional skeleton $S_n = (V_n, E_n)$; higher-order structures $K_n$ are not executed by the current release.
 
 External observation layers evaluate read-only perspective projections $O_n = P_\theta(S_n)$ without mutating state $S_n$ (ADR-024).
 
@@ -156,7 +156,7 @@ Requires the model cached locally (prefetch with `traianus-bootstrap`). The `mod
 
 * **Governance & Audit** (`AGENTS.md`, `TRAIANUS_AUDIT.md`): Agent constitution with the mandatory proposal schema, and the technical audit report with remediation status.
 
-* **Research (archived)** (`docs/archive/legacy_docs/research/`): RESEARCH_HYPOTHESIS.md (grounding in Conceptual Spaces, Gärdenfors) and RESEARCH_PROGRAM.md (WP1-WP4 roadmap), preserved for historical reference.
+* **Research (archived)** (`docs/exploring/legacy_docs/research/`): RESEARCH_HYPOTHESIS.md (grounding in Conceptual Spaces, Gärdenfors) and RESEARCH_PROGRAM.md (WP1-WP4 roadmap), preserved for historical reference.
 
 ## License
 
