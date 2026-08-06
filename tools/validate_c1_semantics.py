@@ -28,6 +28,7 @@ sys.path.insert(0, os.path.abspath("."))
 
 from traianus import app as main_module
 from traianus import bootstrap as gb
+from traianus import storage as storage
 from traianus.core import evaluate_gate_v01
 
 CORPUS = [
@@ -63,8 +64,7 @@ def run():
     temp_db_path = temp_db.name
     temp_db.close()
     try:
-        main_module.DB_PATH = temp_db_path
-        gb.DB_PATH = temp_db_path
+        storage.DB_PATH = temp_db_path
 
         main_module.init_db()
         os.environ["HF_HUB_OFFLINE"] = "1"
@@ -152,8 +152,13 @@ def run():
         rate = consolidated / len(nodes) if nodes else 0.0
         print(f"-> API: {accepted}/{len(CORPUS)} accepted; consolidation rate "
               f"{rate:.0%} ({consolidated}/{len(nodes)})")
-        assert 0.05 <= rate <= 0.95, f"C1 gate degenerate: {rate:.0%}"
-        print("-> C1 GUARD PASSED IN GREEN: rate within [5%, 95%]")
+        # C1 guard: non-degenerate iff BOTH outcomes are observed (>= 1
+        # consolidated AND >= 1 not). Exact count form of the old
+        # `0.05 <= rate <= 0.95` bounds; no magic numbers.
+        assert 1 <= consolidated <= len(nodes) - 1, (
+            f"C1 gate degenerate: {consolidated}/{len(nodes)}"
+        )
+        print("-> C1 GUARD PASSED IN GREEN: non-degenerate (both outcomes observed)")
         print("✅ WP0 VALIDATION PASSED: sigma^2 is a working (falsifiable) hypothesis "
               "and the dual-key law holds on real data.")
     finally:

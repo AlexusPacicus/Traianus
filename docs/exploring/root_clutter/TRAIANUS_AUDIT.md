@@ -68,6 +68,14 @@ None of this is fatal to the *idea*. The fastest path to credibility is **making
 
 Synced with the cycle commit (see `git log`). Resolution criterion: the fix is implemented in code **and** verified by a deterministic test or by the empirical harness (`tools/audit_harness.py` → `✅ C1 GUARD PASSED IN GREEN`, rate 30% = 6/20 on calibrated corpus).
 
+> **On consolidation-rate numbers (correction 2026-08-05):** the rates cited below
+> (6/20, 9/20) were each measured over a *different* 20-note corpus, so they are
+> **not comparable across cycles** — a rate is a property of the corpus, not of the
+> system. The only invariant the harness asserts is that the gate is non-degenerate
+> (rate in `[5%, 95%]`). After the 2026-08-05 corpus deduplication, the harness
+> measures **45% (9/20) over 20 distinct notes**; the exact number is not the point,
+> the non-degeneracy guard is.
+
 | ID | Status | Evidence |
 |---|---|---|
 | C1 | ✅ **Resolved** | `auto_calibrate_critical_threshold()` excludes self-projection (`traianus/app.py`); harness green with rate 6/20 (30%) within `[5%, 95%]`; regression `test_auto_calibrate_excludes_self_projection`. |

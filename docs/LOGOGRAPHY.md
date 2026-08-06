@@ -6,6 +6,7 @@
 
 ## 📌 1. Live Documentation
 
+* **[LEDGER.md](./LEDGER.md):** Append-only operational delta register (`Δ_n`), structural mirror of the immutable `manifold_nodes` sequence.
 * **[PROJECT_IDENTITY.md](./PROJECT_IDENTITY.md):** Substrate definition, Non-Goals, official taxonomy, and fossil purge table.
 * **[ARCHITECTURE.md](./architecture/ARCHITECTURE.md):** Mathematical formulation of state $S_n = (V_n, E_n, K_n)$ and transactional persistence.
 * **[CONTRACTS_AND_PRISMS.md](./architecture/contracts/CONTRACTS_AND_PRISMS.md):** Pydantic Contracts (`RawDump`, `RefinedEntity`) and Zero-Trust Customs.
@@ -41,26 +42,7 @@
 
 ---
 
-## 📌 Milestones
+## 📌 4. Milestones
 
-### [2026-08-04] — OSS Readiness Fase 0 closure (TA-03 / TA-04 / TA-05)
-
-- **TA-03 (Structured Outputs templates):** `docs/templates/operational_templates.md` moved to
-  `docs/agents/templates/operational_templates.md` and redesigned as the Structured Outputs
-  contract (Template 1 via `build_response_format` + strict json_schema, DoD table, legacy mode).
-- **TA-04:** `docs/agents/agents_constitution.md` created as the primary document of the
-  `docs/agents/` node (13-role SRP matrix).
-- **TA-05:** `AGENTS.md` restored to clean markdown (zero `MD`/`+ 1`/`[cite:` artifacts),
-  includes `@plan-architect`, references `traianus/security/schemas/proposals.py` + `build_response_format`;
-  9 new agent files added to `.opencode/agents/` (14 total).
-- **Normative additions:** SEC-M-14..SEC-M-18 in `SPEC-security.md` (Structured Outputs
-  contract), `traianus/security/schemas/parser.py` (`parse_proposal_json`/`parse_proposal`),
-  `tests/security/test_structured_outputs.py`.
-- **Verification:** hermetic suite 208 passed / 2 skipped / 7 deselected; `tests/meta` 13 passed.
-
-### [2026-08-05] — Single-agent realignment (agent layer archived)
-
-- The `.opencode/agents/` role definitions (14 files) were archived to
-  `docs/exploring/legacy_docs/opencode/agents/` and are no longer loaded as live subagents.
-  Traianus is governed by a single executing agent; `AGENTS.md` §6 updated accordingly
-  (enforcement via `opencode.jsonc` global permissions + tridenguard validator MCP + SEC-M-13).
+Operational deltas and historical milestones are recorded in the append-only
+**[LEDGER.md](./LEDGER.md)**. This index does not carry history; it only references it.
