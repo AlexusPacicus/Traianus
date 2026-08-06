@@ -5,7 +5,7 @@ Phase 0 (Foundations). Structural invariant: this module is the ONLY place
 in the test tree where `CREATE TABLE` statements are defined; the rest of
 the harness consumes `create_schema()` / `create_test_db()`.
 
-The schema MUST match `traianus/app.py` (`init_relational_tables`) character
+The schema MUST match `traianus/storage.py` (`init_relational_tables`) character
 by character so tests verify the real system, not a divergent copy (finding L1).
 """
 import json

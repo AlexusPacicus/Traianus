@@ -10,17 +10,17 @@ sys.path.insert(0, os.path.abspath("."))
 
 from traianus import app as main_module
 from traianus import bootstrap as gb
+from traianus import storage as storage
 
 def run_audit():
-    print("=== TRAIANUS EMPIRICAL AUDIT HARNESS (REPAIRED) ===")
+    print("=== TRAIANUS EMPIRICAL AUDIT HARNESS ===")
     
     # 1. Hermetic Database Isolation
     temp_db = tempfile.NamedTemporaryFile(suffix=".db", delete=False)
     temp_db_path = temp_db.name
     temp_db.close()
     
-    main_module.DB_PATH = temp_db_path
-    gb.DB_PATH = temp_db_path
+    storage.DB_PATH = temp_db_path
     
     # Initialize tables and geodetic baseline
     main_module.init_db()
@@ -40,11 +40,12 @@ def run_audit():
 
     client = TestClient(main_module.app)
     
-    # 3. Diversified Corpus (calibrated against the corrected C1 threshold):
+    # 3. Diversified Corpus (20 distinct notes, no duplicates):
     #    6 high-contrast notes written in NSM primitives (variance >>
     #    threshold 0.004292) and 14 low-contrast thematic/narrative notes
-    #    (variance << threshold). Expected rate ~30% (ideal [10%, 40%], within
-    #    the gate [5%, 95%]) — C1 regression guard.
+    #    (variance << threshold). The consolidation rate is a property of
+    #    THIS corpus, not of the system: the guard only asserts the gate is
+    #    non-degenerate (both outcomes observed) — C1 regression guard.
     corpus = [
         # --- High contrast with a geodetic axis (expected: PASS) ---
         "Something happens.",
@@ -59,9 +60,9 @@ def run_audit():
         "The audit report confirms the documentation matches the code.",
         "I want to know if this is true.",
         "All the others agree with me now.",
-        "The cat sees the bird and hears it singing.",
-        "The audit report confirms the documentation matches the code.",
-        "Meeting on Tuesday at 10am to review the quarterly budget.",
+        "The train departs at noon and arrives before evening.",
+        "I wrote the address on a small piece of paper.",
+        "Two friends walk along the side of the river.",
         "I want to know if I can do something more with very little time.",
         "There is no one here right now.",
         "A very good and very big person lives very far from here.",
@@ -112,9 +113,14 @@ def run_audit():
     if os.path.exists(temp_db_path):
         os.remove(temp_db_path)
 
-    # C1 Regression Guard
-    assert 0.05 <= rate <= 0.95, f"❌ CONSOLIDATION GATE DEGENERATE: {rate:.0%} (See Audit C1)"
-    print("✅ C1 GUARD PASSED IN GREEN: Rate within operational range [5%, 95%]")
+    # C1 Regression Guard: the gate is non-degenerate iff BOTH outcomes are
+    # observed on this corpus (>= 1 consolidated AND >= 1 not). This is the
+    # exact condition the old `0.05 <= rate <= 0.95` bounds encoded for n=20;
+    # the count form removes the magic numbers and scales to any corpus size.
+    assert 1 <= consolidated <= len(nodes) - 1, (
+        f"❌ CONSOLIDATION GATE DEGENERATE: {consolidated}/{len(nodes)} (See Audit C1)"
+    )
+    print(f"✅ C1 GUARD PASSED IN GREEN: non-degenerate ({consolidated}/{len(nodes)})")
 
 if __name__ == "__main__":
     run_audit()

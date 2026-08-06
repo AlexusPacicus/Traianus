@@ -1,21 +1,22 @@
 """
-Sustrato Espacial S_n - Pruebas Funcionales Básicas.
-Cubre: Ingesta, Calibración C1 (varianza), Persistencia Append-Only (id, seq) y Adyacencia ε.
+Spatial substrate S_n - basic functional tests.
+Covers: ingestion, C1 calibration (variance), append-only persistence (id, seq) and ε-adjacency.
 """
 import sqlite3
 import numpy as np
 import pytest
 import traianus.app as main
+import traianus.storage as storage
 from traianus.app import serialize_vector, async_spectral_processor
 from traianus.core import evaluate_gate_v01
 
 def test_c1_threshold_excludes_self_projection(isolate_db):
-    """Calibración C1: la varianza de la base ortonormal sin autoproyección debe ser 0.0."""
+    """C1 calibration: the orthonormal basis variance without self-projection must be 0.0."""
     threshold = main.auto_calibrate_critical_threshold()
     assert threshold == pytest.approx(0.0)
 
 def test_append_only_revision_log(client, ingesta, auth_headers, isolate_db):
-    """Invariant H4: La consolidación inserta una nueva revisión sin sobrescribir (seq 1 -> 2)."""
+    """Invariant H4: consolidation inserts a new revision without overwriting (seq 1 -> 2)."""
     res_ingest = ingesta("Entidad inmutable")
     node_id = f"NODE_{res_ingest.json()['ingestion_id']}"
     
@@ -38,8 +39,7 @@ def test_append_only_revision_log(client, ingesta, auth_headers, isolate_db):
     assert rows[-1][1] == "consolidated"
 
 def test_epsilon_edges_adjacency(isolate_db):
-    """Invariant H5: Cálculo determinista de adyacencia epsilon sobre la variedad."""
-    main.DB_PATH = isolate_db
+    """Invariant H5: deterministic epsilon-adjacency computation over the manifold."""
     with sqlite3.connect(isolate_db) as conn:
         for i, nid in enumerate(("NODE_A", "NODE_B")):
             vec = np.zeros(384)
@@ -51,12 +51,11 @@ def test_epsilon_edges_adjacency(isolate_db):
             """, (nid, 1, f"Nodo {nid}", "▲", "incubating", 0.1, 0, serialize_vector(vec), "{}"))
         conn.commit()
     
-    count = main.persist_epsilon_edges(0.8)
+    count = storage.persist_epsilon_edges(0.8)
     assert count == 1
 
 def test_consolidar_does_not_persist_auto_edges(client, ingesta, auth_headers, isolate_db):
-    """SPEC v0.2 §3.3 (M-a): E_n observacional — /consolidar NO persiste auto-edge-*."""
-    main.DB_PATH = isolate_db
+    """SPEC v0.2 §3.3 (M-a): E_n observational - /consolidar does NOT persist auto-edge-*."""
     vec = np.asarray(main._model.encode("Nodo común"), dtype=np.float64)
     with sqlite3.connect(isolate_db) as conn:
         for nid in ("NODE_A", "NODE_B"):
@@ -80,8 +79,7 @@ def test_consolidar_does_not_persist_auto_edges(client, ingesta, auth_headers, i
     assert auto == []
 
 def test_relations_computes_auto_edges_on_read(client, auth_headers, isolate_db):
-    """SPEC v0.2 §3.3: /relations calcula E_n on read (observacional), sin persistir."""
-    main.DB_PATH = isolate_db
+    """SPEC v0.2 §3.3: /relations computes E_n on read (observational), without persisting."""
     vec = np.asarray(main._model.encode("Nodo común"), dtype=np.float64)
     with sqlite3.connect(isolate_db) as conn:
         for nid in ("NODE_A", "NODE_B"):
@@ -99,7 +97,7 @@ def test_relations_computes_auto_edges_on_read(client, auth_headers, isolate_db)
     assert edges["auto-edge-NODE_A-NODE_B"]["state"] == "auto"
 
 def test_axes_anchored_to_prosthetic_epoch(isolate_db):
-    """SPEC v0.2 §3.1: los 8 ejes del geodetic basis están etiquetados PROSTHETIC_NSM_V1."""
+    """SPEC v0.2 §3.1: the 8 geodetic-basis axes are labeled PROSTHETIC_NSM_V1."""
     with sqlite3.connect(isolate_db) as conn:
         axes = conn.execute(
             "SELECT id, epoch_provenance FROM geodesic_axes ORDER BY id"
@@ -108,7 +106,7 @@ def test_axes_anchored_to_prosthetic_epoch(isolate_db):
     assert all(a[1] == "PROSTHETIC_NSM_V1" for a in axes)
 
 def test_nodes_anchored_to_base_epoch(client, ingesta, isolate_db):
-    """SPEC v0.2 §3.1: los nodos (no solo los ejes) quedan anclados a su época base."""
+    """SPEC v0.2 §3.1: nodes (not only axes) stay anchored to their base epoch."""
     res = ingesta("Nodo base")
     node_id = f"NODE_{res.json()['ingestion_id']}"
     with sqlite3.connect(isolate_db) as conn:
@@ -119,7 +117,7 @@ def test_nodes_anchored_to_base_epoch(client, ingesta, isolate_db):
     assert epoch[0] == "PROSTHETIC_NSM_V1"
 
 def test_lifecycle_check_rejects_archived_state(isolate_db):
-    """SPEC v0.2 §3.1 (A-e): `archived` no existe en el schema; el CHECK lo rechaza."""
+    """SPEC v0.2 §3.1 (A-e): `archived` does not exist in the schema; the CHECK rejects it."""
     with sqlite3.connect(isolate_db) as conn:
         with pytest.raises(sqlite3.IntegrityError):
             conn.execute("""
@@ -130,7 +128,7 @@ def test_lifecycle_check_rejects_archived_state(isolate_db):
                   serialize_vector(np.zeros(384, dtype=np.float32)), "{}"))
 
 def test_lifecycle_check_accepts_valid_states(isolate_db):
-    """SPEC v0.2 §3.1: el CHECK admite los 4 estados operativos, incl. telemetry_error."""
+    """SPEC v0.2 §3.1: the CHECK accepts the 4 operational states, incl. telemetry_error."""
     states = ("pending_approval", "incubating", "consolidated", "telemetry_error")
     with sqlite3.connect(isolate_db) as conn:
         for i, state in enumerate(states):
@@ -142,7 +140,7 @@ def test_lifecycle_check_accepts_valid_states(isolate_db):
                   serialize_vector(np.zeros(384, dtype=np.float32)), "{}"))
 
 def test_evaluate_gate_v01_dual_key_requires_both():
-    """Kernel puro (§3.2): consolidación exige AMBAS claves (AND)."""
+    """Pure kernel (§3.2): consolidation requires BOTH keys (AND)."""
     res = evaluate_gate_v01([0.9, -0.4, 0.3, -0.5], ethical_key=False, threshold=0.1)
     assert res["topological_key"]["passed"] is True
     assert res["topological_key"]["status"] == "PROVISIONAL_INFORMATIONAL_SCORE"
@@ -156,7 +154,7 @@ def test_evaluate_gate_v01_dual_key_requires_both():
     assert res["state"] == "incubating"
 
 def test_consolidar_exposes_provisional_score(client, ingesta, auth_headers, isolate_db):
-    """§3.3/§4: /consolidar expone el score en dual_key_status.topological_key."""
+    """§3.3/§4: /consolidar exposes the score in dual_key_status.topological_key."""
     res = ingesta("Entidad con espectro")
     node_id = f"NODE_{res.json()['ingestion_id']}"
     resp = client.post(
@@ -173,7 +171,7 @@ def test_consolidar_exposes_provisional_score(client, ingesta, auth_headers, iso
     assert body["dual_key_status"]["consolidated"] == (body["new_state"] == "consolidated")
 
 def test_mutate_creates_new_epoch_without_touching_v1(client, auth_headers, isolate_db):
-    """SPEC v0.2 §3.3 (M-a): /mutate inserta un basis completo V2; V1 queda inmutable."""
+    """SPEC v0.2 §3.3 (M-a): /mutate inserts a full V2 basis; V1 stays immutable."""
     res = client.post("/mutate/Δ", headers=auth_headers)
     assert res.status_code == 200
     assert res.json()["new_epoch"] == "PROSTHETIC_NSM_V2"
@@ -186,13 +184,13 @@ def test_mutate_creates_new_epoch_without_touching_v1(client, auth_headers, isol
     v2 = [r for r in rows if r[1] == "PROSTHETIC_NSM_V2"]
     assert len(v1) == 8
     assert len(v2) == 9  # 8 re-padded + 1 canonical
-    # V1 rows sin cambios: 384D float64 = 3072 bytes
+    # V1 rows unchanged: 384D float64 = 3072 bytes
     assert all(r[2] == 3072 for r in v1)
     # V2 rows re-padded: 385D float64 = 3080 bytes
     assert all(r[2] == 3080 for r in v2)
 
 def test_mutate_does_not_rewrite_v1_vectors(client, auth_headers, isolate_db):
-    """M-a: el vector de V1 no se altera tras /mutate (era UPDATE en v0.1)."""
+    """M-a: the V1 vector is not altered after /mutate (it was UPDATE in v0.1)."""
     with sqlite3.connect(isolate_db) as conn:
         before = dict(conn.execute("SELECT id, vector_blob FROM geodesic_axes").fetchall())
     res = client.post("/mutate/Ω", headers=auth_headers)

@@ -1,7 +1,8 @@
-import sqlite3
 import os
 import numpy as np
 from sentence_transformers import SentenceTransformer
+
+from traianus.storage import get_db_connection, init_db
 
 # =====================================================================
 # OFFLINE GUARD (audit M3): bootstrap is the first run that used to
@@ -30,8 +31,6 @@ def get_model():
         _model = build_encoder()
     return _model
 
-
-DB_PATH = "traianus.db"
 
 NSM_PRIMES = [
     "something", "someone", "something happens",
@@ -112,60 +111,20 @@ def extract_pure_octagon():
 def anchor_in_sqlite(octagon_data):
     print("[Traianus] Persisting geodetic baseline to SQLite...")
 
-    conn = sqlite3.connect(DB_PATH)
-    conn.execute("PRAGMA journal_mode=WAL;")
-    cursor = conn.cursor()
+    # Canonical DDL (incl. geodesic_axes) is owned by storage.init_db().
+    init_db()
 
-    cursor.execute("""
-        CREATE TABLE IF NOT EXISTS geodesic_axes (
-            id TEXT NOT NULL,
-            simbolo TEXT NOT NULL,
-            tag TEXT NOT NULL,
-            vector_blob BLOB NOT NULL,
-            epoch_provenance TEXT NOT NULL DEFAULT 'PROSTHETIC_NSM_V1',
-            created_at TIMESTAMP DEFAULT CURRENT_TIMESTAMP,
-            PRIMARY KEY (id, epoch_provenance)
-        )
-    """)
-
-    # SPEC v0.2 §3.1/§3.3 (M-a): geodesic_axes MUST support multiple epochs
-    # (one immutable row set per epoch_provenance), so the primary key is
-    # composite (id, epoch_provenance). SQLite cannot change a PK via ALTER:
-    # a legacy table (PK = id) is rebuilt, backfilling the epoch label.
-    axis_sql = cursor.execute(
-        "SELECT sql FROM sqlite_master WHERE type='table' AND name='geodesic_axes'"
-    ).fetchone()
-    if axis_sql and "PRIMARY KEY (id, epoch_provenance)" not in (axis_sql[0] or ""):
-        cursor.execute("ALTER TABLE geodesic_axes RENAME TO geodesic_axes_legacy")
-        cursor.execute("""
-            CREATE TABLE geodesic_axes (
-                id TEXT NOT NULL,
-                simbolo TEXT NOT NULL,
-                tag TEXT NOT NULL,
-                vector_blob BLOB NOT NULL,
-                epoch_provenance TEXT NOT NULL DEFAULT 'PROSTHETIC_NSM_V1',
-                created_at TIMESTAMP DEFAULT CURRENT_TIMESTAMP,
-                PRIMARY KEY (id, epoch_provenance)
+    with get_db_connection() as conn:
+        cursor = conn.cursor()
+        # H4 (F2.3): the geodetic basis is a regenerable derived artifact.
+        # DELETE is prohibited; re-anchoring uses INSERT OR IGNORE to avoid
+        # destroying the existing basis when re-running bootstrap.
+        for rank, (key, data) in enumerate(octagon_data.items()):
+            axis_id = f"AXIS_{rank + 1}"
+            cursor.execute(
+                "INSERT OR IGNORE INTO geodesic_axes (id, simbolo, tag, vector_blob) VALUES (?, ?, ?, ?)",
+                (axis_id, data["symbol"], data["tag"], serialize_vector(data["vector"])),
             )
-        """)
-        cursor.execute("""
-            INSERT INTO geodesic_axes (id, simbolo, tag, vector_blob)
-            SELECT id, simbolo, tag, vector_blob FROM geodesic_axes_legacy
-        """)
-        cursor.execute("DROP TABLE geodesic_axes_legacy")
-
-    # H4 (F2.3): the geodetic basis is a regenerable derived artifact.
-    # DELETE is prohibited; re-anchoring uses INSERT OR IGNORE to avoid
-    # destroying the existing basis when re-running bootstrap.
-    for rank, (key, data) in enumerate(octagon_data.items()):
-        axis_id = f"AXIS_{rank + 1}"
-        cursor.execute(
-            "INSERT OR IGNORE INTO geodesic_axes (id, simbolo, tag, vector_blob) VALUES (?, ?, ?, ?)",
-            (axis_id, data["symbol"], data["tag"], serialize_vector(data["vector"])),
-        )
-
-    conn.commit()
-    conn.close()
 
     print(f"[SUCCESS] Geodetic baseline of {len(octagon_data)} axes anchored.")
 
