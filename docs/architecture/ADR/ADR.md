@@ -169,3 +169,124 @@ Note on Ledger Sequence: Discontinued numbers (006, 008, 009, 011–013) represe
   * **Physical Containment:** every mutation target is byte-canonicalized inside the repo root.
   * **Fail-Closed:** a non-UTF-8 binary file or an unresolvable path aborts the proposal; there is no fail-open branch.
 * **Status:** Approved / Active.
+
+
+ADR-028: DESCARTE DE REPRESENTACIONES PARAMÉTRICAS NEURALES Y ADOPCIÓN DEL PARSER ANALÍTICO WEIGHTLESS 14D (NSM 1972)
+Atributo	Detalle
+Fecha:	2026-08-07
+Estado:	ACEPTADO / PROPUESTO
+Autores / Impacto:	Kernel Cinético / Traianus Core (Tier 1 & Tier 2)
+1. Contexto y Problema
+En la versión PoC v1.0 de Traianus, se adoptó como prótesis provisional el modelo all-MiniLM-L6-v2 (384D float32) para mapear el texto a coordenadas hiperdimensionales. Las auditorías numéricas y las ingestas empíricas sobre el Manifiesto (151 párrafos de Sua Potestas) revelaron tres limitaciones críticas en la arquitectura:  
+ZIP
+Sesgo de Correlación Estructural: La base geodésica extraída con MiniLM arrojó un coseno fuera de diagonal promedio de 0.2267 (máximo 0.3362). Esta no-ortonormalidad no responde a la geometría real del pensamiento, sino a los sesgos de coocurrencia estadística del corpus de entrenamiento comercial del modelo neural.
+Inestabilidad de la Compuerta C1 (θ 
+dyn
+​	
+ ): Al calcular la varianza espectral sobre ejes correlacionados, la densidad de fondo de la matriz infla artificialmente las proyecciones. Esto provocaba que párrafos de densidad ontológica idéntica quedaran separados a ambos lados de la frontera por fluctuaciones insignificantes (±0.0001).
+Pérdida de Soberanía y Determinismo Estricto: La dependencia de librerías de deep learning (PyTorch, Transformers) introduce sobrecarga de recursos (>1 GB RAM) y riesgo de deriva flotante entre arquitecturas de hardware (M1 vs CPU Intel vs GPU), violando las hipótesis RH-2 (Determinismo) y RH-3 (Soberanía Local).  
+ZIP
+2. Decisión Arquitectónica
+Se acuerda desterrar de forma permanente los codificadores estocásticos paramétricos (Sentence-Transformers u homólogos) de la Capa de Representación (Tier 1). En su lugar, el sistema transiciona formalmente hacia un Parser Analítico No Paramétrico y Weightless de 14 Dimensiones (NSM 1972).  
+ZIP
+Espacio Atómico Canonizado (R 
+14
+ ): La base inicial se estructura sobre las 14 primitivas semánticas universales originales formuladas por Anna Wierzbicka (1972).  
+PY
+Mapeo 1:1 Estricto por Token Único: Cada dimensión se evalúa mediante la presencia de un token literal único estricto sin diccionarios arbitrarios de sinónimos: yo (e 
+1
+​	
+ ), tú (e 
+2
+​	
+ ), alguien (e 
+3
+​	
+ ), algo (e 
+4
+​	
+ ), este (e 
+5
+​	
+ ), querer (e 
+6
+​	
+ ), no (e 
+7
+​	
+ ), pensar (e 
+8
+​	
+ ), imaginar (e 
+9
+​	
+ ), sentir (e 
+10
+​	
+ ), decir (e 
+11
+​	
+ ), devenir (e 
+12
+​	
+ ), mundo (e 
+13
+​	
+ ), parte (e 
+14
+​	
+ ).
+Ortogonalidad Axiomática por Diseño: La base inicial nace como la matriz identidad I 
+14×14
+​	
+ . Su coseno fuera de la diagonal es idénticamente 0.0, garantizando una medición pura de la fricción espectral.
+Conservación L 
+2
+​	
+  Invariante: Todo vector resultante del conteo analítico se somete inmediatamente a normalización L 
+2
+​	
+  (∥v 
+14
+​	
+ ∥ 
+2
+​	
+ =1.0).
+Andamiaje Provisional (Prosthetic Epoch): Se reafirma que esta base NSM de 14D es una prótesis transitoria. Al acumularse masa crítica de notas consolidadas, el espacio se emancipará de las 14 primitivas para derivar sus propios ejes geodésicos soberanos.  
+ZIP
++ 1
+3. Consecuencias
+Positivas
+Eradicación del Sesgo Comercial: Eliminación completa de la inercia estadística de internet en la geometría del sustrato.
+Despliegue Ultra-Ligero: Descarte total de dependencias pesadas (PyTorch / Transformers). El ejecutable consume <1 MB de RAM y corre en microsegundos.  
+ZIP
++ 1
+Determinismo Bit a Bit Absoluto: Eliminación de fluctuaciones de punto flotante de la GPU/Neural Engine. Resultados 100% reproducibles en cualquier chip mineral.  
+ZIP
+Métrica de Fricción Pura: La varianza espectral refleja de forma transparente la focalización del texto frente a un estándar cognitivo universal.  
+CHANGELOG TÉCNICO: REFACTORIZACIÓN A KERNEL CINÉTICO
+Desafíos / Cambios Requeridos
+Refactorización del core de ingesta en traianus/app.py y traianus/bootstrap.py para operar sobre 14D analítico en lugar de 384D neural.  
+ZIP
+Ajuste del test suite hermético y de los esquemas en pyproject.toml para remover paquetes en desuso.  
+ZIP
+
+Adenda de Verificación Empírica (2026-08-08) — Desacople de la Compuerta Semántica en 14D
+Estado: Aprobado / Enmienda operativa a ADR-028.
+Hallazgo Empírico: La suite TDD del parser analítico 14D (tools/weightless_parser_1972.py) validó completamente la arquitectura de representación soberana (Tier 1: <1 MB RAM, ejecución en microsegundos, cero dependencias neuronales, determinismo bit a bit). Sin embargo, la verificación sobre el corpus de control demostró que la varianza espectral (σ 
+2
+ ) sobre 14 contenedores de Feature Hashing no mide densidad semántica, sino dispersión alfabética y longitud de caracteres (length bias / aliasing de n-gramas).
+Resolución de Capas:
+Tier 1 (Capa de Representación): Se ratifica el Parser 14D como generador de coordenadas deterministas v∈S 
+13
+  (∥v∥ 
+2
+​	
+ =1.0). Su rol es aséptico y no ejerce filtrado ni juzga la relevancia de los datos.
+Tier 2 (Plano de Control Espacial): La evaluación de fricción geométrica (σ 
+2
+ ≥θ 
+dyn
+​	
+ ) y la compuerta de consolidación semántica se desvinculan de las casillas de hash en 14D y permanecen bajo la gobernanza del Plano de Control Espacial sobre variedades con resolución adecuada.
