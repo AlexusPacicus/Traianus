@@ -1,8 +1,14 @@
 # 🏗️ Architecture Specification — OpenCode Configuration of Traianus/TridenGuard
 
-> **Date:** 2026-08-01 · **opencode 1.18.10** · **Status:** ACTIVE (hardened after the 2026-08-01 Plan)
-> **Primary sources:** `opencode.jsonc`, `.opencode/agents/*.md`, `tools/tridenguard_validator.py`, `AGENTS.md`
-> **Topological Grounding:** every configuration or constitution quote reproduces the real file character by character.
+> **Status:** ARCHIVED (2026-08-08). This document describes the 5-subagent topology
+> and `tools/tridenguard_validator.py`, both superseded on 2026-08-05 (single-agent
+> mode, `AGENTS.md` §6) and by the opencode modularization (issue #24). Retained for
+> historical traceability under `docs/exploring/`. Do not treat as normative.
+> **Live contract:** `opencode.jsonc` (SEC-M-13 permission perimeter) + `.opencode/commands/` + `.opencode/skills/`.
+
+---
+
+## 1. Purpose and Scope
 
 ---
 
