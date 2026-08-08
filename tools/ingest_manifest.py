@@ -91,8 +91,8 @@ def main() -> int:
     args = parser.parse_args()
 
     paragraphs = split_manifest(args.manifest, args.min_len)
-    print(f"[+] Manifiesto: {args.manifest}")
-    print(f"[+] Parrafos: {len(paragraphs)}")
+    print(f"[+] Manifest: {args.manifest}")
+    print(f"[+] Paragraphs: {len(paragraphs)}")
 
     if args.list:
         for i, para in enumerate(paragraphs, 1):
@@ -101,10 +101,10 @@ def main() -> int:
 
     axis_vectors = load_geodesic_axes()
     if not axis_vectors:
-        print("ERR: geodesic_axes vacia (correr traianus-bootstrap)")
+        print("ERR: geodesic_axes is empty (run traianus-bootstrap)")
         return 1
     threshold = calibrate_critical_threshold(axis_vectors)
-    print(f"[+] theta_dyn (densidad del tejido): {threshold:.6f}")
+    print(f"[+] theta_dyn (tissue density): {threshold:.6f}")
 
     selected = sorted(set(args.index or range(1, len(paragraphs) + 1)))
     consolidated = 0
@@ -120,12 +120,12 @@ def main() -> int:
     total = len(selected)
     rate = consolidated / total if total else 0.0
     print("-" * 78)
-    print(f"[=] Resultado: {consolidated}/{total} consolidados ({rate:.1%})")
+    print(f"[=] Result: {consolidated}/{total} consolidated ({rate:.1%})")
     degenerate = consolidated == 0 or consolidated == total
     if degenerate:
-        print("[!] GATE DEGENERADO: un solo resultado en este corpus (guard C1).")
+        print("[!] DEGENERATE GATE: single outcome on this corpus (guard C1).")
     else:
-        print("[+] GATE NO-DEGENERADO: ambos resultados observados (guard C1 OK).")
+        print("[+] NON-DEGENERATE GATE: both outcomes observed (guard C1 OK).")
     return 0
 
 
