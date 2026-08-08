@@ -8,6 +8,11 @@ from fastapi.testclient import TestClient
 # Ensure traianus package import
 sys.path.insert(0, os.path.abspath("."))
 
+from tools.weightless_parser_1972 import (
+    calibrate_control_threshold,
+    encode_weightless_14d,
+    load_control_corpus,
+)
 from traianus import app as main_module
 from traianus import bootstrap as gb
 from traianus import storage as storage
@@ -121,6 +126,22 @@ def run_audit():
         f"❌ CONSOLIDATION GATE DEGENERATE: {consolidated}/{len(nodes)} (See Audit C1)"
     )
     print(f"✅ C1 GUARD PASSED IN GREEN: non-degenerate ({consolidated}/{len(nodes)})")
+
+    # 7. SPEC-TDD-028 Weightless 14D: record theta_dyn = P95(sigma^2_control)
+    #    calibrated over the neutral control corpus, and assert the parser's
+    #    deterministic L2-normalized 14D contract holds on real prose.
+    control = load_control_corpus()
+    theta_wl = calibrate_control_threshold(control)
+    print(f"-> Weightless theta_dyn (P95 sigma^2_control, {len(control)} phrases): {theta_wl:.6f}")
+
+    probe = "pensamiento y pensamiento"
+    v_probe = encode_weightless_14d(probe)
+    norm = float(np.linalg.norm(v_probe))
+    assert v_probe.shape == (14,) and abs(norm - 1.0) <= 1e-12, (
+        f"Weightless vector contract violated: shape={v_probe.shape}, norm={norm}"
+    )
+    print(f"-> Weightless 14D contract OK (shape=(14,), norm={norm:.1f})")
+
 
 if __name__ == "__main__":
     run_audit()
