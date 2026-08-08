@@ -1,24 +1,23 @@
-# Simulación del Kernel sobre Base Geodésica Real — Datos de la Prueba
+# Kernel Simulation over the Real Geodetic Basis — Test Data
 
-**Script:** `traianus-simulation.py` (raíz)
-**Fecha:** 2026-08-06
-**DB:** `traianus.db` — tabla `geodesic_axes` (solo lectura, sin mutación)
+**Script:** `traianus-simulation.py` (repo root)
+**Date:** 2026-08-06
+**DB:** `traianus.db` — table `geodesic_axes` (read-only, no mutation)
 **Kernel:** `traianus/core.py` (`calibrate_critical_threshold`, `evaluate_gate_v01`)
 
 ---
 
-## 1. Objeto de la prueba
+## 1. Test objective
 
-Sustituir los ejes sintéticos (`np.random` + Gram-Schmidt, ortonormales) por los
-8 BLOBs reales de `geodesic_axes` y medir: densidad del tejido (θ_dyn),
-comportamiento de la compuerta dual y validez de la Válvula Dimensional
-384D → 385D.
+Replace the synthetic axes (`np.random` + Gram-Schmidt, orthonormal) with the 8
+real BLOBs from `geodesic_axes` and measure: tissue density (θ_dyn), dual-key
+gate behavior, and validity of the Dimensional Valve 384D → 385D.
 
-## 2. Base geodésica real cargada
+## 2. Real geodetic basis loaded
 
-8 ejes, dimensión 384, L2-normalizados (norma = 1.0):
+8 axes, dimension 384, L2-normalized (norm = 1.0):
 
-| Eje | Símbolo | Tag | Dim | \|\|v\|\|₂ |
+| Axis | Symbol | Tag | Dim | \|\|v\|\|₂ |
 |---|---|---|---|---|
 | AXIS_1 | ▲ | _SOMETHING | 384 | 1.000000 |
 | AXIS_2 | △ | _BE_BELOW | 384 | 1.000000 |
@@ -29,27 +28,27 @@ comportamiento de la compuerta dual y validez de la Válvula Dimensional
 | AXIS_7 | ▸ | _BECAUSE | 384 | 1.000000 |
 | AXIS_8 | ▹ | _KIND_OF | 384 | 1.000000 |
 
-**No-ortonormalidad medida:** coseno fuera de diagonal media **0.2267**, máxima **0.3362**.
-(Base anterior de la simulación: ortonormal → coseno 0.0. Ficción.)
+**Measured non-orthonormality:** mean off-diagonal cosine **0.2267**, max **0.3362**.
+(Previous simulation basis: orthonormal → cosine 0.0. Fiction.)
 
-## 3. Densidad del tejido (umbral dinámico)
+## 3. Tissue density (dynamic threshold)
 
-`calibrate_critical_threshold()` — varianza de proyecciones **cruzadas** de la base,
-excluyendo auto-proyección (i ≠ j, audit C1):
+`calibrate_critical_threshold()` — variance of the basis **cross** projections,
+excluding self-projection (i ≠ j, audit C1):
 
 ```
 theta_dyn = 0.004292
 ```
 
-- Con la base ortonormal sintética: `theta_dyn = 0.000000` (gate degenerado).
-- Con la fórmula vieja de la simulación (`mean(cross²)`): `0.056346` (escala errónea).
+- With the synthetic orthonormal basis: `theta_dyn = 0.000000` (degenerate gate).
+- With the simulation's old formula (`mean(cross²)`): `0.056346` (wrong scale).
 
-## 4. Vector de prueba y espectro de proyección
+## 4. Test vector and projection spectrum
 
-Vector de prueba = mezcla convexa de dos primitivas reales (AXIS_1 + AXIS_2),
-normalizada L2 (simula una ingesta focalizada).
+Test vector = convex mixture of two real primitives (AXIS_1 + AXIS_2),
+L2-normalized (simulates a focused ingestion).
 
-| Proyección | Valor |
+| Projection | Value |
 |---|---|
 | p₁ (<v_d, e₁>) | +0.772054 |
 | p₂ (<v_d, e₂>) | +0.772054 |
@@ -61,54 +60,54 @@ normalizada L2 (simula una ingesta focalizada).
 | p₈ (<v_d, e₈>) | +0.299192 |
 
 ```
-Media Espectral (p_bar)   = +0.414277
-Varianza (sigma^2)        = 0.044516   (fricción)
+Spectral mean (p_bar)   = +0.414277
+Variance (sigma^2)      = 0.044516   (friction)
 ```
 
-## 5. Compuerta Dual
+## 5. Dual-Key Gate
 
-| Clave | Valor |
+| Key | Value |
 |---|---|
-| Condición (σ² ≥ θ_dyn) | `True` (0.044516 ≥ 0.004292) |
+| Condition (σ² ≥ θ_dyn) | `True` (0.044516 ≥ 0.004292) |
 | Ethical Key (HITL) | `True` |
-| Estado | **CONSOLIDATED** |
+| State | **CONSOLIDATED** |
 
-**Contraste (gate ahora discriminante):** vector "ruidoso" uniforme (seed 42) →
-varianza ≈ 0.003 < 0.004292 → **INCUBATING**. El umbral real separa nota focalizada
-de nota genérica; ya no es un gate que siempre pasa.
+**Contrast (gate now discriminant):** uniform "noisy" vector (seed 42) →
+variance ≈ 0.003 < 0.004292 → **INCUBATING**. The real threshold separates a
+focused note from a generic one; it is no longer a gate that always passes.
 
-## 6. Válvula Dimensional (384D → 385D)
+## 6. Dimensional Valve (384D → 385D)
 
-1. Zero-padding de la entidad: `v_d+1 = [v_d; 0.0]` → shape `(385,)`.
-2. Re-padding de los 8 ejes reales (cada uno `[e_i; 0.0]`).
-3. Inyección del eje canónico `e_9 = [0, ..., 0, 1.0]`.
-4. Recálculo del espectro en R³⁸⁵ (9 ejes): p₁..p₈ idénticos, **p₉ = +0.000000**.
+1. Zero-pad the entity: `v_d+1 = [v_d; 0.0]` → shape `(385,)`.
+2. Re-pad the 8 real axes (each `[e_i; 0.0]`).
+3. Inject the canonical axis `e_9 = [0, ..., 0, 1.0]`.
+4. Recompute the spectrum in R³⁸⁵ (9 axes): p₁..p₈ identical, **p₉ = +0.000000**.
 
 ```
-Nueva varianza espectral (sigma^2) = 0.056520
+New spectral variance (sigma^2) = 0.056520
 ```
 
-## 7. Invariantes físicas (todas VERDE)
+## 7. Physical invariants (all GREEN)
 
-| Invariante | Resultado | Valor |
+| Invariant | Result | Value |
 |---|---|---|
 | 1. \|\|v₃₈₅\|\|₂ == 1.0 | ✅ | 1.000000 |
 | 2. dim(e₉) == 385 | ✅ | — |
 | 3. \|B_n+1\| == 9 | ✅ | — |
-| 4. max\|⟨e_viejo, e_nuevo⟩\| == 0 | ✅ | 0.00e+00 |
-| 5. ⟨v_d+1, e_nuevo⟩ == 0 | ✅ | 0.00e+00 |
+| 4. max\|⟨e_old, e_new⟩\| == 0 | ✅ | 0.00e+00 |
+| 5. ⟨v_d+1, e_new⟩ == 0 | ✅ | 0.00e+00 |
 
-**RESULTADO DE LA PRUEBA: PASÓ (VERDE)**
+**TEST RESULT: PASSED (GREEN)**
 
-## 8. Conclusiones
+## 8. Conclusions
 
-1. La base real no es ortonormal; el modelo Gram-Schmidt era irreal y fabricaba
-   un gate degenerado (θ = 0.0).
-2. θ_dyn = 0.0043 es propiedad exclusiva de la base (8 BLOBs reales): estable y auditable.
-3. El gate ahora discrimina: varianza espectral = "fricción"; consolidación requiere
-   fricción ≥ densidad del tejido.
-4. La Válvula Dimensional es un protocolo matemáticamente consistente: L2 = 1.0
-   exacto, ortogonalidad absoluta del eje nuevo, espectro determinista.
-5. Validación pendiente: el vector de prueba es sintético. Falta correr el criterio
-   sobre embeddings reales de notas (`tools/audit_harness.py`) para confirmar que la
-   varianza predice algo útil (WP1 del audit).
+1. The real basis is not orthonormal; the Gram-Schmidt model was unrealistic and
+   fabricated a degenerate gate (θ = 0.0).
+2. θ_dyn = 0.0043 is an exclusive property of the basis (8 real BLOBs): stable and auditable.
+3. The gate now discriminates: spectral variance = "friction"; consolidation
+   requires friction ≥ tissue density.
+4. The Dimensional Valve is a mathematically consistent protocol: exact L2 = 1.0,
+   absolute orthogonality of the new axis, deterministic spectrum.
+5. Validation pending: the test vector is synthetic. The criterion still needs to
+   be run over real note embeddings (`tools/audit_harness.py`) to confirm that the
+   variance predicts something useful (audit WP1).
