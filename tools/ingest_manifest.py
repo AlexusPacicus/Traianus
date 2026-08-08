@@ -82,7 +82,8 @@ def evaluate(paragraph: str, axis_vectors: list[np.ndarray], threshold: float) -
 
 def main() -> int:
     parser = argparse.ArgumentParser(description=__doc__)
-    parser.add_argument("manifest", nargs="?", default="/Users/test/Downloads/MANIFIESTO_0.9.md")
+    parser.add_argument("input_file", nargs="?",
+                        help="path to the markdown manifest to analyze (agnostic to location)")
     parser.add_argument("--min-len", type=int, default=20, help="drop fragments shorter than this (chars)")
     parser.add_argument("--index", type=int, action="append", metavar="N",
                         help="evaluate only paragraph N (1-based; repeatable). Default: all.")
@@ -90,8 +91,16 @@ def main() -> int:
                         help="print paragraph index + preview without encoding (no model load).")
     args = parser.parse_args()
 
-    paragraphs = split_manifest(args.manifest, args.min_len)
-    print(f"[+] Manifest: {args.manifest}")
+    if args.input_file is None:
+        print("ERR: input_file argument missing.", file=sys.stderr)
+        print("usage: python tools/ingest_manifest.py <path-to-markdown-manifest>", file=sys.stderr)
+        return 2
+    if not os.path.isfile(args.input_file):
+        print(f"ERR: input file not found: {args.input_file}", file=sys.stderr)
+        return 2
+
+    paragraphs = split_manifest(args.input_file, args.min_len)
+    print(f"[+] Input file: {args.input_file}")
     print(f"[+] Paragraphs: {len(paragraphs)}")
 
     if args.list:
