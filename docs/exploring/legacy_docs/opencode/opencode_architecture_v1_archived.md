@@ -1,5 +1,7 @@
 # 🏗️ Architecture Specification — OpenCode Configuration of Traianus/TridenGuard
 
+> **ARCHIVED (2026-08-08):** historical v1 (2026-08-01). Superseded by `docs/exploring/legacy_docs/opencode/opencode_architecture.md` (v1.2.0). Kept for traceability only.
+
 > **Date:** 2026-08-01 · **opencode 1.18.10** · **Status:** ACTIVE (hardened after the 2026-08-01 Plan)
 > **Primary sources:** `opencode.jsonc`, `.opencode/agents/*.md`, `tools/tridenguard_validator.py`, `AGENTS.md`
 > **Topological Grounding:** every configuration or constitution quote reproduces the real file character by character.
