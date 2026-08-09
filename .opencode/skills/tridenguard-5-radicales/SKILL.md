@@ -6,11 +6,11 @@ description: Use when generating or validating code proposals under the 5 Radica
 # TridenGuard 5 Radicals
 
 Every change proposal must contain exactly:
-1. `Intent_Class`: [GENERATE | REFACTOR | FIX | AUDIT | NONE]
-2. `Runtime_Contract`: target environment and constraints (local/offline, <= 8 GB RAM).
-3. `Implementation_Block`: executable source code snippet.
-4. `Topological_Grounding`: exact textual quote, character by character, of the original code.
-5. `Safety_Abort`: [NONE | UNSAFE_REQUEST_DETECTED | MISSING_DEPENDENCY_SPEC]
+1. `Intent_Class`: [FIX | REFACTOR | TEST | DOC | SPEC]
+2. `Target_File`: relative path within repository root.
+3. `Topological_Grounding`: exact UTF-8 quote present literally in the target file.
+4. `Implementation_Block`: exact text or code block to insert/replace.
+5. `Safety_Abort`: [NONE | BOUNDARY_VIOLATION | SYNTAX_ERROR | UNAUTHORIZED_SCOPE]
 
 ## Deterministic gates (validate_proposal)
 1. Safety Gate: Safety_Abort != "NONE" -> BLOCKED_BY_SAFETY_GATE
