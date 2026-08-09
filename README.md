@@ -154,6 +154,48 @@ Requires the model cached locally (prefetch with `traianus-bootstrap`). The `mod
 
 * **Research (archived)** (`docs/exploring/legacy_docs/research/`): RESEARCH_HYPOTHESIS.md (grounding in Conceptual Spaces, Gärdenfors) and RESEARCH_PROGRAM.md (WP1-WP4 roadmap), preserved for historical reference.
 
+## 7. Development Environment (OpenCode)
+
+This project uses [OpenCode](https://opencode.ai) as the primary AI-assisted development interface with a zero-trust MCP architecture.
+
+### OpenCode Plugin Setup
+
+```bash
+# Install the OpenCode plugin and skills runtime
+cd .opencode && npm install && cd ..
+```
+
+This installs `@opencode-ai/plugin` and the two skills:
+- `tdd-cycle` — Red-Green-Refactor workflow with empirical validation
+- `tridenguard-5-radicales` — Structured mutation proposals (5 Radicals)
+
+### Configuration Summary
+
+| Component | Value |
+|---|---|
+| Primary model | `opencode/longcat-2.0-free` (1M context, free tier) |
+| Small model | `opencode/deepseek-v4-flash-free` (flash, free tier) |
+| MCP servers | `tridenguard-validator` (Zero-Trust gate), `spectral-math-engine` (deterministic algebra) |
+| Network | Fully denied (`webfetch: deny`, `websearch: deny`) |
+| Git mutations | Require confirmation (`ask`) |
+
+### MCP Servers
+
+Both servers run locally over stdio — no network egress:
+
+- **`traianus/security/validator.py`** (v1.2.0) — validates mutation proposals through 3 deterministic gates: Safety, Zero-Trust, Grounding
+- **`tools/spectral_math_mcp.py`** (v1.0.0) — deterministic math: C1 threshold calibration, simplex volume (Cayley-Menger), barycentric coordinates, float drift analysis
+
+### Permissions
+
+OpenCode operates under a strict permission matrix (`opencode.jsonc`):
+- **Read-only git** — `git status`, `git diff`, `git log`, `git show` allowed without prompt
+- **Mutating git** — `git commit`, `git push`, `git checkout` require confirmation
+- **Destructive** — `rm *` denied
+- **Network** — all web access denied
+
+See `opencode.jsonc` for the full permission matrix and `AGENTS.md` for the agent constitution.
+
 ## License
 
 GPL-3.0-or-later. See `pyproject.toml` and `LICENSE` for the full license declaration.
