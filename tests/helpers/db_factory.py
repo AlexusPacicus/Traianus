@@ -69,6 +69,16 @@ SCHEMA_STATEMENTS = [
         PRIMARY KEY (id, seq)
     )
     """,
+    """
+    CREATE TABLE IF NOT EXISTS audit_log (
+        case_id TEXT PRIMARY KEY,
+        timestamp TEXT DEFAULT (datetime('now')),
+        intent_class TEXT,
+        target_file TEXT,
+        decision TEXT NOT NULL,
+        safety_abort TEXT
+    )
+    """,
 ]
 
 AXIS_COUNT = 8
