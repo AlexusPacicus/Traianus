@@ -243,3 +243,25 @@
 
 * **Status:** `Consolidated`. EAS-01 promoted `Propuesto` → `Aceptado` on
   this evidence.
+
+### seq 11 — 2026-08-10 — Logographic Restructure: tools/ Subdivision and .data/ Isolation
+
+* **Context:** `tools/` had grown as a flat directory of 14+ scripts with no
+  semantic grouping; runtime artifacts (`traianus.db`, `-shm`, `-wal`) lived at
+  the repository root, violating logographic hygiene.
+* **Action:**
+  - `tools/` subdivided into `audit/`, `experiments/`, `mcp/` — each with its
+    own `__init__.py` for Python import resolution.
+  - Root artifacts relocated: `traianus-simulation.py` → `tools/experiments/`;
+    `traianus.db` (+ `-shm`, `-wal`) → `.data/` (gitignored).
+  - `docs/EAS-01_LOGOGRAPHIC_PHYSICS.md` → `docs/specifications/`.
+  - All path references updated across `opencode.jsonc`, `AGENTS.md`,
+    `IMPLEMENTATION_STATUS.md`, `README.md`, `LOGOGRAPHY.md`, `LEDGER.md`,
+    `docs/development/`, `docs/exploring/root_clutter/`, and `.opencode/skills/`.
+  - Cross-package imports updated in 6 experiment files + 1 test file.
+* **Scope (files moved):** 11 files under `tools/`, 1 under `docs/`,
+  1 root script. Zero modifications to `traianus/` source or `tests/` logic.
+* **Gate (measured):**
+  - `pytest tests/` → **68 passed** (full suite, hermetic + model).
+  - No functional delta; pure structural refactor (logographic hygiene).
+* **Status:** `Consolidated`.
