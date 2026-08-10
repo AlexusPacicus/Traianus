@@ -93,7 +93,7 @@ def main() -> int:
 
     if args.input_file is None:
         print("ERR: input_file argument missing.", file=sys.stderr)
-        print("usage: python tools/ingest_manifest.py <path-to-markdown-manifest>", file=sys.stderr)
+        print("usage: python tools/experiments/ingest_manifest.py <path-to-markdown-manifest>", file=sys.stderr)
         return 2
     if not os.path.isfile(args.input_file):
         print(f"ERR: input file not found: {args.input_file}", file=sys.stderr)

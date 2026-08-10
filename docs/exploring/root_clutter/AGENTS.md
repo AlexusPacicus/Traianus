@@ -18,7 +18,7 @@
 
 ### Network Zero-Trust
 - Code proposals **MUST NOT** contain external network primitives (`fetch`, `axios`, `urllib`, `requests`, `httpx`, `socket`, `subprocess`, `curl`, `wget`, `aiohttp`, `importlib`, `os.system`, `os.popen`).
-  - Scope note: this ban applies to the `Implementation_Block` of mutation proposals. Local repository tooling (e.g. `tools/check_impact.py`, which shells out to `git grep`) is not subject to it.
+  - Scope note: this ban applies to the `Implementation_Block` of mutation proposals. Local repository tooling (e.g. `tools/audit/check_impact.py`, which shells out to `git grep`) is not subject to it.
 - Uvicorn/FastAPI endpoints **MUST** bind exclusively to `127.0.0.1`.
 - Wildcard CORS policies (`allow_origins=["*"]`) combined with credentials **MUST NOT** be introduced.
 

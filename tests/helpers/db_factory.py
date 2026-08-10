@@ -112,7 +112,7 @@ def seed_onehot_axes(conn: sqlite3.Connection, axis_count: int = AXIS_COUNT, dim
 def seed_realistic_axes(conn: sqlite3.Connection, fixture_path: str | None = None) -> None:
     """
     FROZEN realistic geometry (Phase 0): NSM octagon exported by
-    `tools/export_nsm_axes.py` from the real all-MiniLM-L6-v2 model (off-diag
+    `tools/experiments/export_nsm_axes.py` from the real all-MiniLM-L6-v2 model (off-diag
     cosine ≈ 0.23, max ≈ 0.34). Allows hermetic tests with production
     geometry WITHOUT loading the model (L1).
     """

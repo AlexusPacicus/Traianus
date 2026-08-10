@@ -62,7 +62,7 @@ jobs:
           HF_HUB_OFFLINE=1 pytest tests/ -m "model" -q
       - name: Audit harness (C1 guard)
         run: |
-          HF_HUB_OFFLINE=1 python tools/audit_harness.py
+          HF_HUB_OFFLINE=1 python tools/audit/audit_harness.py
       - name: WP0 semantics validation (Step 4)
         run: |
-          HF_HUB_OFFLINE=1 python tools/validate_c1_semantics.py
+          HF_HUB_OFFLINE=1 python tools/experiments/validate_c1_semantics.py
