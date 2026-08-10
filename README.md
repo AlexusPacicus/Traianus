@@ -184,7 +184,7 @@ This installs `@opencode-ai/plugin` and the two skills:
 Both servers run locally over stdio — no network egress:
 
 - **`traianus/security/validator.py`** (v1.2.0) — validates mutation proposals through 3 deterministic gates: Safety, Zero-Trust, Grounding
-- **`tools/spectral_math_mcp.py`** (v1.0.0) — deterministic math: C1 threshold calibration, simplex volume (Cayley-Menger), barycentric coordinates, float drift analysis
+- **`tools/mcp/spectral_math_mcp.py`** (v1.0.0) — deterministic math: C1 threshold calibration, simplex volume (Cayley-Menger), barycentric coordinates, float drift analysis
 
 ### Permissions
 

@@ -13,7 +13,7 @@ Verified invariants:
   TR-ZT-002  CORS without wildcard (static)
 
 Usage:
-  python3 tools/traianus_invariant_verifier.py [path_to_traianus.db]
+  python3 tools/audit/traianus_invariant_verifier.py [path_to_traianus.db]
 Exit 0 = all obligations met; exit 1 = findings.
 """
 

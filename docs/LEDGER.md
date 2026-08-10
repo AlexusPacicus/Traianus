@@ -54,8 +54,8 @@
   shims (no `sqlite3`).
 - **Gate (S0 → S1):** `grep -c "sqlite3.connect\|import sqlite3" traianus/app.py` == 0;
   `DB_PATH` exclusive to `traianus/storage`; `pytest tests/ -m "not model"` → 50 passed / 1 deselected;
-  `pytest tests/ -m "model"` → 1 passed; `python tools/audit_harness.py` → C1 guard GREEN;
-  `python tools/validate_c1_semantics.py` → GREEN.
+   `pytest tests/ -m "model"` → 1 passed; `python tools/audit/audit_harness.py` → C1 guard GREEN;
+   `python tools/experiments/validate_c1_semantics.py` → GREEN.
 - **Status:** `Approved`.
 
 ### seq 4 — 2026-08-05 — SPEC-M2-DELTA-0-1 (Consolidated)
@@ -75,9 +75,9 @@
   - `DB_PATH = "traianus.db"` defined exclusively in `traianus/storage.py` ✔
   - `pytest tests/ -m "not model"` → **50 passed / 1 deselected** ✔
   - `pytest tests/ -m "model"` → **1 passed** ✔
-  - `python tools/audit_harness.py` → **C1 GUARD PASSED IN GREEN (45%, 9/20)** ✔
-  - `python tools/validate_c1_semantics.py` → **WP0 VALIDATION PASSED (53%, 9/17)** ✔
-  - Full combined run: **51 passed** ✔
+   - `python tools/audit/audit_harness.py` → **C1 GUARD PASSED IN GREEN (45%, 9/20)** ✔
+   - `python tools/experiments/validate_c1_semantics.py` → **WP0 VALIDATION PASSED (53%, 9/17)** ✔
+   - Full combined run: **51 passed** ✔
 - **Status:** `Consolidated`. System enabled for Δ2 (HTTP route extraction).
 
 > **Consolidation rule:** a delta reaches `Consolidated` only when its declared gate is satisfied
@@ -100,7 +100,7 @@
 - **Gate (measured):**
   - `pytest tests/ -m "not model"` → **57 passed / 1 deselected** (7 new hardening tests)
   - `pytest tests/ -m "model"` → **1 passed**
-  - `python tools/audit_harness.py` → **C1 GUARD PASSED IN GREEN (45%, 9/20 over 20 distinct notes)**
+   - `python tools/audit/audit_harness.py` → **C1 GUARD PASSED IN GREEN (45%, 9/20 over 20 distinct notes)**
 - **Status:** `Consolidated`.
 
 ### seq 6 — 2026-08-06 — Connection-lifecycle hardening (Δ1 review follow-up)
@@ -127,8 +127,8 @@
 - **Gate (measured):**
   - `pytest tests/ -m "not model"` → **61 passed / 1 deselected** (+4 connection tests)
   - `pytest tests/ -m "model"` → **1 passed**
-  - `python tools/audit_harness.py` → **C1 GUARD PASSED IN GREEN (45%, 9/20)**
-  - `python tools/validate_c1_semantics.py` → **WP0 VALIDATION PASSED (53%, 9/17)**
+   - `python tools/audit/audit_harness.py` → **C1 GUARD PASSED IN GREEN (45%, 9/20)**
+   - `python tools/experiments/validate_c1_semantics.py` → **WP0 VALIDATION PASSED (53%, 9/17)**
 - **Status:** `Consolidated`.
 
 ### seq 7 — 2026-08-06 — Canonical-DDL ownership + consolidation guard (Δ1 review, findings #1/#2)
@@ -146,13 +146,100 @@
   from `max({}.keys())`.
 - **Language normalization (audit L3):** Spanish docstrings/comments in
   `traianus/app.py`, `tests/test_substrate.py`, `tests/test_e2e.py` and the
-  `(n=20)` comment in `tools/validate_c1_semantics.py` converted to English.
+   `(n=20)` comment in `tools/experiments/validate_c1_semantics.py` converted to English.
 - **New tests** (`tests/test_storage_hardening.py`, +3): `init_db()` alone creates
   `geodesic_axes`; `anchor_in_sqlite` is self-sufficient on a fresh DB;
   consolidation on an empty basis returns 400.
 - **Gate (measured):**
   - `pytest tests/ -m "not model"` → **64 passed / 1 deselected** (+3)
   - `pytest tests/ -m "model"` → **1 passed**
-  - `python tools/audit_harness.py` → **C1 GUARD PASSED IN GREEN (45%, 9/20)**
-  - `python tools/validate_c1_semantics.py` → **WP0 VALIDATION PASSED (53%, 9/17)**
+   - `python tools/audit/audit_harness.py` → **C1 GUARD PASSED IN GREEN (45%, 9/20)**
+   - `python tools/experiments/validate_c1_semantics.py` → **WP0 VALIDATION PASSED (53%, 9/17)**
 - **Status:** `Consolidated`.
+
+### seq 8 — 2026-08-08 — Meta-Governance Moratorium and Structural Sanitation
+* **Context:** The document architecture and agent bureaucracy (5 radicals, MCP, RFC 2119) grew disproportionately relative to the product, obscuring the empirically unvalidated mathematical core ($\sigma^2 \ge \theta_{dyn}$).
+* **Action:** Declaration of total meta-governance moratorium.
+   * Issue #1, #5, #6: Technical debt purge, sanitation of `tools/experiments/ingest_manifest.py` (CLI-agnostic), obsolete agent architecture archived to `legacy_docs`, and permission restriction in `opencode.jsonc` (Zero-Trust).
+  * Issue #2, #3: Official freeze of the representation layer at 384D (`all-MiniLM-L6-v2`, offline) to prepare the ground.
+* **Next Step:** Deployment of WP1 empirical research (Issue #4) to falsify the consolidation hypothesis over a real corpus.
+
+### seq 9 — 2026-08-08 — WP1 Empirical Research Closure (Falsification of Hypothesis B_0)
+ * **Context:** Deployment of `tools/experiments/validate_wp1_empirical.py` to evaluate the C1 gate ($\sigma^2 \ge \theta_{\text{dyn}}$) over 384D (`all-MiniLM-L6-v2`) with a real labeled corpus of 111 paragraphs (Cat A: Technical Focus n=45, Cat B: Conversational Prose n=46, Cat C: Stochastic Noise n=20).
+* **Empirical Results:**
+  * Cat C (Noise): $\sigma^2 = 0.002021$, consolidation rate **0%** (0/20). C1 acts effectively as a filter against stochastic noise.
+  * Cat B (Prose): $\sigma^2 = 0.002582$, consolidation rate **15%** (7/46). High dispersion due to concentration of general primitives.
+  * Cat A (Technical): $\sigma^2 = 0.002176$, consolidation rate **7%** (3/45). Semantic mass distributes homogeneously over the prosthetic octagon ($S_0$).
+* **Scientific Verdict:** The initial hypothesis on the static basis $B_0$ is **falsified in the data**. Variance over $B_0$ does not measure "technical focus" but dispersion over Wierzbicka primitives. The need to derive geodesic axes dynamically from the user corpus is scientifically demonstrated (ADR-017).
+ * **Status:** Immediate roadmap (Issues #1 to #6) completed at 100%. Hermetic suite (65 passed) and `tools/audit/audit_harness.py` in GREEN.
+
+### seq 10 — 2026-08-09 — EAS-01 Fase 1b/1c: Sparse Lexical Substrates Falsified, NCD Coupling Validated
+
+* **Context:** EAS-01 Fase 1 roadmap. Three candidate substrates for the
+  substrate-side key (Llave 1) evaluated over the 111-note control corpus
+   (Cat A: 45, Cat B: 46, Cat C: 20) via `tools/experiments/exp_logographic_nonortho.py`
+   and `tools/experiments/exp_entropy_spectral.py`. Every probe ships its own
+  falsification controls (C1–C6); headline numbers are not reported alone.
+
+* **Fase 1b — Non-orthogonal sparse basis (FALSIFIED):**
+  - Relaxing strict orthogonality **did** rescue the spectral key: the Gram
+    off-diagonal rises to mean 0.0163 (max 0.1311) and
+    $\theta_{dyn} = 0.000980$, versus exactly $0.000000$ under the one-hot
+    basis of Fase 1. $\rho$ becomes continuous (40 distinct values in Cat A
+    vs 2 previously). Confirms that $\theta_{dyn} = 0$ on any strictly
+    orthogonal basis is an algebraic identity, not a tuning defect.
+  - **C4 still fails:** one injected domain term consolidates pure noise
+    ($\rho = 0.0309$, passes); a word salad with two terms reaches
+    $\rho = 0.1457$. **C3 still inverts:** axes rebuilt from Category B
+    vocabulary give Cat B 46/46 consolidation and drop Cat A to 15/45.
+  - **Verdict:** non-orthogonality fixes the geometry but not the dictionary
+    dependence. Any lexicon-based $\rho$ remains a keyword filter.
+
+* **Fase 1c — Markov spectral gap (FALSIFIED):**
+  - Reference-free eigenvalue gap of each note's own character-bigram
+    transition matrix. No comparison reaches significance:
+    gap A vs B AUC 0.414 ($p = 0.16$), A vs C AUC 0.619 ($p = 0.13$);
+    spectral entropy A vs B AUC 0.556, A vs C AUC 0.468.
+  - Cat B shows a **higher** mean gap (0.0904) than Cat A (0.0811),
+    contradicting the Wigner-matrix prediction for noise.
+  - **Verdict:** the gap measures orthographic regularity, not conceptual
+    structure. English word salad is still English at the bigram level.
+
+* **Fase 1c — NCD coupling (VALIDATED):**
+  - $\text{NCD}(x,y) = \frac{C(xy) - \min(C(x),C(y))}{\max(C(x),C(y))}$,
+    reported as coupling $1 - \text{NCD}$ against a **held-out half** of the
+    reference corpus. Zero lexicon, zero tokenizer, byte level.
+  - Separation is consistent across three independent compressors:
+
+    | Compressor | A vs B | A vs C | C4 terms to defeat |
+    |---|---|---|---|
+    | zlib | AUC 0.953, $p=9.8\times10^{-10}$ | AUC 0.967, $p=1.6\times10^{-7}$ | 8 |
+    | bz2 | AUC 0.922, $p=1.3\times10^{-8}$ | AUC 0.946, $p=5.7\times10^{-7}$ | 8 |
+    | lzma | AUC 0.922, $p=5.0\times10^{-9}$ | AUC 0.933, $p=9.6\times10^{-7}$ | 4 |
+
+  - **C4 defeated:** injections of 1, 2 and 4 domain terms into noise all
+    fail to consolidate under zlib/bz2 (0.0504 / 0.0549 / 0.0593 against a
+    Cat A p25 floor of 0.0628). First substrate of five to resist trivial
+    keyword injection.
+  - **C3b reference symmetry (decisive):** the coupling matrix is fully
+    diagonal — Cat A couples most to an A reference (0.0651), B to B
+    (0.0668), C to C (0.0996). Reference-dependence is a **symmetric
+    property of the coupling operator**, i.e. designed field physics
+    ($E_{int}$ against $\Phi$), not a Category A artifact.
+
+* **Documented limitations (NOT resolved):**
+  - **Length confound:** $r(\text{NCD}, \text{len}) = +0.396$ within Cat A.
+    Length normalization is a precondition for production use.
+  - **Language drift:** C6 gives ES/EN deltas up to 0.0204 on
+    meaning-identical pairs, ~30% of the inter-category range. NCD is far
+    less language-sensitive than dense embeddings but is **not** invariant.
+  - **8-term injection succeeds** under every compressor: resistance is
+    graded, not absolute.
+  - $\Phi$ (§4.2) and the full $E_{int} = \int \rho\Phi\,dV$ integral remain
+    unimplemented; only pairwise coupling to a static reference was measured.
+
+* **Gate (measured):** `pytest tests/ -m "not model"` → **64 passed**.
+  No modification to `traianus/core.py` or existing tests.
+
+* **Status:** `Consolidated`. EAS-01 promoted `Propuesto` → `Aceptado` on
+  this evidence.

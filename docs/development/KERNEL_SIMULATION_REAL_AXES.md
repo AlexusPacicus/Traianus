@@ -1,8 +1,8 @@
 # Kernel Simulation over the Real Geodetic Basis — Test Data
 
-**Script:** `traianus-simulation.py` (repo root)
+**Script:** `tools/experiments/traianus_simulation.py`
 **Date:** 2026-08-06
-**DB:** `traianus.db` — table `geodesic_axes` (read-only, no mutation)
+**DB:** `.data/traianus.db` — table `geodesic_axes` (read-only, no mutation)
 **Kernel:** `traianus/core.py` (`calibrate_critical_threshold`, `evaluate_gate_v01`)
 
 ---
@@ -109,5 +109,5 @@ New spectral variance (sigma^2) = 0.056520
 4. The Dimensional Valve is a mathematically consistent protocol: exact L2 = 1.0,
    absolute orthogonality of the new axis, deterministic spectrum.
 5. Validation pending: the test vector is synthetic. The criterion still needs to
-   be run over real note embeddings (`tools/audit_harness.py`) to confirm that the
+   be run over real note embeddings (`tools/audit/audit_harness.py`) to confirm that the
    variance predicts something useful (audit WP1).

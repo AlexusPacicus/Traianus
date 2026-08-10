@@ -16,6 +16,7 @@
 
 ## 🗄️ 2. Exploring (historical — not referenced by live tooling)
 
+* **docs/exploring/legacy_docs/:** Cementerio activo de documentación histórica. Alberga experimentos pausados (ej. parser 14D), plantillas de agentes obsoletos y arquitecturas previas purgadas del working tree principal para evitar colisiones cognitivas.
 * **Research** (`./exploring/legacy_docs/research/`): RESEARCH_HYPOTHESIS.md (Gärdenfors Conceptual Spaces, RH-0..RH-3), RESEARCH_PROGRAM.md (WP1-WP4 roadmap), NEXT_RESEARCH.md (backlog).
 * **Methodology & Tests** (`./exploring/legacy_docs/development/`): METHODOLOGY.md (4-phase neuro-symbolic flow), working_tree.md, bitacora.md, TEST_OVERVIEW.md, and the 9 RFC 2119 `SPEC-*.md` normative specs consumed by `tests/meta/_spec_lib.py`.
 * **Agents & Templates** (`./exploring/legacy_docs/agents/`): agents_constitution.md (13-role SRP matrix) and templates/operational_templates.md.
@@ -34,10 +35,10 @@
 * **`tests/test_security.py` + `tests/security/`:** Zero-Trust Gate (SEC-M-01..18) on `traianus/security/validator.py` + MCP stdio JSON-RPC server; Structured Outputs contract (SEC-M-14..18) on `traianus/security/schemas/parser.py`; Dual Boundary Gate (SEC-M-08..12); config perimeter (SEC-M-13) on `opencode.jsonc`.
 * **`tests/helpers/`:** `db_factory.py` (single source of DDL), `fake_encoder.py` (L1 hermetic), `endpoint_registry.py`.
 * **`tests/fixtures/nsm_axes_8.json`:** Real axes (8×384) exported for L1 tests.
-* **CI:** `.github/workflows/ci.yml` — 2 jobs: hermetic (`pytest tests/ -m "not model"`, no model/offline) and real-model E2E (`pytest tests/ -m "model"` + `tools/audit_harness.py`, model cached via `actions/cache` + HF prefetch).
+* **CI:** `.github/workflows/ci.yml` — 2 jobs: hermetic (`pytest tests/ -m "not model"`, no model/offline) and real-model E2E (`pytest tests/ -m "model"` + `tools/audit/audit_harness.py`, model cached via `actions/cache` + HF prefetch).
 * **Legacy suite (archived):** the previous G1–G9 catalog, per-block skeletons, `tests/meta/` structure guardians, and `tests/afirmaciones/` claims registry were archived by the flat-suite restructure into `docs/exploring/legacy_docs/tests/` and are not referenced by live tooling.
 * **[TEST_OVERVIEW.md](./exploring/legacy_docs/development/tests/TEST_OVERVIEW.md):** Archived living map of the legacy suite (measured states, bootstrap map, G1–G9 catalog, claims, meta-guardians, Spec-First contribution guide).
-* **[audit_harness.py](../tools/audit_harness.py):** Hermetic empirical harness — C1 regression guard (consolidation rate in `[5%, 95%]`) over ephemeral SQLite.
+* **[audit_harness.py](../tools/audit/audit_harness.py):** Hermetic empirical harness — C1 regression guard (consolidation rate in `[5%, 95%]`) over ephemeral SQLite.
 * **H4 Regression (append-only):** covered live by `tests/test_substrate.py::test_append_only_revision_log` (`seq` increasing per `id`, no UPDATE/REPLACE/DELETE on nodes).
 
 ---

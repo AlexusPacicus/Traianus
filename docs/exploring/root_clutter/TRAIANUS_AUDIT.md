@@ -51,7 +51,7 @@
 
 ## Remediation Status
 
-Resolution criterion: fix implemented in code **and** verified by a deterministic test or the empirical harness (`tools/audit_harness.py`).
+Resolution criterion: fix implemented in code **and** verified by a deterministic test or the empirical harness (`tools/audit/audit_harness.py`).
 
 | ID | Status | Evidence |
 |---|---|---|

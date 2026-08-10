@@ -18,12 +18,12 @@
 
 | Component | State | Scope | Verified Evidence |
 | :--- | :--- | :--- | :--- |
-| **Vertices (V_n)** | 🟢 100% Implemented | `traianus/` | Append-only immutable node log keyed `(id, seq)` in SQLite — DDL `traianus/app.py:160-179`; new revisions inserted with increasing `seq` per `id` (`next_node_seq`, `traianus/app.py:220-229`); no `UPDATE`/`REPLACE`/`DELETE` on `manifold_nodes` (H4 / ADR-025). |
-| **Edges (E_n)** | 🟢 100% Implemented | `traianus/` | Atomic adjacency-ε persistence in `manifold_edges` — server-side `EPSILON_EDGE` (`traianus/app.py:48`), DDL `traianus/app.py:192-199`, transactional insert during consolidation (`traianus/app.py:561`). |
+| **Vertices (V_n)** | 🟢 100% Implemented | `traianus/` | Append-only immutable node log keyed `(id, seq)` in SQLite — DDL `traianus/storage.py:129`; new revisions inserted with increasing `seq` per `id` (`next_node_seq`, `traianus/storage.py:276`); no `UPDATE`/`REPLACE`/`DELETE` on `manifold_nodes` (H4 / ADR-025). |
+| **Edges (E_n)** | 🟢 100% Implemented | `traianus/` | Atomic adjacency-ε persistence in `manifold_edges` — server-side `EPSILON_EDGE` (`traianus/app.py:92`), DDL `traianus/storage.py:207`, transactional insert during rebuild (`traianus/storage.py:594`). |
 | **Simplicial faces (K_n)** | 🔵 Roadmap I+D | `docs/research/` | Persistent topology & dimension discovery, WP2 — `docs/research/RESEARCH_PROGRAM.md:19-23`. Not executed by PoC v1.0. |
-| **Zero-Trust perimeter & C1 gate** | 🟢 100% Implemented | `traianus/` | Fail-closed auth `x-traianus-token` (`traianus/app.py:100-103`); enumerated CORS, no wildcard (`traianus/app.py:52-60`); ingress restricted to `text/plain` (`traianus/app.py:89`, `traianus/app.py:446-447`); dynamic variance threshold calibrated excluding self-projection, observed consolidation rate 30-45% (`traianus/app.py:318-334`, `tools/audit_harness.py`). |
+| **Zero-Trust perimeter & C1 gate** | 🟢 100% Implemented | `traianus/` | Fail-closed auth `x-traianus-token` (`traianus/app.py:110-113`); enumerated CORS, no wildcard (`traianus/app.py:65-73`); ingress restricted to `text/plain` (`traianus/app.py:99`, `traianus/app.py:298-299`); dynamic variance threshold calibrated excluding self-projection (`traianus/core.py:39`), observed consolidation rate 30-45% (`tools/audit/audit_harness.py`). |
 | **Latency** | 🟢 Measured | `traianus/` | Sub-millisecond projection kernel (0.01 ms kernel / ~13 ms total pipeline including neural embedding, PyTorch on CPU). |
-| **Provider agnosticism (RH-1)** | 🟡 Partial | `traianus/` + `docs/research/` | Dimension mismatch handled explicitly: zero-padding when `d_db > d_in`; HTTP 422 rejection when `d_in > d_db` (`traianus/app.py:353-357`, `traianus/app.py:466-473`); multi-provider dynamic switching remains active R&D (RH-1, `docs/research/RESEARCH_HYPOTHESIS.md`). |
+| **Provider agnosticism (RH-1)** | 🟡 Partial | `traianus/` + `docs/research/` | Dimension mismatch handled explicitly: zero-padding when d_db > d_in; HTTP 422 rejection when d_in > d_db (traianus/app.py:353-357, traianus/app.py:466-473). THE POC v1.0 CORE IS OFFICIALLY FROZEN AT 384D (all-MiniLM-L6-v2, pinned, offline). Multi-provider dynamic switching and experimental dimensionalities (e.g., 14D) remain active R&D (RH-1, docs/exploring/legacy_docs/research/RESEARCH_HYPOTHESIS.md) but are out of scope for the current validation phase. |
 | **Observation layer ($O_n = P_\theta(S_n)$)** | 🟢 Contract + 🔵 Client | `traianus/` + `docs/observation/` | Read-only perspective projections declared in ADR-022/ADR-024; zero-side-effect reads verified (G5/OB, ADR-025 #2). The Ulpia client itself is roadmap (no UI code). See `docs/observation/ULPIA_OVERVIEW.md`. |
 
 ---
@@ -39,9 +39,9 @@
 
 | Claim | Primary Source | Guard |
 | :--- | :--- | :--- |
-| Append-only node log | `traianus/app.py:126-139` | `tests/genericos/test_g5_append_only.py` |
-| ε-adjacency persistence | `traianus/app.py:561` | `tests/bloques/relaciones/` |
-| Zero-Trust perimeter | `traianus/app.py:30-69` | `tests/genericos/test_g9_zero_trust.py`, `tests/security/` |
-| C1 variance calibration | `traianus/app.py:249-265` | `tests/genericos/test_g7_determinismo.py`, `tools/audit_harness.py` |
-| Dimension handling (RH-1) | `traianus/app.py:284-292` | `tests/afirmaciones/test_cl_i62_dimension_provider.py` |
-| Latency envelope | `tools/audit_harness.py` | Empirical benchmark (audit harness) |
+| Append-only node log | `traianus/storage.py:129` | `tests/test_substrate.py::test_append_only_revision_log` |
+| ε-adjacency persistence | `traianus/storage.py:594` | `tests/test_substrate.py::test_epsilon_edges_adjacency` |
+| Zero-Trust perimeter | `traianus/app.py:65-73`, `traianus/app.py:110-113` | `tests/test_security.py`, `tests/security/` |
+| C1 variance calibration | `traianus/core.py:39` | `tests/test_substrate.py::test_c1_threshold_excludes_self_projection`, `tools/audit/audit_harness.py` |
+| Dimension handling (RH-1) | `traianus/app.py:203-214`, `traianus/app.py:331-340` | `tests/test_cl_i62_dimension_provider.py` |
+| Latency envelope | `tools/audit/audit_harness.py` | Empirical benchmark (audit harness) |

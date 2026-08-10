@@ -5,8 +5,8 @@ for Spanish-language content, so the main package can be normalized to
 technical English while preserving signatures and behavior byte-for-byte.
 
 Usage:
-    python tools/audit_spanish_terms.py            # whole repository
-    python tools/audit_spanish_terms.py traianus/ # single tree
+    python tools/audit/audit_spanish_terms.py            # whole repository
+    python tools/audit/audit_spanish_terms.py traianus/ # single tree
 
 Exit code 1 when findings are detected; 0 when clean.
 """

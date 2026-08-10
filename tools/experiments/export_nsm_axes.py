@@ -9,7 +9,7 @@ Hermetic tests seed this geometry with
 `helpers.db_factory.seed_realistic_axes` WITHOUT reloading the model (L1).
 
 Usage:
-    HF_HUB_OFFLINE=1 python tools/export_nsm_axes.py [tests/fixtures/nsm_axes_8.json]
+    HF_HUB_OFFLINE=1 python tools/experiments/export_nsm_axes.py [tests/fixtures/nsm_axes_8.json]
 """
 import json
 import os

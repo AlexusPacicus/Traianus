@@ -1,7 +1,7 @@
 # SPEC-REFACTOR-v0.2 — Substrate Realignment & Machine-Checkable Invariants (Integrated)
 
 **Status:** Approved (v0.2)
-**Scope:** `traianus/`, `tests/`, `tools/audit_harness.py`, `docs/`
+**Scope:** `traianus/`, `tests/`, `tools/audit/audit_harness.py`, `docs/`
 **Narrative superseded:** ADR-017, ADR-022, ADR-023, ADR-007 (see §1.4)
 
 ## Objective
@@ -126,7 +126,7 @@ except UnicodeDecodeError as e:
 
 **Contract change:** `/ingesta` accepts a raw `text/plain` body (`Content-Type: text/plain`) instead of the JSON `RawDump` wrapper. The MIME allowlist check (H2) moves from the JSON `type` field to the `Content-Type` header.
 
-**Test-harness adaptation (BEFORE the DDL migrations):** there is no shared ingestion helper today — 5 live call sites repeat `client.post("/ingesta", json={"type": "text/plain", "text": ...}, headers=auth_headers)`: `tests/test_substrate.py`, `tests/test_e2e.py`, `tests/test_security.py` (×2), `tools/audit_harness.py`. Create a single fixture in `tests/conftest.py` and migrate all of them to it:
+**Test-harness adaptation (BEFORE the DDL migrations):** there is no shared ingestion helper today — 5 live call sites repeat `client.post("/ingesta", json={"type": "text/plain", "text": ...}, headers=auth_headers)`: `tests/test_substrate.py`, `tests/test_e2e.py`, `tests/test_security.py` (×2), `tools/audit/audit_harness.py`. Create a single fixture in `tests/conftest.py` and migrate all of them to it:
 
 ```python
 def ingesta(client, auth_headers, text: str):
@@ -204,7 +204,7 @@ def test_claim_cl_prosthetic_basis_and_gate_status(client, auth_headers, isolate
 
 **Step 4 — WP0 experiment (empirical validation)**
 
-- Create `tools/validate_c1_semantics.py` to measure the real validity of σ² over the Epoch 0 Seed on real data before approaching WP1.
+- Create `tools/experiments/validate_c1_semantics.py` to measure the real validity of σ² over the Epoch 0 Seed on real data before approaching WP1.
 
 ---
 
@@ -215,7 +215,7 @@ def test_claim_cl_prosthetic_basis_and_gate_status(client, auth_headers, isolate
 - §2 M-c/M-d: `variance` as the single code/API term (no new vocabulary); falsifiable-hypothesis framing.
 - §3.1: `epoch_provenance` added to `manifold_nodes` as well as to the axes.
 - §3.3: E_n decoupled from the consolidation transaction (observational).
-- §3.4 (SEC-a): ingress byte-level verification added — raw `text/plain` body (breaking contract change), null-byte scan, strict UTF-8, vector binary invariant (384D, float32, L2) before DB write, dry fail-closed rejection (no Silent Denial synthetic success on HTTP — would re-introduce H1), "Neurons Propose, Rules Dispose" kept as the architectural authority principle, not a low-level check. Test-harness adaptation: new `ingesta()` fixture in `tests/conftest.py` (helper does not exist today), MIME allowlist moves to the `Content-Type` header, ~20 call sites + `tools/audit_harness.py` migrate.
+- §3.4 (SEC-a): ingress byte-level verification added — raw `text/plain` body (breaking contract change), null-byte scan, strict UTF-8, vector binary invariant (384D, float32, L2) before DB write, dry fail-closed rejection (no Silent Denial synthetic success on HTTP — would re-introduce H1), "Neurons Propose, Rules Dispose" kept as the architectural authority principle, not a low-level check. Test-harness adaptation: new `ingesta()` fixture in `tests/conftest.py` (helper does not exist today), MIME allowlist moves to the `Content-Type` header, ~20 call sites + `tools/audit/audit_harness.py` migrate.
 - §4: the verification test exercises the real API (path, auth, existing node, fixtures).
 
 ---
