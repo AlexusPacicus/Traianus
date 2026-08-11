@@ -36,7 +36,7 @@ GENERICS_BY_BLOCK: dict[str, list[str]] = {
     "bootstrap": ["G3", "G6", "G7", "G8"],
 }
 
-# Generic catalog G1–G9 (normative spec; see docs/LOGOGAPHY.md §2 and LEDGER.md)
+# Generic catalog G1–G9 (normative spec; see docs/exploring/legacy_docs/development/tests/SPEC-global.md)
 GENERIC_DEFINITIONS: dict[str, dict[str, str]] = {
     "G1": {
         "name": "authentication",

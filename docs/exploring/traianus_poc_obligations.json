@@ -1,0 +1,75 @@
+{
+  "metadata": {
+    "contract": "Traianus PoC v1.0 (IMPLEMENTATION_STATUS.md)",
+    "version": "poc-v1.0",
+    "status": "ACTIVE",
+    "sources": [
+      "traianus/app.py",
+      "IMPLEMENTATION_STATUS.md",
+      "AGENTS.md"
+    ],
+    "table_domain": ["ingestion_queue", "manifold_nodes", "manifold_edges", "geodesic_axes"]
+  },
+  "obligations": [
+    {
+      "id": "TR-H4-001",
+      "type": "MUST_NOT",
+      "archetype": "state",
+      "subject": "manifold_nodes",
+      "condition": "no SQL UPDATE/REPLACE/DELETE statement against manifold_nodes in the code",
+      "verification": "grep UPDATE|REPLACE|DELETE in app.py does not reference manifold_nodes",
+      "section": "ADR-025 §6.2 / H4",
+      "quote": "the node log is immutable; every state transition INSERTS a new revision with increasing seq per id. Runtime_Contract: composite PK (id, seq); never UPDATE/REPLACE/DELETE on manifold_nodes; current state = MAX(seq) per id."
+    },
+    {
+      "id": "TR-H4-002",
+      "type": "MUST",
+      "archetype": "state",
+      "subject": "manifold_nodes",
+      "condition": "composite PK (id, seq) without duplicates in the real DB",
+      "verification": "SELECT id, seq COUNT(*) HAVING COUNT(*) > 1 -> 0 rows",
+      "section": "H4 / IMPLEMENTATION_STATUS.md §1",
+      "quote": "Append-only immutable node log keyed (id, seq) in SQLite"
+    },
+    {
+      "id": "TR-H4-003",
+      "type": "MUST",
+      "archetype": "state",
+      "subject": "manifold_nodes",
+      "condition": "seq per id is contiguous increasing starting at 1 (no gaps)",
+      "verification": "for each id, ordered seq sequence == 1..n contiguous",
+      "section": "H4",
+      "quote": "new revisions inserted with increasing seq per id (next_node_seq)"
+    },
+    {
+      "id": "TR-C1-001",
+      "type": "MUST",
+      "archetype": "state",
+      "subject": "auto_calibrate_critical_threshold",
+      "condition": "self-projection (i==j) is excluded from the base variance computation",
+      "verification": "code contains 'if j != i' in the projections loop",
+      "section": "C1 / AGENTS.md Invariant 2",
+      "quote": "Self-projection (i=j, value 1.0) ... must always be excluded so as not to artificially inflate the variance. Cross projections only (j != i)."
+    },
+    {
+      "id": "TR-ZT-001",
+      "type": "MUST",
+      "archetype": "state",
+      "subject": "ingress",
+      "condition": "ingress perimeter restricted to text/plain (allowlist)",
+      "verification": "ALLOWED_INGRESS_TYPES == {'text/plain'} and 415 if dump.type not allowed",
+      "section": "H2 / AGENTS.md Invariant 3",
+      "quote": "ZERO-TRUST INGRESS PERIMETER (audit H2): ALLOWLIST. Everything that is not text/plain is rejected at the perimeter with 415. ALLOWED_INGRESS_TYPES = {'text/plain'}"
+    },
+    {
+      "id": "TR-ZT-002",
+      "type": "MUST_NOT",
+      "archetype": "state",
+      "subject": "CORS",
+      "condition": "no wildcard CORS allow_origins=['*']",
+      "verification": "ALLOWED_ORIGINS does not contain '*'",
+      "section": "H3 / AGENTS.md Invariant 3",
+      "quote": "remove the wildcard CORS policy (allow_origins=[\"*\"]) combined with credentials"
+    }
+  ]
+}
