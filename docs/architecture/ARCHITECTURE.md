@@ -1,133 +1,108 @@
 # System Architectural Formulation
+
 ## 1. Header & Scope
-Purpose: This document specifies the discrete state machine, governance layers, dual-key consolidation mechanics, and transactional persistence model of the Deterministic Computational Substrate for Autonomous Spatial State Governance.
-Domain: Spatial state transitions ($S_n \to S_{n+1}$), $L_2$ orthogonal projection, dynamic variance circuit breaking, and transactional persistence.
-Explicit Delegations:
-For system identity, non-goals, and boundary taxonomy, see ../identity/PROJECT_IDENTITY.md.
-For scientific foundations and theoretical grounding, see ../research/RESEARCH_HYPOTHESIS.md.
-For engineering decision records, see ../ADR/ADR.md.
-For Pydantic data contracts and Zero Trust ingress rules, see ../contracts/CONTRACTS_AND_PRISMS.md.
+Purpose: This document specifies the discrete state machine, algebraic governance, variance thresholding, and transactional persistence model of **Traianus**.
+Domain: Spatial state transitions ($S_n \to S_{n+1}$), $L_2$ orthogonal projection, dynamic variance circuit breaking, and SQLite WAL append-only persistence.
 
-## 2. Invariants
+**Live Document Delegations:**
+* For constitutional boundaries and Non-Goals, see [../PROJECT_IDENTITY.md](../PROJECT_IDENTITY.md).
+* For empirical falsification records and NCD findings, see [../specifications/EAS-01_LOGOGRAPHIC_PHYSICS.md](../specifications/EAS-01_LOGOGRAPHIC_PHYSICS.md) and [../LEDGER.md](../LEDGER.md).
+* For architectural decision records, see [./ADR/ADR.md](./ADR/ADR.md).
+* For Pydantic data schemas and Zero-Trust validation, see [./contracts/CONTRACTS.md](./contracts/CONTRACTS.md).
 
-* **Representation Invariance Principle:** Traianus never modifies the latent space coordinates emitted by external representation methods. The control plane exclusively governs entity state, spatial topology, and lifecycle transitions within the substrate.
+---
 
-* **Observation Invariant:** External observation layers evaluate read-only perspective projections $O_n = P_\theta(S_n)$ over the state $S_n$. The substrate governs state $S_n$ autonomously and continuously, independently of whether or how the state is observed. The core substrate contains zero visualization logic and computes no 2D/3D render coordinates.
+## 2. Architectural Invariants
 
-### 2.1 Dual-Key Consolidation Invariant
-Transitioning an entity state to `'consolidated'` requires two concurrent validations (ADR-022):
+* **Representation Invariance:** Traianus never modifies input vector coordinates emitted by external providers. The control plane exclusively governs lifecycle states, spatial adjacencies, and historical sequences.
+* **Invariante Append-Only (`PRIMARY KEY (id, seq)`):** State mutations are written strictly as incremental append-only events. Operating `UPDATE` or `DELETE` queries on historical records is forbidden.
+* **Invariante C1 (Self-Projection Exclusion):** Dynamic variance calibration ($\theta_{\text{dyn}}$) explicitly excludes diagonal auto-projections ($i \neq j$) to prevent threshold inflation caused by trivial self-similarity.
+* **Observation Isolation:** Read-only projections $O_n = P_\theta(S_n)$ operate over state $S_n$. The substrate contains zero 2D/3D rendering code or layout logic.
 
-* **Topological Key (Algebraic):** Spatial variance. Projection mass variance must satisfy the dynamic threshold: $\sigma^2 \geq \sigma^2_{\text{dynamic}}$.
-* **Ethical Key (HITL):** Human validation. Explicit operator intervention: `revision_milestone = 1`.
+---
 
-If an entity satisfies only one key, the substrate retains it in quarantine (`lifecycle_state = 'incubating'`), preventing both unvalidated mathematical drift and operator mutation.
+## 3. Mathematical Formulation of System State ($S_n$)
 
-## 3. Mechanism & Specification
+Traianus operates as a discrete, deterministic state machine. At ordinal sequence step $n$ ($n \in \mathbb{N}$), the active spatial state is defined as:
 
-### 3.1 Mathematical Formulation of System State ($S_n$)
-Traianus executes as a discrete, deterministic state machine. Following ADR-023, the computational state at ordinal sequence step $n$ ($n \in \mathbb{N}$) is defined as a finite simplicial complex:
-
-$S_n = (V_n, E_n, K_n)$
+$$S_n = (V_n, E_n)$$
 
 Where:
-$V_n \subset \mathbb{R}^d$ — Finite set of $L_2$-normalized coordinate vectors (vertices).
-$E_n \subseteq V_n \times V_n$ — Deterministic adjacency edges formed strictly where $d(\mathbf{v}_i, \mathbf{v}_j) \leq \epsilon$.
-$K_n$ — Higher-order simplicial faces formed by sets of mutually adjacent vertices.
-The active spatial basis matrix $B_n \in \mathbb{R}^{d \times k}$ is maintained in parallel by the Spatial Control Plane to calculate read-only projections $O_n = P_\theta(S_n)$ without mutating $S_n$.
+* $V_n \subset \mathbb{R}^d$: Finite set of $L_2$-normalized coordinate vectors (vertices).
+* $E_n \subseteq V_n \times V_n$: Deterministic adjacency edges formed strictly where $d(\mathbf{v}_i, \mathbf{v}_j) \le \epsilon$.
+* *(Higher-order simplicial complexes $K_n$ are roadmap I+D scope under WP2).*
 
-### 3.2 Deterministic Transition Function
-Given a sequence input $e_n$ (containing a coordinate vector $v \in \mathbb{R}^d$ emitted by an external representation provider), the state transition follows:
+The active geodetic basis $\mathbf{B}_n \in \mathbb{R}^{d \times k}$ is maintained by the Spatial Control Plane to calculate projections without mutating $S_n$.
 
-$S_{n+1} = f(S_n, e_n)$
+### 3.1 Deterministic State Transition
+Given an incoming payload $e_n$ containing a coordinate vector $\mathbf{v} \in \mathbb{R}^d$, the state transition follows:
 
-Given an identical initial state $S_0$ and sequence $E = \{e_0, e_1, \dots, e_k\}$, f yields exactly the same state $S_{k+1}$ without stochastic variation. The index n represents the discrete transition ordinal, completely decoupled from wall-clock time (ADR-020).
+$$S_{n+1} = f(S_n, e_n)$$
 
-### 3.3 Control Plane Subsystems & Topology Flow
+Given an identical initial state $S_0$ and sequence $E = \{e_0, e_1, \dots, e_k\}$, $f$ yields the exact same state $S_{k+1}$ without stochastic variation. Sequence ordinal $n$ is completely decoupled from wall-clock time.
+
+---
+
+## 4. Subsystem & Data Flow
 
 ```text
 +--------------------------------------------------------------------+
-| 3. Observation Layer (Ulpia Native Mathematical Observation /      |
-|    RefApps)                                                         |
-| Evaluates perspective projections O_n = P_t(S_n) & feeds back      |
-| HITL validations                                                    |
+| 1. External Representation Layer (Encoders / Sensors)               |
+| Emits coordinate vectors v in R^d                                   |
 +------------------------------------------+-------------------------+
                                            |
-                                           v (External Input Payload / Action)
+                                           v Payload Ingestion
 +--------------------------------------------------------------------+
-| Ingress Customs Gate (DUA)                                          |
-| Synchronous Zero-Trust firewall validating payload integrity prior  |
-| to ingestion.                                                       |
+| 2. Zero-Trust Ingress Customs Gate (traianus/security/validator.py)|
+| Validates UTF-8, null-byte absence, and Pydantic v2 schemas        |
 +------------------------------------------+-------------------------+
                                            |
-                                           v (Coordinates v in R^d from External Provider)
+                                           v Clean Vector v in R^d
 +--------------------------------------------------------------------+
-| 2. Spatial Control Plane (Traianus Substrate)                      |
-| |-- Spectral Variance Circuit Breaker (L2 projection & dynamic     |
-| |   thresholding)                                                   |
-| |-- Orthogonalization & Basis Engine (Dynamic axis extraction &    |
-| |   accretion)                                                      |
+| 3. Spatial Control Plane (traianus/core.py)                        |
+| |-- L2 Normalization (||v||₂ = 1.0)                                |
+| |-- Spectral Variance Calculation (C1 Exclusion i ≠ j)              |
+| |-- Routing Decision: σ² ≥ θ_dyn ⟹ 'consolidated' | 'incubating'   |
 +------------------------------------------+-------------------------+
                                            |
-                                           v (State Transition S_n -> S_{n+1})
+                                           v Atomic State Transition
 +--------------------------------------------------------------------+
-| Local Transactional Persistence Substrate                           |
-| Transactional logging, state serialization, and immutable delta    |
-| storage.                                                            |
+| 4. Transactional Persistence Substrate (traianus/storage.py)       |
+| Append-only SQLite WAL storage with composite PK (id, seq)         |
 +--------------------------------------------------------------------+
 ```
-* **Ingress Customs Gate (DUA):** Synchronous integrity firewall filtering non-conforming payloads prior to coordinate processing.
 
-* **Spectral Variance Circuit Breaker:**
-  * Computes $L_2$-normalized orthogonal scalar projections onto active basis axes $B_n$.
-  * Evaluates mass variance $\sigma^2$ against the critical dynamic threshold $\sigma^2_{\text{dynamic}}$ (ADR-017).
-  * Routing Execution Logic:
-    * $\sigma^2 \geq \sigma^2_{\text{dynamic}}$ AND revision_milestone = 1 $\Rightarrow$ Transition to `'consolidated'`.
-    * $\sigma^2 < \sigma^2_{\text{dynamic}}$ $\Rightarrow$ Transition to `'incubating'` while preserving full multichannel projection spectrum in `projections_json`.
+---
 
-* **Orthogonalization & Calibration Subsystem:** Dynamic axis calculation and space accretion (N $\to$ N+1) via greedy farthest-point projection (ADR-017).
+## 5. Persistence Schema (`manifold_nodes`)
 
-## 4. Persistence Substrate Schema (manifold_nodes)
-The canonical relational table maintaining entity state persistence within the transactional log (append-only revision log, composite PK):
+The canonical relational table in `traianus/storage.py` maintaining entity state persistence:
+
 ```sql
 CREATE TABLE IF NOT EXISTS manifold_nodes (
- id TEXT NOT NULL,
- seq INTEGER NOT NULL,
- text TEXT NOT NULL,
- toon_factor TEXT NOT NULL,
- lifecycle_state TEXT NOT NULL,
- action_potential REAL NOT NULL,
- revision_milestone INTEGER NOT NULL,
- vector_blob BLOB NOT NULL,
- projections_json TEXT NOT NULL,
- sys_internal_timestamp DATETIME DEFAULT CURRENT_TIMESTAMP,
- PRIMARY KEY (id, seq)
+    id TEXT NOT NULL,
+    seq INTEGER NOT NULL,
+    state TEXT CHECK(state IN ('pending_approval', 'incubating', 'consolidated', 'telemetry_error')),
+    vector BLOB NOT NULL,
+    projection_var REAL NOT NULL,
+    PRIMARY KEY (id, seq)
 );
 ```
-| Field | Logical Type | Technical Purpose |
+
+| Field | Type | Purpose |
 | :--- | :--- | :--- |
-| `id` | Unique Identifier | Deterministic primary key (`NODE_{ingestion_id}`). |
-| `seq` | Revision Sequence | Monotonically increasing revision number per `id`; current state = `MAX(seq)` per id. |
-| `text` | Plain Text / Payload | Structured entity payload content (`RawDump` / `RefinedEntity`). |
-| `toon_factor` | Single Character | Orthogonal Unicode symbol assigned via projection (`len == 1`). |
-| `lifecycle_state` | State Enum | Lifecycle attribute: `'pending_approval'`, `'consolidated'`, `'incubating'`, or `'telemetry_error'`. |
-| `action_potential` | Continuous Scalar | Action potential for decay via Riemannian metric density (ADR-020). |
-| `revision_milestone` | Boolean / Integer | Ethical Key validation marker for human-in-the-loop intervention (HITL). |
-| `vector_blob` | Dense Binary Array | Dense float64 BLOB storage of normalized vector $v \in \mathbb{R}^d$. |
-| `projections_json` | Multichannel Structure | Log of multi-axis projection spectrum onto active basis $B_n$. |
-| `sys_internal_timestamp` | Substrate Index | Low-level transaction index and local delta synchronization marker. |
+| `id` | TEXT | Entity identifier (`NODE_{ingestion_id}`). |
+| `seq` | INTEGER | Monotonically increasing revision sequence per `id` (current state = `MAX(seq)`). |
+| `state` | TEXT | Lifecycle enum: `pending_approval`, `incubating`, `consolidated`, or `telemetry_error`. |
+| `vector` | BLOB | Binary float array storing $L_2$-normalized vector $\mathbf{v} \in \mathbb{R}^d$. |
+| `projection_var` | REAL | Calculated spectral projection variance $\sigma^2$. |
 
-## 5. Boundaries & Failure Modes
+---
 
-| ID | Failure Mode | Root Mechanism | Mitigation & Boundary |
-| :---: | :--- | :--- | :--- |
-| **F-01** | High-dimensional distance concentration ($d \gg k$). | Relative variance loss due to the curse of dimensionality in raw vector space. | Variance evaluation executed over reduced projection space $k$, isolating scale from $d$, followed by periodic subspace re-projection (WP1/WP2). |
-| **F-02** | Transaction queue saturation. | Input burst exceeding local storage I/O throughput. | Load shedding at Ingress Customs Gate (DUA) upon reaching maximum capacity buffer limits. |
-| **F-03** | Angular collapse of spatial basis. | Axis drift during asynchronous basis update calculations. | Automatic rollback to prior basis state $B_{n-1}$ if total projection variance drops below $\sigma^2_{\min}$. |
-
-## 6. Architectural Execution Guarantees
+## 6. Execution Guarantees
 
 | Core Claim | Execution Mechanism | Boundary |
 | :--- | :--- | :--- |
-| **Deterministic State Transition** | State function $S_{n+1} = f(S_n, e_n)$ executed via deterministic linear algebra operations. | Deterministic; zero stochastic token sampling or LLM completion in the control plane. |
-| **Persistence Isolation** | Write operations routed via transactional write-ahead logging and atomic state queues. | Single-node local concurrency isolation; no distributed consensus required at core level. |
-| **Multichannel Spectrum Integrity** | Full projection spectrum logged in `projections_json` without lossy compression. | Preserves directional projections; does not assign semantic labels to raw geometric projections. |
+| Deterministic Transition | Linear algebra operations in `traianus/core.py`. | Zero stochastic token completion in the control plane. |
+| Append-Only Integrity | SQLite composite primary key `(id, seq)`. | Operations `UPDATE` and `DELETE` are forbidden. |
+| Hermetic Execution | Local SQLite WAL transactions. | Operates fully offline with zero cloud runtime network dependencies. |
