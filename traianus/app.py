@@ -1,5 +1,6 @@
 import os
 import secrets
+import hashlib
 from contextlib import asynccontextmanager
 import numpy as np
 import json
@@ -141,6 +142,11 @@ class HitlRelation(BaseModel):
     source: str
     target: str
     state: str
+
+class VectorIngestBody(BaseModel):
+    vector: list[float] = Field(..., description="Raw coordinate vector v ∈ R^d.")
+    label: str | None = Field(default=None, description="Optional identifier or tag.")
+    metadata: dict = Field(default_factory=dict, description="Optional metadata dictionary.")
 
 # =====================================================================
 # VECTOR UTILITIES
@@ -313,6 +319,121 @@ async def frontend_ingestion_endpoint(
         return {"status": "accepted", "ingestion_id": ingestion_id, "duplicate": True}
     background_tasks.add_task(async_spectral_processor, ingestion_id, text)
     return {"status": "accepted", "ingestion_id": ingestion_id}
+
+@app.post("/ingesta/vector", status_code=201, dependencies=[Depends(require_token)])
+async def vector_ingestion_endpoint(body: VectorIngestBody):
+    """Provider-agnostic vector ingestion (RH-1): accepts raw coordinate
+    arrays without text conversion, text/plain headers, or language encoders.
+
+    Validates dimension, numeric integrity, and non-zero norm; L2-normalizes
+    before projection; persists as append-only node revision."""
+    geodetic_matrix = get_geodetic_matrix_db()
+    if not geodetic_matrix:
+        raise HTTPException(
+            status_code=400,
+            detail=(
+                "Geodetic basis not initialized. "
+                "Run `traianus-bootstrap` (traianus.bootstrap:main) before ingestion."
+            ),
+        )
+
+    dim_db = storage.get_current_dimension_db()
+    raw_vector = body.vector
+
+    if len(raw_vector) == 0 or len(raw_vector) != dim_db:
+        raise HTTPException(
+            status_code=422,
+            detail=(
+                f"Vector dimension {len(raw_vector)} does not match geodetic baseline "
+                f"{dim_db}; dimension mismatch rejected (I-6.2/L6)."
+            ),
+        )
+
+    for idx, val in enumerate(raw_vector):
+        if not isinstance(val, (int, float)):
+            raise HTTPException(
+                status_code=422,
+                detail=f"Vector element at index {idx} is not numeric (type {type(val).__name__}).",
+            )
+        if isinstance(val, bool):
+            raise HTTPException(
+                status_code=422,
+                detail=f"Vector element at index {idx} is not numeric (type bool).",
+            )
+
+    arr = np.array(raw_vector, dtype=np.float64)
+
+    if not np.all(np.isfinite(arr)):
+        raise HTTPException(
+            status_code=422,
+            detail="Vector contains non-finite values (NaN or Inf).",
+        )
+
+    norm = np.linalg.norm(arr)
+    if norm == 0.0:
+        raise HTTPException(status_code=422, detail="Zero-vector (norm == 0) rejected.")
+
+    norm_idea_vector = arr / norm
+
+    projections = {}
+    for axis_id, axis_entry in geodetic_matrix.items():
+        projections[axis_id] = float(np.dot(norm_idea_vector, axis_entry["vector"]))
+
+    dominant_attractor = max(
+        geodetic_matrix.keys(),
+        key=lambda k: np.dot(norm_idea_vector, geodetic_matrix[k]["vector"]),
+    )
+    toon_symbol = geodetic_matrix[dominant_attractor]["symbol"]
+
+    dynamic_threshold = auto_calibrate_critical_threshold()
+
+    gate = evaluate_gate_v01(
+        list(projections.values()), ethical_key=False, threshold=dynamic_threshold
+    )
+    lifecycle_state: LifecycleState = gate["state"]
+    action_potential = float(gate["topological_key"]["variance"])
+
+    projections_json = json.dumps({
+        axis_id: float(value)
+        for axis_id, value in projections.items()
+    })
+
+    if body.label:
+        node_id = f"VEC_{body.label}"
+    else:
+        digest = hashlib.sha256(serialize_vector(norm_idea_vector)).hexdigest()[:12]
+        node_id = f"VEC_{digest}"
+
+    try:
+        with storage.get_db_connection() as conn:
+            seq = storage.insert_node_revision(
+                node_id,
+                body.label or "",
+                toon_symbol,
+                lifecycle_state,
+                action_potential,
+                0,
+                serialize_vector(norm_idea_vector),
+                projections_json,
+                storage.active_epoch(),
+                conn=conn,
+            )
+    except storage.StorageError as e:
+        raise HTTPException(status_code=503, detail="Ingress persistence unavailable.") from e
+
+    return {
+        "status": "accepted",
+        "node_id": node_id,
+        "seq": seq,
+        "lifecycle_state": lifecycle_state,
+        "spectral_variance": float(gate["topological_key"]["variance"]),
+        "projections": projections,
+        "dual_key_status": {
+            "topological_key": gate["topological_key"],
+            "ethical_key": gate["ethical_key"],
+            "consolidated": gate["state"] == "consolidated",
+        },
+    }
 
 @app.post("/nodos/{node_id}/consolidar", dependencies=[Depends(require_token)])
 async def consolidate_sovereignty(node_id: str, body: ConsolidationBody):
