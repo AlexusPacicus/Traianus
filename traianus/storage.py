@@ -23,7 +23,6 @@ from contextlib import contextmanager
 import numpy as np
 
 from traianus.core import compute_epsilon_edges
-from traianus.observability import INGESTA_VECTOR_PERSIST_CONFLICTS
 
 DB_PATH = "traianus.db"
 
@@ -434,7 +433,6 @@ def _insert_node_revision(conn: sqlite3.Connection, node_id: str, text: str,
             ))
             return seq
         except sqlite3.IntegrityError:
-            INGESTA_VECTOR_PERSIST_CONFLICTS.inc()
             if attempt == 2:
                 raise
     return seq  # unreachable

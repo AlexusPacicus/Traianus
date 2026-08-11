@@ -1,46 +1,17 @@
 """
-Observability layer for Traianus: structured logging and Prometheus metrics.
+Observability layer for Traianus: structured logging.
 
 Provides:
 - structlog JSON logging with request_id binding
-- Prometheus counters/histograms for the /ingesta/vector endpoint
 - request_id generation and propagation helpers
+- high-resolution timer for latency measurement
 
-Dependencies: prometheus_client, structlog (both available in the project venv).
+Dependencies: structlog (available in the project venv).
 """
 import time
 import uuid
 
 import structlog
-from prometheus_client import Counter, Histogram
-
-INGESTA_VECTOR_REQUESTS = Counter(
-    "ingesta_vector_requests_total",
-    "Total vector ingestion requests",
-    labelnames=["status", "reason"],
-)
-
-INGESTA_VECTOR_LATENCY = Histogram(
-    "ingesta_vector_latency_seconds",
-    "End-to-end request latency for /ingesta/vector",
-    buckets=(0.001, 0.005, 0.01, 0.025, 0.05, 0.1, 0.25, 0.5, 1.0),
-)
-
-INGESTA_VECTOR_PROJECTION_LATENCY = Histogram(
-    "ingesta_vector_projection_latency_seconds",
-    "Spectral projection phase latency",
-    buckets=(0.0001, 0.0005, 0.001, 0.002, 0.005, 0.01, 0.025, 0.05),
-)
-
-INGESTA_VECTOR_GATE_REJECTS = Counter(
-    "ingesta_vector_gate_rejects_total",
-    "Requests rejected by C1 gate (topological key failed)",
-)
-
-INGESTA_VECTOR_PERSIST_CONFLICTS = Counter(
-    "ingesta_vector_persist_conflicts_total",
-    "PK conflicts on insert_node_revision",
-)
 
 _logger_configured = False
 
