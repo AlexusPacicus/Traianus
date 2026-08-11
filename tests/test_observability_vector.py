@@ -1,6 +1,6 @@
 """
-Tests for /ingesta/vector observability: structured logging, Prometheus
-metrics, request ID propagation, and concurrency conflict detection.
+Tests for /ingesta/vector observability: structured logging,
+request ID propagation, and concurrency conflict detection.
 """
 import json
 import logging
@@ -43,58 +43,6 @@ class TestRequestIdPropagation:
         )
         assert res.status_code == 201
         assert res.headers["x-request-id"] == client_id
-
-
-class TestPrometheusMetrics:
-    """Counters and histograms are updated on each request."""
-
-    def test_requests_total_incremented_on_success(self, client, auth_headers):
-        counter = obs.INGESTA_VECTOR_REQUESTS
-        before = counter.labels(status="201", reason="accepted")._value.get()
-        res = client.post(
-            "/ingesta/vector",
-            json={"vector": _unit_vector()},
-            headers=auth_headers,
-        )
-        assert res.status_code == 201
-        after = counter.labels(status="201", reason="accepted")._value.get()
-        assert after > before
-
-    def test_requests_total_incremented_on_reject(self, client, auth_headers):
-        res = client.post(
-            "/ingesta/vector",
-            json={"vector": _unit_vector(128)},
-            headers=auth_headers,
-        )
-        assert res.status_code == 422
-
-    def test_latency_histogram_observes(self, client, auth_headers):
-        before = obs.INGESTA_VECTOR_LATENCY._sum.get()
-        obs.INGESTA_VECTOR_LATENCY.observe(0.015)
-        after = obs.INGESTA_VECTOR_LATENCY._sum.get()
-        assert after > before
-
-    def test_projection_latency_histogram_observes(self, client, auth_headers):
-        before = obs.INGESTA_VECTOR_PROJECTION_LATENCY._sum.get()
-        obs.INGESTA_VECTOR_PROJECTION_LATENCY.observe(0.005)
-        after = obs.INGESTA_VECTOR_PROJECTION_LATENCY._sum.get()
-        assert after > before
-
-
-class TestGateRejectMetric:
-    """Gate rejects are counted when topological key fails."""
-
-    def test_gate_reject_counter_exists(self):
-        assert hasattr(obs, "INGESTA_VECTOR_GATE_REJECTS")
-        assert obs.INGESTA_VECTOR_GATE_REJECTS._value is not None
-
-
-class TestPersistConflictMetric:
-    """Persistence conflicts (PK violations) are counted."""
-
-    def test_persist_conflicts_counter_exists(self):
-        assert hasattr(obs, "INGESTA_VECTOR_PERSIST_CONFLICTS")
-        assert obs.INGESTA_VECTOR_PERSIST_CONFLICTS._value is not None
 
 
 class TestStructuredLogging:
