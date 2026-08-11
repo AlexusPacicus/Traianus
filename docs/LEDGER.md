@@ -263,5 +263,32 @@
   1 root script. Zero modifications to `traianus/` source or `tests/` logic.
 * **Gate (measured):**
   - `pytest tests/` → **68 passed** (full suite, hermetic + model).
-  - No functional delta; pure structural refactor (logographic hygiene).
+   - No functional delta; pure structural refactor (logographic hygiene).
+* **Status:** `Consolidated`.
+
+### seq 12 — 2026-08-11 — Observability Layer for `/ingesta/vector`
+
+* **Context:** The `/ingesta/vector` endpoint shipped without metrics, structured
+  logging, or trace propagation — blind insertion into production. Without
+  observability, collisions, latency spikes, and gate rejects go undetected.
+* **Action:**
+  - New module `traianus/observability.py`: Prometheus counters/histograms
+    (`ingesta_vector_requests_total`, `ingesta_vector_latency_seconds`,
+    `ingesta_vector_projection_latency_seconds`,
+    `ingesta_vector_gate_rejects_total`,
+    `ingesta_vector_persist_conflicts_total`) + structlog JSON logger with
+    `request_id` binding.
+  - Endpoint instrumented: `X-Request-ID` generated/propagated, logs emitted
+    at 3 phases (ingress, projection, persist), metrics incremented with
+    status/reason labels.
+  - `insert_node_revision` in `traianus/storage.py`: retry-on-conflict logic
+    (3 attempts) with `INGESTA_VECTOR_PERSIST_CONFLICTS` counter increment.
+  - `pyproject.toml`: `[project.optional-dependencies] observability` declared
+    (prometheus_client, structlog — both already in venv).
+* **Scope (files):** 1 new (`observability.py`), 2 modified (`app.py`,
+  `storage.py`), 1 new test file (`test_observability_vector.py`).
+* **Gate (measured):**
+  - `pytest tests/ -m "not model"` → **100 passed** (+11 observability tests).
+  - `python tools/audit/audit_harness.py` → C1 GUARD GREEN (45%, 9/20).
+  - Concurrency test: 8 workers same label → 1 node_id, seq 1..8, zero duplicates.
 * **Status:** `Consolidated`.
