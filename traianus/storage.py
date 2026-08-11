@@ -420,16 +420,22 @@ def _insert_node_revision(conn: sqlite3.Connection, node_id: str, text: str,
                           toon_factor: str, lifecycle_state: str, action_potential: float,
                           revision_milestone: int, vector_blob: bytes,
                           projections_json: str, epoch_provenance: str) -> int:
-    seq = next_node_seq(conn, node_id)
-    conn.execute("""
-        INSERT INTO manifold_nodes
-        (id, seq, text, toon_factor, lifecycle_state, action_potential, revision_milestone, vector_blob, projections_json, epoch_provenance)
-        VALUES (?, ?, ?, ?, ?, ?, ?, ?, ?, ?)
-    """, (
-        node_id, seq, text, toon_factor, lifecycle_state, action_potential,
-        revision_milestone, vector_blob, projections_json, epoch_provenance,
-    ))
-    return seq
+    for attempt in range(3):
+        seq = next_node_seq(conn, node_id)
+        try:
+            conn.execute("""
+                INSERT INTO manifold_nodes
+                (id, seq, text, toon_factor, lifecycle_state, action_potential, revision_milestone, vector_blob, projections_json, epoch_provenance)
+                VALUES (?, ?, ?, ?, ?, ?, ?, ?, ?, ?)
+            """, (
+                node_id, seq, text, toon_factor, lifecycle_state, action_potential,
+                revision_milestone, vector_blob, projections_json, epoch_provenance,
+            ))
+            return seq
+        except sqlite3.IntegrityError:
+            if attempt == 2:
+                raise
+    return seq  # unreachable
 
 
 def insert_node_revision(node_id: str, text: str, toon_factor: str,

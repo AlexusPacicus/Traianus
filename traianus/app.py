@@ -5,13 +5,18 @@ from contextlib import asynccontextmanager
 import numpy as np
 import json
 from typing import List, Literal
-from fastapi import FastAPI, BackgroundTasks, HTTPException, Header, Depends, Request
+from fastapi import FastAPI, BackgroundTasks, HTTPException, Header, Depends, Request, Response
 from fastapi.middleware.cors import CORSMiddleware
 from pydantic import BaseModel, Field
 from sentence_transformers import SentenceTransformer
 
 from traianus.core import evaluate_gate_v01, calibrate_critical_threshold
 from traianus import storage
+from traianus.observability import (
+    get_logger,
+    generate_request_id,
+    now_seconds,
+)
 from traianus.storage import (
     # Re-export shims (SPEC-M2-DELTA-0-1 Δ1): names referenced by the
     # harness/tools stay reachable as `traianus.app.X`. Only live callers are
@@ -114,7 +119,7 @@ def require_token(x_traianus_token: str = Header(default="")):
         raise HTTPException(status_code=401, detail="Missing/invalid operator token.")
 
 # =====================================================================
-# OFFICIAL PYDANTIC DATA CONTRACTS (CONTRACTS_AND_PRISMS.md)
+# OFFICIAL PYDANTIC DATA CONTRACTS (CONTRACTS.md)
 # =====================================================================
 
 LifecycleState = Literal[
@@ -321,14 +326,29 @@ async def frontend_ingestion_endpoint(
     return {"status": "accepted", "ingestion_id": ingestion_id}
 
 @app.post("/ingesta/vector", status_code=201, dependencies=[Depends(require_token)])
-async def vector_ingestion_endpoint(body: VectorIngestBody):
+async def vector_ingestion_endpoint(body: VectorIngestBody, request: Request, response: Response):
     """Provider-agnostic vector ingestion (RH-1): accepts raw coordinate
     arrays without text conversion, text/plain headers, or language encoders.
 
     Validates dimension, numeric integrity, and non-zero norm; L2-normalizes
-    before projection; persists as append-only node revision."""
+    before projection; persists as append-only node revision.
+
+    Emits structured logs (JSON) with request_id for observability.
+    Propagates X-Request-ID for distributed tracing correlation."""
+    t_start = now_seconds()
+    request_id = request.headers.get("X-Request-ID") or generate_request_id()
+    log = get_logger(request_id=request_id)
+
+    log.info(
+        "vector_ingestion_start",
+        label=body.label,
+        vector_dim=len(body.vector),
+        has_metadata=bool(body.metadata),
+    )
+
     geodetic_matrix = get_geodetic_matrix_db()
     if not geodetic_matrix:
+        log.error("vector_ingestion_failed", phase="ingress", reason="basis_uninitialized")
         raise HTTPException(
             status_code=400,
             detail=(
@@ -341,6 +361,8 @@ async def vector_ingestion_endpoint(body: VectorIngestBody):
     raw_vector = body.vector
 
     if len(raw_vector) == 0 or len(raw_vector) != dim_db:
+        log.warning("vector_ingestion_rejected", phase="validation", reason="dimension_mismatch",
+                     got=len(raw_vector), expected=dim_db)
         raise HTTPException(
             status_code=422,
             detail=(
@@ -350,20 +372,18 @@ async def vector_ingestion_endpoint(body: VectorIngestBody):
         )
 
     for idx, val in enumerate(raw_vector):
-        if not isinstance(val, (int, float)):
+        if not isinstance(val, (int, float)) or isinstance(val, bool):
+            log.warning("vector_ingestion_rejected", phase="validation", reason="non_numeric",
+                         index=idx, type=type(val).__name__)
             raise HTTPException(
                 status_code=422,
                 detail=f"Vector element at index {idx} is not numeric (type {type(val).__name__}).",
-            )
-        if isinstance(val, bool):
-            raise HTTPException(
-                status_code=422,
-                detail=f"Vector element at index {idx} is not numeric (type bool).",
             )
 
     arr = np.array(raw_vector, dtype=np.float64)
 
     if not np.all(np.isfinite(arr)):
+        log.warning("vector_ingestion_rejected", phase="validation", reason="non_finite")
         raise HTTPException(
             status_code=422,
             detail="Vector contains non-finite values (NaN or Inf).",
@@ -371,10 +391,12 @@ async def vector_ingestion_endpoint(body: VectorIngestBody):
 
     norm = np.linalg.norm(arr)
     if norm == 0.0:
+        log.warning("vector_ingestion_rejected", phase="validation", reason="zero_vector")
         raise HTTPException(status_code=422, detail="Zero-vector (norm == 0) rejected.")
 
     norm_idea_vector = arr / norm
 
+    t_proj_start = now_seconds()
     projections = {}
     for axis_id, axis_entry in geodetic_matrix.items():
         projections[axis_id] = float(np.dot(norm_idea_vector, axis_entry["vector"]))
@@ -392,6 +414,7 @@ async def vector_ingestion_endpoint(body: VectorIngestBody):
     )
     lifecycle_state: LifecycleState = gate["state"]
     action_potential = float(gate["topological_key"]["variance"])
+
 
     projections_json = json.dumps({
         axis_id: float(value)
@@ -419,7 +442,23 @@ async def vector_ingestion_endpoint(body: VectorIngestBody):
                 conn=conn,
             )
     except storage.StorageError as e:
+        log.error("vector_ingestion_failed", phase="persist", reason="storage_error")
         raise HTTPException(status_code=503, detail="Ingress persistence unavailable.") from e
+
+    duration = now_seconds() - t_start
+
+    log.info(
+        "vector_ingestion_completed",
+        phase="complete",
+        node_id=node_id,
+        seq=seq,
+        lifecycle_state=lifecycle_state,
+        spectral_variance=gate["topological_key"]["variance"],
+        duration_ms=round(duration * 1000, 2),
+        gate_passed=gate["topological_key"]["passed"],
+    )
+
+    response.headers["X-Request-ID"] = request_id
 
     return {
         "status": "accepted",
