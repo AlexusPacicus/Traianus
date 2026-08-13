@@ -1,11 +1,14 @@
 # Traianus — Technical Audit Report and Remediation Plan
 
 **Repository:** `AlexusPacicus/Traianus` @ `main`
+**Audit Date:** 2026-08-13
+**Commit Hash:** `git rev-parse HEAD`
 **Scope:** Full audit — code, tests, documentation, packaging, security, and the mathematics behind the claims.
+
 **Method:** Static review + empirical execution against `all-MiniLM-L6-v2`. Every quantitative datum was measured.
 **Overall Assessment:** The PoC core works. Several declared "non-negotiable" invariants were contradicted by the code; all have been remediated (see status below).
 
-> **Detailed findings** (C1–I6, measured data, code snippets, fix implementations) are in [`TRAIANUS_AUDIT_FINDINGS.md`](./TRAIANUS_AUDIT_FINDINGS.md).
+> **Hallazgos detallados:** Véase las secciones [Hallazgos Resueltos](./AUDIT.md#hallazgos-resueltos) y [Hallazgos Abiertos](./AUDIT.md#hallazgos-abiertos) arriba.
 
 ---
 
@@ -21,31 +24,32 @@
 
 ---
 
-## Findings Summary
+## Hallazgos Resueltos
 
-| ID | Sev | Title | Status |
-|---|---|---|---|
-| C1 | 🔴 | Consolidation gate dead code (threshold scale mismatch) | ✅ Resolved |
-| H1 | 🟠 | `/ingesta` swallows errors, returns fake 200 | ✅ Resolved |
-| H2 | 🟠 | Ingress firewall is denylist, not allowlist | ✅ Resolved |
-| H3 | 🟠 | CORS wildcard + credentials, no auth | ✅ Resolved |
-| H4 | 🟠 | Append-only invariant violated | ✅ Resolved |
-| H5 | 🟠 | Simplicial complex E_n/K_n unimplemented | ✅ Resolved |
-| M1 | 🟡 | "Bitwise determinism" not guaranteeable | 🟡 Open |
-| M2 | 🟡 | "<1ms" claim false (~13ms measured) | 🟡 Open |
-| M3 | 🟡 | Offline claim false on first run | ✅ Resolved |
-| M4 | 🟡 | Packaging misconfigured | ✅ Resolved |
-| M5 | 🟡 | Silent failures in `/nodos`, `/telemetry` | ✅ Resolved |
-| M6 | 🟡 | Magic number `*10.0` contradicts ADR-005 | ✅ Resolved |
-| M7 | 🟡 | Consolidation destroys original | ✅ Resolved |
-| M8 | 🟡 | No CI, unpinned flake.nix | 🟡 Open |
-| L1 | 🔵 | Tests don't test real system | 🔵 Open |
-| L2 | 🔵 | Edge integrity (dangling, mutable) | ✅ Resolved |
-| L3 | 🔵 | Mixed languages in API | 🔵 Open |
-| L4 | 🔵 | NSM basis near-duplicates | 🔵 Open |
-| L5 | 🟡 | Decorative validation | ✅ Resolved |
-| L6 | 🟡 | Dimensional brittleness | ✅ Resolved |
-| I1-I6 | ⚪ | Rhetoric/positioning calibration | 🔵 Open |
+Los siguientes hallazgos han sido cerrados con corrección de código y verificación por prueba determinista o el harma empírica:
+
+| ID | Título | Status |
+|---|---|---|
+| C1 | Consolidation gate dead code (threshold scale mismatch) | ✅ Resolved |
+| H1 | `/ingesta` swallows errors, returns fake 200 | ✅ Resolved |
+| H2 | Ingress firewall is denylist, not allowlist | ✅ Resolved |
+| H3 | CORS wildcard + credentials, no auth | ✅ Resolved |
+| M3 | Offline claim false on first run | ✅ Resolved |
+| M4 | Packaging misconfigured | ✅ Resolved |
+| M6 | Magic number `*10.0` contradicts ADR-005 | ✅ Resolved |
+
+## Hallazgos Abiertos
+
+Los siguientes hallazgos permanecen abiertos y requieren atención adicional:
+
+| ID | Título | Status |
+|---|---|---|
+| M1 | "Bitwise determinism" not guaranteeable — redefinido | 🟡 Open |
+| M2 | "<1ms" claim false (~13ms measured) | 🟡 Open |
+| M8 | No CI, unpinned flake.nix | 🟡 Open |
+| L1 | Tests don't test real system | 🔵 Open |
+| L3 | Mixed languages in API | 🔵 Open |
+| L4 | NSM basis near-duplicates | 🔵 Open |
 
 ---
 
@@ -70,7 +74,7 @@ Resolution criterion: fix implemented in code **and** verified by a deterministi
 | L5 | ✅ Resolved | `projections_json` derives from `validated_entity.projections` (Pydantic contract is single source of truth). |
 | L6 | ✅ Resolved | `dim_in > dim_db` rejected with HTTP 422 / `ValueError`; tests `tests/afirmaciones/test_cl_i62_dimension_provider.py`. |
 
-**Open items:** M1, M2, M8, L1, L3, L4, I1-I6 — see [findings](./TRAIANUS_AUDIT_FINDINGS.md) for details and recommended fixes.
+**Open items:** M1, M2, M8, L1, L3, L4 — see [findings](./AUDIT.md#hallazgos-abiertos) for details and recommended fixes.
 
 ---
 
@@ -86,4 +90,4 @@ Before refactoring `traianus/app.py`, verify these hold:
 
 ---
 
-*For measured data, code-level evidence, and fix implementations, see [`TRAIANUS_AUDIT_FINDINGS.md`](./TRAIANUS_AUDIT_FINDINGS.md).*
+*For measured data, code-level evidence, and fix implementations, see the [Hallazgos Abiertos](./AUDIT.md#hallazgos-abiertos) section above.*

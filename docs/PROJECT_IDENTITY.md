@@ -52,4 +52,4 @@ Traianus does not construct or modify external representations of reality. It pr
 
 ### 5.2 Operational Boundaries
 * **Zero Cloud Runtime Dependencies:** Executes fully offline on local edge hardware ($\le 8\text{ GB}$ RAM) with zero network connectivity required.
-* **Deterministic Reproducibility:** Given identical input vector sequences and initial database state, the execution path and resulting state are bitwise reproducible on local hardware.
+* **Deterministic Reproducibility:** Given identical vector sequences, initial state, and execution semantics, the core state transition is deterministic (no bitwise reproducibility claim across hardware revisions).

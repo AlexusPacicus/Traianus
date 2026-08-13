@@ -159,7 +159,7 @@ Note on Ledger Sequence: Discontinued numbers (006, 008, 009, 011–013) represe
 ### ADR-027: Dual Boundary Pattern & Binary Verification Gate
 * **Date:** 2026-08-03
 * **Author / Responsible:** AlexusPacicus (I+D Marzo 2026 – Presente)
-* **Context:** The Zero-Trust governance layer (AGENTS.md §2, TRAIANUS_AUDIT.md H3) blocks agents from embedding external network primitives (`fetch`, `axios`, `urllib`, `requests`, `httpx`, `socket`, `subprocess`, `curl`, `wget`, `aiohttp`, `importlib`, `os.system`, `os.popen`). Semantic, plain-text substring checks on proposals are evadable (encoding tricks, obfuscated import paths, symlink escapes) and cannot guarantee that a mutated target file remains inside the repository boundary.
+* **Context:** The Zero-Trust governance layer (AGENTS.md §2, AUDIT.md H3) blocks agents from embedding external network primitives (`fetch`, `axios`, `urllib`, `requests`, `httpx`, `socket`, `subprocess`, `curl`, `wget`, `aiohttp`, `importlib`, `os.system`, `os.popen`). Semantic, plain-text substring checks on proposals are evadable (encoding tricks, obfuscated import paths, symlink escapes) and cannot guarantee that a mutated target file remains inside the repository boundary.
 * **Decision:** The validation gate operates on physical bytes, not on semantic lists:
   1. **Spatial Canonicalization (`Target_File`):** every target path is resolved with `Path.resolve(strict=True)` and MUST remain inside the repository root (`is_relative_to`). Symlink escapes and `..` traversal are rejected at the boundary (no follow).
   2. **Binary Subsequence Grounding:** literal grounding is verified as a UTF-8 subsequence over `read_bytes()` of the physical file, not via `in`-checks on a decoded string.

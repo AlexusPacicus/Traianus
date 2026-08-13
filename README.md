@@ -6,8 +6,8 @@ Every system that manages knowledge inherits a hidden coupling: the way it *repr
 
 This separation addresses the **Representation-State Coupling Problem** and guarantees three core properties:
 - **Deterministic state engine** — spatial state transitions $S_{n+1} = f(S_n, \mathbf{v}_n)$ are governed deterministically over $L_2$-normalized coordinate vectors $\mathbf{v} \in \mathbb{R}^d$.
-- **State reproducibility** — state transitions are fully deterministic and reproducible given identical input vector sequences.
-- **Offline sovereignty** — the entire substrate executes locally ($\le 8\text{ GB}$ RAM) with zero cloud runtime dependencies.
+- **State reproducibility** — Given identical vector sequences, initial state, and execution semantics, the core state transition is deterministic.
+- **Offline sovereignty** — hermetic execution offline: `HF_HUB_OFFLINE=1` + `local_files_only=True`, the entire substrate executes locally ($\le 8\text{ GB}$ RAM) with zero cloud runtime dependencies.
 
 Current status: Proof of Concept (PoC) v1.0 using sovereign personal knowledge as its initial reference application (RefApp-01). See [IMPLEMENTATION_STATUS.md](./IMPLEMENTATION_STATUS.md) for current feature status versus the R&D roadmap.
 
