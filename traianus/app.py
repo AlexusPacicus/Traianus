@@ -10,7 +10,7 @@ from fastapi.middleware.cors import CORSMiddleware
 from pydantic import BaseModel, Field
 from sentence_transformers import SentenceTransformer
 
-from traianus.core import evaluate_gate_v01, calibrate_critical_threshold
+from traianus.core import evaluate_gate_v01, calibrate_critical_threshold, compute_kinetic_resistance
 from traianus import storage
 from traianus.observability import (
     get_logger,
@@ -409,6 +409,47 @@ async def vector_ingestion_endpoint(body: VectorIngestBody, request: Request, re
 
     dynamic_threshold = auto_calibrate_critical_threshold()
 
+    # Determinar node_id ANTES de calcular K_cin
+    if body.label:
+        node_id = f"VEC_{body.label}"
+    else:
+        digest = hashlib.sha256(serialize_vector(norm_idea_vector)).hexdigest()[:12]
+        node_id = f"VEC_{digest}"
+
+    # H1: Calcular K_cin real usando la función pura y el vector anterior
+    # Recuperamos v_{t-1} del append-only log en SQLite
+    # Convertir geodetic_matrix dict a B_0 matriz numpy
+    B_0_rows = []
+    for axis_id, axis_entry in geodetic_matrix.items():
+        B_0_rows.append(np.array(axis_entry["vector"], dtype=np.float64))
+    B_0 = np.array(B_0_rows) if B_0_rows else np.eye(dim_db)
+    
+    with storage.get_db_connection() as conn:
+        # Buscar la revisión anterior del mismo nodo (cualquier seq anterior)
+        prev_row = conn.execute(
+            "SELECT seq, vector_blob FROM manifold_nodes WHERE id = ? "
+            "ORDER BY seq DESC LIMIT 2 OFFSET 1",
+            (node_id,),
+        ).fetchone()
+        
+        if prev_row is None:
+            # Primer vector de la secuencia: K_cin = 0.0
+            k_cin = 0.0
+        else:
+            # Recuperar vector anterior y calcular K_cin real
+            prev_vector = np.frombuffer(prev_row[1], dtype=np.float64)
+            # Asegurar que tenga la dimensión correcta
+            if len(prev_vector) != dim_db:
+                # Padding o truncado según sea necesario
+                if len(prev_vector) < dim_db:
+                    prev_vector = np.pad(prev_vector, (0, dim_db - len(prev_vector)))
+                else:
+                    prev_vector = prev_vector[:dim_db]
+            
+            # Calcular K_cin usando la función pura (sin *10.0, solo variance)
+            # K_cin = 0.5 ||v_t - v_{t-1}||^2 ⋅ (1 + Var(v_t B_0^T))
+            k_cin = float(compute_kinetic_resistance(norm_idea_vector, prev_vector, B_0))
+    
     gate = evaluate_gate_v01(
         list(projections.values()), ethical_key=False, threshold=dynamic_threshold
     )
@@ -465,6 +506,7 @@ async def vector_ingestion_endpoint(body: VectorIngestBody, request: Request, re
         "node_id": node_id,
         "seq": seq,
         "lifecycle_state": lifecycle_state,
+        "k_cin": k_cin,
         "spectral_variance": float(gate["topological_key"]["variance"]),
         "projections": projections,
         "dual_key_status": {
