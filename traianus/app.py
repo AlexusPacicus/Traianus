@@ -5,18 +5,13 @@ from contextlib import asynccontextmanager
 import numpy as np
 import json
 from typing import List, Literal
-from fastapi import FastAPI, BackgroundTasks, HTTPException, Header, Depends, Request, Response
+from fastapi import FastAPI, BackgroundTasks, HTTPException, Header, Depends, Request
 from fastapi.middleware.cors import CORSMiddleware
 from pydantic import BaseModel, Field
 from sentence_transformers import SentenceTransformer
 
-from traianus.core import evaluate_gate_v01, calibrate_critical_threshold, compute_kinetic_resistance
+from traianus.core import evaluate_gate_v01, calibrate_critical_threshold
 from traianus import storage
-from traianus.observability import (
-    get_logger,
-    generate_request_id,
-    now_seconds,
-)
 from traianus.storage import (
     # Re-export shims (SPEC-M2-DELTA-0-1 Δ1): names referenced by the
     # harness/tools stay reachable as `traianus.app.X`. Only live callers are
@@ -119,7 +114,7 @@ def require_token(x_traianus_token: str = Header(default="")):
         raise HTTPException(status_code=401, detail="Missing/invalid operator token.")
 
 # =====================================================================
-# OFFICIAL PYDANTIC DATA CONTRACTS (CONTRACTS.md)
+# OFFICIAL PYDANTIC DATA CONTRACTS (CONTRACTS_AND_PRISMS.md)
 # =====================================================================
 
 LifecycleState = Literal[
@@ -326,29 +321,14 @@ async def frontend_ingestion_endpoint(
     return {"status": "accepted", "ingestion_id": ingestion_id}
 
 @app.post("/ingesta/vector", status_code=201, dependencies=[Depends(require_token)])
-async def vector_ingestion_endpoint(body: VectorIngestBody, request: Request, response: Response):
+async def vector_ingestion_endpoint(body: VectorIngestBody):
     """Provider-agnostic vector ingestion (RH-1): accepts raw coordinate
     arrays without text conversion, text/plain headers, or language encoders.
 
     Validates dimension, numeric integrity, and non-zero norm; L2-normalizes
-    before projection; persists as append-only node revision.
-
-    Emits structured logs (JSON) with request_id for observability.
-    Propagates X-Request-ID for distributed tracing correlation."""
-    t_start = now_seconds()
-    request_id = request.headers.get("X-Request-ID") or generate_request_id()
-    log = get_logger(request_id=request_id)
-
-    log.info(
-        "vector_ingestion_start",
-        label=body.label,
-        vector_dim=len(body.vector),
-        has_metadata=bool(body.metadata),
-    )
-
+    before projection; persists as append-only node revision."""
     geodetic_matrix = get_geodetic_matrix_db()
     if not geodetic_matrix:
-        log.error("vector_ingestion_failed", phase="ingress", reason="basis_uninitialized")
         raise HTTPException(
             status_code=400,
             detail=(
@@ -361,8 +341,6 @@ async def vector_ingestion_endpoint(body: VectorIngestBody, request: Request, re
     raw_vector = body.vector
 
     if len(raw_vector) == 0 or len(raw_vector) != dim_db:
-        log.warning("vector_ingestion_rejected", phase="validation", reason="dimension_mismatch",
-                     got=len(raw_vector), expected=dim_db)
         raise HTTPException(
             status_code=422,
             detail=(
@@ -372,18 +350,20 @@ async def vector_ingestion_endpoint(body: VectorIngestBody, request: Request, re
         )
 
     for idx, val in enumerate(raw_vector):
-        if not isinstance(val, (int, float)) or isinstance(val, bool):
-            log.warning("vector_ingestion_rejected", phase="validation", reason="non_numeric",
-                         index=idx, type=type(val).__name__)
+        if not isinstance(val, (int, float)):
             raise HTTPException(
                 status_code=422,
                 detail=f"Vector element at index {idx} is not numeric (type {type(val).__name__}).",
+            )
+        if isinstance(val, bool):
+            raise HTTPException(
+                status_code=422,
+                detail=f"Vector element at index {idx} is not numeric (type bool).",
             )
 
     arr = np.array(raw_vector, dtype=np.float64)
 
     if not np.all(np.isfinite(arr)):
-        log.warning("vector_ingestion_rejected", phase="validation", reason="non_finite")
         raise HTTPException(
             status_code=422,
             detail="Vector contains non-finite values (NaN or Inf).",
@@ -391,12 +371,10 @@ async def vector_ingestion_endpoint(body: VectorIngestBody, request: Request, re
 
     norm = np.linalg.norm(arr)
     if norm == 0.0:
-        log.warning("vector_ingestion_rejected", phase="validation", reason="zero_vector")
         raise HTTPException(status_code=422, detail="Zero-vector (norm == 0) rejected.")
 
     norm_idea_vector = arr / norm
 
-    t_proj_start = now_seconds()
     projections = {}
     for axis_id, axis_entry in geodetic_matrix.items():
         projections[axis_id] = float(np.dot(norm_idea_vector, axis_entry["vector"]))
@@ -409,53 +387,11 @@ async def vector_ingestion_endpoint(body: VectorIngestBody, request: Request, re
 
     dynamic_threshold = auto_calibrate_critical_threshold()
 
-    # Determinar node_id ANTES de calcular K_cin
-    if body.label:
-        node_id = f"VEC_{body.label}"
-    else:
-        digest = hashlib.sha256(serialize_vector(norm_idea_vector)).hexdigest()[:12]
-        node_id = f"VEC_{digest}"
-
-    # H1: Calcular K_cin real usando la función pura y el vector anterior
-    # Recuperamos v_{t-1} del append-only log en SQLite
-    # Convertir geodetic_matrix dict a B_0 matriz numpy
-    B_0_rows = []
-    for axis_id, axis_entry in geodetic_matrix.items():
-        B_0_rows.append(np.array(axis_entry["vector"], dtype=np.float64))
-    B_0 = np.array(B_0_rows) if B_0_rows else np.eye(dim_db)
-    
-    with storage.get_db_connection() as conn:
-        # Buscar la revisión anterior del mismo nodo (cualquier seq anterior)
-        prev_row = conn.execute(
-            "SELECT seq, vector_blob FROM manifold_nodes WHERE id = ? "
-            "ORDER BY seq DESC LIMIT 2 OFFSET 1",
-            (node_id,),
-        ).fetchone()
-        
-        if prev_row is None:
-            # Primer vector de la secuencia: K_cin = 0.0
-            k_cin = 0.0
-        else:
-            # Recuperar vector anterior y calcular K_cin real
-            prev_vector = np.frombuffer(prev_row[1], dtype=np.float64)
-            # Asegurar que tenga la dimensión correcta
-            if len(prev_vector) != dim_db:
-                # Padding o truncado según sea necesario
-                if len(prev_vector) < dim_db:
-                    prev_vector = np.pad(prev_vector, (0, dim_db - len(prev_vector)))
-                else:
-                    prev_vector = prev_vector[:dim_db]
-            
-            # Calcular K_cin usando la función pura (sin *10.0, solo variance)
-            # K_cin = 0.5 ||v_t - v_{t-1}||^2 ⋅ (1 + Var(v_t B_0^T))
-            k_cin = float(compute_kinetic_resistance(norm_idea_vector, prev_vector, B_0))
-    
     gate = evaluate_gate_v01(
         list(projections.values()), ethical_key=False, threshold=dynamic_threshold
     )
     lifecycle_state: LifecycleState = gate["state"]
     action_potential = float(gate["topological_key"]["variance"])
-
 
     projections_json = json.dumps({
         axis_id: float(value)
@@ -483,30 +419,13 @@ async def vector_ingestion_endpoint(body: VectorIngestBody, request: Request, re
                 conn=conn,
             )
     except storage.StorageError as e:
-        log.error("vector_ingestion_failed", phase="persist", reason="storage_error")
         raise HTTPException(status_code=503, detail="Ingress persistence unavailable.") from e
-
-    duration = now_seconds() - t_start
-
-    log.info(
-        "vector_ingestion_completed",
-        phase="complete",
-        node_id=node_id,
-        seq=seq,
-        lifecycle_state=lifecycle_state,
-        spectral_variance=gate["topological_key"]["variance"],
-        duration_ms=round(duration * 1000, 2),
-        gate_passed=gate["topological_key"]["passed"],
-    )
-
-    response.headers["X-Request-ID"] = request_id
 
     return {
         "status": "accepted",
         "node_id": node_id,
         "seq": seq,
         "lifecycle_state": lifecycle_state,
-        "k_cin": k_cin,
         "spectral_variance": float(gate["topological_key"]["variance"]),
         "projections": projections,
         "dual_key_status": {
