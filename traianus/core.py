@@ -74,6 +74,50 @@ def compute_epsilon_edges(nodes: dict[str, np.ndarray], epsilon: float) -> list[
     edges.sort(key=lambda e: (e["source"], e["target"]))
     return edges
 
+
+def project_dimensional_relief(v: np.ndarray, k_cin: float) -> np.ndarray:
+    """Pure operator: map v ∈ R^d → v̂ ∈ R^{d+1} via dimensional relief.
+
+    The K_cin scalar absorbs solenoidal/kinetic energy into the new coordinate,
+    allowing the spectral variance to relaminate and the node to be evaluated
+    with lower distortion on the augmented base B_0 ∈ R^{k × (d+1)}.
+
+    Parameters
+    ----------
+    v : np.ndarray
+        Input vector v ∈ R^d (first d coordinates).
+    k_cin : float
+        Kinematic resistance K_cin ∈ R (non-negative, typically K_cin ≥ 0).
+
+    Returns
+    -------
+    np.ndarray
+        Augmented vector v̂ ∈ R^{d+1} = (v_1, ..., v_d, K_cin).
+    """
+    v_hat = np.empty(v.shape[0] + 1, dtype=v.dtype)
+    v_hat[:-1] = v
+    v_hat[-1] = float(k_cin)
+    return v_hat
+
+
+def compute_kinetic_resistance(v_t: np.ndarray, v_prev: np.ndarray, B_0: np.ndarray) -> float:
+    """Pure computation of kinematic resistance K_cin.
+
+    K_cin(v_t, v_{t-1}, B_0) = 0.5 ||v_t - v_{t-1}||^2 ⋅ (1 + Var(v_t B_0^T)).
+
+    Parameters are pure (no mutable state). B_0 is the geodetic basis matrix
+    (k × d) where each row is an axis vector; v_t B_0^T yields projection
+    coordinates per axis, and Var() computes their variance.
+
+    Returns a scalar float representing kinematic resistance.
+    """
+    delta = v_t - v_prev
+    norm_delta2 = float(np.linalg.norm(delta) ** 2)
+    projections = np.dot(v_t, B_0.T)  # shape (k,)
+    projection_var = float(np.var(projections))  # scalar variance
+    return 0.5 * norm_delta2 * (1.0 + projection_var)
+
+
 def ortho_distance(v: np.ndarray, B_0: np.ndarray) -> float:
     """Pure operator: orthogonal residual distance from vector v to base B_0.
 
@@ -138,45 +182,3 @@ def discrimination_ratio(
     if k_cin < epsilon:
         return float(od / epsilon)  # avoid div‑0; very high ratio
     return float(od / k_cin)
-
-
-def compute_kinetic_resistance(v_t: np.ndarray, v_prev: np.ndarray, B_0: np.ndarray) -> float:
-    """Pure computation of kinematic resistance K_cin.
-
-    K_cin(v_t, v_{t-1}, B_0) = 0.5 ||v_t - v_{t-1}||^2 ⋅ (1 + Var(v_t B_0^T)).
-
-    Parameters are pure (no mutable state). B_0 is the geodetic basis matrix
-    (k × d) where each row is an axis vector; v_t B_0^T yields projection
-    coordinates per axis, and Var() computes their variance.
-
-    Returns a scalar float representing kinematic resistance.
-    """
-    delta = v_t - v_prev
-    norm_delta2 = float(np.linalg.norm(delta) ** 2)
-    projections = np.dot(v_t, B_0.T)  # shape (k,)
-    projection_var = float(np.var(projections))  # scalar variance
-    return 0.5 * norm_delta2 * (1.0 + projection_var)
-
-def project_dimensional_relief(v: np.ndarray, k_cin: float) -> np.ndarray:
-    """Pure operator: map v ∈ R^d → v̂ ∈ R^{d+1} via dimensional relief.
-
-    The K_cin scalar absorbs solenoidal/kinetic energy into the new coordinate,
-    allowing the spectral variance to relaminate and the node to be evaluated
-    with lower distortion on the augmented base B_0 ∈ R^{k × (d+1)}.
-
-    Parameters
-    ----------
-    v : np.ndarray
-        Input vector v ∈ R^d (first d coordinates).
-    k_cin : float
-        Kinematic resistance K_cin ∈ R (non-negative, typically K_cin ≥ 0).
-
-    Returns
-    -------
-    np.ndarray
-        Augmented vector v̂ ∈ R^{d+1} = (v_1, ..., v_d, K_cin).
-    """
-    v_hat = np.empty(v.shape[0] + 1, dtype=v.dtype)
-    v_hat[:-1] = v
-    v_hat[-1] = float(k_cin)
-    return v_hat
