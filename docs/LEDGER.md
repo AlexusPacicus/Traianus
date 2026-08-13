@@ -335,3 +335,25 @@
 * **Status:** `Consolidated`. Empirical basis for C1 gate threshold calibration
   and dimensional relief mechanism design.
 
+
+## [seq: 16] - Validación del Pipeline Cinemático Integrado (H1 ∧ H2 ∧ H3)
+
+**Fecha:** 13 de Agosto, 2026  
+**Tipo:** Experimento de Bloque Integrado / Integración de Producción  
+**Ramas Involucradas:** `exp-h1`, `exp-h2`, `exp-h3-implementation` → `feature/integrated-kinematics`  
+**Veredicto:** ✅ VALIDADO (109/109 tests verdes)
+
+### Contexto y Matriz de Pruebas
+Se sometió al sustrato a un caudal continuo e inhomogéneo de 200 eventos sintéticos (`tests/test_cinematic_pipeline.py`) distribuidos en 5 fases temporales para verificar la estabilidad de la física de fluidos cinemáticos y la conservación de invariantes.
+
+### Resultados Empíricos por Fase
+1. **Laminar (t = 1..40):** K_cin ≤ \theta_dyn. Desplazamiento fluido en R^384 sin activación de válvulas de alivio.
+2. **Estaticidad Pura (t = 41..70):** Ingesta consecutiva del mismo vector (\Delta v = 0). Demostrado que K_cin = 0.0 exacto; el reposo absoluto no genera falsa presión ni agitación.
+3. **Enquistamiento / Compresión Local (t = 71..110):** Micro-oscilaciones de alta frecuencia. Disparó K_cin > \theta_dyn, activando el operador `project_dimensional_relief` para adosar K_cin en la coordenada 385 (R^385).
+4. **Ruido Transitorio Incoherente (t = 111..150):** Saltos estocásticos de alta velocidad. Se mantuvo dr < \theta_struct, enrutando los nodos hacia `incubating` con metadato `"quarantine_noise": true`.
+5. **Novedad Estructural (t = 151..200):** Rotación geodésica constante fuera de B_0. Se registró dr >= \theta_struct, enrutando los nodos a `pending_approval` con metadato `"structural_candidate": true`.
+
+### Invariantes Confirmados
+* **Invariante C1 Dual-Key:** Preservado (\sigma^2 >= \theta_dyn) AND (EthicalKey == True).
+* **Almacenamiento SQLite:** Cero migraciones DDL; se conservan los 4 estados canónicos en `manifold_nodes`.
+* **Regresión:** 109/109 tests del sistema pasando.
