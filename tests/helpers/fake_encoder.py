@@ -7,7 +7,7 @@ Replaces `SentenceTransformer("all-MiniLM-L6-v2")` in unit tests:
 - Produces deterministic 384-dim L2-normalized vectors with the same
   contract shape as `model.encode()` from sentence-transformers.
 
-Grounding: TRAIANUS_AUDIT.md:87 — "injecting a fake encoder" (L1).
+Grounding: AUDIT.md:87 — "injecting a fake encoder" (L1).
 """
 import hashlib
 
