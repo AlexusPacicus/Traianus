@@ -10,7 +10,7 @@ from fastapi.middleware.cors import CORSMiddleware
 from pydantic import BaseModel, Field
 from sentence_transformers import SentenceTransformer
 
-from traianus.core import evaluate_gate_v01, calibrate_critical_threshold
+from traianus.core import evaluate_gate_v01, calibrate_critical_threshold, compute_kinetic_resistance
 from traianus import storage
 from traianus.observability import (
     get_logger,
@@ -443,6 +443,27 @@ async def vector_ingestion_endpoint(body: VectorIngestBody, request: Request, re
             )
     except storage.StorageError as e:
         log.error("vector_ingestion_failed", phase="persist", reason="storage_error")
+
+    # L1 (audit): retrieve previous vector revision for K_cin computation.
+    # Append-only log: current revision is seq; previous is the next lower seq.
+    prev_vector = None
+    with storage.get_db_connection() as conn:
+        prev_row = conn.execute(
+            "SELECT vector_blob FROM manifold_nodes WHERE id = ? AND seq < ? ORDER BY seq DESC LIMIT 1",
+            (node_id, seq),
+        ).fetchone()
+        if prev_row is not None:
+            prev_vector = np.frombuffer(prev_row[0], dtype=np.float64)
+
+    # Compute kinematic resistance K_cin if previous vector exists.
+    k_cin = None
+    if prev_vector is not None:
+        geodetic_matrix = get_geodetic_matrix_db()
+        if geodetic_matrix:
+            B_0 = np.vstack([axis_entry["vector"] for axis_entry in geodetic_matrix.values()])
+            k_cin = float(compute_kinetic_resistance(norm_idea_vector, prev_vector, B_0))
+
+
         raise HTTPException(status_code=503, detail="Ingress persistence unavailable.") from e
 
     duration = now_seconds() - t_start
@@ -454,6 +475,7 @@ async def vector_ingestion_endpoint(body: VectorIngestBody, request: Request, re
         seq=seq,
         lifecycle_state=lifecycle_state,
         spectral_variance=gate["topological_key"]["variance"],
+        k_cin=k_cin,
         duration_ms=round(duration * 1000, 2),
         gate_passed=gate["topological_key"]["passed"],
     )
@@ -466,6 +488,7 @@ async def vector_ingestion_endpoint(body: VectorIngestBody, request: Request, re
         "seq": seq,
         "lifecycle_state": lifecycle_state,
         "spectral_variance": float(gate["topological_key"]["variance"]),
+        "k_cin": k_cin,
         "projections": projections,
         "dual_key_status": {
             "topological_key": gate["topological_key"],
