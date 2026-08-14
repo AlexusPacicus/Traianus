@@ -364,3 +364,25 @@
   distancia de proyección a la base separa estrictamente el ruido/anomalías
   transitorias de las actualizaciones estructurales reales de la base.
 * **Status:** `Consolidated`. Empirical base for complete H1∧H2∧H3 framework validation.
+
+### seq 16 — 2026-08-13 — Integrated Cinematic Pipeline validation (H1∧H2∧H3)
+
+* **Context:** Verification that the H1/H2/H3 core kernels hold under a
+  continuous, non-homogeneous stream of synthetic events (`tests/test_cinematic_pipeline.py`),
+  exercising the 200-event 5-phase dataset against the pure core operators
+  (`compute_kinetic_resistance`, `ortho_distance`, `discrimination_ratio`).
+* **Phases (t ranges):**
+  1. Laminar [1..40] — smooth displacement, max K_cin < θ_dyn.
+  2. Estática [41..70] — v_t = v_{t-1} ⇒ K_cin ≈ 0.0 exact (Δv = 0).
+  3. Enquistamiento [71..110] — micro-oscillations, min K_cin > θ_dyn.
+  4. Ruido [111..150] — stochastic jumps, low discrimination ratio (mean dr < θ_struct).
+  5. Novedad [151..200] — geodesic rotation outside B_0, dr ≥ θ_struct.
+* **Scope note:** the test validates the **core computational kernels**
+  (numpy-only, pure) per phase. `project_dimensional_relief` (H2) is imported
+  but not asserted by this test; lifecycle routing assertions
+  (`quarantine_noise`/`structural_candidate`) are NOT covered here and belong
+  to the integration layer.
+* **Gate (measured):** `pytest tests/test_cinematic_pipeline.py` → **5 passed**;
+  full suite `pytest tests/` → **110 passed** (hermetic + model).
+* **Status:** `Consolidated`. Integrated-kernel regression coverage for
+  H1∧H2∧H3 as pure operators.
