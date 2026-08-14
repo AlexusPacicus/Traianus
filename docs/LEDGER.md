@@ -427,3 +427,47 @@
   - `python3 tools/audit/audit_harness.py` → **C1 GUARD PASSED IN GREEN (45%, 9/20)**.
   - `grep -c "sentence_transformers" traianus/app.py traianus/bootstrap.py` → **0**.
 * **Status:** `Consolidated`.
+
+### seq 18 — 2026-08-14 — Phase 3.3: Representation Independence central experiment (issue #53)
+
+* **Context:** prove that governance RULES are invariant under total
+  representation replacement (ASSERT layer) while measuring the outcome
+  coupling quantitatively (REPORT layer), over the same WP1 corpus and the
+  same ephemeral DB seeded with the frozen realistic 384D geodetic basis.
+* **Δ executed:**
+  - **Harness:** `tools/experiments/exp_representation_independence.py` runs
+    four scenarios — **A** `SentenceTransformerProvider` (all-MiniLM-L6-v2,
+    384D, offline), **B** `MockRepresentationProvider` (isomorphic 384D),
+    **C.1** `SyntheticHeteroProvider(128)` zero-padded through the full
+    pipeline, **C.2** `SyntheticHeteroProvider(512)` fail-closed at the
+    boundary — each against a fresh ephemeral DB. ASSERT invariants
+    (violation = RED/exit 1): A. seq contiguous 1..N per id + append-only
+    replay diff; B. dual-key (`EthicalKey=False → incubating` unconditionally);
+    C. persisted states ⊆ {pending_approval, incubating, consolidated,
+    telemetry_error}; D. fail-closed ingress (415 non-text/plain, 400 null
+    byte); E. ε-edge set deterministic and equal to
+    `storage.rebuild_epsilon_edges(0.8)`. REPORT layer (never fails):
+    κ per provider/category, σ² distribution, edge density, edge-set Jaccard,
+    rate spread.
+  - **Bug fixed en route:** `allowed_states` in `_snapshot_nodes` read column
+    index `r[2]` (text) instead of `r[4]` (lifecycle_state); corrected.
+  - **Hermetic smoke:** `tests/test_representation_independence.py` re-runs
+    scenarios B, C.1, C.2 over a six-note corpus (no model, no network) and
+    re-asserts the governance and rejection invariants.
+* **Gate (measured, reproducible):**
+  - Runner (scenario A + B + C.1 + C.2, full WP1 corpus):
+    - `[a]` κ=0.090 states={incubating:101, consolidated:10}
+    - `[b]` κ=0.018 states={incubating:109, consolidated:2}
+    - `[c1]` κ=0.054 states={incubating:105, consolidated:6}
+    - `[c2]` vector_422=422, node_rows_written=0, telemetry_error_rows=1
+    - `edge_jaccard={'a<->b': 1.0, 'a<->c1': 1.0, 'b<->c1': 1.0}` —
+      vacuous 1.0: every scenario yielded `edge_count=0` at ε=0.8 over the
+      WP1 corpus; `edges_deterministic` still holds.
+    - `rate_spread = 0.072` (a 0.090 − c1 0.054, − b 0.018).
+    - σ² means per category — a: A 0.002176 / B 0.002582 / C 0.002021;
+      b: A 0.001682 / B 0.001817 / C 0.001722; c1: A 0.001939 / B 0.001931 /
+      C 0.001613 — all within the ~0.0016–0.0026 band.
+    - `pytest tests/` → **142 passed, 5 deselected** (hermetic, was 139 in 3.2).
+    - TridenGuard gate cases: `0f6298d3` (runner), `85a2f81f` (smoke).
+* **Status:** `Consolidated`. Representation Independence promoted to
+  **B. Experimental** in `docs/STATUS.md`.
