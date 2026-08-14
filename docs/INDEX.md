@@ -8,7 +8,8 @@
 
 | Concept / Principle | Module / Script | Test / Audit | Status / Verdict |
 | :--- | :--- | :--- | :--- |
-| **Algebraic Kernel ($\mathbb{R}^d$, $L_2$, $\sigma^2$)** | `traianus/core.py` | `tests/test_substrate.py` | Implemented in production |
+| **Algebraic Kernel ($\mathbb{R}^d$, $L_2$, $\sigma^2$)** | `traianus/geometry/observables.py`<br>`traianus/governance/gate.py` | `tests/test_substrate.py` | Implemented in production |
+| **Representation Layer (Provider Protocol)** | `traianus/representation/` | `tests/test_representation_protocol.py`<br>`tests/test_representation_providers.py` | Implemented in production |
 | **Append-Only SQLite WAL Persistence (`id, seq`)** | `traianus/storage.py` | `tests/test_storage_hardening.py`<br>`tools/audit/traianus_invariant_verifier.py` | Implemented in production |
 | **Zero-Trust Perimeter & Dual Boundary Gate** | `traianus/security/validator.py`<br>`traianus/app.py` | `tests/security/test_tridenguard_validator.py` | Implemented in production |
 | **Bootstrap Geodesy (8D)** | `traianus/bootstrap.py`<br>`tests/fixtures/nsm_axes_8.json` | `tests/test_substrate.py` | Implemented in production |

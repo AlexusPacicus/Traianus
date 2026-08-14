@@ -56,7 +56,7 @@ def test_epsilon_edges_adjacency(isolate_db):
 
 def test_consolidar_does_not_persist_auto_edges(client, ingesta, auth_headers, isolate_db):
     """SPEC v0.2 §3.3 (M-a): E_n observational - /consolidar does NOT persist auto-edge-*."""
-    vec = np.asarray(main._model.encode("Nodo común"), dtype=np.float64)
+    vec = np.asarray(main.get_provider().encode("Nodo común"), dtype=np.float64)
     with sqlite3.connect(isolate_db) as conn:
         for nid in ("NODE_A", "NODE_B"):
             conn.execute("""
@@ -80,7 +80,7 @@ def test_consolidar_does_not_persist_auto_edges(client, ingesta, auth_headers, i
 
 def test_relations_computes_auto_edges_on_read(client, auth_headers, isolate_db):
     """SPEC v0.2 §3.3: /relations computes E_n on read (observational), without persisting."""
-    vec = np.asarray(main._model.encode("Nodo común"), dtype=np.float64)
+    vec = np.asarray(main.get_provider().encode("Nodo común"), dtype=np.float64)
     with sqlite3.connect(isolate_db) as conn:
         for nid in ("NODE_A", "NODE_B"):
             conn.execute("""

@@ -59,10 +59,9 @@ Given an identical initial state $S_0$ and sequence $E = \{e_0, e_1, \dots, e_k\
                                            |
                                            v Clean Vector v in R^d
 +--------------------------------------------------------------------+
-| 3. Spatial Control Plane (traianus/core.py)                        |
-| |-- L2 Normalization (||v||₂ = 1.0)                                |
-| |-- Spectral Variance Calculation (C1 Exclusion i ≠ j)              |
-| |-- Routing Decision: σ² ≥ θ_dyn ⟹ 'consolidated' | 'incubating'   |
+| 3. Geometry & Governance (traianus/geometry/ + traianus/governance/) |
+| |-- Observables: K_cin, ortho distance, E_n (purely observational)   |
+| |-- Gate C1 Dual-Key: σ² ≥ θ_dyn ∧ EthicalKey (governance/gate.py)   |
 +------------------------------------------+-------------------------+
                                            |
                                            v Atomic State Transition
@@ -103,6 +102,6 @@ CREATE TABLE IF NOT EXISTS manifold_nodes (
 
 | Core Claim | Execution Mechanism | Boundary |
 | :--- | :--- | :--- |
-| Deterministic Transition | Linear algebra operations in `traianus/core.py`. | Zero stochastic token completion in the control plane. |
+| Deterministic Transition | Pure operators in `traianus/geometry/observables.py` and gate C1 in `traianus/governance/gate.py`. | Zero stochastic token completion in the control plane. |
 | Append-Only Integrity | SQLite composite primary key `(id, seq)`. | Operations `UPDATE` and `DELETE` are forbidden. |
 | Hermetic Execution | Local SQLite WAL transactions. | Operates fully offline with zero cloud runtime network dependencies. |

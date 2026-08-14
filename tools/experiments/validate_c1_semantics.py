@@ -68,8 +68,8 @@ def run():
 
         main_module.init_db()
         os.environ["HF_HUB_OFFLINE"] = "1"
-        gb._model = main_module.get_model()
-        gb.get_model = main_module.get_model
+        gb._provider = main_module.get_provider()
+        gb.get_provider = main_module.get_provider
         gb.anchor_in_sqlite(gb.extract_pure_octagon())
 
         matrix = main_module.get_geodetic_matrix_db()

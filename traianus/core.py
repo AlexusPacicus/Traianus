@@ -1,184 +1,29 @@
-"""Pure decision and geometry kernel.
+"""Pure decision and geometry kernel — re-export shim (issue #48).
 
-Deterministic, side-effect-free algorithms: the dual-key gate C1 and the
-ε-adjacency / projection-variance geometry. This module has NO SQLite/FastAPI
-dependencies (pure Python + numpy + math only). The persistence layer
-(`traianus/storage.py`) and the HTTP layer (`traianus/app.py`) delegate the
-mathematical computations here.
+Canonical homes: ``traianus.geometry.observables`` (observational geometry)
+and ``traianus.governance.gate`` (dual-key C1 gate). This module aggregates
+both so every historical import path (`traianus.core.X`) keeps resolving:
+tests, tools, `traianus.storage` and `traianus.app` are untouched by the
+split.
 """
 
-import numpy as np
+from traianus.geometry.observables import (
+    calibrate_critical_threshold,
+    compute_epsilon_edges,
+    compute_kinetic_resistance,
+    discrimination_ratio,
+    ortho_distance,
+    project_dimensional_relief,
+)
+from traianus.governance.gate import evaluate_gate, evaluate_gate_v01
 
-
-def evaluate_gate_v01(spectrum: list[float], ethical_key: bool, threshold: float) -> dict:
-    """Evaluates the dual gate C1 for v0.1.
-
-    The Topological Key acts as a provisional informational geometric score.
-    The dual gate is preserved: consolidation requires BOTH keys
-    simultaneously (Topological Key AND Ethical Key / HITL). Neither acts
-    alone.
-    """
-    mean = sum(spectrum) / len(spectrum) if spectrum else 0.0
-    variance = sum((x - mean) ** 2 for x in spectrum) / len(spectrum) if spectrum else 0.0
-
-    topological_passed = variance >= threshold
-    is_consolidated = topological_passed and ethical_key  # dual-key (AND)
-
-    return {
-        "state": "consolidated" if is_consolidated else "incubating",
-        "topological_key": {
-            "status": "PROVISIONAL_INFORMATIONAL_SCORE",
-            "variance": variance,
-            "threshold": threshold,
-            "passed": topological_passed,
-        },
-        "ethical_key": ethical_key,
-    }
-
-
-def calibrate_critical_threshold(vectors: list[np.ndarray]) -> float:
-    """Critical variance threshold on S^{d-1}, self-projections excluded.
-
-    Cross projections only (j != i). Self-projection (dot == 1.0 for an
-    L2-normalized axis) inflated the baseline to an unreachable scale for
-    inputs, forcing the Topological Key to a 0% approval rate on real
-    corpora (audit finding C1).
-    """
-    base_variances = []
-    for i, axis_vector in enumerate(vectors):
-        projections = [
-            float(np.dot(axis_vector, other))
-            for j, other in enumerate(vectors) if j != i
-        ]
-        base_variances.append(np.var(projections))
-    return float(np.mean(base_variances))
-
-
-def compute_epsilon_edges(nodes: dict[str, np.ndarray], epsilon: float) -> list[dict]:
-    """Pure ε-adjacency computation (ADR-023/H5, RE-08): no DB access.
-
-    (v_i, v_j) ∈ E_n iff ||v_i − v_j||₂ ≤ epsilon. Deterministic: nodes are
-    processed in sorted id order and edges are sorted by (source, target).
-    """
-    ids = sorted(nodes)
-    edges: list[dict] = []
-    for i in range(len(ids)):
-        for j in range(i + 1, len(ids)):
-            dist = float(np.linalg.norm(nodes[ids[i]] - nodes[ids[j]]))
-            if dist <= epsilon:
-                edges.append({
-                    "source": ids[i],
-                    "target": ids[j],
-                    "distance": round(dist, 6),
-                })
-    edges.sort(key=lambda e: (e["source"], e["target"]))
-    return edges
-
-
-def project_dimensional_relief(v: np.ndarray, k_cin: float) -> np.ndarray:
-    """Pure operator: map v ∈ R^d → v̂ ∈ R^{d+1} via dimensional relief.
-
-    The K_cin scalar absorbs solenoidal/kinetic energy into the new coordinate,
-    allowing the spectral variance to relaminate and the node to be evaluated
-    with lower distortion on the augmented base B_0 ∈ R^{k × (d+1)}.
-
-    Parameters
-    ----------
-    v : np.ndarray
-        Input vector v ∈ R^d (first d coordinates).
-    k_cin : float
-        Kinematic resistance K_cin ∈ R (non-negative, typically K_cin ≥ 0).
-
-    Returns
-    -------
-    np.ndarray
-        Augmented vector v̂ ∈ R^{d+1} = (v_1, ..., v_d, K_cin).
-    """
-    v_hat = np.empty(v.shape[0] + 1, dtype=v.dtype)
-    v_hat[:-1] = v
-    v_hat[-1] = float(k_cin)
-    return v_hat
-
-
-def compute_kinetic_resistance(v_t: np.ndarray, v_prev: np.ndarray, B_0: np.ndarray) -> float:
-    """Pure computation of kinematic resistance K_cin.
-
-    K_cin(v_t, v_{t-1}, B_0) = 0.5 ||v_t - v_{t-1}||^2 ⋅ (1 + Var(v_t B_0^T)).
-
-    Parameters are pure (no mutable state). B_0 is the geodetic basis matrix
-    (k × d) where each row is an axis vector; v_t B_0^T yields projection
-    coordinates per axis, and Var() computes their variance.
-
-    Returns a scalar float representing kinematic resistance.
-    """
-    delta = v_t - v_prev
-    norm_delta2 = float(np.linalg.norm(delta) ** 2)
-    projections = np.dot(v_t, B_0.T)  # shape (k,)
-    projection_var = float(np.var(projections))  # scalar variance
-    return 0.5 * norm_delta2 * (1.0 + projection_var)
-
-
-def ortho_distance(v: np.ndarray, B_0: np.ndarray) -> float:
-    """Pure operator: orthogonal residual distance from vector v to base B_0.
-
-    Computes the squared L2-norm of the component of v orthogonal to all
-    rows of B_0 (k × d matrix).  This is the "projection distance outside
-    the piscina B_0" used by H3 discrimination.
-
-    Parameters
-    ----------
-    v : np.ndarray of shape (d,)
-        Input vector in R^d.
-    B_0 : np.ndarray of shape (k, d)
-        Reduced base matrix (k < d), rows are orthogonal axes of the
-        geodetic piscina.
-
-    Returns
-    -------
-    float
-        Squared norm ||v - v B_0^T B_0||^2.  Higher = more "outside".
-    """
-    # Project v onto B_0: coords = v @ B_0.T  (shape (k,))
-    projected_coords = np.dot(v, B_0.T)  # shape (k,)
-    # Reconstruct from projection: v_proj = B_0.T @ projected_coords  (shape (d,))
-    # Since B_0 is (k, d), B_0.T is (d, k), so B_0.T @ projected_coords = (d,)
-    v_proj = np.dot(B_0.T, projected_coords)  # shape (d,)
-    # Residual (orthogonal component)
-    residual = v - v_proj
-    return float(np.linalg.norm(residual) ** 2)
-
-
-def discrimination_ratio(
-    v_t: np.ndarray,
-    v_prev: np.ndarray,
-    B_0: np.ndarray,
-    epsilon: float = 1e-12,
-) -> float:
-    """Pure operator: discrimination ratio for H3 novelty classification.
-
-    ortho_distance / K_cin.  High ratio  → structural novelty (smooth
-    rotation outside B_0, low kinetic resistance).  Low ratio    → transitory
-    noise (high kinetic energy but within the known sub‑space).
-
-    Parameters
-    ----------
-    v_t : np.ndarray of shape (d,)
-        Current vector in the trajectory.
-    v_prev : np.ndarray of shape (d,)
-        Preceding vector.
-    B_0 : np.ndarray of shape (k, d)
-        Reduced geodetic base.
-    epsilon : float, optional
-        Small value to avoid division‑zero when K_cin ≈ 0.
-
-    Returns
-    -------
-    float
-        Discrimination ratio = ortho_distance / K_cin.
-        +inf if K_cin == 0.
-    """
-    k_cin = compute_kinetic_resistance(v_t, v_prev, B_0)
-    od = ortho_distance(v_t, B_0)
-    if k_cin < epsilon:
-        return float(od / epsilon)  # avoid div‑0; very high ratio
-    return float(od / k_cin)
+__all__ = [
+    "calibrate_critical_threshold",
+    "compute_epsilon_edges",
+    "compute_kinetic_resistance",
+    "discrimination_ratio",
+    "ortho_distance",
+    "project_dimensional_relief",
+    "evaluate_gate",
+    "evaluate_gate_v01",
+]
