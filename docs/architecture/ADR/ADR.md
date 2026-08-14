@@ -2,7 +2,7 @@
 
 Objective: Document immutable engineering trade-offs to prevent emotional refactoring, architectural drift, or scope creep.
 
-Philosophy: Append-Only. Architectural decisions are stacked sequentially to guarantee structural traceability.
+Philosophy: Append-Only. Architectural decisions are stacked sequentially to preserve structural traceability.
 
 Historical Context & Evolutionary Trajectory:
 The early entries (ADR-001 through ADR-007) capture rapid prototyping for a deterministic knowledge organizer during a hackathon. To eliminate data randomness and system drift, architectural focus shifted from application features to core state persistence. Subsequent entries (ADR-010 through ADR-025) record this evolution into a foundational, immutable control plane.
@@ -67,7 +67,7 @@ Note on Ledger Sequence: Discontinued numbers (006, 008, 009, 011–013) represe
 
 ### ADR-015: Space Accretion via Orthogonal Canonical Injection
 * **Context:** Adding new computational dimensions to static spaces yields noisy projections due to a lack of anchor points for emergent concepts.
-* **Decision:** Hyperspace expansion (N→N+1) executes via hot-swapping computational linear algebra. The control plane zero-pads existing vectors and injects a pure canonical unit vector ([0,0,...,1]), guaranteeing mathematical orthogonality.
+* **Decision:** Hyperspace expansion (N→N+1) executes via hot-swapping computational linear algebra. The control plane zero-pads existing vectors and injects a pure canonical unit vector ([0,0,...,1]), preserving mathematical orthogonality by construction.
 * **Status:** Approved / Active.
 
 ### ADR-016: Non-Generative Vector Inference
@@ -76,7 +76,7 @@ Note on Ledger Sequence: Discontinued numbers (006, 008, 009, 011–013) represe
 * **Status:** Approved / Active.
 
 ### ADR-017: Dynamic Geodetic Axes Derived from Corpus Variance
-* **Context:** Static geodetic axes anchored on Natural Semantic Metalanguage (NSM) primitives guarantee safe initial bootstrap ($S_0$), but induce projection drift over time as domain complexity grows.
+* **Context:** Static geodetic axes anchored on Natural Semantic Metalanguage (NSM) primitives provide a safe initial bootstrap ($S_0$), but induce projection drift over time as domain complexity grows.
 * **Decision:** Transition from fixed bootstrap primitives to dynamic geodetic axes extracted directly from corpus variance. Non-blocking background workers execute iterative min-max greedy farthest-point calculations over consolidated embeddings.
 * **Status:** Proposed / Funded R&D Scope (WP1). PoC Boundary: Current PoC executes static NSM-anchored axes. Dynamic corpus-derived axis recalculation is deferred to WP1.
 

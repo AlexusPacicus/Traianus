@@ -46,7 +46,7 @@ Los siguientes hallazgos permanecen abiertos y requieren atención adicional:
 |---|---|---|
 | M1 | "Bitwise determinism" not guaranteeable — redefinido | 🟡 Open |
 | M2 | "<1ms" claim false (~13ms measured) | 🟡 Open |
-| M8 | No CI, unpinned flake.nix | 🟡 Open |
+| M8 | No CI, unpinned flake.nix | 🟡 Parcial — inputs de `flake.nix` pinnados (nixpkgs commit `148bab9c…`, flake-utils tag `v1.0.0`); `flake.lock` pendiente de congelación: ejecutar `nix flake lock` en un host Nix y commitear el lockfile **antes del tag v1.0.0**. |
 | L1 | Tests don't test real system | 🔵 Open |
 | L3 | Mixed languages in API | 🔵 Open |
 | L4 | NSM basis near-duplicates | 🔵 Open |

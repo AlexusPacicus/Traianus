@@ -4,11 +4,12 @@
   inputs = {
     # Pinned (Step 4.1 / finding M8): nixos-unstable frozen at a revision
     # with known hash (commit 148bab9c1c3c53136ecb44a6ea356a0ed5b39b06,
-    # 2026-08-01). Without pinning, every evaluation drifts and the
-    # reproducibility promise is false. To pin the full lock, run on a
-    # Nix host: `nix flake lock` and commit the generated flake.lock.
+    # 2026-08-01). flake-utils pinned to the v1.0.0 tag. Without pinning,
+    # every evaluation drifts and the reproducibility promise is false.
+    # To pin the full lock, run on a Nix host: `nix flake lock` and commit
+    # the generated flake.lock (required before the v1.0.0 tag).
     nixpkgs.url = "github:NixOS/nixpkgs/148bab9c1c3c53136ecb44a6ea356a0ed5b39b06";
-    flake-utils.url = "github:numtide/flake-utils";
+    flake-utils.url = "github:numtide/flake-utils/v1.0.0";
   };
 
   outputs = { self, nixpkgs, flake-utils }:

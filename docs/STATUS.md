@@ -7,7 +7,7 @@ This document establishes the canonical and immutable classification of all comp
 
 
 ## A. Implemented (Control Plane / Canonical)
-*Components present in `traianus/` with deterministic proofs, execution guarantees, and 110/110 tests passing.*
+*Components present in `traianus/` with determinism verified by hermetic tests, and 143/143 tests passing.*
 
 
 * **Ingestion and HTTP Servability:** `/ingesta/vector` endpoint in `traianus/app.py`.
@@ -38,16 +38,19 @@ This document establishes the canonical and immutable classification of all comp
 ---
 
 
-## C. Hypotheses / Future Research
-*Open research lines not implemented in the core.*
+## C. Research / Future Roadmap (Work Packages WP1–WP4)
+*Open research lines not implemented in the core. Explicitly declared **RESEARCH / FUTURE ROADMAP** — not part of Core/Control Plane v1.0.0 (see IMPLEMENTATION_STATUS.md §0/§4 for the 5-category formal classification).*
 
 
-* **Adaptive Dimensional Discovery:** Inertial and uninterrupted representation space expansion $N \to N+1$.
-* **Persistent Topology over Manifolds:** Persistent Homology filtration over simplicial complexes in the substrate.
+* **WP1 — Dynamic Geodetic Axes (ADR-017):** Transition from the fixed `PROSTHETIC_NSM_V1` bootstrap basis to corpus-derived axes; decoupling governance from representation (EAS-01).
+* **WP2 — Persistent Homology & Simplicial Faces (K_n) (ADR-018, ADR-019, ADR-023):** Persistent Homology filtration over simplicial complexes in the substrate; dynamic k-discovery via $H_1$; native GUDHI C++ integration.
+* **WP3 — Riemannian Metric Engine (ADR-020):** System clock eradication and geodesic metric tensor integration.
+* **WP4 — Cross-Scope Invariant Preservation (ADR-025):** Architectural drift control for invariants across optimizations, language bindings, and hardware targets.
+* **RH-1 — Multi-Provider Dynamic Switching:** Dynamic provider switching beyond the frozen 384D core.
 
 
 ---
 
 
 ## Official Determinism Guarantee
-> **Official Definition:** Given an identical sequence of input vectors, the same initial database state, and the same execution semantics, Traianus core state transitions are **100% deterministic and reproducible**.
+> **Official Definition:** Given identical initial state, identical input vectors and identical execution semantics, the core state transitions are deterministic.
