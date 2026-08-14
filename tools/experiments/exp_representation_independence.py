@@ -24,6 +24,9 @@ ASSERT (violation = exit 1):
 REPORT (never fails the run):
   kappa per provider/category, sigma^2 distribution, epsilon-edge count,
   edge-set Jaccard between scenarios (over non-empty calibrated sets).
+  kappa spread IS the representation coupling index: it quantifies how each
+  embedding space deforms consolidation geometry. Variation across providers
+  is a MEASUREMENT of coupling, never a governance-rule failure.
 """
 import argparse
 import hashlib
@@ -364,6 +367,10 @@ def compute_coupling_report(results: dict) -> dict:
             )
     rates = {n: m.get("kappa_overall") for n, m in results.items() if "kappa_overall" in m}
     report["rate_spread"] = max(rates.values()) - min(rates.values()) if rates else 0.0
+    # kappa spread is the representation coupling index (REPORT): it measures
+    # how each embedding space deforms consolidation geometry. It is NOT a
+    # governance-rule failure; the ASSERT layer covers the rules only.
+    report["coupling_index"] = report["rate_spread"]
     return report
 
 
@@ -436,6 +443,9 @@ def main(argv=None) -> int:
                   f"telemetry_error_rows={m['telemetry_error_rows']}")
     print(f"edge_jaccard={report['edge_jaccard']} "
           f"rate_spread={report['rate_spread']:.3f}")
+    print("REPORT -- kappa spread is the REPRESENTATION COUPLING index: it "
+          "quantifies how each embedding space deforms consolidation geometry. "
+          "Governance RULES (ASSERT layer) are invariant and independent of kappa.")
 
     if failures:
         print("RED -- governance ASSERT violated:")

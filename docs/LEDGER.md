@@ -511,3 +511,38 @@
     masked this coupling.
   - `pytest tests/` → **143 passed, 5 deselected** (was 142 in seq 18).
 * **Status:** `Consolidated`.
+
+### seq 20 — 2026-08-14 — Red Team remediation II: κ coupling semantics + realistic-basis tooling (pre-tag v1.0.0)
+
+* **Context:** two Red Team findings before the v1.0.0 tag — (P2) a
+  conceptual mismatch: κ variation across providers was misread as a
+  governance-invariance failure; (P3) tooling debt: `exp_vorticity_pressure.py`
+  (H1) measured K_cin against a full-rank identity (one-hot) basis.
+* **Δ executed:**
+  - **P2 (κ = coupling index, REPORT):** the 3.3 runner now labels kappa
+    spread explicitly as the REPRESENTATION COUPLING index: the JSON report
+    carries `coupling_index` alongside `rate_spread` and the run prints a
+    REPORT line stating that κ variation quantifies how each embedding space
+    deforms consolidation geometry while the governance RULES (ASSERT layer)
+    are invariant and independent of κ. The ASSERT layer covers only the
+    rules (state machine, Dual-Key C1, WAL order, boundary rejections,
+    non-vacuous deterministic ε-edges); κ spread never fails the run.
+  - **P3 (realistic basis for synthetic runs):** `exp_vorticity_pressure.py`
+    replaces `B_0 = np.eye(dim)` (full-rank identity/one-hot) with the frozen
+    realistic geodetic basis `tests/fixtures/nsm_axes_8.json` (8 × 384) via
+    `load_realistic_basis()`, with a fail-loud dimension guard. Deterministic
+    RNG (seeds 42 / 42+1000) is preserved — determinism is a feature for
+    reproducibility. The Red Team's own untracked diagnostic
+    (`exp_cinematic_analysis.py`) and the falsified sparse-lexicon substrate
+    (seq 10) are intentionally left untouched.
+* **Gate (measured, reproducible):**
+  - H1 re-validated under the realistic basis: free K_cin = 0.006115,
+    compressed K_cin = 0.032985 → **H1 VALIDA** (verdict and values unchanged:
+    the frozen NSM axes are near-orthogonal, so Var(v·B_0ᵀ) ≈ Var(v)).
+  - Runner GREEN: `coupling_index = rate_spread = 0.072`, edge-jaccard
+    a↔b=0.025, a↔c1=0.025, b↔c1=0.027 — reported as coupling measurements,
+    not rule failures.
+  - `pytest tests/` → **143 passed, 5 deselected** (unchanged).
+  - TridenGuard gates: `d04ed591` (P2 labeling), `7eadd5a7` (P3 migration),
+    `2e6dae44` (docs).
+* **Status:** `Consolidated`.

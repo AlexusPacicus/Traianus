@@ -8,10 +8,29 @@ increases the kinetic distortion metric K_cin.
 
 import sys
 import os
+import json
+from pathlib import Path
 sys.path.insert(0, os.path.join(os.path.dirname(__file__), '..'))
 
 import numpy as np
 from typing import Tuple
+
+REPO_ROOT = Path(__file__).resolve().parents[2]
+
+
+def load_realistic_basis() -> np.ndarray:
+    """Frozen realistic geodetic basis B_0 (8 x 384) from nsm_axes_8.json.
+
+    Replaces the former full-rank identity (one-hot) basis: the production
+    geodetic baseline is the reduced 8-axis subspace, so K_cin must be
+    measured against the real frozen geometry (Red Team P3). Deterministic:
+    the fixture is a committed frozen artifact.
+    """
+    fixture = REPO_ROOT / "tests" / "fixtures" / "nsm_axes_8.json"
+    entries = json.loads(fixture.read_text(encoding="utf-8"))
+    return np.stack(
+        [np.asarray(e["vector"], dtype=np.float64) for e in entries]
+    )
 
 # Import core kinematics functions
 from kinematics_engine import (
@@ -92,8 +111,14 @@ def run_experiment(
 
     Returns (free_k_cin_avg, compressed_k_cin_avg, verdict)
     """
-    # Orthogonal base B_0 (full-rank: identity)
-    B_0 = np.eye(dim, dtype=np.float64)
+    # Reduced geodetic base B_0: frozen realistic NSM axes (8 x 384).
+    # Replaces the former full-rank identity (one-hot) basis so the
+    # measurement matches the production geodetic subspace (Red Team P3).
+    B_0 = load_realistic_basis()
+    if B_0.shape[1] != dim:
+        raise ValueError(
+            f"Realistic basis dimension {B_0.shape[1]} != space dimension {dim}"
+        )
 
     # Free/laminar flow
     free_vectors = generate_laminar_flow(n_free, dim, seed)
@@ -131,6 +156,8 @@ def main():
     free_avg, compressed_avg, verdict = run_experiment(dim=dim)
 
     print(f"Dimensión del espacio: R^{dim}")
+    print(f"Base geodésica B_0: base realista congelada NSM "
+          f"({load_realistic_basis().shape[0]} x {load_realistic_basis().shape[1]})")
     print(f"")
     print(f"Zona de flujo libre (laminar):")
     print(f"  K_cin promedio: {free_avg:.6f}")

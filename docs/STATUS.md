@@ -29,10 +29,10 @@ This document establishes the canonical and immutable classification of all comp
 
 
 * **`kinematics_engine.py`:** Laboratory development algebra engine for experiment runs.
-* **Falsification Runners:** $H_1$ (`seq 13$), $H_2$ (`seq 14$), $H_3$ (`seq 15$) scripts and Integrated Pipeline (`seq 16$).
+* **Falsification Runners:** $H_1$ (`seq 13`, realistic NSM basis since `seq 20`), $H_2$ (`seq 14$), $H_3$ (`seq 15$) scripts and Integrated Pipeline (`seq 16$).
 * **Logographic Experiments:** Reduced orthogonal basis probes and semantic dispersion.
 * **NCD (Normalized Compression Distance) Tests:** Symbolic similarity comparatives.
-* **Representation Independence (seq 18, seq 19):** Governance-rule invariance under total embedding replacement (`exp_representation_independence.py`, scenarios A/B/C.1/C.2). Empirically validated GREEN: all governance ASSERTs hold across a 384D MiniLM model, the isomorphic mock, and the 128D hetero provider (zero-padded); 512D ingress is fail-closed (422, zero node side effects, one `telemetry_error` row). The ε-edge metric is calibrated to a 5% pair density per provider (seq 19) so the edge-set Jaccard is non-vacuous: coupling is measured as κ spread 0.018–0.090, σ² means ~0.0016–0.0026, and edge-Jaccard ≈ 0.025–0.027 between scenarios (rules invariant, local E_n structure highly representation-dependent).
+* **Representation Independence (seq 18, seq 19, seq 20):** Governance-rule invariance under total embedding replacement (`exp_representation_independence.py`, scenarios A/B/C.1/C.2). Empirically validated GREEN: all governance ASSERTs hold across a 384D MiniLM model, the isomorphic mock, and the 128D hetero provider (zero-padded); 512D ingress is fail-closed (422, zero node side effects, one `telemetry_error` row). The ε-edge metric is calibrated to a 5% pair density per provider (seq 19) so the edge-set Jaccard is non-vacuous. κ spread is the representation coupling index (REPORT, seq 20): measured as κ 0.018–0.090 (spread 0.072), σ² means ~0.0016–0.0026, edge-Jaccard ≈ 0.025–0.027 between scenarios — the governance RULES are invariant while the local E_n structure is highly representation-dependent.
 
 
 ---
