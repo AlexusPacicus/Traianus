@@ -64,3 +64,40 @@ def test_tridenguard_validator_gate():
     decision = validate_proposal(valid_prop, "traianus/app.py")
     assert decision["status"] == "VALIDATED"
     assert decision["final_decision"] == "EXECUTE_SAFE"
+
+def test_ingesta_rejects_overlong_utf8(client, auth_headers):
+    """Overlong UTF-8 lead bytes (C0/C1) must be rejected at the byte level."""
+    res = client.post(
+        "/ingesta",
+        content=b"\xc0\xaf",
+        headers={**auth_headers, "Content-Type": "text/plain"},
+    )
+    assert res.status_code == 400
+
+def test_ingesta_rejects_utf16_bom(client, auth_headers):
+    """UTF-16 BOM bytes must be rejected as non-UTF-8."""
+    res = client.post(
+        "/ingesta",
+        content=b"\xff\xfeH\x00i\x00",
+        headers={**auth_headers, "Content-Type": "text/plain"},
+    )
+    assert res.status_code == 400
+
+def test_ingesta_rejects_null_byte_at_end(client, auth_headers):
+    """A trailing null byte must still trigger the null-byte rejection."""
+    res = client.post(
+        "/ingesta",
+        content=b"valid\x00",
+        headers={**auth_headers, "Content-Type": "text/plain"},
+    )
+    assert res.status_code == 400
+
+def test_ingesta_accepts_multi_byte_utf8_without_false_positive(client, ingesta):
+    """Valid multi-byte UTF-8 must pass the perimeter (no false positive)."""
+    res = ingesta("Español ñ ¡¿ç — 你好 🚀")
+    assert res.status_code == 200
+
+def test_ingesta_accepts_charset_parameter(client, ingesta):
+    """text/plain with a charset parameter must be accepted (allowlist base type)."""
+    res = ingesta("charset ok", content_type="text/plain; charset=utf-8")
+    assert res.status_code == 200

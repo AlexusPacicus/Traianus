@@ -427,3 +427,122 @@
   - `python3 tools/audit/audit_harness.py` → **C1 GUARD PASSED IN GREEN (45%, 9/20)**.
   - `grep -c "sentence_transformers" traianus/app.py traianus/bootstrap.py` → **0**.
 * **Status:** `Consolidated`.
+
+### seq 18 — 2026-08-14 — Phase 3.3: Representation Independence central experiment (issue #53)
+
+* **Context:** prove that governance RULES are invariant under total
+  representation replacement (ASSERT layer) while measuring the outcome
+  coupling quantitatively (REPORT layer), over the same WP1 corpus and the
+  same ephemeral DB seeded with the frozen realistic 384D geodetic basis.
+* **Δ executed:**
+  - **Harness:** `tools/experiments/exp_representation_independence.py` runs
+    four scenarios — **A** `SentenceTransformerProvider` (all-MiniLM-L6-v2,
+    384D, offline), **B** `MockRepresentationProvider` (isomorphic 384D),
+    **C.1** `SyntheticHeteroProvider(128)` zero-padded through the full
+    pipeline, **C.2** `SyntheticHeteroProvider(512)` fail-closed at the
+    boundary — each against a fresh ephemeral DB. ASSERT invariants
+    (violation = RED/exit 1): A. seq contiguous 1..N per id + append-only
+    replay diff; B. dual-key (`EthicalKey=False → incubating` unconditionally);
+    C. persisted states ⊆ {pending_approval, incubating, consolidated,
+    telemetry_error}; D. fail-closed ingress (415 non-text/plain, 400 null
+    byte); E. ε-edge set deterministic and equal to
+    `storage.rebuild_epsilon_edges(0.8)`. REPORT layer (never fails):
+    κ per provider/category, σ² distribution, edge density, edge-set Jaccard,
+    rate spread.
+  - **Bug fixed en route:** `allowed_states` in `_snapshot_nodes` read column
+    index `r[2]` (text) instead of `r[4]` (lifecycle_state); corrected.
+  - **Hermetic smoke:** `tests/test_representation_independence.py` re-runs
+    scenarios B, C.1, C.2 over a six-note corpus (no model, no network) and
+    re-asserts the governance and rejection invariants.
+* **Gate (measured, reproducible):**
+  - Runner (scenario A + B + C.1 + C.2, full WP1 corpus):
+    - `[a]` κ=0.090 states={incubating:101, consolidated:10}
+    - `[b]` κ=0.018 states={incubating:109, consolidated:2}
+    - `[c1]` κ=0.054 states={incubating:105, consolidated:6}
+    - `[c2]` vector_422=422, node_rows_written=0, telemetry_error_rows=1
+    - `edge_jaccard={'a<->b': 1.0, 'a<->c1': 1.0, 'b<->c1': 1.0}` —
+      vacuous 1.0: every scenario yielded `edge_count=0` at ε=0.8 over the
+      WP1 corpus; `edges_deterministic` still holds.
+    - `rate_spread = 0.072` (a 0.090 − c1 0.054, − b 0.018).
+    - σ² means per category — a: A 0.002176 / B 0.002582 / C 0.002021;
+      b: A 0.001682 / B 0.001817 / C 0.001722; c1: A 0.001939 / B 0.001931 /
+      C 0.001613 — all within the ~0.0016–0.0026 band.
+    - `pytest tests/` → **142 passed, 5 deselected** (hermetic, was 139 in 3.2).
+    - TridenGuard gate cases: `0f6298d3` (runner), `85a2f81f` (smoke).
+* **Status:** `Consolidated`. Representation Independence promoted to
+  **B. Experimental** in `docs/STATUS.md`.
+
+### seq 19 — 2026-08-14 — Red Team remediation: degenerate ε-edges made vacuous (pre-tag v1.0.0)
+
+* **Context:** Red Team finding before the v1.0.0 tag — the Representation
+  Independence experiment reported `edge_count=0` at ε=0.8 over the 384D
+  L2-normalized WP1 corpus, so the E. determinism ASSERT and the edge-set
+  Jaccard (1.0) were VACUOUS: two empty graphs always compare as identical
+  (∅=∅), proving nothing about representation independence.
+* **Δ executed:**
+  - **RED test:** `tests/test_representation_independence.py::
+    test_epsilon_edge_set_is_non_vacuous_under_mock_provider` failed with
+    `edge_count=0` on the pre-fix harness (gate `b203e42e`).
+  - **Calibration:** `calibrate_epsilon(vectors, target_density=0.05)` in
+    `exp_representation_independence.py` returns the k-th smallest pairwise
+    L2 distance over the L2-normalized corpus vectors (k = max(1,
+    int(density·n_pairs))), stepping one rank further so the float32→float64
+    drift of persisted `vector_blob` cannot push the k-th closest pair
+    outside `dist <= ε` (gate `994edf3d`); normalization added so raw
+    non-normalized providers cannot calibrate over un-normalized distances
+    and yield a degenerate full graph (gate `0fb0662b`).
+  - **Seam injection:** the calibrated ε is patched into
+    `main_module.EPSILON_EDGE` inside `try/finally` (restored after the
+    scenario), mirroring the provider-injection seam; the E. determinism
+    check now compares the live endpoint against
+    `storage.rebuild_epsilon_edges(calibrated_eps)`.
+  - **Hardened ASSERT:** `assert_invariants` now enforces
+    `non_vacuous_edges` (`edge_count > 0`), so a degenerate graph is a
+    governance-rule violation (RED), not a silent pass.
+* **Gate (measured, reproducible):**
+  - Calibrated ε-edges (density ≈ 5%): `[a]` ε=1.1786 edges=305;
+    `[b]` ε=1.3538 edges=306; `[c1]` ε=1.3109 edges=305; `[c2]` unchanged
+    (422 / 0 node rows / 1 telemetry_error).
+  - **Edge-set Jaccard now real:** a↔b=0.0252, a↔c1=0.0252, b↔c1=0.0269
+    (was a vacuous 1.0). Findings: the governance RULES are invariant across
+    representations (all ASSERTs green, κ spread 0.018–0.090 unchanged),
+    while the local E_n structure is HIGHLY representation-dependent
+    (~2.5% of the 5%-density neighborhoods coincide) — the vacuous 1.0 had
+    masked this coupling.
+  - `pytest tests/` → **143 passed, 5 deselected** (was 142 in seq 18).
+* **Status:** `Consolidated`.
+
+### seq 20 — 2026-08-14 — Red Team remediation II: κ coupling semantics + realistic-basis tooling (pre-tag v1.0.0)
+
+* **Context:** two Red Team findings before the v1.0.0 tag — (P2) a
+  conceptual mismatch: κ variation across providers was misread as a
+  governance-invariance failure; (P3) tooling debt: `exp_vorticity_pressure.py`
+  (H1) measured K_cin against a full-rank identity (one-hot) basis.
+* **Δ executed:**
+  - **P2 (κ = coupling index, REPORT):** the 3.3 runner now labels kappa
+    spread explicitly as the REPRESENTATION COUPLING index: the JSON report
+    carries `coupling_index` alongside `rate_spread` and the run prints a
+    REPORT line stating that κ variation quantifies how each embedding space
+    deforms consolidation geometry while the governance RULES (ASSERT layer)
+    are invariant and independent of κ. The ASSERT layer covers only the
+    rules (state machine, Dual-Key C1, WAL order, boundary rejections,
+    non-vacuous deterministic ε-edges); κ spread never fails the run.
+  - **P3 (realistic basis for synthetic runs):** `exp_vorticity_pressure.py`
+    replaces `B_0 = np.eye(dim)` (full-rank identity/one-hot) with the frozen
+    realistic geodetic basis `tests/fixtures/nsm_axes_8.json` (8 × 384) via
+    `load_realistic_basis()`, with a fail-loud dimension guard. Deterministic
+    RNG (seeds 42 / 42+1000) is preserved — determinism is a feature for
+    reproducibility. The Red Team's own untracked diagnostic
+    (`exp_cinematic_analysis.py`) and the falsified sparse-lexicon substrate
+    (seq 10) are intentionally left untouched.
+* **Gate (measured, reproducible):**
+  - H1 re-validated under the realistic basis: free K_cin = 0.006115,
+    compressed K_cin = 0.032985 → **H1 VALIDA** (verdict and values unchanged:
+    the frozen NSM axes are near-orthogonal, so Var(v·B_0ᵀ) ≈ Var(v)).
+  - Runner GREEN: `coupling_index = rate_spread = 0.072`, edge-jaccard
+    a↔b=0.025, a↔c1=0.025, b↔c1=0.027 — reported as coupling measurements,
+    not rule failures.
+  - `pytest tests/` → **143 passed, 5 deselected** (unchanged).
+  - TridenGuard gates: `d04ed591` (P2 labeling), `7eadd5a7` (P3 migration),
+    `2e6dae44` (docs).
+* **Status:** `Consolidated`.
