@@ -471,3 +471,43 @@
     - TridenGuard gate cases: `0f6298d3` (runner), `85a2f81f` (smoke).
 * **Status:** `Consolidated`. Representation Independence promoted to
   **B. Experimental** in `docs/STATUS.md`.
+
+### seq 19 — 2026-08-14 — Red Team remediation: degenerate ε-edges made vacuous (pre-tag v1.0.0)
+
+* **Context:** Red Team finding before the v1.0.0 tag — the Representation
+  Independence experiment reported `edge_count=0` at ε=0.8 over the 384D
+  L2-normalized WP1 corpus, so the E. determinism ASSERT and the edge-set
+  Jaccard (1.0) were VACUOUS: two empty graphs always compare as identical
+  (∅=∅), proving nothing about representation independence.
+* **Δ executed:**
+  - **RED test:** `tests/test_representation_independence.py::
+    test_epsilon_edge_set_is_non_vacuous_under_mock_provider` failed with
+    `edge_count=0` on the pre-fix harness (gate `b203e42e`).
+  - **Calibration:** `calibrate_epsilon(vectors, target_density=0.05)` in
+    `exp_representation_independence.py` returns the k-th smallest pairwise
+    L2 distance over the L2-normalized corpus vectors (k = max(1,
+    int(density·n_pairs))), stepping one rank further so the float32→float64
+    drift of persisted `vector_blob` cannot push the k-th closest pair
+    outside `dist <= ε` (gate `994edf3d`); normalization added so raw
+    non-normalized providers cannot calibrate over un-normalized distances
+    and yield a degenerate full graph (gate `0fb0662b`).
+  - **Seam injection:** the calibrated ε is patched into
+    `main_module.EPSILON_EDGE` inside `try/finally` (restored after the
+    scenario), mirroring the provider-injection seam; the E. determinism
+    check now compares the live endpoint against
+    `storage.rebuild_epsilon_edges(calibrated_eps)`.
+  - **Hardened ASSERT:** `assert_invariants` now enforces
+    `non_vacuous_edges` (`edge_count > 0`), so a degenerate graph is a
+    governance-rule violation (RED), not a silent pass.
+* **Gate (measured, reproducible):**
+  - Calibrated ε-edges (density ≈ 5%): `[a]` ε=1.1786 edges=305;
+    `[b]` ε=1.3538 edges=306; `[c1]` ε=1.3109 edges=305; `[c2]` unchanged
+    (422 / 0 node rows / 1 telemetry_error).
+  - **Edge-set Jaccard now real:** a↔b=0.0252, a↔c1=0.0252, b↔c1=0.0269
+    (was a vacuous 1.0). Findings: the governance RULES are invariant across
+    representations (all ASSERTs green, κ spread 0.018–0.090 unchanged),
+    while the local E_n structure is HIGHLY representation-dependent
+    (~2.5% of the 5%-density neighborhoods coincide) — the vacuous 1.0 had
+    masked this coupling.
+  - `pytest tests/` → **143 passed, 5 deselected** (was 142 in seq 18).
+* **Status:** `Consolidated`.

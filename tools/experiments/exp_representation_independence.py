@@ -17,11 +17,13 @@ ASSERT (violation = exit 1):
   B. dual-key: EthicalKey=False -> incubating unconditionally
   C. allowed lifecycle states only
   D. fail-closed ingress: 400/415 with zero corrupt node rows
-  E. deterministic epsilon-edges sorted by (source, target), dist <= epsilon
+  E. NON-EMPTY, deterministic epsilon-edges (eps calibrated to a target
+     pair density per provider; an empty edge set would make the
+     determinism check and the edge-set Jaccard vacuous, so it is refused)
 
 REPORT (never fails the run):
   kappa per provider/category, sigma^2 distribution, epsilon-edge count,
-  edge-set Jaccard between scenarios.
+  edge-set Jaccard between scenarios (over non-empty calibrated sets).
 """
 import argparse
 import hashlib
@@ -48,6 +50,7 @@ from traianus.representation.mock_provider import MockRepresentationProvider  # 
 
 ALLOWED_STATES = {"pending_approval", "incubating", "consolidated", "telemetry_error"}
 EPSILON = 0.8
+DEFAULT_EDGE_DENSITY = 0.05
 DEFAULT_TOKEN = "exp-representation-independence"
 
 
@@ -100,110 +103,166 @@ def _snapshot_nodes(db_path: Path) -> list[tuple]:
         ).fetchall()
 
 
+def calibrate_epsilon(vectors: list[np.ndarray],
+                      target_density: float = DEFAULT_EDGE_DENSITY) -> float:
+    """ε yielding a NON-EMPTY ε-edge set: the k-th smallest pairwise L2
+    distance, k = max(1, int(target_density * n_pairs)). Deterministic.
+
+    The default server epsilon (0.8) yields an EMPTY edge set on the 384D
+    L2-normalized WP1 corpus, which makes edges_deterministic and the
+    edge-set Jaccard vacuous (∅=∅); this calibration refuses to measure a
+    degenerate graph.
+    """
+    normed = []
+    for v in vectors:
+        nrm = float(np.linalg.norm(v))
+        if nrm > 0:
+            normed.append(np.asarray(v) / nrm)
+    n = len(normed)
+    n_pairs = n * (n - 1) // 2
+    if n_pairs == 0:
+        return 0.0
+    dists = sorted(
+        float(np.linalg.norm(normed[i] - normed[j]))
+        for i in range(n)
+        for j in range(i + 1, n)
+    )
+    k = max(1, int(target_density * n_pairs))
+    # Use the NEXT distance step (position k) as the threshold: the persisted
+    # vector_blob is float64 while encode_batch is float32, so recomputed L2
+    # distances drift ~1e-7 and the k-th closest pair would otherwise fall
+    # OUTSIDE dist <= epsilon, making the calibrated set empty again.
+    return dists[min(k, n_pairs - 1)]
+
+
 def run_governance_scenario(provider, corpus, workdir: Path,
-                            token: str = DEFAULT_TOKEN) -> dict:
+                            token: str = DEFAULT_TOKEN,
+                            epsilon: float | None = None,
+                            target_density: float = DEFAULT_EDGE_DENSITY) -> dict:
     """Runs the corpus through the full HTTP pipeline under one provider."""
     db_path = _create_scenario_db(workdir)
     _install_provider(provider)
+    if epsilon is None:
+        epsilon = calibrate_epsilon(
+            [np.asarray(v) for v in provider.encode_batch([p for _, p in corpus])],
+            target_density,
+        )
+    orig_epsilon = main_module.EPSILON_EDGE
+    main_module.EPSILON_EDGE = epsilon
     os.environ["TRAIANUS_TOKEN"] = token
     auth = {"x-traianus-token": token}
     out = {"provider": type(provider).__name__,
-           "dimension": getattr(provider, "dimension", None)}
+           "dimension": getattr(provider, "dimension", None),
+           "epsilon": epsilon}
 
-    with TestClient(main_module.app) as client:
-        out["probe_415"] = client.post(
-            "/ingesta", content=b"{}",
-            headers={**auth, "Content-Type": "application/json"},
-        ).status_code
-        out["probe_null"] = client.post(
-            "/ingesta", content=b"a\x00b",
-            headers={**auth, "Content-Type": "text/plain"},
-        ).status_code
-
-        category_by_node = {}
-        accepted = 0
-        for label, paragraph in corpus:
-            res = client.post(
-                "/ingesta", content=paragraph.encode("utf-8"),
+    try:
+        with TestClient(main_module.app) as client:
+            out["probe_415"] = client.post(
+                "/ingesta", content=b"{}",
+                headers={**auth, "Content-Type": "application/json"},
+            ).status_code
+            out["probe_null"] = client.post(
+                "/ingesta", content=b"a\x00b",
                 headers={**auth, "Content-Type": "text/plain"},
-            )
-            if res.status_code == 200:
-                accepted += 1
-                category_by_node[f"NODE_{res.json()['ingestion_id']}"] = label
-        out["ingested"] = accepted
+            ).status_code
 
-        nodes = client.get("/nodos", headers=auth).json().get("nodes", [])
-        out["nodes"] = len(nodes)
-        snapshot_ingest = _snapshot_nodes(db_path)
+            category_by_node = {}
+            accepted = 0
+            for label, paragraph in corpus:
+                res = client.post(
+                    "/ingesta", content=paragraph.encode("utf-8"),
+                    headers={**auth, "Content-Type": "text/plain"},
+                )
+                if res.status_code == 200:
+                    accepted += 1
+                    category_by_node[f"NODE_{res.json()['ingestion_id']}"] = label
+            out["ingested"] = accepted
 
-        state_counts = Counter()
-        variances = defaultdict(list)
-        consolidated_by_category = Counter()
-        total_by_category = Counter()
-        probe_dual_key_denied = None
-        for n in nodes:
-            label = category_by_node.get(n["id"])
-            total_by_category[label] += 1
-            resp = client.post(
-                f"/nodos/{n['id']}/consolidar",
-                json={"text": n["text"], "ethical_key": True},
-                headers=auth,
-            )
-            body = resp.json()
-            state_counts[body["new_state"]] += 1
-            if body["new_state"] == "consolidated":
-                consolidated_by_category[label] += 1
-            variances[label].append(body["dual_key_status"]["topological_key"]["variance"])
-            if probe_dual_key_denied is None:
-                denied = client.post(
+            nodes = client.get("/nodos", headers=auth).json().get("nodes", [])
+            out["nodes"] = len(nodes)
+            snapshot_ingest = _snapshot_nodes(db_path)
+
+            state_counts = Counter()
+            variances = defaultdict(list)
+            consolidated_by_category = Counter()
+            total_by_category = Counter()
+            probe_dual_key_denied = None
+            for n in nodes:
+                label = category_by_node.get(n["id"])
+                total_by_category[label] += 1
+                resp = client.post(
                     f"/nodos/{n['id']}/consolidar",
-                    json={"text": n["text"], "ethical_key": False},
+                    json={"text": n["text"], "ethical_key": True},
                     headers=auth,
                 )
-                probe_dual_key_denied = denied.json()["new_state"]
+                body = resp.json()
+                state_counts[body["new_state"]] += 1
+                if body["new_state"] == "consolidated":
+                    consolidated_by_category[label] += 1
+                variances[label].append(
+                    body["dual_key_status"]["topological_key"]["variance"]
+                )
+                if probe_dual_key_denied is None:
+                    denied = client.post(
+                        f"/nodos/{n['id']}/consolidar",
+                        json={"text": n["text"], "ethical_key": False},
+                        headers=auth,
+                    )
+                    probe_dual_key_denied = denied.json()["new_state"]
 
-        out["probe_dual_key_denied"] = probe_dual_key_denied
-        out["state_counts"] = dict(state_counts)
+            out["probe_dual_key_denied"] = probe_dual_key_denied
+            out["state_counts"] = dict(state_counts)
 
-        snapshot_consolidated = _snapshot_nodes(db_path)
-        out["append_only_diff"] = all(
-            old in snapshot_consolidated for old in snapshot_ingest
-        )
-        seqs = defaultdict(list)
-        for row in snapshot_consolidated:
-            seqs[row[0]].append(row[1])
-        out["seq_monotonic"] = all(
-            s == list(range(1, len(s) + 1)) for s in seqs.values()
-        )
-        out["allowed_states"] = {r[4] for r in snapshot_consolidated} <= ALLOWED_STATES
-
-        relations = client.get("/relations", headers=auth).json()
-        auto_ids = sorted(r["id"] for r in relations if r["id"].startswith("auto-edge-"))
-        out["auto_edge_ids"] = auto_ids
-        out["edge_count"] = len(auto_ids)
-        n = len(nodes)
-        out["edge_density"] = len(auto_ids) / (n * (n - 1) / 2) if n > 1 else 0.0
-
-        rebuilt = storage.rebuild_epsilon_edges(EPSILON)
-        rebuilt_ids = sorted(
-            f"auto-edge-{e['source']}-{e['target']}" for e in rebuilt
-        )
-        out["edges_deterministic"] = auto_ids == rebuilt_ids
-
-        kappa, sigma2 = {}, {}
-        for label in sorted(total_by_category):
-            total = total_by_category[label]
-            kappa[label] = consolidated_by_category[label] / total if total else 0.0
-            v = variances[label]
-            sigma2[label] = (
-                {"mean": float(np.mean(v)), "var": float(np.var(v))} if v else None
+            snapshot_consolidated = _snapshot_nodes(db_path)
+            out["append_only_diff"] = all(
+                old in snapshot_consolidated for old in snapshot_ingest
             )
-        out["kappa"] = kappa
-        out["sigma2"] = sigma2
-        out["kappa_overall"] = (
-            sum(consolidated_by_category.values()) / len(nodes) if nodes else 0.0
-        )
-    return out
+            seqs = defaultdict(list)
+            for row in snapshot_consolidated:
+                seqs[row[0]].append(row[1])
+            out["seq_monotonic"] = all(
+                s == list(range(1, len(s) + 1)) for s in seqs.values()
+            )
+            out["allowed_states"] = {
+                r[4] for r in snapshot_consolidated
+            } <= ALLOWED_STATES
+
+            relations = client.get("/relations", headers=auth).json()
+            auto_ids = sorted(
+                r["id"] for r in relations if r["id"].startswith("auto-edge-")
+            )
+            out["auto_edge_ids"] = auto_ids
+            out["edge_count"] = len(auto_ids)
+            n = len(nodes)
+            out["edge_density"] = (
+                len(auto_ids) / (n * (n - 1) / 2) if n > 1 else 0.0
+            )
+
+            rebuilt = storage.rebuild_epsilon_edges(epsilon)
+            rebuilt_ids = sorted(
+                f"auto-edge-{e['source']}-{e['target']}" for e in rebuilt
+            )
+            out["edges_deterministic"] = auto_ids == rebuilt_ids
+
+            kappa, sigma2 = {}, {}
+            for label in sorted(total_by_category):
+                total = total_by_category[label]
+                kappa[label] = (
+                    consolidated_by_category[label] / total if total else 0.0
+                )
+                v = variances[label]
+                sigma2[label] = (
+                    {"mean": float(np.mean(v)), "var": float(np.var(v))}
+                    if v else None
+                )
+            out["kappa"] = kappa
+            out["sigma2"] = sigma2
+            out["kappa_overall"] = (
+                sum(consolidated_by_category.values()) / len(nodes) if nodes else 0.0
+            )
+        return out
+    finally:
+        main_module.EPSILON_EDGE = orig_epsilon
 
 
 def run_rejection_scenario(workdir: Path, token: str = DEFAULT_TOKEN) -> dict:
@@ -249,6 +308,7 @@ def assert_invariants(metrics: dict) -> bool:
         "append_only_diff": metrics.get("append_only_diff"),
         "allowed_states": metrics.get("allowed_states"),
         "dual_key_denied_incubating": metrics.get("probe_dual_key_denied") == "incubating",
+        "non_vacuous_edges": metrics.get("edge_count", 0) > 0,
         "edges_deterministic": metrics.get("edges_deterministic"),
         "ingress_415": metrics.get("probe_415") == 415,
         "ingress_null_400": metrics.get("probe_null") == 400,
@@ -368,6 +428,7 @@ def main(argv=None) -> int:
         if "kappa_overall" in m:
             print(f"[{name}] provider={m['provider']} dim={m['dimension']} "
                   f"nodes={m['nodes']} kappa={m['kappa_overall']:.3f} "
+                  f"eps={m.get('epsilon', EPSILON):.4f} "
                   f"edges={m['edge_count']} states={m['state_counts']}")
         else:
             print(f"[{name}] provider={m['provider']} vector_422={m['vector_422']} "

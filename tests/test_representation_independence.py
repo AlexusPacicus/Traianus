@@ -44,6 +44,15 @@ class TestRepresentationIndependenceSmoke:
         assert metrics["ingested"] == 6
         assert metrics["nodes"] == 6
 
+    def test_epsilon_edge_set_is_non_vacuous_under_mock_provider(self, tmp_path):
+        metrics = run_governance_scenario(
+            MockRepresentationProvider(), SMOKE_CORPUS, Path(tmp_path)
+        )
+        assert metrics["edge_count"] > 0, (
+            "vacuous epsilon-edge set: edge_count=0 makes edges_deterministic "
+            "and edge_jaccard vacuous (empty graph similarity)"
+        )
+
     def test_rejection_invariants_hold_for_hetero_512(self, tmp_path):
         metrics = run_rejection_scenario(Path(tmp_path), token=DEFAULT_TOKEN)
         assert_rejection_invariants(metrics)
