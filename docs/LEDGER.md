@@ -36,7 +36,7 @@
 - The `.opencode/agents/` role definitions (14 files) were archived to
   `docs/exploring/legacy_docs/opencode/agents/` and are no longer loaded as live subagents.
 - Traianus is governed by a single executing agent; `AGENTS.md` §6 updated accordingly
-  (enforcement via `opencode.jsonc` global permissions + tridenguard validator MCP + SEC-M-13).
+  (enforcement via `opencode.jsonc` global permissions + boundary-validator MCP + SEC-M-13).
 - **Gate:** hermetic suite green.
 
 ### seq 3 — 2026-08-05 — SPEC-M2-DELTA-0-1 (Approved)
@@ -468,7 +468,7 @@
       b: A 0.001682 / B 0.001817 / C 0.001722; c1: A 0.001939 / B 0.001931 /
       C 0.001613 — all within the ~0.0016–0.0026 band.
     - `pytest tests/` → **142 passed, 5 deselected** (hermetic, was 139 in 3.2).
-    - TridenGuard gate cases: `0f6298d3` (runner), `85a2f81f` (smoke).
+    - BoundaryValidator gate cases: `0f6298d3` (runner), `85a2f81f` (smoke).
 * **Status:** `Consolidated`. Representation Independence promoted to
   **B. Experimental** in `docs/STATUS.md`.
 
@@ -543,6 +543,17 @@
     a↔b=0.025, a↔c1=0.025, b↔c1=0.027 — reported as coupling measurements,
     not rule failures.
   - `pytest tests/` → **143 passed, 5 deselected** (unchanged).
-  - TridenGuard gates: `d04ed591` (P2 labeling), `7eadd5a7` (P3 migration),
+  - BoundaryValidator gates: `d04ed591` (P2 labeling), `7eadd5a7` (P3 migration),
     `2e6dae44` (docs).
 * **Status:** `Consolidated`.
+
+### seq 21 — 2026-08-14 — Phase 5: Brand Decontamination and 100% English Standardization (TA-5.1 / TA-5.2 / TA-5.3 / TA-5.4 / TA-5.5)
+- **TA-5.1 (Brand Decontamination):** Eliminated all traces of the "TridenGuard" brand name across the codebase, replacing it with the neutral technical term "BoundaryValidator / boundary-validator". Renamed `.opencode/skills/tridenguard-5-radicales/` to `.opencode/skills/boundary-validator/`. Renamed `tests/security/test_tridenguard_validator.py` to `tests/security/test_boundary_validator.py`. Updated references in `AGENTS.md`, `opencode.jsonc`, `traianus/security/`, `tests/security/`, `tests/helpers/`, `pyproject.toml`, and `docs/`.
+- **TA-5.2 (Code and Language Audit — 100% English Policy):** Ran `python3 tools/audit/audit_spanish_terms.py` which identified Spanish-occurring terms across the codebase. Translated genuine Spanish narrative content in `tools/experiments/exp_manifesto_tomo0.py`, `tools/experiments/exp_vorticity_pressure.py`, and `tests/integration/test_h1_pressure_integration.py` to strict English. Enforced English docstrings, comments, and narrative throughout `traianus/`, `tools/`, and `tests/`.
+- **TA-5.3 (Documentation Audit — 100% English):** Reviewed `docs/` and translated any remaining narrative sections to English. Verified relative links between `README.md` and `docs/` files. Synced `STATUS.md`, `LEDGER.md`, and `AUDIT.md` to ensure final metrics (143/143 hermetic tests passed, consolidation rate κ ≈ 0.025, κ REPORT) and the new `tests/` structure match reality exactly.
+- **TA-5.4 (Agent Verification and Test Suite):** Executed `pytest tests/` (143/143 hermetic tests passed). Ran `python3 tools/audit/audit_harness.py` confirming C1 guard GREEN (non-degenerate, 9/20 consolidation rate). Confirmed no obsolete imports or dead code remain post-refactor.
+- **TA-5.5 (Documentation Record):** Added seq 21 entry documenting the full phase5 decontamination and audit process. Final commit: `audit(phase5): brand decontamination, 100% english standardization, and full agent governance audit`.
+
+**Gate:** hermetic suite green + C1 guard green + invariants verified.
+
+- **Status:** `Consolidated`. All brand decontamination, language standardization, and governance audit phases complete.

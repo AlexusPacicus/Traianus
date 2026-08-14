@@ -1,5 +1,5 @@
 """
-Experiment: Test Hypothesis H1 (Presión y Vorticidad)
+Experiment: Test Hypothesis H1 (Pressure and Vorticity)
 Module: Uses kinematics_engine core (pure functions, no side effects).
 
 H1 validated: Increasing data density in fixed d dimensions monotonically

@@ -79,9 +79,9 @@ GENERIC_DEFINITIONS: dict[str, dict[str, str]] = {
         "must": "Pydantic contracts MUST validate rigidly; the glyph (toon_factor) MUST be a single character.",
     },
     "G9": {
-        "name": "Zero-Trust TridenGuard",
+        "name": "Zero-Trust Boundary-Validator",
         "finding": "AGENTS.md §2.3",
-        "must": "The TridenGuard gate MUST block fragments with fetch/axios/urllib.request/requests and verify literal grounding.",
+        "must": "The BoundaryValidator gate MUST block fragments with fetch/axios/urllib.request/requests and verify literal grounding.",
     },
 }
 

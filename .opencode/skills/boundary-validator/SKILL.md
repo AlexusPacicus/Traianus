@@ -1,9 +1,9 @@
 ---
-name: tridenguard-5-radicales
-description: Use when generating or validating code proposals under the 5 Radicales contract (Intent_Class, Runtime_Contract, Implementation_Block, Topological_Grounding, Safety_Abort), or when checking a proposal against the tridenguard-validator MCP Zero-Trust gates.
+name: boundary-validator
+description: Use when generating or validating code proposals under the 5 Radicales contract (Intent_Class, Runtime_Contract, Implementation_Block, Topological_Grounding, Safety_Abort), or when checking a proposal against the boundary-validator MCP Zero-Trust gates.
 ---
 
-# TridenGuard 5 Radicals
+# BoundaryValidator 5 Radicals
 
 Every change proposal must contain exactly:
 1. `Intent_Class`: [FIX | REFACTOR | TEST | DOC | SPEC]
