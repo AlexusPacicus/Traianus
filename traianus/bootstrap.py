@@ -1,6 +1,11 @@
 import os
 import numpy as np
-from sentence_transformers import SentenceTransformer
+
+from traianus.representation.sentence_transformer import (
+    MODEL_ID,
+    MODEL_REVISION,
+    SentenceTransformerProvider,
+)
 
 from traianus.storage import get_db_connection, init_db
 
@@ -8,28 +13,21 @@ from traianus.storage import get_db_connection, init_db
 # OFFLINE GUARD (audit M3): bootstrap is the first run that used to
 # download the model from the HF Hub. With the offline guard it requires
 # local prefetch; the geodetic extraction becomes reproducible and sovereign.
+# Enforced inside the representation provider module (local_files_only=True).
 # =====================================================================
 os.environ.setdefault("HF_HUB_OFFLINE", "1")
 
 
-MODEL_ID = "all-MiniLM-L6-v2"
-MODEL_REVISION = "1110a243fdf4706b3f48f1d95db1a4f5529b4d41"
+# Lazy provider (hermetic import, L1): importing `traianus.bootstrap` does
+# NOT build the model. `get_provider()` loads it on first use and caches it.
+_provider = None
 
 
-def build_encoder():
-    return SentenceTransformer(MODEL_ID, revision=MODEL_REVISION, local_files_only=True)
-
-
-# Lazy encoder (hermetic import, L1): importing `traianus.bootstrap` does
-# NOT build the model. `get_model()` loads it on first use and caches it.
-_model = None
-
-
-def get_model():
-    global _model
-    if _model is None:
-        _model = build_encoder()
-    return _model
+def get_provider():
+    global _provider
+    if _provider is None:
+        _provider = SentenceTransformerProvider()
+    return _provider
 
 
 NSM_PRIMES = [
@@ -64,7 +62,7 @@ def serialize_vector(vector: np.ndarray) -> bytes:
 def extract_pure_octagon():
     print(f"[Traianus] Vectorizing {len(NSM_PRIMES)} concepts. Generating symmetric space...")
 
-    embeddings = get_model().encode(NSM_PRIMES)
+    embeddings = get_provider().encode_batch(NSM_PRIMES)
     norms = np.linalg.norm(embeddings, axis=1, keepdims=True)
     norms[norms == 0] = 1.0
     vectors_l2 = embeddings / norms

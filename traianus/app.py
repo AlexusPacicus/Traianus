@@ -8,9 +8,17 @@ from typing import List, Literal
 from fastapi import FastAPI, BackgroundTasks, HTTPException, Header, Depends, Request, Response
 from fastapi.middleware.cors import CORSMiddleware
 from pydantic import BaseModel, Field
-from sentence_transformers import SentenceTransformer
+from traianus.representation.sentence_transformer import (
+    MODEL_ID,
+    MODEL_REVISION,
+    SentenceTransformerProvider,
+)
 
-from traianus.core import evaluate_gate_v01, calibrate_critical_threshold, compute_kinetic_resistance
+from traianus.geometry.observables import (
+    calibrate_critical_threshold,
+    compute_kinetic_resistance,
+)
+from traianus.governance.gate import evaluate_gate
 from traianus import storage
 from traianus.observability import (
     get_logger,
@@ -28,17 +36,10 @@ from traianus.storage import (
 # =====================================================================
 # OFFLINE GUARD (audit M3): offline sovereignty. Model must be prefetched
 # locally; no HF Hub downloads at runtime. First run is the only one that
-# requires network (prefetch via bootstrap/setup).
+# requires network (prefetch via bootstrap/setup). Enforced inside the
+# representation provider module (`local_files_only=True`).
 # =====================================================================
 os.environ.setdefault("HF_HUB_OFFLINE", "1")
-
-
-MODEL_ID = "all-MiniLM-L6-v2"
-MODEL_REVISION = "1110a243fdf4706b3f48f1d95db1a4f5529b4d41"
-
-
-def build_encoder():
-    return SentenceTransformer(MODEL_ID, revision=MODEL_REVISION, local_files_only=True)
 
 
 def _startup_create_schema():
@@ -47,7 +48,7 @@ def _startup_create_schema():
     Import is side-effect free by design: `traianus.app` does NOT open a
     database or load the encoder at import time (hermeticity, L1). Both
     artifacts are created lazily — the schema on server startup, the encoder
-    on first `get_model()` call.
+    on first `get_provider()` call.
     """
     init_db()
 
@@ -78,17 +79,18 @@ app.add_middleware(
     allow_headers=["*"],
 )
 
-# Lazy encoder (hermetic import, L1): the model is NOT built at import time.
-# Import of `traianus.app` is side-effect free; `get_model()` loads the encoder
-# on first use and caches it. Unit tests run without the model (fake injected).
-_model = None
+# Lazy provider (hermetic import, L1): the model is NOT built at import time.
+# Import of `traianus.app` is side-effect free; `get_provider()` builds the
+# representation provider on first use and caches it. Unit tests run with the
+# deterministic mock provider injected (conftest `_hermetic_model`).
+_provider = None
 
 
-def get_model():
-    global _model
-    if _model is None:
-        _model = build_encoder()
-    return _model
+def get_provider():
+    global _provider
+    if _provider is None:
+        _provider = SentenceTransformerProvider()
+    return _provider
 
 # =====================================================================
 # SERVER-SIDE EPSILON FOR DETERMINISTIC E_n (ADR-023/H5, RE-09/CO-12)
@@ -171,16 +173,18 @@ def _encode_vector(raw_text: str) -> np.ndarray:
     serialization (serialize_vector); this check is the only place the
     native float32 dtype is observable.
     """
-    native_vector = get_model().encode(raw_text)
+    provider = get_provider()
+    native_vector = provider.encode(raw_text)
     if not isinstance(native_vector, np.ndarray) or native_vector.ndim != 1:
         raise ValueError("Provider output must be a 1-D vector.")
     if native_vector.dtype != np.float32:
         raise ValueError(
             f"Provider output dtype {native_vector.dtype} != float32 (native model dtype)."
         )
-    if native_vector.size != 384:
+    if native_vector.size != provider.dimension:
         raise ValueError(
-            f"Provider dimension {native_vector.size} != 384 (ingress binary invariant)."
+            f"Provider dimension {native_vector.size} != {provider.dimension} "
+            "(ingress binary invariant)."
         )
     if not np.all(np.isfinite(native_vector)):
         raise ValueError("Provider output contains non-finite values.")
@@ -409,7 +413,7 @@ async def vector_ingestion_endpoint(body: VectorIngestBody, request: Request, re
 
     dynamic_threshold = auto_calibrate_critical_threshold()
 
-    gate = evaluate_gate_v01(
+    gate = evaluate_gate(
         list(projections.values()), ethical_key=False, threshold=dynamic_threshold
     )
     lifecycle_state: LifecycleState = gate["state"]
@@ -543,7 +547,7 @@ async def consolidate_sovereignty(node_id: str, body: ConsolidationBody):
         # the single authority for the decision. The Topological Key acts as a
         # provisional informational geometric score; consolidation requires BOTH
         # keys simultaneously (AND). Neither acts alone.
-        gate = evaluate_gate_v01(
+        gate = evaluate_gate(
             list(projections.values()), body.ethical_key, dynamic_threshold
         )
         new_state: LifecycleState = gate["state"]

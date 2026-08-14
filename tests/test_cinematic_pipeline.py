@@ -176,8 +176,8 @@ def test_cinematic_pipeline_core_functions(
     fake = FakeSentenceTransformer()
     monkeypatch = request.getfixturevalue("monkeypatch")
     monkeypatch.setattr(storage, "DB_PATH", realistic_isolate_db)
-    monkeypatch.setattr(main_app, "_model", fake)
-    monkeypatch.setattr(main_app, "get_model", lambda: fake)
+    monkeypatch.setattr(main_app, "_provider", fake)
+    monkeypatch.setattr(main_app, "get_provider", lambda: fake)
 
     # Ensure geodetic matrix is loaded with realistic geometry
     storage.DB_PATH = realistic_isolate_db
