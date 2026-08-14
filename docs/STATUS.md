@@ -7,7 +7,7 @@ This document establishes the canonical and immutable classification of all comp
 
 
 ## A. Implemented (Control Plane / Canonical)
-*Components present in `traianus/` with deterministic proofs, execution guarantees, and 109/109 tests passing.*
+*Components present in `traianus/` with deterministic proofs, execution guarantees, and 110/110 tests passing.*
 
 
 * **Ingestion and HTTP Servability:** `/ingesta/vector` endpoint in `traianus/app.py`.
