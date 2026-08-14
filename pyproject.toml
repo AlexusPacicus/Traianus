@@ -29,8 +29,9 @@ test = [
 [project.scripts]
 traianus-bootstrap = "traianus.bootstrap:main"
 
-[tool.setuptools]
-packages = ["traianus"]
+[tool.setuptools.packages.find]
+where = ["."]
+include = ["traianus*"]
 
 [tool.pytest.ini_options]
 testpaths = ["tests"]
