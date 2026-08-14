@@ -5,7 +5,7 @@ density variations in fixed dimensional space, as specified in
 THEORETICAL_FRAMEWORK.md H1 and the production plan.
 
 H1 hypothesis: "El aumento de densidad de puntos dentro de d dimensiones
-fijas incrementa de forma monótona la vorticidad ω y el dismorfismo
+fixes incrementally increase the vorticity ω and the dismorphism
 cinético K_cin."""
 import numpy as np
 import pytest

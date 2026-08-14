@@ -25,14 +25,14 @@ ANCHOR_AXIOM = "CONTINUO_SOMATICO"
 
 
 TOMO0_GLOSSARY = {
-    "TODO_ABSOLUTO": "El orden geometrico, continuo e infragmentable del cosmos que abarca la totalidad de las dimensiones y sus aristas relacionales.",
-    "EL_SER": "La entidad cognitiva continua entendida como una expresion local, inseparable y geometrica del Todo Absoluto.",
-    "CONTINUO_SOMATICO": "El postulado de que la actividad cognitiva es un proceso fisico, continuo e indivisible de la totalidad del organismo biologico, prohibiendo la fragmentacion de los datos de entrada.",
-    "CORPORA_SIMPLICISSIMA": "Los elementos infinitamente pequenos y por tanto indivisibles que forman el Todo Absoluto; sus unidades carecen de atributos y su identidad se determina exclusivamente por vecindad metrica.",
-    "DIFERENCIAL_SOMATICO": "La huella cruda y varianza relacional de la continua interaccion entre los corpora simplicissima que configuran el pensamiento.",
-    "MUTILACION_CORTICAL": "Reduccion neurocentrista de la complejidad hiperdimensional del pliegue vivo a un muestreo fragmentario mediante la penetracion invasiva del tejido nervioso craneal.",
-    "TRAUMA_GLIAL": "Respuesta inmunitaria defensiva de astrocitos que encapsula los electrodos rigidos en la carne.",
-    "RESONANCIA_ENDOVASCULAR": "Arquitectura que asume el sistema cardiovascular completo como un medio unificado de propagacion de ondas y transductor natural continuo.",
+    "TODO_ABSOLUTO": "The absolute, continuous and unfragmentable order of the cosmos encompassing all dimensions and its relational edges.",
+    "EL_SER": "The cognitive entity understood as a local, inseparable and geometric expression of the Absolute Totality.",
+    "CONTINUO_SOMATICO": "The postulate that cognitive activity is a physical, continuous and indivisible process of the total organism, prohibiting fragmentation of input data.",
+    "CORPORA_SIMPLICISSIMA": "The infinitely small elements and therefore indivisible that form the Absolute Totality; their units lack attributes and their identity is determined exclusively by metric proximity.",
+    "DIFERENCIAL_SOMATICO": "The raw relational variance fingerprint of the continuous interaction between the corpora simplicissima that configure thought.",
+    "MUTILACION_CORTICAL": "Neurocentric reduction of the hyperdimensional complexity of the living fold to a fragmentary sampling via invasive penetration of the cranial nerve tissue.",
+    "TRAUMA_GLIAL": "Defensive immune response of astrocytes that encapsulates rigid electrodes in the flesh.",
+    "RESONANCIA_ENDOVASCULAR": "Architecture that assumes the complete cardiovascular system as a unified medium for wave propagation and a natural continuous transducer.",
 }
 
 

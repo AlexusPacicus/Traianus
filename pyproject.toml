@@ -38,7 +38,7 @@ testpaths = ["tests"]
 addopts = ["-m", "not model", "--strict-markers"]
 markers = [
     "model: tests that require the real all-MiniLM-L6-v2 model (offline, cached)",
-    "security: TridenGuard Zero-Trust validator tests (SEC-M-01..12)",
+    "security: Boundary-Validator Zero-Trust validator tests (SEC-M-01..12)",
 ]
 filterwarnings = [
     "ignore::DeprecationWarning",
