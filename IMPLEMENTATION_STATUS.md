@@ -19,11 +19,11 @@
 | Component | State | Scope | Verified Evidence |
 | :--- | :--- | :--- | :--- |
 | **Vertices (V_n)** | 🟢 100% Implemented | `traianus/` | Append-only immutable node log keyed `(id, seq)` in SQLite — DDL `traianus/storage.py:129`; new revisions inserted with increasing `seq` per `id` (`next_node_seq`, `traianus/storage.py:276`); no `UPDATE`/`REPLACE`/`DELETE` on `manifold_nodes` (H4 / ADR-025). |
-| **Edges (E_n)** | 🟢 100% Implemented | `traianus/` | Atomic adjacency-ε persistence in `manifold_edges` — server-side `EPSILON_EDGE` (`traianus/app.py:92`), DDL `traianus/storage.py:207`, transactional insert during rebuild (`traianus/storage.py:594`). |
+| **Edges (E_n)** | 🟢 100% Implemented | `traianus/` | Atomic adjacency-ε persistence in `manifold_edges` — server-side `EPSILON_EDGE` (`traianus/app.py:100`), DDL `traianus/storage.py:207`, transactional append during rebuild (`traianus/storage.py:525-531`). |
 | **Simplicial faces (K_n)** | 🔵 Roadmap I+D | `docs/STATUS.md` | Persistent topology & dimension discovery, WP2 — declared in docs/STATUS.md as R&D roadmap, not part of PoC v1.0. |
-| **Zero-Trust perimeter & C1 gate** | 🟢 100% Implemented | `traianus/` | Fail-closed auth `x-traianus-token` (`traianus/app.py:110-113`); enumerated CORS, no wildcard (`traianus/app.py:65-73`); ingress restricted to `text/plain` (`traianus/app.py:99`, `traianus/app.py:298-299`); dynamic variance threshold calibrated excluding self-projection (`traianus/core.py:39`), observed consolidation rate 30-45% (`tools/audit/audit_harness.py`). |
+| **Zero-Trust perimeter & C1 gate** | 🟢 100% Implemented | `traianus/` | Fail-closed auth `x-traianus-token` (`traianus/app.py:118`); enumerated CORS, no wildcard (`traianus/app.py:72-79`); ingress restricted to `text/plain` (`traianus/app.py:107`, `traianus/app.py:314`); dynamic variance threshold calibrated excluding self-projection (`traianus/geometry/observables.py`), observed consolidation rate 30-45% (`tools/audit/audit_harness.py`). |
 | **Latency** | 🟢 Measured | `traianus/` | ~13ms total pipeline (neural embedding + CPU-bound processing). Verified offline with `HF_HUB_OFFLINE=1` + `local_files_only=True`. |
-| **Provider agnosticism (RH-1)** | 🟡 Partial | `traianus/` | Dimension mismatch handled explicitly: zero-padding when d_db > d_in; HTTP 422 rejection when d_in > d_db (traianus/app.py:353-357, traianus/app.py:466-473). THE POC v1.0 CORE IS OFFICIALLY FROZEN AT 384D (all-MiniLM-L6-v2, pinned, offline). Multi-provider dynamic switching and experimental dimensionalities (e.g., 14D) remain active R&D (RH-1, see LEDGER.md seq 8) but are out of scope for the current validation phase. |
+| **Provider agnosticism (RH-1)** | 🟡 Partial | `traianus/` | Dimension mismatch handled explicitly: zero-padding when d_db > d_in; HTTP 422 rejection when d_in > d_db (traianus/app.py:221-229, traianus/app.py:367, traianus/app.py:518-529). THE POC v1.0 CORE IS OFFICIALLY FROZEN AT 384D (all-MiniLM-L6-v2, pinned, offline). Multi-provider dynamic switching and experimental dimensionalities (e.g., 14D) remain active R&D (RH-1, see LEDGER.md seq 8) but are out of scope for the current validation phase. |
 | **Observation layer ($O_n = P_\theta(S_n)$)** | 🟢 Contract + 🔵 Client | `traianus/` | Read-only perspective projections declared in ADR-022/ADR-024; zero-side-effect reads verified (G5/OB, ADR-025 #2). The Ulpia client itself is roadmap (no UI code). See docs/STATUS.md for formal status classification. |
 
 ---
@@ -41,7 +41,7 @@
 | :--- | :--- | :--- |
 | Append-only node log | `traianus/storage.py:129` | `tests/test_substrate.py::test_append_only_revision_log` |
 | ε-adjacency persistence | `traianus/storage.py:594` | `tests/test_substrate.py::test_epsilon_edges_adjacency` |
-| Zero-Trust perimeter | `traianus/app.py:65-73`, `traianus/app.py:110-113` | `tests/test_security.py`, `tests/security/` |
-| C1 variance calibration | `traianus/core.py:39` | `tests/test_substrate.py::test_c1_threshold_excludes_self_projection`, `tools/audit/audit_harness.py` |
-| Dimension handling (RH-1) | `traianus/app.py:203-214`, `traianus/app.py:331-340` | `tests/test_cl_i62_dimension_provider.py` |
+| Zero-Trust perimeter | `traianus/app.py:72-79`, `traianus/app.py:118` | `tests/test_security.py`, `tests/security/` |
+| C1 variance calibration | `traianus/geometry/observables.py` | `tests/test_substrate.py::test_c1_threshold_excludes_self_projection`, `tools/audit/audit_harness.py` |
+| Dimension handling (RH-1) | `traianus/app.py:221-229`, `traianus/app.py:518-529` | `tests/test_cl_i62_dimension_provider.py` |
 | Latency envelope | `tools/audit/audit_harness.py` | Empirically validated low-latency CPU-bound processing (~13ms pipeline) |

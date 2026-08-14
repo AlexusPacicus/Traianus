@@ -386,3 +386,44 @@
   full suite `pytest tests/` → **110 passed** (hermetic + model).
 * **Status:** `Consolidated`. Integrated-kernel regression coverage for
   H1∧H2∧H3 as pure operators.
+
+### seq 17 — 2026-08-14 — Phase 2: Representation protocol, DI and geometry/governance split (issues #44..#49)
+
+* **Context:** decouple the substrate from the concrete embedding engine and
+  separate observational geometry from the dual-key governance gate, without
+  breaking the existing suite.
+* **Δ executed:**
+  - **Packaging:** `[tool.setuptools.packages.find]` replaces
+    `packages = ["traianus"]` so subpackages install (previously latent defect,
+    issue #44).
+  - **Representation layer:** `traianus/representation/protocol.py` defines the
+    `RepresentationProvider` protocol (`dimension`, `encode`, `encode_batch`,
+    native float32 output). `sentence_transformer.py` wraps all-MiniLM-L6-v2
+    (offline M3: `local_files_only=True`), centralizing `MODEL_ID` /
+    `MODEL_REVISION`; `mock_provider.py` is the deterministic hermetic double
+    (absorbs `tests/helpers/fake_encoder.py`, now an alias) (issues #45..#46).
+  - **DI:** `traianus/app.py` and `traianus/bootstrap.py` consume the provider
+    via lazy `get_provider()`; direct `sentence_transformers` imports removed;
+    `_encode_vector` validates against `provider.dimension` (was hardcoded 384).
+    Seam migrated in the same step: conftest `_hermetic_model`, cinematic
+    pipeline, audit harness, `validate_c1_semantics` (issue #47).
+  - **Geometry/governance split:** six pure observables moved to
+    `traianus/geometry/observables.py` (K_cin, ortho distance, discrimination
+    ratio, dimensional relief, ε-adjacency, threshold calibration); the dual-key
+    C1 gate moved to `traianus/governance/gate.py` with canonical
+    `evaluate_gate` and compat alias `evaluate_gate_v01`. `traianus/core.py`
+    remains a re-export shim so legacy imports resolve unchanged (issues #48..#49).
+  - **Remediation (post-review):** `traianus/app.py` consumes the canonical
+    symbols directly (`evaluate_gate` from `traianus/governance/gate.py`,
+    `calibrate_critical_threshold` / `compute_kinetic_resistance` from
+    `traianus/geometry/observables.py`); offline construction is verified
+    behaviorally (kwargs capture of `local_files_only=True`, no
+    `inspect.getsource`); the M3 import side-effect (`HF_HUB_OFFLINE=1`) is
+    declared in the provider module docstring; dead compat helpers
+    (`build_mock_provider`, `build_fake_encoder`) removed; doc line references
+    in `IMPLEMENTATION_STATUS.md` re-anchored to the refactored source.
+* **Gate (measured, reproducible):**
+  - `pytest tests/` → **126 passed** (hermetic + model, was 110 before).
+  - `python3 tools/audit/audit_harness.py` → **C1 GUARD PASSED IN GREEN (45%, 9/20)**.
+  - `grep -c "sentence_transformers" traianus/app.py traianus/bootstrap.py` → **0**.
+* **Status:** `Consolidated`.

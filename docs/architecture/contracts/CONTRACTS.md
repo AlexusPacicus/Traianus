@@ -12,7 +12,7 @@ This document specifies the validation boundaries, byte-level security filters, 
 
 ## 2. Zero-Trust Perimeter Rules (Byte-Level Validation)
 
-Before any payload is processed by representation providers or passed to `traianus/core.py`, it must clear the synchronous Zero-Trust validation gate in `traianus/security/validator.py`:
+Before any payload is processed by representation providers (`traianus/representation/`) or passed to the geometry/governance kernels (`traianus/geometry/`, `traianus/governance/gate.py`), it must clear the synchronous Zero-Trust validation gate in `traianus/security/validator.py`:
 
 1. **Null-Byte Rejection (`\x00`):** Any raw payload containing null bytes is immediately rejected at the byte layer to prevent memory corruption and string truncation attacks.
 2. **UTF-8 Decoding Validation:** Strictly verifies valid UTF-8 character encoding; malformed byte sequences trigger an immediate perimeter fault.
