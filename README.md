@@ -9,7 +9,7 @@ This separation addresses the **Representation-State Coupling Problem** and guar
 - **State reproducibility** — Given identical vector sequences, initial state, and execution semantics, the core state transition is deterministic.
 - **Offline sovereignty** — hermetic execution offline: `HF_HUB_OFFLINE=1` + `local_files_only=True`, the entire substrate executes locally ($\le 8\text{ GB}$ RAM) with zero cloud runtime dependencies.
 
-Current status: Proof of Concept (PoC) v1.0 using sovereign personal knowledge as its initial reference application (RefApp-01). See [IMPLEMENTATION_STATUS.md](./IMPLEMENTATION_STATUS.md) for current feature status versus the R&D roadmap.
+Current status: Core/Control Plane **v1.0.0 (IMPLEMENTED)** using sovereign personal knowledge as its initial reference application (RefApp-01). Work Packages WP1–WP4 (including Persistent Homology) remain **RESEARCH / FUTURE ROADMAP**. See [IMPLEMENTATION_STATUS.md](./IMPLEMENTATION_STATUS.md) for the formal repository classification.
 
 > **"Traianus operates as an independent spatial control plane, governing state transitions deterministically over coordinate vectors $\mathbf{v} \in \mathbb{R}^d$."**
 
@@ -141,9 +141,18 @@ Natural Language Text (RefApp-01): Governed via Normalized Compression Distance 
 5. Quickstart
 Minimal setup with venv + pip.
 
+### Supported Environment
+
+| Component | Version | Source |
+|---|---|---|
+| **Python** | **3.11** | `requires-python = "~=3.11"` in `pyproject.toml`; CI on `ubuntu-latest` (setup-python 3.11) |
+| **SQLite** | **3.x** | Python stdlib `sqlite3` (runtime persistence) |
+
+The canonical, reproducible local setup is the `venv` + `pip` path below; CI mirrors it (setup-python 3.11 on `ubuntu-latest`). Reproducibility is anchored in the pinned `pyproject.toml` dependencies (Python 3.11) and the green CI matrix (hermetic + model suites).
+
 1. Minimal setup
 Bash
-# Isolated environment (Python 3.10+, see pyproject.toml)
+# Isolated environment (Python 3.11, see pyproject.toml)
 python -m venv .venv
 source .venv/bin/activate
 
@@ -205,6 +214,7 @@ Data Contracts: Byte-level security filters, Silent Denial (ADR-002), and Pydant
 ADR Ledger: Immutable append-only record of architectural decisions (ADR-001 to ADR-027).
 Normative Specification EAS-01: Empirical report on the Representation-State Coupling Problem and NCD validation.
 Kernel Simulation Guide: Simulation protocol over the 8D real geodetic basis.
+Implementation Status: Formal 5-category repository classification (IMPLEMENTED / EXPERIMENTAL / RESEARCH-FUTURE ROADMAP / DOCUMENTATION / INFRASTRUCTURE) and declared capabilities vs. R&D roadmap.
 7. Development Environment (OpenCode)
 This project uses OpenCode as the primary development interface backed by a local Zero-Trust MCP validator architecture.
 

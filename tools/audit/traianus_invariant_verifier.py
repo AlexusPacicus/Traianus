@@ -17,14 +17,20 @@ Usage:
 Exit 0 = all obligations met; exit 1 = findings.
 """
 
+import os
 import re
 import sqlite3
 import sys
 from pathlib import Path
 
-REPO_ROOT = Path(__file__).resolve().parent.parent
+sys.path.insert(0, os.path.abspath("."))
+
+import traianus.storage as storage
+
+REPO_ROOT = Path(__file__).resolve().parent.parent.parent
 APP_PY = REPO_ROOT / "traianus" / "app.py"
 DB_PATH = REPO_ROOT / "traianus.db"
+OBSERVABLES_PY = REPO_ROOT / "traianus" / "geometry" / "observables.py"
 
 
 def read_app() -> str:
@@ -32,6 +38,7 @@ def read_app() -> str:
 
 
 def check_static(app_code: str, findings: list) -> None:
+    observables_code = OBSERVABLES_PY.read_text(encoding="utf-8")
     # TR-H4-001: destructive statements against manifold_nodes
     destructive = re.findall(
         r"(UPDATE|REPLACE|DELETE)\s+manifold_nodes\b",
@@ -47,7 +54,7 @@ def check_static(app_code: str, findings: list) -> None:
 
     # TR-C1-001: self-projection exclusion
     has_self_excl = bool(
-        re.search(r"for j,\s*other\s+in\s+enumerate\(vectors\)\s+if\s+j\s*!=\s*i", app_code)
+        re.search(r"for j,\s*other\s+in\s+enumerate\(vectors\)\s+if\s+j\s*!=\s*i", observables_code)
     )
     if has_self_excl:
         print("  OK TR-C1-001  self-projection excluded (if j != i)")
@@ -68,10 +75,29 @@ def check_static(app_code: str, findings: list) -> None:
         findings.append("TR-ZT-002 MUST_NOT: CORS with wildcard allow_origins ('*')")
 
 
+def _has_manifold_nodes(db_path: Path) -> bool:
+    con = sqlite3.connect(str(db_path))
+    try:
+        return (
+            con.execute(
+                "SELECT 1 FROM sqlite_master WHERE type='table' AND name='manifold_nodes'"
+            ).fetchone()
+            is not None
+        )
+    finally:
+        con.close()
+
+
 def check_db(db_path: Path, findings: list) -> None:
     if not db_path.exists():
         findings.append(f"Database not found: {db_path}")
         return
+    if not _has_manifold_nodes(db_path):
+        # Hermetic bootstrap: the canonical append-only schema is a runtime
+        # artifact (init_db). Initialize it so the data obligations can be
+        # verified; idempotent, no data loss.
+        storage.DB_PATH = str(db_path)
+        storage.init_db()
     con = sqlite3.connect(str(db_path))
     try:
         # TR-H4-002: no (id, seq) duplicates

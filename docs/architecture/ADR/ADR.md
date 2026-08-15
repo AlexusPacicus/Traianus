@@ -2,7 +2,7 @@
 
 Objective: Document immutable engineering trade-offs to prevent emotional refactoring, architectural drift, or scope creep.
 
-Philosophy: Append-Only. Architectural decisions are stacked sequentially to guarantee structural traceability.
+Philosophy: Append-Only. Architectural decisions are stacked sequentially to prevent emotional refactoring, architectural drift, or scope creep.
 
 Historical Context & Evolutionary Trajectory:
 The early entries (ADR-001 through ADR-007) capture rapid prototyping for a deterministic knowledge organizer during a hackathon. To eliminate data randomness and system drift, architectural focus shifted from application features to core state persistence. Subsequent entries (ADR-010 through ADR-025) record this evolution into a foundational, immutable control plane.
