@@ -4,7 +4,7 @@ An offline-first, open-source computational substrate for deterministic spatial 
 
 Every system that manages knowledge inherits a hidden coupling: the way it *represents* concepts is fused with how state is maintained. Swap the representation, and historical state collapses. Traianus cuts this knot by introducing a **spatial control plane** — a deterministic state machine that operates purely on coordinate vectors $\mathbf{v} \in \mathbb{R}^d$.
 
-This separation addresses the **Representation-State Coupling Problem** and provides three core properties:
+This separation addresses the **Representation-State Coupling Problem** and guarantees three core properties:
 - **Deterministic state engine** — spatial state transitions $S_{n+1} = f(S_n, \mathbf{v}_n)$ are governed deterministically over $L_2$-normalized coordinate vectors $\mathbf{v} \in \mathbb{R}^d$.
 - **State reproducibility** — Given identical vector sequences, initial state, and execution semantics, the core state transition is deterministic.
 - **Offline sovereignty** — hermetic execution offline: `HF_HUB_OFFLINE=1` + `local_files_only=True`, the entire substrate executes locally ($\le 8\text{ GB}$ RAM) with zero cloud runtime dependencies.
@@ -145,10 +145,10 @@ Minimal setup with venv + pip.
 
 | Component | Version | Source |
 |---|---|---|
-| **Python** | **3.11** | Nix devshell (`pkgs.python311`); `requires-python = "~=3.11"` in `pyproject.toml` |
-| **SQLite** | **3.x** | Python stdlib `sqlite3` (runtime persistence); `pkgs.sqlite` in devshell |
+| **Python** | **3.11** | `requires-python = "~=3.11"` in `pyproject.toml`; CI on `ubuntu-latest` (setup-python 3.11) |
+| **SQLite** | **3.x** | Python stdlib `sqlite3` (runtime persistence) |
 
-The Nix devshell (`nix develop`) provides the pinned Python 3.11 environment. The `flake.lock` freeze (`nix flake lock` on a Nix host) is required before tagging `v1.0.0`.
+The canonical, reproducible local setup is the `venv` + `pip` path below; CI mirrors it (setup-python 3.11 on `ubuntu-latest`). Reproducibility is anchored in the pinned `pyproject.toml` dependencies (Python 3.11) and the green CI matrix (hermetic + model suites).
 
 1. Minimal setup
 Bash

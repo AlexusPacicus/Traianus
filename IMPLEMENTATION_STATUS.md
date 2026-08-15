@@ -50,7 +50,7 @@ Formal classification of the project tree. Each element belongs to exactly one c
 | 🟡 **EXPERIMENTAL** | `tools/experiments/` — `kinematics_engine.py`, `_wp1_corpus.py`, `exp_dimensional_relief.py`, `exp_discriminative_novelty.py`, `exp_entropy_spectral.py`, `exp_logographic_nonortho.py`, `exp_logographic_sparse.py`, `exp_manifesto_tomo0.py`, `exp_representation_independence.py`, `exp_vorticity_pressure.py`, `export_nsm_axes.py`, `ingest_manifest.py`, `traianus_simulation.py`, `validate_c1_semantics.py`, `validate_wp1_empirical.py` |
 | 🔵 **RESEARCH / FUTURE WORK** | Work Packages WP1–WP4, Persistent Homology, RH-1 (multi-provider), Ulpia observation client — see §4. No code exists in `traianus/` for these. |
 | ⚪ **DOCUMENTATION** | `docs/` (INDEX, LEDGER, PROJECT_IDENTITY, STATUS, architecture/, audit/, specifications/) · `README.md` · `IMPLEMENTATION_STATUS.md` · `LICENSE` |
-| 🔧 **INFRASTRUCTURE** | `pyproject.toml` · `flake.nix` · `opencode.jsonc` · `AGENTS.md` · `.gitignore` · `.github/` (CI) · `.opencode/` (skills) · `tests/` (verification harness) · `tools/audit/` (audit harness, invariant verifier) · `tools/mcp/` (spectral math MCP) |
+| 🔧 **INFRASTRUCTURE** | `pyproject.toml` · `opencode.jsonc` · `AGENTS.md` · `.gitignore` · `.github/` (CI) · `.opencode/` (skills) · `tests/` (verification harness) · `tools/audit/` (audit harness, invariant verifier) · `tools/mcp/` (spectral math MCP) |
 
 ---
 

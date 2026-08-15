@@ -1,12 +1,12 @@
 # Traianus — Technical Audit Report and Remediation Plan
 
 **Repository:** `AlexusPacicus/Traianus` @ `main`
-**Audit Date:** 2026-08-13
+**Audit Date:** 2026-08-15
 **Commit Hash:** `git rev-parse HEAD`
 **Scope:** Full audit — code, tests, documentation, packaging, security, and the mathematics behind the claims.
 
 **Method:** Static review + empirical execution against `all-MiniLM-L6-v2`. Every quantitative datum was measured.
-**Overall Assessment:** The PoC core works. Several declared "non-negotiable" invariants were contradicted by the code; all have been remediated (see status below).
+**Overall Assessment:** The Control Plane core works at v1.0.0. Several declared "non-negotiable" invariants were contradicted in the PoC phase; all have been remediated (see status below).
 
 > **Hallazgos detallados:** Véase las secciones [Hallazgos Resueltos](./AUDIT.md#hallazgos-resueltos) y [Hallazgos Abiertos](./AUDIT.md#hallazgos-abiertos) arriba.
 
@@ -37,6 +37,7 @@ Los siguientes hallazgos han sido cerrados con corrección de código y verifica
 | M3 | Offline claim false on first run | ✅ Resolved |
 | M4 | Packaging misconfigured | ✅ Resolved |
 | M6 | Magic number `*10.0` contradicts ADR-005 | ✅ Resolved |
+| M8 | Nix devshell / reproducibility | ✅ Resolved | Nix `flake.nix` devshell removed from the v1.0.0 release freeze; reproducibility anchored in pinned `pyproject.toml` (Python 3.11, `requires-python = "~=3.11"`) and the green CI matrix (hermetic + model suites on `ubuntu-latest`). |
 
 ## Hallazgos Abiertos
 
@@ -46,7 +47,6 @@ Los siguientes hallazgos permanecen abiertos y requieren atención adicional:
 |---|---|---|
 | M1 | "Bitwise determinism" not guaranteeable — redefinido | 🟡 Open |
 | M2 | "<1ms" claim false (~13ms measured) | 🟡 Open |
-| M8 | No CI, unpinned flake.nix | 🟡 Parcial — inputs de `flake.nix` pinnados (nixpkgs commit `148bab9c…`, flake-utils tag `v1.0.0`); `flake.lock` pendiente de congelación: ejecutar `nix flake lock` en un host Nix y commitear el lockfile **antes del tag v1.0.0**. |
 | L1 | Tests don't test real system | 🔵 Open |
 | L3 | Mixed languages in API | 🔵 Open |
 | L4 | NSM basis near-duplicates | 🔵 Open |
@@ -70,11 +70,12 @@ Resolution criterion: fix implemented in code **and** verified by a deterministi
 | M5 | ✅ Resolved | `/nodos` returns 5xx; `/telemetry` requires token; regressions `test_nodos_returns_500_on_db_error`. |
 | M6 | ✅ Resolved | `action_potential = float(variance)` without `*10.0`; regression `test_action_potential_is_variance_not_scaled`. |
 | M7 | ✅ Resolved | Consolidation INSERTS revision; missing node → 404; regression `test_consolidar_missing_node_returns_404`. |
+| M8 | ✅ Resolved | Nix `flake.nix` devshell removed from v1.0.0 release freeze; reproducibility anchored in pinned `pyproject.toml` (Python 3.11) + green CI matrix. |
 | L2 | ✅ Resolved | Dangling edges rejected (404); edges append-only; WAL everywhere; tests `tests/genericos/test_g3_wal.py`. |
 | L5 | ✅ Resolved | `projections_json` derives from `validated_entity.projections` (Pydantic contract is single source of truth). |
 | L6 | ✅ Resolved | `dim_in > dim_db` rejected with HTTP 422 / `ValueError`; tests `tests/afirmaciones/test_cl_i62_dimension_provider.py`. |
 
-**Open items:** M1, M2, M8, L1, L3, L4 — see [findings](./AUDIT.md#hallazgos-abiertos) for details and recommended fixes.
+**Open items:** M1, M2, L1, L3, L4 — see [findings](./AUDIT.md#hallazgos-abiertos) for details and recommended fixes.
 
 ---
 

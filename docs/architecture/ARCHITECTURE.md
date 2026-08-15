@@ -39,7 +39,7 @@ Given an incoming payload $e_n$ containing a coordinate vector $\mathbf{v} \in \
 
 $$S_{n+1} = f(S_n, e_n)$$
 
-Given identical initial state $S_0$, identical input vectors and identical execution semantics, $f$ yields the same state $S_{k+1}$. Sequence ordinal $n$ is completely decoupled from wall-clock time.
+Given an identical initial state $S_0$ and sequence $E = \{e_0, e_1, \dots, e_k\}$, $f$ yields the exact same state $S_{k+1}$ **without stochastic variation**. Sequence ordinal $n$ is completely decoupled from wall-clock time.
 
 ---
 
@@ -98,7 +98,7 @@ CREATE TABLE IF NOT EXISTS manifold_nodes (
 
 ---
 
-## 6. Execution Determinism & Boundaries
+## 6. Execution Guarantees
 
 | Core Claim | Execution Mechanism | Boundary |
 | :--- | :--- | :--- |

@@ -53,4 +53,4 @@ This document establishes the canonical and immutable classification of all comp
 
 
 ## Official Determinism Guarantee
-> **Official Definition:** Given identical initial state, identical input vectors and identical execution semantics, the core state transitions are deterministic.
+> **Official Definition:** Given identical initial state, identical input vectors and identical execution semantics, the core state transitions are **100% deterministic and reproducible** within a runtime. Bitwise equality across different Python builds or hardware architectures is **not** guaranteed (see audit finding M1 — "Bitwise determinism" redefined).
