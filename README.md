@@ -4,7 +4,7 @@
 
 [![CI](https://github.com/AlexusPacicus/Traianus/actions/workflows/ci.yml/badge.svg)](https://github.com/AlexusPacicus/Traianus/actions/workflows/ci.yml)
 [![Version](https://img.shields.io/badge/version-1.0.0-blue.svg)](pyproject.toml)
-[![License](https://img.shields.io/badge/license-GPLv3-green.svg)](LICENSE)
+[![License](https://img.shields.io/badge/license-AGPLv3-green.svg)](LICENSE)
 [![Python](https://img.shields.io/badge/python-3.11%2B-blue)](pyproject.toml)
 
 ---
@@ -157,4 +157,4 @@ Traianus uses OpenCode as its primary development interface, backed by a local Z
 
 ## 📄 License
 
-This project is licensed under the GNU General Public License v3.0 (GPL-3.0-or-later). See the [LICENSE](./LICENSE) file for details.
+This project is licensed under the GNU Affero General Public License v3.0 (AGPL-3.0-or-later). See the [LICENSE](./LICENSE) file for details.
