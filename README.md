@@ -1,226 +1,160 @@
-# Traianus
+# Deterministic Spatial Control Plane & Local-First Research Substrate
 
-An offline-first, open-source computational substrate for deterministic spatial state governance over vector coordinate systems in $\mathbb{R}^d$.
+> Decoupling vector representation systems from state management over $v \in \mathbb{R}^d$.
 
-Every system that manages knowledge inherits a hidden coupling: the way it *represents* concepts is fused with how state is maintained. Swap the representation, and historical state collapses. Traianus cuts this knot by introducing a **spatial control plane** — a deterministic state machine that operates purely on coordinate vectors $\mathbf{v} \in \mathbb{R}^d$.
-
-This separation addresses the **Representation-State Coupling Problem** and guarantees three core properties:
-- **Deterministic state engine** — spatial state transitions $S_{n+1} = f(S_n, \mathbf{v}_n)$ are governed deterministically over $L_2$-normalized coordinate vectors $\mathbf{v} \in \mathbb{R}^d$.
-- **State reproducibility** — Given identical vector sequences, initial state, and execution semantics, the core state transition is deterministic.
-- **Offline sovereignty** — hermetic execution offline: `HF_HUB_OFFLINE=1` + `local_files_only=True`, the entire substrate executes locally ($\le 8\text{ GB}$ RAM) with zero cloud runtime dependencies.
-
-Current status: Core/Control Plane **v1.0.0 (IMPLEMENTED)** using sovereign personal knowledge as its initial reference application (RefApp-01). Work Packages WP1–WP4 (including Persistent Homology) remain **RESEARCH / FUTURE ROADMAP**. See [IMPLEMENTATION_STATUS.md](./IMPLEMENTATION_STATUS.md) for the formal repository classification.
-
-> **"Traianus operates as an independent spatial control plane, governing state transitions deterministically over coordinate vectors $\mathbf{v} \in \mathbb{R}^d$."**
+[![CI](https://github.com/AlexusPacicus/Traianus/actions/workflows/ci.yml/badge.svg)](https://github.com/AlexusPacicus/Traianus/actions/workflows/ci.yml)
+[![Version](https://img.shields.io/badge/version-1.0.0-blue.svg)](pyproject.toml)
+[![License](https://img.shields.io/badge/license-GPLv3-green.svg)](LICENSE)
+[![Python](https://img.shields.io/badge/python-3.11%2B-blue)](pyproject.toml)
 
 ---
 
-## 1. System Boundaries & Non-Goals
+## ⚡ Quickstart & Hermetic Verification
 
-To position this infrastructure precisely within the systems landscape, Traianus is explicitly NOT:
+Traianus is frozen in `v1.0.0` with a zero-dependency, hermetic test suite. You can run the deterministic core and verify system invariants locally:
 
-* **Not a Large Language Model (LLM):** Performs zero probabilistic text completion, token generation, or prompt processing.
-* **Not a Standard Vector Database:** Does not merely index static embeddings for top-k similarity retrieval; functions as an active spatial state controller.
-* **Not a Graph Database:** Avoids manual triple extraction (subject-predicate-object) or static rigid schemas.
-* **Not an Execution Agent Framework:** Executes zero autonomous external tools, network API calls, or unmonitored background tasks.
-* **Not a User Interface Framework:** Contains zero rendering or layout code. External inspection layers operate strictly as optional observation clients.
+```bash
+# 1. Clone the repository
+git clone https://github.com/AlexusPacicus/Traianus.git
+cd Traianus
 
----
-
-## 2. The 3-Tier Architectural Model
-
-Traianus enforces a strict three-tier separation of concerns:
-
-```text
-1. Representation Layer
-   Question: "How is an entity mapped into coordinates v ∈ ℝᵈ?"
-   Vectors:
-     • Text embedding model — all-MiniLM-L6-v2 (384D float32, offline, pinned)
-     • Physical telemetry & sensor modalities (roadmap scope)
-        │
-        ▼  (Coordinates v ∈ ℝᵈ)
-        │
-2. Spatial Control Plane (Traianus Substrate)
-   Question: "How is a deterministic spatial state S_n maintained and evolved?"
-   Subsystems: Transactional state persistence (SQLite WAL), dynamic variance thresholding, L₂ geometry.
-        │
-        ▲  ▼  (Dual Interaction Loop: Read Projections ◄► External HITL Feedback)
-        │
-3. Observation Layer (Ulpia Mathematical Framework / RefApps)
-   Question: "How is that spatial state observed, and how does external interaction drive space continuity?"
-   Framework & Clients: Ulpia (Native Mathematical Observation Framework), RefApp-01 (Knowledge).
-Representation Layer: Maps entities or signals into coordinate vectors v∈R 
-d
- .
-Spatial Control Plane: Executes deterministic state transitions S 
-n+1
-​	
- =f(S 
-n
-​	
- ,v 
-n
-​	
- ) over the discrete state S 
-n
-​	
- =(V 
-n
-​	
- ,E 
-n
-​	
- ) purely through linear algebra, dynamic variance thresholding, and SQLite WAL append-only persistence (PRIMARY KEY (id, seq)).
-Observation Layer: Evaluates read-only perspective projections O 
-n
-​	
- =P 
-θ
-​	
- (S 
-n
-​	
- ) without mutating state S 
-n
-​	
- . External interactions provide human-in-the-loop (HITL) feedback to satisfy the Ethical Key for state consolidation (ADR-022).
-3. Decoupled Architecture & State Function
-Given an entity coordinate v∈R 
-d
- , the state transition function executes deterministically within the control plane:
-
-S 
-n+1
-​	
- =f(S 
-n
-​	
- ,v 
-n
-​	
- )
-Where S 
-n
-​	
- =(V 
-n
-​	
- ,E 
-n
-​	
- ) represents the discrete spatial state at sequence step n:
-V 
-n
-​	
-  — Vertices (L 
-2
-​	
- -normalized coordinate vectors in R 
-d
- )
-E 
-n
-​	
-  — Deterministic adjacency edges (d(v 
-i
-​	
- ,v 
-j
-​	
- )≤ϵ)
-(Higher-order simplicial faces K 
-n
-​	
-  are reserved for the WP2 R&D roadmap).
-4. Modality Specialization & Empirical Findings (EAS-01)
-Traianus enforces a strict distinction based on signal modality:
-Continuous Signals & Physical Telemetry: Governed natively by continuous spectral projection variance (σ 
-2
- ) in traianus/core.py.
-Natural Language Text (RefApp-01): Governed via Normalized Compression Distance (NCD) coupling or Human-In-The-Loop (HITL) validation. This addresses the Representation-State Coupling Problem, defeating keyword injection and noise dilution (AUC>0.93).
-5. Quickstart
-Minimal setup with venv + pip.
-
-### Supported Environment
-
-| Component | Version | Source |
-|---|---|---|
-| **Python** | **3.11** | `requires-python = "~=3.11"` in `pyproject.toml`; CI on `ubuntu-latest` (setup-python 3.11) |
-| **SQLite** | **3.x** | Python stdlib `sqlite3` (runtime persistence) |
-
-The canonical, reproducible local setup is the `venv` + `pip` path below; CI mirrors it (setup-python 3.11 on `ubuntu-latest`). Reproducibility is anchored in the pinned `pyproject.toml` dependencies (Python 3.11) and the green CI matrix (hermetic + model suites).
-
-1. Minimal setup
-Bash
-# Isolated environment (Python 3.11, see pyproject.toml)
+# 2. Install in editable mode (Python 3.11, pinned in pyproject.toml)
 python -m venv .venv
 source .venv/bin/activate
-
-# Install the package and the `traianus-bootstrap` script
 pip install -e .
-
-# Install test dependencies (pytest, pytest-asyncio, httpx)
 pip install -e ".[test]"
 
-# Run the bootstrap scaffold
+# 3. Bootstrap the local substrate scaffold (8D geodetic basis)
 traianus-bootstrap
-2. Start the server (Localhost binding)
-Bash
+
+# 4. Run the complete hermetic test suite (Unit, Integration, Security & Representation)
+pytest
+```
+
+The default run (`pytest`) executes the offline hermetic suite (`-m "not model"`). The E2E partition that requires the cached `all-MiniLM-L6-v2` model runs with `pytest tests/ -m "model"`.
+
+### Serve (localhost only)
+
+```bash
 TRAIANUS_TOKEN=your-secret uvicorn traianus.app:app --host 127.0.0.1 --port 8000
-The FastAPI server binds exclusively to loopback 127.0.0.1 — no external network exposure.
-TRAIANUS_TOKEN is mandatory for protected endpoints (/ingesta, /consolidar, /mutate, /relations, /telemetry). Unauthenticated requests respond with 401.
-3. Environment Variables
-Variable	Required	Type	Default	Description
-TRAIANUS_TOKEN	Yes	string	—	Operator token for protected endpoints (/ingesta, /consolidar, /mutate, /relations, /telemetry).
-TRAIANUS_EPSILON_EDGE	No	float	0.8	Distance threshold ϵ for deterministic E 
-n
-​	
- adjacency (∥v 
-i
-​	
- −v 
-j
-​	
- ∥ 
-2
-​	
- ≤\epsil).
-4. Running the Test Suite
-Bash
-# Hermetic unit & integration tests (offline, no neural model execution)
-pytest tests/ -m "not model"
+```
 
-# E2E test suite (requires cached local model)
-pytest tests/ -m "model"
-6. Documentation Ledger (docs/)
-The documentation suite follows a strict Fractal Architecture:
-Master Index: Unified traceability matrix (Concept → Code → Test) and navigation map.
-Project Identity: System boundaries, Non-Goals, operational invariants, and canonical definitions.
-Operational Ledger: Append-only log of operational deltas (Δ 
-n
-​	
- ) and empirical falsations.
-Architecture Specification: Mathematical state machine formulation S 
-n
-​	
- =(V 
-n
-​	
- ,E 
-n
-​	
- ) and SQLite WAL schema.
-Data Contracts: Byte-level security filters, Silent Denial (ADR-002), and Pydantic v2 schemas (RawDump, RefinedEntity).
-ADR Ledger: Immutable append-only record of architectural decisions (ADR-001 to ADR-027).
-Normative Specification EAS-01: Empirical report on the Representation-State Coupling Problem and NCD validation.
-Kernel Simulation Guide: Simulation protocol over the 8D real geodetic basis.
-Implementation Status: Formal 5-category repository classification (IMPLEMENTED / EXPERIMENTAL / RESEARCH-FUTURE ROADMAP / DOCUMENTATION / INFRASTRUCTURE) and declared capabilities vs. R&D roadmap.
-7. Development Environment (OpenCode)
-This project uses OpenCode as the primary development interface backed by a local Zero-Trust MCP validator architecture.
+The FastAPI server binds exclusively to loopback `127.0.0.1` — no external network exposure. `TRAIANUS_TOKEN` is mandatory for the protected endpoints (`/ingesta`, `/ingesta/vector`, `/nodos/{node_id}/consolidar`, `/mutate/{new_symbol}`, `/relations`, `/telemetry`); unauthenticated requests respond with 401. `GET /nodos` is public.
 
-Governance & Security Constraints
-AGENTS.md: Root constitution defining agent roles, single-step execution, and the 5 Code Radicals.
-opencode.jsonc: Process-level permission matrix (edit, bash allowlists/denylists).
-In-Flight Interception: Agent mutation proposals are intercepted in-flight by the local stdio MCP validator (traianus/security/validator.py) executing 3 physical gates: Safety, process execution denylist, and exact UTF-8 byte Grounding.
-License
-GPL-3.0-or-later. See pyproject.toml and LICENSE for the full license declaration.
+| Variable | Required | Type | Default | Description |
+| :--- | :---: | :--- | :--- | :--- |
+| `TRAIANUS_TOKEN` | Yes | string | — | Operator token for protected endpoints. |
+| `TRAIANUS_EPSILON_EDGE` | No | float | `0.8` | Distance threshold ε for deterministic adjacency (‖vᵢ − vⱼ‖₂ ≤ ε). |
+
+---
+
+## 🏗️ Core Architecture: Decoupling Representation from State
+
+Current software architectures conflate representation (mapping reality into embeddings via encoders or cloud APIs) with state management. Traianus physically decouples these responsibilities, providing a white-box, deterministic control plane over local state.
+
+```text
+[ Sensory Input / Text ]
+          |
+          v
+[ Representation Layer ]  ---> Abstract Provider Protocol (SentenceTransformers / Mock)
+          |
+          v  (Strict Boundary Enforcement)
+[ Traianus Core Engine ]  ---> Deterministic Geometry & State Management (v ∈ ℝᵈ)   (Order Implied — v1.0.0)
+          |
+          v
+[ Ulpia Spatial Canvas ]  ---> Projection Layer & Spatial Visualization                     (Order Explicit — RESEARCH / FUTURE ROADMAP)
+```
+
+**Traianus is the implied order** — the backend engine owning deterministic state transitions over coordinate vectors. **Ulpia is the explicit order** — the read-only projection layer that observes state ($O_n = P_\theta(S_n)$, ADR-022/024). Ulpia is declared RESEARCH / FUTURE ROADMAP and has no code in `traianus/`.
+
+This separation addresses the **Representation-State Coupling Problem** and guarantees three core properties:
+
+- **Deterministic state engine** — spatial state transitions $S_{n+1} = f(S_n, \mathbf{v}_n)$ governed deterministically over $L_2$-normalized coordinate vectors $\mathbf{v} \in \mathbb{R}^d$.
+- **State reproducibility** — identical vector sequences, initial state, and execution semantics yield identical transitions.
+- **Offline sovereignty** — hermetic execution offline (`HF_HUB_OFFLINE=1`, `local_files_only=True`) within ≤ 8 GB RAM and zero cloud runtime dependencies.
+
+### System Boundaries & Non-Goals
+
+* **Not a Large Language Model:** performs zero probabilistic text completion, token generation, or prompt processing.
+* **Not a Standard Vector Database:** does not index static embeddings for top-k similarity retrieval; it is an active spatial state controller.
+* **Not a Graph Database:** avoids manual triple extraction or static rigid schemas.
+* **Not an Execution Agent Framework:** executes zero autonomous external tools, network API calls, or unmonitored background tasks.
+* **Not a User Interface Framework:** contains zero rendering or layout code; inspection layers are optional read-only observation clients.
+
+### Modality Specialization (EAS-01)
+
+* **Continuous signals & physical telemetry:** governed natively by continuous spectral projection variance (σ²) in `traianus/geometry/observables.py` (C1 threshold calibration, self-projections excluded).
+* **Natural language text (RefApp-01):** governed via Normalized Compression Distance (NCD) coupling or Human-In-The-Loop (HITL) validation — defeating keyword injection and noise dilution (AUC > 0.93).
+
+### Status
+
+Core/Control Plane **v1.0.0 (IMPLEMENTED)**. Work Packages WP1–WP4 (including Persistent Homology) and the Ulpia observation client remain **RESEARCH / FUTURE ROADMAP**. See [IMPLEMENTATION_STATUS.md](./IMPLEMENTATION_STATUS.md) and [docs/STATUS.md](./docs/STATUS.md).
+
+---
+
+## 🛠️ Engineering & Domain Mapping
+
+To bridge the theoretical foundation with standard backend engineering practices:
+
+| Domain Term | System Component | Python Module | Function / Responsibility |
+| :--- | :--- | :--- | :--- |
+| El Ser | Sovereign Entity / User | `traianus.core` | Originating agency for state transitions |
+| 1D Friction | Linear Text Bottleneck | `traianus.representation` | Protocol converting sequential streams into vectors |
+| Order Implied | Backend Engine | `traianus.core` & `traianus.storage` | Local, deterministic vector state persistence |
+| Dual Boundary | Security Gate | `traianus.security` | Hermetic boundary & schema validation |
+| Order Explicit | Projection Layer | Ulpia (roadmap) | Read-only observation; Traianus governs, Ulpia observes |
+
+---
+
+## 📂 Repository Layout
+
+```text
+Traianus/
+├── traianus/                # Core Python Package
+│   ├── core.py              # Pure geometry & dual-key gate kernel (re-export shim)
+│   ├── storage.py           # Hardened local vector storage (SQLite WAL, append-only)
+│   ├── app.py               # Application entrypoint (loopback-bound HTTP server)
+│   ├── bootstrap.py         # Bootstrap geodesy scaffold (8D basis, PROSTHETIC_NSM_V1)
+│   ├── observability.py     # Structured logging & telemetry (structlog, request_id)
+│   ├── geometry/            # Observables & spatial projections
+│   ├── governance/          # System gates & invariants
+│   ├── representation/      # Encoder protocols & sentence-transformers
+│   └── security/            # Boundary validators & schema security
+├── tests/                   # Hermetic Test Harness
+│   ├── integration/         # Pressure, relief & vector ingestion tests
+│   ├── representation/      # Provider independence tests
+│   ├── security/            # Boundary & permission audits
+│   └── unit/                # Core substrate invariant tests
+├── tools/                   # Audits, MCP servers & simulation experiments
+└── docs/                    # Architectural specs, audits & status ledger
+```
+
+---
+
+## 📖 Deep-Dive Documentation
+
+For thorough theoretical, topological, and architectural specifications, consult the `docs/` directory:
+
+* **📐 Theoretical Framework:** [docs/specifications/THEORETICAL_FRAMEWORK.md](./docs/specifications/THEORETICAL_FRAMEWORK.md) — formal topological definitions and mathematical substrates.
+* **🏛️ System Architecture:** [docs/architecture/ARCHITECTURE.md](./docs/architecture/ARCHITECTURE.md) — complete component contracts and dataflow design.
+* **🛡️ Security & Boundary Audit:** [docs/audit/AUDIT.md](./docs/audit/AUDIT.md) — invariant verification and hermetic boundary guarantees.
+* **📜 Foundation Manuscripts (SUA POTESTAS, Tomo 0):** declared RESEARCH / FUTURE ROADMAP — experimental reproduction in `tools/experiments/exp_manifesto_tomo0.py`.
+* **Master Index:** [docs/INDEX.md](./docs/INDEX.md) — unified traceability matrix (Concept → Code → Test).
+* **Operational Ledger:** [docs/LEDGER.md](./docs/LEDGER.md) — append-only log of operational deltas and empirical falsations.
+* **Implementation Status:** [IMPLEMENTATION_STATUS.md](./IMPLEMENTATION_STATUS.md) + [docs/STATUS.md](./docs/STATUS.md) — formal 5-category repository classification.
+
+---
+
+## Development Environment (OpenCode)
+
+Traianus uses OpenCode as its primary development interface, backed by a local Zero-Trust MCP validator:
+
+* **AGENTS.md** — root constitution defining agent governance, single-step execution, and the 5 Code Radicals.
+* **opencode.jsonc** — process-level permission matrix (git read-only allowlist; mutations gated).
+* **In-Flight Interception** — agent mutation proposals are intercepted by the local stdio MCP validator (`traianus/security/validator.py`), executing safety, process-execution denylist, and exact UTF-8 byte grounding gates.
+
+---
+
+## 📄 License
+
+This project is licensed under the GNU General Public License v3.0 (GPL-3.0-or-later). See the [LICENSE](./LICENSE) file for details.
