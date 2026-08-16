@@ -4,7 +4,7 @@
 
 [![CI](https://github.com/AlexusPacicus/Traianus/actions/workflows/ci.yml/badge.svg)](https://github.com/AlexusPacicus/Traianus/actions/workflows/ci.yml)
 [![Version](https://img.shields.io/badge/version-1.0.0-blue.svg)](pyproject.toml)
-[![License](https://img.shields.io/badge/license-GPLv3-green.svg)](LICENSE)
+[![License](https://img.shields.io/badge/license-AGPLv3-green.svg)](LICENSE)
 [![Python](https://img.shields.io/badge/python-3.11%2B-blue)](pyproject.toml)
 
 ---
@@ -59,13 +59,13 @@ Current software architectures conflate representation (mapping reality into emb
 [ Representation Layer ]  ---> Abstract Provider Protocol (SentenceTransformers / Mock)
           |
           v  (Strict Boundary Enforcement)
-[ Traianus Core Engine ]  ---> Deterministic Geometry & State Management (v ∈ ℝᵈ)   (Order Implied — v1.0.0)
+[ Traianus Core Engine ]  ---> Deterministic Geometry & State Management (v ∈ ℝᵈ)   (Implicate Order — v1.0.0)
           |
           v
-[ Ulpia Spatial Canvas ]  ---> Projection Layer & Spatial Visualization                     (Order Explicit — RESEARCH / FUTURE ROADMAP)
+[ Ulpia Spatial Canvas ]  ---> Projection Layer
 ```
 
-**Traianus is the implied order** — the backend engine owning deterministic state transitions over coordinate vectors. **Ulpia is the explicit order** — the read-only projection layer that observes state ($O_n = P_\theta(S_n)$, ADR-022/024). Ulpia is declared RESEARCH / FUTURE ROADMAP and has no code in `traianus/`.
+**Traianus is the implicate order** — the backend engine owning deterministic state transitions over coordinate vectors. **Ulpia is the explicate order** — the read-only projection layer that observes state ($O_n = P_\theta(S_n)$, ADR-022/024). Ulpia is declared RESEARCH / FUTURE ROADMAP and has no code in `traianus/`.
 
 This separation addresses the **Representation-State Coupling Problem** and guarantees three core properties:
 
@@ -100,9 +100,9 @@ To bridge the theoretical foundation with standard backend engineering practices
 | :--- | :--- | :--- | :--- |
 | El Ser | Sovereign Entity / User | `traianus.core` | Originating agency for state transitions |
 | 1D Friction | Linear Text Bottleneck | `traianus.representation` | Protocol converting sequential streams into vectors |
-| Order Implied | Backend Engine | `traianus.core` & `traianus.storage` | Local, deterministic vector state persistence |
+| Implicate Order | Backend Engine | `traianus.core` & `traianus.storage` | Local, deterministic vector state persistence |
 | Dual Boundary | Security Gate | `traianus.security` | Hermetic boundary & schema validation |
-| Order Explicit | Projection Layer | Ulpia (roadmap) | Read-only observation; Traianus governs, Ulpia observes |
+| Explicate Order | Projection Layer | Ulpia (roadmap) | Read-only observation; Traianus governs, Ulpia observes |
 
 ---
 
@@ -157,4 +157,4 @@ Traianus uses OpenCode as its primary development interface, backed by a local Z
 
 ## 📄 License
 
-This project is licensed under the GNU General Public License v3.0 (GPL-3.0-or-later). See the [LICENSE](./LICENSE) file for details.
+This project is licensed under the GNU Affero General Public License v3.0 (AGPL-3.0-or-later). See the [LICENSE](./LICENSE) file for details.
