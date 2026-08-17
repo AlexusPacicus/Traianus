@@ -11,7 +11,7 @@
 
 ## ⚡ Quickstart & Hermetic Verification
 
-Traianus is frozen in `v1.0.0` with a zero-dependency, hermetic test suite. You can run the deterministic core and verify system invariants locally:
+Traianus is frozen in `v1.0.0` with a hermetic, offline-isolated test suite. You can run the deterministic core and verify system invariants locally:
 
 ```bash
 # 1. Clone the repository
@@ -50,7 +50,7 @@ The FastAPI server binds exclusively to loopback `127.0.0.1` — no external net
 
 ## 🏗️ Core Architecture: Decoupling Representation from State
 
-Current software architectures conflate representation (mapping reality into embeddings via encoders or cloud APIs) with state management. Traianus physically decouples these responsibilities, providing a white-box, deterministic control plane over local state.
+Current software architectures conflate representation (mapping reality into embeddings via encoders or cloud APIs) with state management. Traianus decouples these responsibilities via abstract provider protocols, providing a white-box, deterministic control plane over local state.
 
 ```text
 [ Sensory Input / Text ]
@@ -71,7 +71,7 @@ This separation addresses the **Representation-State Coupling Problem** and guar
 
 - **Deterministic state engine** — spatial state transitions $S_{n+1} = f(S_n, \mathbf{v}_n)$ governed deterministically over $L_2$-normalized coordinate vectors $\mathbf{v} \in \mathbb{R}^d$.
 - **State reproducibility** — identical vector sequences, initial state, and execution semantics yield identical transitions.
-- **Offline sovereignty** — hermetic execution offline (`HF_HUB_OFFLINE=1`, `local_files_only=True`) within ≤ 8 GB RAM and zero cloud runtime dependencies.
+- **Offline sovereignty** — hermetic execution offline (`HF_HUB_OFFLINE=1`, `local_files_only=True`) with zero cloud runtime dependencies.
 
 ### System Boundaries & Non-Goals
 
@@ -84,7 +84,7 @@ This separation addresses the **Representation-State Coupling Problem** and guar
 ### Modality Specialization (EAS-01)
 
 * **Continuous signals & physical telemetry:** governed natively by continuous spectral projection variance (σ²) in `traianus/geometry/observables.py` (C1 threshold calibration, self-projections excluded).
-* **Natural language text (RefApp-01):** governed via Normalized Compression Distance (NCD) coupling or Human-In-The-Loop (HITL) validation — defeating keyword injection and noise dilution (AUC > 0.93).
+* **Natural language text (RefApp-01):** governed via Normalized Compression Distance (NCD) coupling or Human-In-The-Loop (HITL) validation — demonstrating graded resistance to keyword injection (zlib AUC 0.953, bz2/lzma AUC 0.922–0.933).
 
 ### Status
 
