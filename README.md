@@ -92,20 +92,6 @@ Core/Control Plane **v1.0.0 (IMPLEMENTED)**. Work Packages WP1–WP4 (including 
 
 ---
 
-## 🛠️ Engineering & Domain Mapping
-
-To bridge the theoretical foundation with standard backend engineering practices:
-
-| Domain Term | System Component | Python Module | Function / Responsibility |
-| :--- | :--- | :--- | :--- |
-| El Ser | Sovereign Entity / User | `traianus.core` | Originating agency for state transitions |
-| 1D Friction | Linear Text Bottleneck | `traianus.representation` | Protocol converting sequential streams into vectors |
-| Implicate Order | Backend Engine | `traianus.core` & `traianus.storage` | Local, deterministic vector state persistence |
-| Dual Boundary | Security Gate | `traianus.security` | Hermetic boundary & schema validation |
-| Explicate Order | Projection Layer | Ulpia (roadmap) | Read-only observation; Traianus governs, Ulpia observes |
-
----
-
 ## 📂 Repository Layout
 
 ```text

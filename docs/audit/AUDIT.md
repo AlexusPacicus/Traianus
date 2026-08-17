@@ -63,7 +63,7 @@ Resolution criterion: fix implemented in code **and** verified by a deterministi
 | H1 | ✅ Resolved | `/ingesta` fails loudly with `503`; regression `test_ingesta_returns_503_on_persistence_failure`. |
 | H2 | ✅ Resolved | `ALLOWED_INGRESS_TYPES = {"text/plain"}` allowlist; 415 otherwise; regressions `test_ingesta_endpoint_rejects_non_plain_text_payloads`. |
 | H3 | ✅ Resolved | CORS enumerated; operator token on mutating routes; regressions `test_cors_origins_are_enumerated_no_wildcard`. |
-| H4 | ✅ Resolved | `manifold_nodes` + `manifold_edges` are append-only revision logs `(id, seq)`; tests `tests/genericos/test_g5_append_only.py`. |
+| H4 | ✅ Resolved | `manifold_nodes` + `manifold_edges` are append-only revision logs `(id, seq)`; tests `tests/unit/test_substrate.py`. |
 | H5 | ✅ Resolved | `_compute_epsilon_edges`/`rebuild_epsilon_edges`/`persist_epsilon_edges` implemented; ε-adjacency persisted as `auto-edge-*`. |
 | M3 | ✅ Resolved | `HF_HUB_OFFLINE=1` + `local_files_only=True`; regressions `test_encoder_constructed_offline_local_files_only`. |
 | M4 | ✅ Resolved | Real package `traianus/`; `pyproject.toml` with `traianus-bootstrap`; quickstart documented. |
@@ -71,9 +71,9 @@ Resolution criterion: fix implemented in code **and** verified by a deterministi
 | M6 | ✅ Resolved | `action_potential = float(variance)` without `*10.0`; regression `test_action_potential_is_variance_not_scaled`. |
 | M7 | ✅ Resolved | Consolidation INSERTS revision; missing node → 404; regression `test_consolidar_missing_node_returns_404`. |
 | M8 | ✅ Resolved | Nix `flake.nix` devshell removed from v1.0.0 release freeze; reproducibility anchored in pinned `pyproject.toml` (Python 3.11) + green CI matrix. |
-| L2 | ✅ Resolved | Dangling edges rejected (404); edges append-only; WAL everywhere; tests `tests/genericos/test_g3_wal.py`. |
+| L2 | ✅ Resolved | Dangling edges rejected (404); edges append-only; WAL everywhere; tests `tests/unit/test_storage_hardening.py`. |
 | L5 | ✅ Resolved | `projections_json` derives from `validated_entity.projections` (Pydantic contract is single source of truth). |
-| L6 | ✅ Resolved | `dim_in > dim_db` rejected with HTTP 422 / `ValueError`; tests `tests/afirmaciones/test_cl_i62_dimension_provider.py`. |
+| L6 | ✅ Resolved | `dim_in > dim_db` rejected with HTTP 422 / `ValueError`; tests `tests/representation/test_representation_providers.py`. |
 
 **Open items:** M1, M2, L1, L3, L4 — see [findings](./AUDIT.md#hallazgos-abiertos) for details and recommended fixes.
 

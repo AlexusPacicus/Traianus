@@ -80,9 +80,9 @@ The following work packages are explicitly declared **RESEARCH / FUTURE ROADMAP*
 
 | Claim | Primary Source | Guard |
 | :--- | :--- | :--- |
-| Append-only node log | `traianus/storage.py:129` | `tests/test_substrate.py::test_append_only_revision_log` |
-| ε-adjacency persistence | `traianus/storage.py:594` | `tests/test_substrate.py::test_epsilon_edges_adjacency` |
-| Zero-Trust perimeter | `traianus/app.py:72-79`, `traianus/app.py:118` | `tests/test_security.py`, `tests/security/` |
-| C1 variance calibration | `traianus/geometry/observables.py` | `tests/test_substrate.py::test_c1_threshold_excludes_self_projection`, `tools/audit/audit_harness.py` |
-| Dimension handling (RH-1) | `traianus/app.py:221-229`, `traianus/app.py:518-529` | `tests/test_cl_i62_dimension_provider.py` |
+| Append-only node log | `traianus/storage.py:129` | `tests/unit/test_substrate.py::test_append_only_revision_log` |
+| ε-adjacency persistence | `traianus/storage.py:594` | `tests/unit/test_substrate.py::test_epsilon_edges_adjacency` |
+| Zero-Trust perimeter | `traianus/app.py:72-79`, `traianus/app.py:118` | `tests/security/test_security.py`, `tests/security/` |
+| C1 variance calibration | `traianus/geometry/observables.py` | `tests/unit/test_substrate.py::test_c1_threshold_excludes_self_projection`, `tools/audit/audit_harness.py` |
+| Dimension handling (RH-1) | `traianus/app.py:221-229`, `traianus/app.py:518-529` | `tests/representation/test_representation_providers.py` |
 | Latency envelope | `tools/audit/audit_harness.py` | Empirically validated low-latency CPU-bound processing (~13ms pipeline) |
