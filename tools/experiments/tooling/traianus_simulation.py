@@ -4,7 +4,7 @@ import numpy as np
 
 from traianus.core import calibrate_critical_threshold, evaluate_gate_v01
 
-DB_PATH = "traianus.db"
+DB_PATH = ".data/traianus.db"
 
 
 def load_geodesic_axes(db_path: str = DB_PATH):

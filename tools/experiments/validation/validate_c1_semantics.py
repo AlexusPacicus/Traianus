@@ -24,8 +24,6 @@ import tempfile
 import numpy as np
 from fastapi.testclient import TestClient
 
-sys.path.insert(0, os.path.abspath("."))
-
 from traianus import app as main_module
 from traianus import bootstrap as gb
 from traianus import storage as storage

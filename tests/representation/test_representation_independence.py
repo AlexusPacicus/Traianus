@@ -7,7 +7,7 @@ manually via `exp_representation_independence.py --providers a`.
 """
 from pathlib import Path
 
-from tools.experiments.exp_representation_independence import (
+from tools.experiments.representation.exp_representation_independence import (
     DEFAULT_TOKEN,
     SyntheticHeteroProvider,
     assert_invariants,

@@ -46,7 +46,7 @@ REPO_ROOT = Path(__file__).resolve().parents[2]
 if str(REPO_ROOT) not in sys.path:
     sys.path.insert(0, str(REPO_ROOT))
 
-from tools.experiments._wp1_corpus import iter_corpus, validate_corpus  # noqa: E402
+from tools.experiments.shared._wp1_corpus import iter_corpus, validate_corpus  # noqa: E402
 from traianus import app as main_module  # noqa: E402
 from traianus import storage as storage  # noqa: E402
 from traianus.representation.mock_provider import MockRepresentationProvider  # noqa: E402

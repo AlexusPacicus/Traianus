@@ -19,12 +19,10 @@ os.environ.setdefault("HF_HUB_OFFLINE", "1")
 
 import numpy as np
 
-sys.path.insert(0, os.path.abspath("."))
-
 from traianus import app as main_module
 from traianus.core import calibrate_critical_threshold, evaluate_gate_v01
 
-DB_PATH = "traianus.db"
+DB_PATH = ".data/traianus.db"
 
 
 def load_geodesic_axes(db_path: str = DB_PATH) -> list[np.ndarray]:

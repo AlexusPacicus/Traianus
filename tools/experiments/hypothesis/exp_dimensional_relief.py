@@ -12,15 +12,13 @@ identity base I_d is trivial (no variance). Real measurement requires
 a reduced basis to capture "disalignment" from the known subspace.
 """
 
-import sys
-import os
-sys.path.insert(0, os.path.join(os.path.dirname(__file__), '..'))
+
 
 import numpy as np
 from typing import Tuple
 
 # Import core kinematics functions
-from kinematics_engine import (
+from tools.experiments.shared.kinematics_engine import (
     compute_k_cin,
     compute_dismorphism,
     compute_finite_difference,

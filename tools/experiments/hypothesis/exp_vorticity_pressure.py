@@ -6,11 +6,8 @@ H1 validated: Increasing data density in fixed d dimensions monotonically
 increases the kinetic distortion metric K_cin.
 """
 
-import sys
-import os
 import json
 from pathlib import Path
-sys.path.insert(0, os.path.join(os.path.dirname(__file__), '..'))
 
 import numpy as np
 from typing import Tuple
@@ -33,7 +30,7 @@ def load_realistic_basis() -> np.ndarray:
     )
 
 # Import core kinematics functions
-from kinematics_engine import (
+from tools.experiments.shared.kinematics_engine import (
     compute_k_cin,
     compute_dismorphism,
     compute_finite_difference,

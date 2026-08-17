@@ -47,7 +47,7 @@ Formal classification of the project tree. Each element belongs to exactly one c
 | Category | Folders / Files |
 | :--- | :--- |
 | 🟢 **IMPLEMENTED** | `traianus/app.py` · `traianus/storage.py` · `traianus/core.py` · `traianus/bootstrap.py` · `traianus/observability.py` · `traianus/geometry/` · `traianus/governance/` · `traianus/representation/` · `traianus/security/` · `traianus/__init__.py` |
-| 🟡 **EXPERIMENTAL** | `tools/experiments/` — `kinematics_engine.py`, `_wp1_corpus.py`, `exp_dimensional_relief.py`, `exp_discriminative_novelty.py`, `exp_entropy_spectral.py`, `exp_logographic_nonortho.py`, `exp_logographic_sparse.py`, `exp_manifesto_tomo0.py`, `exp_representation_independence.py`, `exp_vorticity_pressure.py`, `export_nsm_axes.py`, `ingest_manifest.py`, `traianus_simulation.py`, `validate_c1_semantics.py`, `validate_wp1_empirical.py` |
+| 🟡 **EXPERIMENTAL** | `tools/experiments/` — `shared/` (corpus, kinematics engine), `hypothesis/` (H1/H2/H3), `logographic/` (EAS-01), `representation/` (independence), `validation/` (C1, WP1), `tooling/` (fixture export, ingest, simulation), `exp_manifesto_tomo0.py` |
 | 🔵 **RESEARCH / FUTURE WORK** | Work Packages WP1–WP4, Persistent Homology, RH-1 (multi-provider), Ulpia observation client — see §4. No code exists in `traianus/` for these. |
 | ⚪ **DOCUMENTATION** | `docs/` (INDEX, LEDGER, PROJECT_IDENTITY, STATUS, architecture/, audit/, specifications/) · `README.md` · `IMPLEMENTATION_STATUS.md` · `LICENSE` |
 | 🔧 **INFRASTRUCTURE** | `pyproject.toml` · `opencode.jsonc` · `AGENTS.md` · `.gitignore` · `.github/` (CI) · `.opencode/` (skills) · `tests/` (verification harness) · `tools/audit/` (audit harness, invariant verifier) · `tools/mcp/` (spectral math MCP) |

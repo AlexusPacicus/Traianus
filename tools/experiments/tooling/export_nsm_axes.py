@@ -16,7 +16,6 @@ import os
 import sys
 
 os.environ.setdefault("HF_HUB_OFFLINE", "1")
-sys.path.insert(0, os.path.abspath("."))
 
 from traianus import bootstrap  # noqa: E402
 

@@ -15,15 +15,13 @@ The K_cin vs. projection-distance relationship creates a discriminative boundary
 that separates transient noise from genuine entity hyperdimensional expansion.
 """
 
-import sys
-import os
-sys.path.insert(0, os.path.join(os.path.dirname(__file__), '..'))
+
 
 import numpy as np
 from typing import Tuple, List
 
 # Import core kinematics functions
-from kinematics_engine import (
+from tools.experiments.shared.kinematics_engine import (
     compute_k_cin,
     compute_dismorphism,
     compute_finite_difference,

@@ -28,7 +28,7 @@ This document establishes the canonical and immutable classification of all comp
 *Scripts and engines located in `tools/experiments/`. Empirically validated but outside the production control plane.*
 
 
-* **`kinematics_engine.py`:** Laboratory development algebra engine for experiment runs.
+* **`shared/kinematics_engine.py`:** Laboratory development algebra engine for experiment runs.
 * **Falsification Runners:** $H_1$ (`seq 13`, realistic NSM basis since `seq 20`), $H_2$ (`seq 14$), $H_3$ (`seq 15$) scripts and Integrated Pipeline (`seq 16$).
 * **Logographic Experiments:** Reduced orthogonal basis probes and semantic dispersion.
 * **NCD (Normalized Compression Distance) Tests:** Symbolic similarity comparatives.

@@ -16,8 +16,8 @@ if REPO_ROOT not in sys.path:
     sys.path.insert(0, REPO_ROOT)
 
 
-from tools.experiments._wp1_corpus import ALL_CATEGORIES, validate_corpus
-from tools.experiments.exp_logographic_sparse import cohens_d, mannwhitney_u_p
+from tools.experiments.shared._wp1_corpus import ALL_CATEGORIES, validate_corpus
+from tools.experiments.logographic.exp_logographic_sparse import cohens_d, mannwhitney_u_p
 
 
 COMPRESSORS = {

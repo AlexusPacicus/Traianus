@@ -14,7 +14,7 @@ if REPO_ROOT not in sys.path:
 
 
 from sentence_transformers import SentenceTransformer
-from tools.experiments._wp1_corpus import ALL_CATEGORIES, validate_corpus
+from tools.experiments.shared._wp1_corpus import ALL_CATEGORIES, validate_corpus
 from traianus.core import calibrate_critical_threshold
 
 

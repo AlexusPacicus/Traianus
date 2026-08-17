@@ -13,7 +13,7 @@ if REPO_ROOT not in sys.path:
     sys.path.insert(0, REPO_ROOT)
 
 
-from tools.experiments._wp1_corpus import (
+from tools.experiments.shared._wp1_corpus import (
     ALL_CATEGORIES,
     category_description,
     iter_corpus,
