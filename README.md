@@ -121,7 +121,6 @@ Traianus/
 
 For thorough theoretical, topological, and architectural specifications, consult the `docs/` directory:
 
-* **📐 Theoretical Framework:** [docs/specifications/THEORETICAL_FRAMEWORK.md](./docs/specifications/THEORETICAL_FRAMEWORK.md) — formal topological definitions and mathematical substrates.
 * **🏛️ System Architecture:** [docs/architecture/ARCHITECTURE.md](./docs/architecture/ARCHITECTURE.md) — complete component contracts and dataflow design.
 * **🛡️ Security & Boundary Audit:** [docs/audit/AUDIT.md](./docs/audit/AUDIT.md) — invariant verification and hermetic boundary guarantees.
 * **📜 Foundation Manuscripts (SUA POTESTAS, Tomo 0):** declared RESEARCH / FUTURE ROADMAP — experimental reproduction in `tools/experiments/exp_manifesto_tomo0.py`.
