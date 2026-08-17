@@ -14,7 +14,7 @@
 | **Zero-Trust Perimeter & Dual Boundary Gate** | `traianus/security/validator.py`<br>`traianus/app.py` | `tests/security/test_boundary_validator.py` | Implemented in production |
 | **Bootstrap Geodesy (8D)** | `traianus/bootstrap.py`<br>`tests/fixtures/nsm_axes_8.json` | `tests/unit/test_substrate.py` | Implemented in production |
 | **Corpus Variance Test (WP1 / EAS-01)** | `tools/experiments/_wp1_corpus.py` | `tools/experiments/validate_wp1_empirical.py` | **Demonstrates the Representation-Governance Coupling Problem** (Pure variance $p=0.58$ / $0.68$ ➔ Requires decoupling governance from representation) |
-| **NCD Text Coupling (EAS-01 Phase 1c)** | `tools/experiments/exp_entropy_spectral.py` | `docs/specifications/EAS-01_LOGOGRAPHIC_PHYSICS.md` | **Validated Solution** ($AUC > 0.93$, defeats C4 injection) |
+| **NCD Text Coupling (EAS-01 Phase 1c)** | `tools/experiments/logographic/exp_entropy_spectral.py` | `docs/specifications/EAS-01_LOGOGRAPHIC_PHYSICS.md` | **Validated Solution** ($AUC > 0.93$, defeats C4 injection) |
 
 ---
 

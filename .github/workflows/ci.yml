@@ -65,4 +65,4 @@ jobs:
           HF_HUB_OFFLINE=1 python tools/audit/audit_harness.py
       - name: WP0 semantics validation (Step 4)
         run: |
-          HF_HUB_OFFLINE=1 python tools/experiments/validate_c1_semantics.py
+          HF_HUB_OFFLINE=1 python tools/experiments/validation/validate_c1_semantics.py
