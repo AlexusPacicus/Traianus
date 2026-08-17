@@ -42,7 +42,7 @@ import numpy as np
 from fastapi.testclient import TestClient
 
 os.environ.setdefault("HF_HUB_OFFLINE", "1")
-REPO_ROOT = Path(__file__).resolve().parents[2]
+REPO_ROOT = Path(__file__).resolve().parents[3]
 if str(REPO_ROOT) not in sys.path:
     sys.path.insert(0, str(REPO_ROOT))
 

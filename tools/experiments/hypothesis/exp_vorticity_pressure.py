@@ -12,7 +12,7 @@ from pathlib import Path
 import numpy as np
 from typing import Tuple
 
-REPO_ROOT = Path(__file__).resolve().parents[2]
+REPO_ROOT = Path(__file__).resolve().parents[3]
 
 
 def load_realistic_basis() -> np.ndarray:
