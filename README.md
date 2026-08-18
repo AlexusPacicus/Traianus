@@ -71,7 +71,7 @@ graph TD
     B --> C[Traianus Core Engine<br/>Implicate Order v1.0.0]
     C --> D[Ulpia Spatial Canvas<br/>Explicate Order — Research]
     
-    subgraph "Traianus Core"
+    subgraph Core["Traianus Core"]
         C1[Geometry Observables<br/>K_cin, σ², E_n]
         C2[Governance Gate C1<br/>σ² ≥ θ_dyn ∧ EthicalKey]
         C3[Storage WAL<br/>Append-only (id, seq)]
