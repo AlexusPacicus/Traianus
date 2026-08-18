@@ -57,23 +57,23 @@ stateDiagram-v2
 
 ```mermaid
 flowchart TD
-    subgraph "Zero-Trust Ingress"
+    subgraph ZT["Zero-Trust Ingress"]
         A[Raw text/plain] --> B[UTF-8 strict + null-byte scan]
         B --> C[Idempotency Key check]
     end
     
-    subgraph "Geometry & Governance"
+    subgraph GG["Geometry & Governance"]
         C --> D[Provider.encode → L2 norm]
         D --> E[Project onto B₀ → σ²]
         E --> F[C1 Gate: σ² ≥ θ_dyn ∧ EthicalKey]
     end
     
-    subgraph "Transactional Persistence"
+    subgraph TP["Transactional Persistence"]
         F --> G[INSERT manifold_nodes (id, seq++)]
         G --> H[WAL commit]
     end
     
-    subgraph "Observation Contract"
+    subgraph OC["Observation Contract"]
         H --> I[/nodos GET]
         H --> J[/relations GET → rebuild E_n]
         H --> K[/telemetry GET]
