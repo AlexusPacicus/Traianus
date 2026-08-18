@@ -153,8 +153,8 @@ The geodetic basis evolves via immutable epoch-append. Each `/mutate/{symbol}` c
 
 ```mermaid
 graph LR
-    V1[PROSTHETIC_NSM_V1<br/>8 axes, 384D] -->|/mutate/| V2[PROSTHETIC_NSM_V2<br/>9 axes, 385D]
-    V2 -->|/mutate/| V3[PROSTHETIC_NSM_V3<br/>10 axes, 386D]
+    V1[PROSTHETIC_NSM_V1~~8 axes, 384D] -->|/mutate/| V2[PROSTHETIC_NSM_V2~~9 axes, 385D]
+    V2 -->|/mutate/| V3[PROSTHETIC_NSM_V3~~10 axes, 386D]
     style V1 fill:#e1f5fe
     style V2 fill:#fff3e0
     style V3 fill:#f3e5f5

@@ -67,14 +67,14 @@ Current software architectures conflate representation (mapping reality into emb
 
 ```mermaid
 graph TD
-    A[Sensory Input / Text] --> B[Representation Layer<br/>Abstract Provider Protocol]
-    B --> C[Traianus Core Engine<br/>Implicate Order v1.0.0]
-    C --> D[Ulpia Spatial Canvas<br/>Explicate Order — Research]
+    A[Sensory Input / Text] --> B[Representation Layer~~Abstract Provider Protocol]
+    B --> C[Traianus Core Engine~~Implicate Order v1.0.0]
+    C --> D[Ulpia Spatial Canvas~~Explicate Order — Research]
     
     subgraph Core["Traianus Core"]
-        C1[Geometry Observables<br/>K_cin, σ², E_n]
-        C2[Governance Gate C1<br/>σ² ≥ θ_dyn ∧ EthicalKey]
-        C3[Storage WAL<br/>Append-only (id, seq)]
+        C1[Geometry Observables~~K_cin, σ², E_n]
+        C2[Governance Gate C1~~σ² ≥ θ_dyn ∧ EthicalKey]
+        C3[Storage WAL~~Append-only (id, seq)]
     end
 ```
 
