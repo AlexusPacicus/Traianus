@@ -52,4 +52,4 @@ Traianus does not construct or modify external representations of reality. It pr
 
 ### 5.2 Operational Boundaries
 * **Zero Cloud Runtime Dependencies:** Executes fully offline on local edge hardware ($\le 8\text{ GB}$ RAM) with zero network connectivity required.
-* **Deterministic Reproducibility:** Given identical vector sequences, initial state, and execution semantics, the core state transition is deterministic (no bitwise reproducibility claim across hardware revisions).
+* **Deterministic Reproducibility:** Given identical initial state, identical input vectors, and identical execution semantics, the core state transition is deterministic within a runtime. **Bitwise equality across Python builds, hardware architectures, or floating-point implementations is not guaranteed** (audit M1).

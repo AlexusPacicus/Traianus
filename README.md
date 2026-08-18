@@ -65,6 +65,19 @@ Current software architectures conflate representation (mapping reality into emb
 [ Ulpia Spatial Canvas ]  ---> Projection Layer
 ```
 
+```mermaid
+graph TD
+    A[Sensory Input / Text] --> B[Representation Layer<br/>Abstract Provider Protocol]
+    B --> C[Traianus Core Engine<br/>Implicate Order v1.0.0]
+    C --> D[Ulpia Spatial Canvas<br/>Explicate Order — Research]
+    
+    subgraph "Traianus Core"
+        C1[Geometry Observables<br/>K_cin, σ², E_n]
+        C2[Governance Gate C1<br/>σ² ≥ θ_dyn ∧ EthicalKey]
+        C3[Storage WAL<br/>Append-only (id, seq)]
+    end
+```
+
 **Traianus is the implicate order** — the backend engine owning deterministic state transitions over coordinate vectors. **Ulpia is the explicate order** — the read-only projection layer that observes state ($O_n = P_\theta(S_n)$, ADR-022/024). Ulpia is declared RESEARCH / FUTURE ROADMAP and has no code in `traianus/`.
 
 This separation addresses the **Representation-State Coupling Problem** and guarantees three core properties:

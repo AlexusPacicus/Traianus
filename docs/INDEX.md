@@ -20,12 +20,29 @@
 
 ## 📄 2. Fractal Documentation System (`docs/`)
 
+```mermaid
+graph TD
+    ROOT[docs/INDEX.md] --> PID[PROJECT_IDENTITY.md]
+    ROOT --> LED[LEDGER.md]
+    ROOT --> ARCH[architecture/ARCHITECTURE.md]
+    ROOT --> CONT[architecture/contracts/CONTRACTS.md]
+    ROOT --> ADR[architecture/ADR/ADR.md]
+    ROOT --> EAS[specifications/EAS-01_LOGOGRAPHIC_PHYSICS.md]
+    ROOT --> AUD[audit/AUDIT.md]
+    ROOT --> STA[STATUS.md]
+    
+    ARCH --> CON1[contracts/POC_FREEZE_v1.md]
+    ARCH --> CON2[contracts/CONTRACTS.md]
+```
+
 * **[PROJECT_IDENTITY.md](./PROJECT_IDENTITY.md):** Substrate definition, explicit boundaries (*Non-Scope*), real invariants, and the Representation-Governance Coupling Problem.
 * **[LEDGER.md](./LEDGER.md):** Immutable *append-only* ledger of operational deltas ($\Delta_n$) and empirical falsifications.
 * **[architecture/ARCHITECTURE.md](./architecture/ARCHITECTURE.md):** Mathematical formulation of state space $S_n = (V_n, E_n)$, SQLite DDL schema, and data flow.
 * **[architecture/contracts/CONTRACTS.md](./architecture/contracts/CONTRACTS.md):** Byte-level Zero-Trust customs, Silent Denial (ADR-002), and Pydantic v2 schemas (`RawDump`, `RefinedEntity`).
 * **[architecture/ADR/ADR.md](./architecture/ADR/ADR.md):** *Append-only* Architecture Decision Record log (ADR-001 to ADR-027).
 * **[specifications/EAS-01_LOGOGRAPHIC_PHYSICS.md](./specifications/EAS-01_LOGOGRAPHIC_PHYSICS.md):** Normative specification of the spectral dispersion experiment, NCD coupling, and Representation-Governance Coupling Problem report.
+* **[audit/AUDIT.md](./audit/AUDIT.md):** Technical audit report with remediation status.
+* **[STATUS.md](./STATUS.md):** Formal classification (Implemented / Experimental / Research) + Known Limitations.
 
 ---
 
