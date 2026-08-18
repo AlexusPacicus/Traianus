@@ -44,11 +44,11 @@ Given an identical initial state $S_0$ and sequence $E = \{e_0, e_1, \dots, e_k\
 ```mermaid
 stateDiagram-v2
     [*] --> S0: Bootstrap (PROSTHETIC_NSM_V1)
-    S0 --> S1: Ingest v₁
-    S1 --> S2: Ingest v₂
-    S2 --> S3: Ingest v₃
+    S0 --> S1: Ingest v1
+    S1 --> S2: Ingest v2
+    S2 --> S3: Ingest v3
     Sn --> Sn1: f(Sn, e_n)
-    note right of Sn: Deterministic\nS_{n+1} = f(S_n, v_n)
+    note right of Sn: Deterministic~~S_{n+1} = f(S_n, v_n)
 ```
 
 ---
