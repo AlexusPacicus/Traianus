@@ -74,7 +74,7 @@ graph TD
     subgraph Core["Traianus Core"]
         C1[Geometry Observables~~K_cin, σ², E_n]
         C2[Governance Gate C1~~σ² ≥ θ_dyn ∧ EthicalKey]
-        C3[Storage WAL~~Append-only (id, seq)]
+        C3[Storage WAL~~Append-only]
     end
 ```
 
