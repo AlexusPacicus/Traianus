@@ -59,13 +59,13 @@ Current software architectures conflate representation (mapping reality into emb
 [ Representation Layer ]  ---> Abstract Provider Protocol (SentenceTransformers / Mock)
           |
           v  (Strict Boundary Enforcement)
-[ Traianus Core Engine ]  ---> Deterministic Geometry & State Management (v ∈ ℝᵈ)   (Implicate Order — v1.0.0)
+[ Traianus Core Engine ]  ---> Deterministic Geometry & State Management (v ∈ ℝᵈ)
           |
           v
 [ Ulpia Spatial Canvas ]  ---> Projection Layer
 ```
 
-**Traianus is the implicate order** — the backend engine owning deterministic state transitions over coordinate vectors. **Ulpia is the explicate order** — the read-only projection layer that observes state ($O_n = P_\theta(S_n)$, ADR-022/024). Ulpia is declared RESEARCH / FUTURE ROADMAP and has no code in `traianus/`.
+**Traianus** — the backend engine owning deterministic state transitions over coordinate vectors. **Ulpia** — the read-only projection layer that observes state ($O_n = P_\theta(S_n)$, ADR-022/024). Ulpia is declared RESEARCH / FUTURE ROADMAP and has no code in `traianus/`.
 
 This separation addresses the **Representation-State Coupling Problem** and guarantees three core properties:
 
