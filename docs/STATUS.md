@@ -53,4 +53,13 @@ This document establishes the canonical and immutable classification of all comp
 
 
 ## Official Determinism Guarantee
-> **Official Definition:** Given identical initial state, identical input vectors and identical execution semantics, the core state transitions are **100% deterministic and reproducible** within a runtime. Bitwise equality across different Python builds or hardware architectures is **not** guaranteed (see audit finding M1 — "Bitwise determinism" redefined).
+> **Official Definition:** Given identical initial state, identical input vectors, and identical execution semantics, the core state transitions are **100% deterministic and reproducible within a runtime**. Bitwise equality across different Python builds, hardware architectures, or floating-point implementations is **not guaranteed** (see audit finding M1 — "Bitwise determinism" redefined to **runtime determinism**).
+
+## Known Limitations (v1.0.0 Freeze)
+
+| ID | Limitation | Impact | Roadmap |
+|----|------------|--------|---------|
+| **M1** | Runtime determinism only; no bitwise cross-build guarantee | Cannot use for cross-platform state replication | WP4 (Cross-Scope Invariant Preservation) |
+| **M2** | Measured pipeline latency ~13ms (embedding + CPU), not <1ms | Latency-sensitive deployments need profiling | — |
+| **L1** | Hermetic suite uses deterministic MockProvider; model suite uses cached all-MiniLM-L6-v2 | Real encoder drift not continuously tested | RH-1 (Multi-Provider) |
+| **L4** | NSM bootstrap basis has near-duplicates (max off-diag cosine ~0.13) | Provisional scaffold; variance calibration affected | WP1 (Dynamic Geodetic Axes) |

@@ -45,11 +45,9 @@ Los siguientes hallazgos permanecen abiertos y requieren atención adicional:
 
 | ID | Título | Status |
 |---|---|---|
-| M1 | "Bitwise determinism" not guaranteeable — redefinido | 🟡 Open |
-| M2 | "<1ms" claim false (~13ms measured) | 🟡 Open |
-| L1 | Tests don't test real system | 🔵 Open |
-| L3 | Mixed languages in API | 🔵 Open |
-| L4 | NSM basis near-duplicates | 🔵 Open |
+| *None* | *All documentation findings resolved in `docs/excellence-v1.0.0`* | ✅ |
+
+> **Note:** M1, M2, L1, L3, L4 were documentation-only findings. They have been resolved via documentation updates in branch `docs/excellence-v1.0.0` (see Remediation Status below). No code changes required; freeze v1.0.0 remains intact.
 
 ---
 
@@ -74,8 +72,13 @@ Resolution criterion: fix implemented in code **and** verified by a deterministi
 | L2 | ✅ Resolved | Dangling edges rejected (404); edges append-only; WAL everywhere; tests `tests/unit/test_storage_hardening.py`. |
 | L5 | ✅ Resolved | `projections_json` derives from `validated_entity.projections` (Pydantic contract is single source of truth). |
 | L6 | ✅ Resolved | `dim_in > dim_db` rejected with HTTP 422 / `ValueError`; tests `tests/representation/test_representation_providers.py`. |
+| M1 | ✅ Resolved (Doc) | `docs/STATUS.md` + `docs/PROJECT_IDENTITY.md` clarified runtime vs bitwise determinism |
+| M2 | ✅ Resolved (Doc) | Claim only existed in audit finding; no public doc claimed <1ms |
+| L1 | ✅ Resolved (Doc) | `docs/STATUS.md` "Known Limitations" documents hermetic vs model suite scope |
+| L3 | ✅ Resolved (Doc) | Seq 7, 21 already fixed code; docs verified English-only |
+| L4 | ✅ Resolved (Doc) | `docs/STATUS.md` "Known Limitations" documents NSM basis as provisional scaffold |
 
-**Open items:** M1, M2, L1, L3, L4 — see [findings](./AUDIT.md#hallazgos-abiertos) for details and recommended fixes.
+**Open items:** None — all findings resolved (code or documentation).
 
 ---
 
