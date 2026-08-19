@@ -557,3 +557,14 @@
 **Gate:** hermetic suite green + C1 guard green + invariants verified.
 
 - **Status:** `Consolidated`. All brand decontamination, language standardization, and governance audit phases complete.
+
+### seq 22 — 2026-08-19 — WP1 Latency Decomposition (validate_wp1_empirical.py)
+
+* **Context:** Empirical measurement of the H3 I/O stability hypothesis to isolate SQLite WAL persistence latency from sentence-transformer encoding latency.
+* **Method:** Modified `tools/experiments/validation/validate_wp1_empirical.py` to use a persistent SQLite connection with `PRAGMA wal_autocheckpoint = 0`, measuring `encode_latency_us` and `sqlite_persist_latency_us` separately over the 111-note WP1 corpus.
+* **Results:**
+  - `sqlite_persist_latency_us`: p50=459μs, p95=989μs, p99=1,693μs, max=2,495μs
+  - `encode_latency_us`: p50=11,546μs, p95=33,022μs, p99=39,940μs, max=54,025μs
+  - `total_latency_us`: p50=11,956μs, p95=33,455μs, p99=40,397μs, max=56,520μs
+* **Verdict:** **H3 I/O stability VALIDATED for SQLite persistence** (p50 < 1ms, p95 < 1ms). The encoding latency is a provider-layer concern (sentence-transformer), not a control-plane defect. Architecture correctly isolates WAL I/O via persistent connection.
+* **Status:** `Consolidated`. Telemetry at `docs/audit/telemetry_real_corpus_v1.json`.

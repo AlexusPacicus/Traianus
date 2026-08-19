@@ -146,6 +146,7 @@ erDiagram
 | Deterministic Transition | Pure operators in `traianus/geometry/observables.py` and gate C1 in `traianus/governance/gate.py`. | Zero stochastic token completion in the control plane. |
 | Append-Only Integrity | SQLite composite primary key `(id, seq)`. | Operations `UPDATE` and `DELETE` are forbidden. |
 | Hermetic Execution | Local SQLite WAL transactions. | Operates fully offline with zero cloud runtime network dependencies. |
+| I/O Latency Guarantee | SQLite WAL persistence p50 < 1ms | Persistent connection + WAL mode; measured via `validate_wp1_empirical.py` | Provider encoding excluded |
 
 ## 7. Epoch Evolution (Logographic Genesis)
 

@@ -60,6 +60,6 @@ This document establishes the canonical and immutable classification of all comp
 | ID | Limitation | Impact | Roadmap |
 |----|------------|--------|---------|
 | **M1** | Runtime determinism only; no bitwise cross-build guarantee | Cannot use for cross-platform state replication | WP4 (Cross-Scope Invariant Preservation) |
-| **M2** | Measured pipeline latency ~13ms (embedding + CPU), not <1ms | Latency-sensitive deployments need profiling | — |
+| **M2** | Measured pipeline latency ~12ms p50 (encoding ~11.5ms + SQLite WAL ~0.5ms); SQLite I/O <1ms satisfied | Encoding bottleneck in provider layer | RH-1 (Multi-Provider) |
 | **L1** | Hermetic suite uses deterministic MockProvider; model suite uses cached all-MiniLM-L6-v2 | Real encoder drift not continuously tested | RH-1 (Multi-Provider) |
 | **L4** | NSM bootstrap basis has near-duplicates (max off-diag cosine ~0.13) | Provisional scaffold; variance calibration affected | WP1 (Dynamic Geodetic Axes) |
