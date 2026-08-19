@@ -1,0 +1,1197 @@
+{
+  "metadata": {
+    "protocol_version": "1.0.0",
+    "epoch_provenance": "PROSTHETIC_NSM_V1",
+    "timestamp_utc": "2026-08-19T10:33:26Z",
+    "corpus_categories": [
+      "A",
+      "B",
+      "C"
+    ],
+    "total_paragraphs": 111,
+    "geodetic_axes_count": 8,
+    "theta_dyn": 0.004292361374286038
+  },
+  "hypothesis_H1_variance_structure": {
+    "per_category": {
+      "A": {
+        "count": 45,
+        "variance_mean": 0.002175503439633557,
+        "variance_std": 0.0010827829472130806,
+        "above_threshold": 3,
+        "below_threshold": 42
+      },
+      "B": {
+        "count": 46,
+        "variance_mean": 0.0025822507964163403,
+        "variance_std": 0.0013364862741153112,
+        "above_threshold": 7,
+        "below_threshold": 39
+      },
+      "C": {
+        "count": 20,
+        "variance_mean": 0.0020205429033333237,
+        "variance_std": 0.000906963834001597,
+        "above_threshold": 0,
+        "below_threshold": 20
+      }
+    },
+    "bimodality_test": {
+      "conclusion": "UNIMODAL"
+    }
+  },
+  "hypothesis_H2_angular_collapse": {
+    "cosine_matrix_stats": {
+      "min": -0.1756818849534334,
+      "max": 0.6756180930614086,
+      "mean": 0.07983952931289659,
+      "std": 0.11824358780631149
+    },
+    "distance_concentration": {
+      "ratio_max_min": 769055.5570783667
+    },
+    "dimensionality_estimate": {
+      "participation_ratio": 9.192782170154665,
+      "effective_dim": 9.192782170154665
+    }
+  },
+  "hypothesis_H3_io_stability": {
+    "insertion_latency_us": {
+      "mean": 21360.882882882885,
+      "p50": 17568.0,
+      "p95": 46151.0,
+      "p99": 47558.700000000004,
+      "max": 68879.0
+    },
+    "storage_growth_bytes": {
+      "db_size_initial_bytes": 73728,
+      "db_size_final_bytes": 528384,
+      "growth_bytes": 454656,
+      "per_insertion_mean": 4096.0
+    },
+    "sequence_integrity": {
+      "gaps": 0,
+      "duplicates": 0,
+      "corruption": false
+    }
+  },
+  "state_dynamics": {
+    "lifecycle_distribution": {
+      "pending_approval": 111
+    },
+    "gate_approval_rate": 0.0,
+    "gate_approval_rate_with_ethical_key": 0.07207207207207207
+  },
+  "raw_measurements": [
+    {
+      "id": "NODE_1787135602650025",
+      "category": "A",
+      "text": "The state vector v must be L2 normalized to unit length before projection onto t",
+      "variance": 0.0027154227482254273,
+      "state": "pending_approval",
+      "action_potential": 0.0027154227482254273,
+      "latency_us": 68879,
+      "above_threshold": false
+    },
+    {
+      "id": "NODE_1787135602720541",
+      "category": "A",
+      "text": "Dual-key consolidation requires both the Topological Key and the Ethical Key to ",
+      "variance": 0.001650435291163764,
+      "state": "pending_approval",
+      "action_potential": 0.001650435291163764,
+      "latency_us": 46849,
+      "above_threshold": false
+    },
+    {
+      "id": "NODE_1787135602768318",
+      "category": "A",
+      "text": "The simplicial complex S_n is defined as the tuple of vertices V_n, edges E_n, a",
+      "variance": 0.002134598254364105,
+      "state": "pending_approval",
+      "action_potential": 0.002134598254364105,
+      "latency_us": 47590,
+      "above_threshold": false
+    },
+    {
+      "id": "NODE_1787135602817573",
+      "category": "A",
+      "text": "Every state transition in the manifold nodes table must be recorded as an append",
+      "variance": 0.0027370254083110643,
+      "state": "pending_approval",
+      "action_potential": 0.0027370254083110643,
+      "latency_us": 45491,
+      "above_threshold": false
+    },
+    {
+      "id": "NODE_1787135602864035",
+      "category": "A",
+      "text": "The geodetic basis consists of eight axes derived from NSM primitives via farthe",
+      "variance": 0.0016509599287779673,
+      "state": "pending_approval",
+      "action_potential": 0.0016509599287779673,
+      "latency_us": 17015,
+      "above_threshold": false
+    },
+    {
+      "id": "NODE_1787135602881936",
+      "category": "A",
+      "text": "Projection variance sigma squared measures the dispersion of dot products across",
+      "variance": 0.0012891510778702238,
+      "state": "pending_approval",
+      "action_potential": 0.0012891510778702238,
+      "latency_us": 46420,
+      "above_threshold": false
+    },
+    {
+      "id": "NODE_1787135602929309",
+      "category": "A",
+      "text": "The dynamic threshold theta_dyn is calibrated by excluding self-projection terms",
+      "variance": 0.0017234949725033037,
+      "state": "pending_approval",
+      "action_potential": 0.0017234949725033037,
+      "latency_us": 18601,
+      "above_threshold": false
+    },
+    {
+      "id": "NODE_1787135602948550",
+      "category": "A",
+      "text": "Local adjacency E_n is computed via L2 distance between vectors with epsilon equ",
+      "variance": 0.0010799718455131613,
+      "state": "pending_approval",
+      "action_potential": 0.0010799718455131613,
+      "latency_us": 40284,
+      "above_threshold": false
+    },
+    {
+      "id": "NODE_1787135602990425",
+      "category": "A",
+      "text": "Epoch provenance PROSTHETIC_NSM_V1 identifies the active seed epoch for all anch",
+      "variance": 0.0016849098120609962,
+      "state": "pending_approval",
+      "action_potential": 0.0016849098120609962,
+      "latency_us": 17818,
+      "above_threshold": false
+    },
+    {
+      "id": "NODE_1787135603009055",
+      "category": "A",
+      "text": "The ingest endpoint must reject non text plain content types at the zero-trust p",
+      "variance": 0.003284368569145542,
+      "state": "pending_approval",
+      "action_potential": 0.003284368569145542,
+      "latency_us": 39780,
+      "above_threshold": false
+    },
+    {
+      "id": "NODE_1787135603050253",
+      "category": "A",
+      "text": "Vector blobs are serialized as float64 byte arrays for deterministic persistence",
+      "variance": 0.002853643769880518,
+      "state": "pending_approval",
+      "action_potential": 0.002853643769880518,
+      "latency_us": 38885,
+      "above_threshold": false
+    },
+    {
+      "id": "NODE_1787135603090181",
+      "category": "A",
+      "text": "The operator token is required for all routes that mutate substrate state or exp",
+      "variance": 0.0010000768103969133,
+      "state": "pending_approval",
+      "action_potential": 0.0010000768103969133,
+      "latency_us": 14651,
+      "above_threshold": false
+    },
+    {
+      "id": "NODE_1787135603105470",
+      "category": "A",
+      "text": "CORS origins must be enumerated explicitly without wildcard to prevent credentia",
+      "variance": 0.0025612522838682626,
+      "state": "pending_approval",
+      "action_potential": 0.0025612522838682626,
+      "latency_us": 15536,
+      "above_threshold": false
+    },
+    {
+      "id": "NODE_1787135603121857",
+      "category": "A",
+      "text": "The spectral processor encodes raw text to 384D vectors using all-MiniLM-L6-v2 w",
+      "variance": 0.001024643114093183,
+      "state": "pending_approval",
+      "action_potential": 0.001024643114093183,
+      "latency_us": 42231,
+      "above_threshold": false
+    },
+    {
+      "id": "NODE_1787135603165094",
+      "category": "A",
+      "text": "Action potential is derived from the projection variance without magic constants",
+      "variance": 0.0012395584817880385,
+      "state": "pending_approval",
+      "action_potential": 0.0012395584817880385,
+      "latency_us": 17093,
+      "above_threshold": false
+    },
+    {
+      "id": "NODE_1787135603182850",
+      "category": "A",
+      "text": "The epsilon adjacency relation is purely observational and must not alter lifecy",
+      "variance": 0.0024999402585127047,
+      "state": "pending_approval",
+      "action_potential": 0.0024999402585127047,
+      "latency_us": 14981,
+      "above_threshold": false
+    },
+    {
+      "id": "NODE_1787135603198552",
+      "category": "A",
+      "text": "Every database connection must run PRAGMA journal_mode equals WAL for write-ahea",
+      "variance": 0.0017489803683652008,
+      "state": "pending_approval",
+      "action_potential": 0.0017489803683652008,
+      "latency_us": 16941,
+      "above_threshold": false
+    },
+    {
+      "id": "NODE_1787135603216056",
+      "category": "A",
+      "text": "Dimension mismatch is rejected when provider vector dimension exceeds geodetic b",
+      "variance": 0.004314251477020413,
+      "state": "pending_approval",
+      "action_potential": 0.004314251477020413,
+      "latency_us": 16199,
+      "above_threshold": true
+    },
+    {
+      "id": "NODE_1787135603232975",
+      "category": "A",
+      "text": "Idempotency keys ensure exactly-once ingestion semantics under concurrent reques",
+      "variance": 0.002085162153245628,
+      "state": "pending_approval",
+      "action_potential": 0.002085162153245628,
+      "latency_us": 15342,
+      "above_threshold": false
+    },
+    {
+      "id": "NODE_1787135603248964",
+      "category": "A",
+      "text": "The farthest-point greedy algorithm selects basis axes to minimize maximum pairw",
+      "variance": 0.001878296252012124,
+      "state": "pending_approval",
+      "action_potential": 0.001878296252012124,
+      "latency_us": 16021,
+      "above_threshold": false
+    },
+    {
+      "id": "NODE_1787135603265895",
+      "category": "A",
+      "text": "Vertices in the manifold represent L2-normalized embeddings of external knowledg",
+      "variance": 0.000767729807850987,
+      "state": "pending_approval",
+      "action_potential": 0.000767729807850987,
+      "latency_us": 15745,
+      "above_threshold": false
+    },
+    {
+      "id": "NODE_1787135603282298",
+      "category": "A",
+      "text": "Consolidation creates a new node revision without overwriting the original row p",
+      "variance": 0.0008698802142193293,
+      "state": "pending_approval",
+      "action_potential": 0.0008698802142193293,
+      "latency_us": 15863,
+      "above_threshold": false
+    },
+    {
+      "id": "NODE_1787135603298800",
+      "category": "A",
+      "text": "The Topological Key is a provisional informational score based on spectral varia",
+      "variance": 0.002605125287426588,
+      "state": "pending_approval",
+      "action_potential": 0.002605125287426588,
+      "latency_us": 16460,
+      "above_threshold": false
+    },
+    {
+      "id": "NODE_1787135603315912",
+      "category": "A",
+      "text": "Cross-epoch comparisons are prohibited without re-projection per epoch provenanc",
+      "variance": 0.0038808072770238336,
+      "state": "pending_approval",
+      "action_potential": 0.0038808072770238336,
+      "latency_us": 38759,
+      "above_threshold": false
+    },
+    {
+      "id": "NODE_1787135603355999",
+      "category": "A",
+      "text": "The critical variance threshold is computed from cross-projections only excludin",
+      "variance": 0.005112793989598009,
+      "state": "pending_approval",
+      "action_potential": 0.005112793989598009,
+      "latency_us": 42370,
+      "above_threshold": true
+    },
+    {
+      "id": "NODE_1787135603399220",
+      "category": "A",
+      "text": "Refined entity projections are persisted from the validated Pydantic contract no",
+      "variance": 0.002907004467380726,
+      "state": "pending_approval",
+      "action_potential": 0.002907004467380726,
+      "latency_us": 17847,
+      "above_threshold": false
+    },
+    {
+      "id": "NODE_1787135603418223",
+      "category": "A",
+      "text": "Telemetry error rows are append-only and excluded from epsilon adjacency computa",
+      "variance": 0.0014671010047009256,
+      "state": "pending_approval",
+      "action_potential": 0.0014671010047009256,
+      "latency_us": 46658,
+      "above_threshold": false
+    },
+    {
+      "id": "NODE_1787135603465680",
+      "category": "A",
+      "text": "The manifold edges table supports tombstone state removed for append-only edge l",
+      "variance": 0.0033296190849885165,
+      "state": "pending_approval",
+      "action_potential": 0.0033296190849885165,
+      "latency_us": 17303,
+      "above_threshold": false
+    },
+    {
+      "id": "NODE_1787135603484132",
+      "category": "A",
+      "text": "Provider agnosticism means the control plane operates deterministically over any",
+      "variance": 0.0009544361070730607,
+      "state": "pending_approval",
+      "action_potential": 0.0009544361070730607,
+      "latency_us": 17404,
+      "above_threshold": false
+    },
+    {
+      "id": "NODE_1787135603502703",
+      "category": "A",
+      "text": "Bitwise determinism is guaranteed only given identical input vectors and fixed m",
+      "variance": 0.002754789206156928,
+      "state": "pending_approval",
+      "action_potential": 0.002754789206156928,
+      "latency_us": 15847,
+      "above_threshold": false
+    },
+    {
+      "id": "NODE_1787135603519138",
+      "category": "A",
+      "text": "The Sentence Transformer model is pinned to a specific revision hash for reprodu",
+      "variance": 0.005296163630056148,
+      "state": "pending_approval",
+      "action_potential": 0.005296163630056148,
+      "latency_us": 17259,
+      "above_threshold": true
+    },
+    {
+      "id": "NODE_1787135603537325",
+      "category": "A",
+      "text": "Null byte detection at the ingress perimeter prevents binary payload injection a",
+      "variance": 0.0011007388579119856,
+      "state": "pending_approval",
+      "action_potential": 0.0011007388579119856,
+      "latency_us": 43752,
+      "above_threshold": false
+    },
+    {
+      "id": "NODE_1787135603582071",
+      "category": "A",
+      "text": "Strict UTF-8 decoding with errors equals strict rejects malformed payloads at th",
+      "variance": 0.002973438168235541,
+      "state": "pending_approval",
+      "action_potential": 0.002973438168235541,
+      "latency_us": 16582,
+      "above_threshold": false
+    },
+    {
+      "id": "NODE_1787135603599269",
+      "category": "A",
+      "text": "The active epoch is determined by the most recently created epoch provenance in ",
+      "variance": 0.0025839802525618495,
+      "state": "pending_approval",
+      "action_potential": 0.0025839802525618495,
+      "latency_us": 15588,
+      "above_threshold": false
+    },
+    {
+      "id": "NODE_1787135603615553",
+      "category": "A",
+      "text": "Logographic genesis expands the hyperspace dimension by appending a canonical or",
+      "variance": 0.0018089967508439836,
+      "state": "pending_approval",
+      "action_potential": 0.0018089967508439836,
+      "latency_us": 16772,
+      "above_threshold": false
+    },
+    {
+      "id": "NODE_1787135603632978",
+      "category": "A",
+      "text": "Node existence validation prevents dangling edge creation in the forge relation ",
+      "variance": 0.0030286512024006364,
+      "state": "pending_approval",
+      "action_potential": 0.0030286512024006364,
+      "latency_us": 18339,
+      "above_threshold": false
+    },
+    {
+      "id": "NODE_1787135603652135",
+      "category": "A",
+      "text": "The CHECK constraint on lifecycle state restricts valid values to four operation",
+      "variance": 0.0018345119567136142,
+      "state": "pending_approval",
+      "action_potential": 0.0018345119567136142,
+      "latency_us": 17438,
+      "above_threshold": false
+    },
+    {
+      "id": "NODE_1787135603670380",
+      "category": "A",
+      "text": "Bootstrap extraction uses the anchor concept something as the first axis in the ",
+      "variance": 0.0009469295950303045,
+      "state": "pending_approval",
+      "action_potential": 0.0009469295950303045,
+      "latency_us": 16346,
+      "above_threshold": false
+    },
+    {
+      "id": "NODE_1787135603687566",
+      "category": "A",
+      "text": "Revision sequences ensure monotonic append-only evolution of node and edge recor",
+      "variance": 0.0020181398374821916,
+      "state": "pending_approval",
+      "action_potential": 0.0020181398374821916,
+      "latency_us": 14886,
+      "above_threshold": false
+    },
+    {
+      "id": "NODE_1787135603703056",
+      "category": "A",
+      "text": "The repository enforces RFC 2119 compliance for all normative specifications and",
+      "variance": 0.0005812638507977199,
+      "state": "pending_approval",
+      "action_potential": 0.0005812638507977199,
+      "latency_us": 14846,
+      "above_threshold": false
+    },
+    {
+      "id": "NODE_1787135603718548",
+      "category": "A",
+      "text": "Historical vertices edges and simplicial faces in persistent storage are immutab",
+      "variance": 0.0029473319836834143,
+      "state": "pending_approval",
+      "action_potential": 0.0029473319836834143,
+      "latency_us": 15706,
+      "above_threshold": false
+    },
+    {
+      "id": "NODE_1787135603734907",
+      "category": "A",
+      "text": "The spectral projection signature is computed as the dot product between the nor",
+      "variance": 0.0011011386077489206,
+      "state": "pending_approval",
+      "action_potential": 0.0011011386077489206,
+      "latency_us": 17731,
+      "above_threshold": false
+    },
+    {
+      "id": "NODE_1787135603753495",
+      "category": "A",
+      "text": "Variance inflation occurs when self-projection terms are included in threshold c",
+      "variance": 0.0014276595399781342,
+      "state": "pending_approval",
+      "action_potential": 0.0014276595399781342,
+      "latency_us": 16749,
+      "above_threshold": false
+    },
+    {
+      "id": "NODE_1787135603771317",
+      "category": "A",
+      "text": "The dual gate evaluates to consolidated only when both topological and ethical c",
+      "variance": 0.0019734095312965673,
+      "state": "pending_approval",
+      "action_potential": 0.0019734095312965673,
+      "latency_us": 15161,
+      "above_threshold": false
+    },
+    {
+      "id": "NODE_1787135603787390",
+      "category": "A",
+      "text": "Cross-projection exclusion ensures the baseline variance reflects inter-axis dis",
+      "variance": 0.0024698716952316173,
+      "state": "pending_approval",
+      "action_potential": 0.0024698716952316173,
+      "latency_us": 16480,
+      "above_threshold": false
+    },
+    {
+      "id": "NODE_1787135603804833",
+      "category": "B",
+      "text": "Hey did you see the email from Sarah about the meeting on Thursday afternoon?",
+      "variance": 0.002202630362985775,
+      "state": "pending_approval",
+      "action_potential": 0.002202630362985775,
+      "latency_us": 16648,
+      "above_threshold": false
+    },
+    {
+      "id": "NODE_1787135603822382",
+      "category": "B",
+      "text": "I think we should probably grab lunch at that new place near the corner sometime",
+      "variance": 0.001708886215694269,
+      "state": "pending_approval",
+      "action_potential": 0.001708886215694269,
+      "latency_us": 16260,
+      "above_threshold": false
+    },
+    {
+      "id": "NODE_1787135603839644",
+      "category": "B",
+      "text": "Can you remind me what time the call starts tomorrow morning with the design tea",
+      "variance": 0.0025843706015132506,
+      "state": "pending_approval",
+      "action_potential": 0.0025843706015132506,
+      "latency_us": 15766,
+      "above_threshold": false
+    },
+    {
+      "id": "NODE_1787135603856106",
+      "category": "B",
+      "text": "The weather has been really nice lately perfect for walking to the office instea",
+      "variance": 0.0006418738916452165,
+      "state": "pending_approval",
+      "action_potential": 0.0006418738916452165,
+      "latency_us": 16059,
+      "above_threshold": false
+    },
+    {
+      "id": "NODE_1787135603873157",
+      "category": "B",
+      "text": "I was wondering if you had a chance to look at the draft I sent over yesterday e",
+      "variance": 0.002685714966546911,
+      "state": "pending_approval",
+      "action_potential": 0.002685714966546911,
+      "latency_us": 16059,
+      "above_threshold": false
+    },
+    {
+      "id": "NODE_1787135603890029",
+      "category": "B",
+      "text": "Let me know when you are free to chat about the project timeline and next steps.",
+      "variance": 0.00492514315929066,
+      "state": "pending_approval",
+      "action_potential": 0.00492514315929066,
+      "latency_us": 15837,
+      "above_threshold": true
+    },
+    {
+      "id": "NODE_1787135603906817",
+      "category": "B",
+      "text": "Thanks for sending that over I will take a look first thing in the morning.",
+      "variance": 0.003367225554046196,
+      "state": "pending_approval",
+      "action_potential": 0.003367225554046196,
+      "latency_us": 16339,
+      "above_threshold": false
+    },
+    {
+      "id": "NODE_1787135603923969",
+      "category": "B",
+      "text": "We need to figure out who is going to handle the client presentation next Monday",
+      "variance": 0.0014247905112342763,
+      "state": "pending_approval",
+      "action_potential": 0.0014247905112342763,
+      "latency_us": 16545,
+      "above_threshold": false
+    },
+    {
+      "id": "NODE_1787135603941501",
+      "category": "B",
+      "text": "I completely forgot about the deadline extension we discussed last week in the s",
+      "variance": 0.004197842130044699,
+      "state": "pending_approval",
+      "action_potential": 0.004197842130044699,
+      "latency_us": 16942,
+      "above_threshold": false
+    },
+    {
+      "id": "NODE_1787135603959383",
+      "category": "B",
+      "text": "Do you remember where we parked the car when we went to the conference downtown ",
+      "variance": 0.0027183270842681944,
+      "state": "pending_approval",
+      "action_potential": 0.0027183270842681944,
+      "latency_us": 16168,
+      "above_threshold": false
+    },
+    {
+      "id": "NODE_1787135603976956",
+      "category": "B",
+      "text": "The coffee machine on the third floor has been broken again since Tuesday I thin",
+      "variance": 0.002150189556496585,
+      "state": "pending_approval",
+      "action_potential": 0.002150189556496585,
+      "latency_us": 16532,
+      "above_threshold": false
+    },
+    {
+      "id": "NODE_1787135603994266",
+      "category": "B",
+      "text": "I was thinking we could maybe order pizza for the team lunch on Friday if that w",
+      "variance": 0.0014403981207635694,
+      "state": "pending_approval",
+      "action_potential": 0.0014403981207635694,
+      "latency_us": 17182,
+      "above_threshold": false
+    },
+    {
+      "id": "NODE_1787135604012234",
+      "category": "B",
+      "text": "Can you pick up some milk on your way home I noticed we were running low this mo",
+      "variance": 0.0016648493987311236,
+      "state": "pending_approval",
+      "action_potential": 0.0016648493987311236,
+      "latency_us": 20230,
+      "above_threshold": false
+    },
+    {
+      "id": "NODE_1787135604033867",
+      "category": "B",
+      "text": "I saw that movie you recommended last weekend it was actually pretty good overal",
+      "variance": 0.0014578560377209978,
+      "state": "pending_approval",
+      "action_potential": 0.0014578560377209978,
+      "latency_us": 21045,
+      "above_threshold": false
+    },
+    {
+      "id": "NODE_1787135604056429",
+      "category": "B",
+      "text": "We should probably schedule a follow-up session to review the feedback from the ",
+      "variance": 0.00436365406461901,
+      "state": "pending_approval",
+      "action_potential": 0.00436365406461901,
+      "latency_us": 18141,
+      "above_threshold": true
+    },
+    {
+      "id": "NODE_1787135604076179",
+      "category": "B",
+      "text": "The train was delayed again this morning so I ended up being about fifteen minut",
+      "variance": 0.0026418754399781747,
+      "state": "pending_approval",
+      "action_potential": 0.0026418754399781747,
+      "latency_us": 18410,
+      "above_threshold": false
+    },
+    {
+      "id": "NODE_1787135604095344",
+      "category": "B",
+      "text": "I was going to make a reservation for dinner but I was not sure what time everyo",
+      "variance": 0.0013180349223242817,
+      "state": "pending_approval",
+      "action_potential": 0.0013180349223242817,
+      "latency_us": 19314,
+      "above_threshold": false
+    },
+    {
+      "id": "NODE_1787135604115268",
+      "category": "B",
+      "text": "Did you get a chance to read the article I shared in the group chat yesterday ab",
+      "variance": 0.0031270694399638185,
+      "state": "pending_approval",
+      "action_potential": 0.0031270694399638185,
+      "latency_us": 17993,
+      "above_threshold": false
+    },
+    {
+      "id": "NODE_1787135604133901",
+      "category": "B",
+      "text": "I think the new intern starts next week on Monday morning so we should prepare t",
+      "variance": 0.0025000049347052473,
+      "state": "pending_approval",
+      "action_potential": 0.0025000049347052473,
+      "latency_us": 19838,
+      "above_threshold": false
+    },
+    {
+      "id": "NODE_1787135604155218",
+      "category": "B",
+      "text": "The printer in the marketing department has been making a weird noise again sinc",
+      "variance": 0.002327106494315987,
+      "state": "pending_approval",
+      "action_potential": 0.002327106494315987,
+      "latency_us": 16028,
+      "above_threshold": false
+    },
+    {
+      "id": "NODE_1787135604172105",
+      "category": "B",
+      "text": "We need to coordinate with the backend team about the API contract changes befor",
+      "variance": 0.0035711854371353905,
+      "state": "pending_approval",
+      "action_potential": 0.0035711854371353905,
+      "latency_us": 16086,
+      "above_threshold": false
+    },
+    {
+      "id": "NODE_1787135604189801",
+      "category": "B",
+      "text": "I was wondering if it would be possible to push the demo back a couple of days t",
+      "variance": 0.0043968197994330455,
+      "state": "pending_approval",
+      "action_potential": 0.0043968197994330455,
+      "latency_us": 17112,
+      "above_threshold": true
+    },
+    {
+      "id": "NODE_1787135604208346",
+      "category": "B",
+      "text": "The office plants need watering again I think whoever is responsible forgot to d",
+      "variance": 0.002082844354348537,
+      "state": "pending_approval",
+      "action_potential": 0.002082844354348537,
+      "latency_us": 18383,
+      "above_threshold": false
+    },
+    {
+      "id": "NODE_1787135604227376",
+      "category": "B",
+      "text": "Can you send me the link to that spreadsheet we were working on last Tuesday aft",
+      "variance": 0.006498351429636799,
+      "state": "pending_approval",
+      "action_potential": 0.006498351429636799,
+      "latency_us": 18301,
+      "above_threshold": true
+    },
+    {
+      "id": "NODE_1787135604246405",
+      "category": "B",
+      "text": "I was planning to leave early today to pick up my daughter from school so I will",
+      "variance": 0.0023074917440871036,
+      "state": "pending_approval",
+      "action_potential": 0.0023074917440871036,
+      "latency_us": 18440,
+      "above_threshold": false
+    },
+    {
+      "id": "NODE_1787135604265402",
+      "category": "B",
+      "text": "We should probably order more supplies for the kitchen the paper towels and coff",
+      "variance": 0.0010264457377078594,
+      "state": "pending_approval",
+      "action_potential": 0.0010264457377078594,
+      "latency_us": 17631,
+      "above_threshold": false
+    },
+    {
+      "id": "NODE_1787135604283682",
+      "category": "B",
+      "text": "I was not sure if you had seen the message about the all hands meeting scheduled",
+      "variance": 0.0009823114051516174,
+      "state": "pending_approval",
+      "action_potential": 0.0009823114051516174,
+      "latency_us": 19489,
+      "above_threshold": false
+    },
+    {
+      "id": "NODE_1787135604304710",
+      "category": "B",
+      "text": "The wifi in the conference room has been really slow lately especially during th",
+      "variance": 0.001917920578414918,
+      "state": "pending_approval",
+      "action_potential": 0.001917920578414918,
+      "latency_us": 16454,
+      "above_threshold": false
+    },
+    {
+      "id": "NODE_1787135604321686",
+      "category": "B",
+      "text": "I was thinking about reorganizing the shared drive to make it easier to find the",
+      "variance": 0.005229736784776713,
+      "state": "pending_approval",
+      "action_potential": 0.005229736784776713,
+      "latency_us": 17592,
+      "above_threshold": true
+    },
+    {
+      "id": "NODE_1787135604340815",
+      "category": "B",
+      "text": "Can you let me know if you need any help with the onboarding docs before the new",
+      "variance": 0.0028130982955965086,
+      "state": "pending_approval",
+      "action_potential": 0.0028130982955965086,
+      "latency_us": 17593,
+      "above_threshold": false
+    },
+    {
+      "id": "NODE_1787135604360285",
+      "category": "B",
+      "text": "I think we forgot to reply to that customer inquiry from last week it might stil",
+      "variance": 0.00281309201276697,
+      "state": "pending_approval",
+      "action_potential": 0.00281309201276697,
+      "latency_us": 16415,
+      "above_threshold": false
+    },
+    {
+      "id": "NODE_1787135604377565",
+      "category": "B",
+      "text": "We should probably take a walk around the block after lunch it is such a nice da",
+      "variance": 0.002382946530144545,
+      "state": "pending_approval",
+      "action_potential": 0.002382946530144545,
+      "latency_us": 19126,
+      "above_threshold": false
+    },
+    {
+      "id": "NODE_1787135604397301",
+      "category": "B",
+      "text": "I was going to bring donuts for the morning meeting but I got stuck in traffic o",
+      "variance": 0.0015441633869314167,
+      "state": "pending_approval",
+      "action_potential": 0.0015441633869314167,
+      "latency_us": 19058,
+      "above_threshold": false
+    },
+    {
+      "id": "NODE_1787135604416954",
+      "category": "B",
+      "text": "Do you know if the building management fixed the air conditioning issue on the s",
+      "variance": 0.0022397556153569502,
+      "state": "pending_approval",
+      "action_potential": 0.0022397556153569502,
+      "latency_us": 18547,
+      "above_threshold": false
+    },
+    {
+      "id": "NODE_1787135604436025",
+      "category": "B",
+      "text": "I was wondering if we could reschedule the design review to Wednesday afternoon ",
+      "variance": 0.0030366828771219373,
+      "state": "pending_approval",
+      "action_potential": 0.0030366828771219373,
+      "latency_us": 18964,
+      "above_threshold": false
+    },
+    {
+      "id": "NODE_1787135604456411",
+      "category": "B",
+      "text": "The parking garage entrance is blocked again for construction so we need to use ",
+      "variance": 0.0011775264643766375,
+      "state": "pending_approval",
+      "action_potential": 0.0011775264643766375,
+      "latency_us": 17471,
+      "above_threshold": false
+    },
+    {
+      "id": "NODE_1787135604475369",
+      "category": "B",
+      "text": "I think I left my jacket in the meeting room on the fourth floor can you check i",
+      "variance": 0.005879193050935991,
+      "state": "pending_approval",
+      "action_potential": 0.005879193050935991,
+      "latency_us": 17486,
+      "above_threshold": true
+    },
+    {
+      "id": "NODE_1787135604493867",
+      "category": "B",
+      "text": "We should probably send out a reminder about the team offsite planning survey be",
+      "variance": 0.0017756387987646165,
+      "state": "pending_approval",
+      "action_potential": 0.0017756387987646165,
+      "latency_us": 18804,
+      "above_threshold": false
+    },
+    {
+      "id": "NODE_1787135604513383",
+      "category": "B",
+      "text": "I was not sure whether to take the bus or drive today given the traffic report o",
+      "variance": 0.0005790478066141427,
+      "state": "pending_approval",
+      "action_potential": 0.0005790478066141427,
+      "latency_us": 18822,
+      "above_threshold": false
+    },
+    {
+      "id": "NODE_1787135604532786",
+      "category": "B",
+      "text": "Can you ask Facilities about the broken blinds in the west conference room they ",
+      "variance": 0.002027977931615038,
+      "state": "pending_approval",
+      "action_potential": 0.002027977931615038,
+      "latency_us": 17101,
+      "above_threshold": false
+    },
+    {
+      "id": "NODE_1787135604550526",
+      "category": "B",
+      "text": "I think the new security badge system is finally working again after the update ",
+      "variance": 0.0024387514761866477,
+      "state": "pending_approval",
+      "action_potential": 0.0024387514761866477,
+      "latency_us": 20130,
+      "above_threshold": false
+    },
+    {
+      "id": "NODE_1787135604571258",
+      "category": "B",
+      "text": "We should probably order some snacks for the afternoon workshop I think people w",
+      "variance": 0.002785519058463297,
+      "state": "pending_approval",
+      "action_potential": 0.002785519058463297,
+      "latency_us": 16810,
+      "above_threshold": false
+    },
+    {
+      "id": "NODE_1787135604589452",
+      "category": "B",
+      "text": "I was planning to update the onboarding wiki but I got pulled into the productio",
+      "variance": 0.0029138688162218583,
+      "state": "pending_approval",
+      "action_potential": 0.0029138688162218583,
+      "latency_us": 17226,
+      "above_threshold": false
+    },
+    {
+      "id": "NODE_1787135604607170",
+      "category": "B",
+      "text": "Did you happen to notice if the recycling bins were emptied yesterday they seem ",
+      "variance": 0.0018228810647867482,
+      "state": "pending_approval",
+      "action_potential": 0.0018228810647867482,
+      "latency_us": 18807,
+      "above_threshold": false
+    },
+    {
+      "id": "NODE_1787135604627239",
+      "category": "B",
+      "text": "I was thinking we could carpool to the offsite next month to save on parking and",
+      "variance": 0.0007864595546147053,
+      "state": "pending_approval",
+      "action_potential": 0.0007864595546147053,
+      "latency_us": 19422,
+      "above_threshold": false
+    },
+    {
+      "id": "NODE_1787135604647321",
+      "category": "B",
+      "text": "The thermostat in the open office area has been set way too high again can someo",
+      "variance": 0.004305983737073438,
+      "state": "pending_approval",
+      "action_potential": 0.004305983737073438,
+      "latency_us": 17814,
+      "above_threshold": true
+    },
+    {
+      "id": "NODE_1787135604666507",
+      "category": "C",
+      "text": "purple elephant dancing on the ceiling of a submarine sandwich factory at midnig",
+      "variance": 0.0034031928623333846,
+      "state": "pending_approval",
+      "action_potential": 0.0034031928623333846,
+      "latency_us": 47277,
+      "above_threshold": false
+    },
+    {
+      "id": "NODE_1787135604714530",
+      "category": "C",
+      "text": "quick sort algorithm banana republic fuzzy wuzzy was a bear had no hair",
+      "variance": 0.0011658996855314244,
+      "state": "pending_approval",
+      "action_potential": 0.0011658996855314244,
+      "latency_us": 17568,
+      "above_threshold": false
+    },
+    {
+      "id": "NODE_1787135604733604",
+      "category": "C",
+      "text": "the square root of yesterday is blue and tastes like quadratic equations on toas",
+      "variance": 0.0003262429613087622,
+      "state": "pending_approval",
+      "action_potential": 0.0003262429613087622,
+      "latency_us": 19385,
+      "above_threshold": false
+    },
+    {
+      "id": "NODE_1787135604754449",
+      "category": "C",
+      "text": "xyzqwk mnbvc lkjhg fdsap oiuyt rewq zx cvb nm lk jh gf ds a",
+      "variance": 0.0017139002861506964,
+      "state": "pending_approval",
+      "action_potential": 0.0017139002861506964,
+      "latency_us": 42990,
+      "above_threshold": false
+    },
+    {
+      "id": "NODE_1787135604798558",
+      "category": "C",
+      "text": "supercalifragilisticexpialidocious backwards spells something nobody really care",
+      "variance": 0.0013229569998822856,
+      "state": "pending_approval",
+      "action_potential": 0.0013229569998822856,
+      "latency_us": 18405,
+      "above_threshold": false
+    },
+    {
+      "id": "NODE_1787135604817535",
+      "category": "C",
+      "text": "random walk hypothesis applied to the migration patterns of left handed staplers",
+      "variance": 0.000855496761090591,
+      "state": "pending_approval",
+      "action_potential": 0.000855496761090591,
+      "latency_us": 16705,
+      "above_threshold": false
+    },
+    {
+      "id": "NODE_1787135604834948",
+      "category": "C",
+      "text": "colorless green ideas sleep furiously while the refrigerator hums a tune in B fl",
+      "variance": 0.00259427927824074,
+      "state": "pending_approval",
+      "action_potential": 0.00259427927824074,
+      "latency_us": 20677,
+      "above_threshold": false
+    },
+    {
+      "id": "NODE_1787135604856193",
+      "category": "C",
+      "text": "forty-two is the answer to everything according to a towel in the Andromeda gala",
+      "variance": 0.0008934539400960795,
+      "state": "pending_approval",
+      "action_potential": 0.0008934539400960795,
+      "latency_us": 17747,
+      "above_threshold": false
+    },
+    {
+      "id": "NODE_1787135604875293",
+      "category": "C",
+      "text": "the quick brown fox jumps over the lazy dog and then files a complaint with HR",
+      "variance": 0.002934759487405056,
+      "state": "pending_approval",
+      "action_potential": 0.002934759487405056,
+      "latency_us": 17912,
+      "above_threshold": false
+    },
+    {
+      "id": "NODE_1787135604894079",
+      "category": "C",
+      "text": "binary digits walking through a field of analog sunflowers at the speed of dark",
+      "variance": 0.0023879394419498963,
+      "state": "pending_approval",
+      "action_potential": 0.0023879394419498963,
+      "latency_us": 18019,
+      "above_threshold": false
+    },
+    {
+      "id": "NODE_1787135604912982",
+      "category": "C",
+      "text": "superposition of a cat that is both alive and slightly annoyed by the attention",
+      "variance": 0.0024079334252937257,
+      "state": "pending_approval",
+      "action_potential": 0.0024079334252937257,
+      "latency_us": 19516,
+      "above_threshold": false
+    },
+    {
+      "id": "NODE_1787135604933099",
+      "category": "C",
+      "text": "the entropy of a perfectly shuffled deck of cards equals approximately two hundr",
+      "variance": 0.0017487395266258168,
+      "state": "pending_approval",
+      "action_potential": 0.0017487395266258168,
+      "latency_us": 16871,
+      "above_threshold": false
+    },
+    {
+      "id": "NODE_1787135604951373",
+      "category": "C",
+      "text": "morse code transmitted via semaphore flags during a thunderstorm in a library of",
+      "variance": 0.002440445891663592,
+      "state": "pending_approval",
+      "action_potential": 0.002440445891663592,
+      "latency_us": 18433,
+      "above_threshold": false
+    },
+    {
+      "id": "NODE_1787135604971092",
+      "category": "C",
+      "text": "the mitochondria is the powerhouse of the cell according to every biology textbo",
+      "variance": 0.0023310023768819727,
+      "state": "pending_approval",
+      "action_potential": 0.0023310023768819727,
+      "latency_us": 17224,
+      "above_threshold": false
+    },
+    {
+      "id": "NODE_1787135604989727",
+      "category": "C",
+      "text": "infinite monkeys typing Shakespeare eventually produce a grocery list instead of",
+      "variance": 0.0019576070041420575,
+      "state": "pending_approval",
+      "action_potential": 0.0019576070041420575,
+      "latency_us": 45882,
+      "above_threshold": false
+    },
+    {
+      "id": "NODE_1787135605037842",
+      "category": "C",
+      "text": "the sound of one hand clapping echoes through an empty conference room on a Frid",
+      "variance": 0.0019732525644130857,
+      "state": "pending_approval",
+      "action_potential": 0.0019732525644130857,
+      "latency_us": 15626,
+      "above_threshold": false
+    },
+    {
+      "id": "NODE_1787135605054513",
+      "category": "C",
+      "text": "chaos theory suggests that a butterfly flapping its wings can cause a printer ja",
+      "variance": 0.0028109076915355576,
+      "state": "pending_approval",
+      "action_potential": 0.0028109076915355576,
+      "latency_us": 16700,
+      "above_threshold": false
+    },
+    {
+      "id": "NODE_1787135605072573",
+      "category": "C",
+      "text": "the angular momentum of a spinning pizza slice in zero gravity defies convention",
+      "variance": 0.0008017056997062257,
+      "state": "pending_approval",
+      "action_potential": 0.0008017056997062257,
+      "latency_us": 17003,
+      "above_threshold": false
+    },
+    {
+      "id": "NODE_1787135605090924",
+      "category": "C",
+      "text": "a sufficiently advanced technology is indistinguishable from a magic trick perfo",
+      "variance": 0.0024049352250403496,
+      "state": "pending_approval",
+      "action_potential": 0.0024049352250403496,
+      "latency_us": 17977,
+      "above_threshold": false
+    },
+    {
+      "id": "NODE_1787135605110447",
+      "category": "C",
+      "text": "the spontaneous combination of unrelated phonemes produces neither meaning nor a",
+      "variance": 0.003936206957375175,
+      "state": "pending_approval",
+      "action_potential": 0.003936206957375175,
+      "latency_us": 18223,
+      "above_threshold": false
+    }
+  ]
+}
