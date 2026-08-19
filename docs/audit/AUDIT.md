@@ -73,7 +73,7 @@ Resolution criterion: fix implemented in code **and** verified by a deterministi
 | L5 | ✅ Resolved | `projections_json` derives from `validated_entity.projections` (Pydantic contract is single source of truth). |
 | L6 | ✅ Resolved | `dim_in > dim_db` rejected with HTTP 422 / `ValueError`; tests `tests/representation/test_representation_providers.py`. |
 | M1 | ✅ Resolved (Doc) | `docs/STATUS.md` + `docs/PROJECT_IDENTITY.md` clarified runtime vs bitwise determinism |
-| M2 | ✅ Resolved (Doc) | Claim only existed in audit finding; no public doc claimed <1ms |
+| M2 | ✅ Resolved (Doc + Empirical) | SQLite WAL I/O p50=459μs, p95=989μs (<1ms) validated via `validate_wp1_empirical.py`; encoding ~11.5ms p50 is provider-layer |
 | L1 | ✅ Resolved (Doc) | `docs/STATUS.md` "Known Limitations" documents hermetic vs model suite scope |
 | L3 | ✅ Resolved (Doc) | Seq 7, 21 already fixed code; docs verified English-only |
 | L4 | ✅ Resolved (Doc) | `docs/STATUS.md` "Known Limitations" documents NSM basis as provisional scaffold |
