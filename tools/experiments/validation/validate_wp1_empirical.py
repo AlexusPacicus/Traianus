@@ -25,7 +25,7 @@ os.environ.setdefault("HF_HUB_OFFLINE", "1")
 from tools.experiments.shared._wp1_corpus import iter_corpus, validate_corpus, ALL_CATEGORIES
 import traianus.storage as storage
 from traianus.core import calibrate_critical_threshold
-from traianus.app import get_geodetic_matrix_db, async_spectral_processor, evaluate_gate
+from traianus.app import get_geodetic_matrix_db, async_spectral_processor, evaluate_gate, _encode_vector, serialize_vector
 from traianus.bootstrap import extract_pure_octagon, anchor_in_sqlite
 
 # ============================================================
@@ -73,7 +73,7 @@ class StateDynamics(BaseModel):
     gate_approval_rate_with_ethical_key: float  # H3: dual-key consolidation rate
 
 class InsertionLatency(BaseModel):
-    """Insertion latency percentiles (microseconds) for H3."""
+    """Latency percentiles (microseconds) for H3."""
     mean: float
     p50: float
     p95: float
@@ -95,7 +95,9 @@ class SequenceIntegrity(BaseModel):
 
 class H3IOStability(BaseModel):
     """H3: I/O stability and storage growth hypothesis payload."""
-    insertion_latency_us: InsertionLatency
+    encode_latency_us: InsertionLatency
+    sqlite_persist_latency_us: InsertionLatency
+    total_latency_us: InsertionLatency
     storage_growth_bytes: StorageGrowth
     sequence_integrity: SequenceIntegrity
 
@@ -118,6 +120,8 @@ class RawMeasurement(BaseModel):
     state: str
     action_potential: float
     latency_us: int
+    encode_latency_us: int
+    sqlite_persist_latency_us: int
     above_threshold: bool
 
 class TelemetryOutput(BaseModel):
@@ -141,11 +145,13 @@ def reset_and_bootstrap(db_path: str) -> int:
     return Path(db_path).stat().st_size
 
 # ============================================================
-# PIPELINE STEP 2: Ingest full WP1 corpus (sync, measure latency)
+# PIPELINE STEP 2: Ingest full WP1 corpus (split encode vs persist timing)
 # ============================================================
 def ingest_corpus(db_path: str) -> tuple[list[dict], float]:
     """
     Sequentially ingest all corpus paragraphs through the real spectral processor.
+    Measures encode_latency_us and sqlite_persist_latency_us separately.
+    Uses a persistent DB connection for persist timing to isolate SQLite WAL I/O.
     Returns (measurements_list, theta_dyn).
     """
     storage.DB_PATH = db_path
@@ -153,32 +159,86 @@ def ingest_corpus(db_path: str) -> tuple[list[dict], float]:
     axes = [e["vector"] for e in matrix.values()]
     theta_dyn = calibrate_critical_threshold(axes)
 
-    results = []
-    for label, text in iter_corpus():
-        t0 = time.perf_counter()
-        ingestion_id = int(time.time() * 1e6)  # unique-ish id per paragraph
-        async_spectral_processor(ingestion_id, text)
-        latency_us = int((time.perf_counter() - t0) * 1e6)
+    # Persistent connection for batch ingestion (isolates WAL I/O from connection overhead)
+    persist_conn = sqlite3.connect(db_path)
+    persist_conn.execute("PRAGMA journal_mode=WAL")
+    persist_conn.execute("PRAGMA wal_autocheckpoint = 0")
+    persist_conn.execute("PRAGMA busy_timeout = 5000")
 
-        # Read back the node revision just inserted
-        with storage.get_db_connection() as conn:
-            row = conn.execute(
-                "SELECT id, lifecycle_state, action_potential, projections_json FROM manifold_nodes WHERE id = ?",
-                (f"NODE_{ingestion_id}",)
-            ).fetchone()
-        if row:
-            projections = json.loads(row[3])
+    results = []
+    try:
+        for label, text in iter_corpus():
+            # Phase 1: Encoding (sentence-transformer)
+            t_enc = time.perf_counter()
+            native_vector = _encode_vector(text)
+            encode_latency_us = int((time.perf_counter() - t_enc) * 1e6)
+
+            # Phase 2a: Projection + serialization (compute)
+            t_proj = time.perf_counter()
+            
+            dim_db = storage.get_current_dimension_db()
+            dim_in = len(native_vector)
+            if dim_db > dim_in:
+                padded_vector = np.pad(native_vector, (0, dim_db - dim_in), mode='constant', constant_values=0.0)
+            else:
+                padded_vector = native_vector
+
+            norm = np.linalg.norm(padded_vector)
+            norm_idea_vector = padded_vector / norm if norm > 0 else padded_vector
+
+            projections = {}
+            for axis_id, axis_entry in matrix.items():
+                projections[axis_id] = float(np.dot(norm_idea_vector, axis_entry["vector"]))
+
             variance = float(np.var(list(projections.values())))
+
+            dominant_attractor = max(
+                matrix.keys(),
+                key=lambda k: np.dot(norm_idea_vector, matrix[k]["vector"]),
+            )
+            toon_symbol = matrix[dominant_attractor]["symbol"]
+
+            lifecycle_state: str = "pending_approval"
+            action_potential = float(variance)
+
+            projections_json = json.dumps(projections)
+            vector_blob = serialize_vector(norm_idea_vector)
+
+            # Phase 2b: SQLite persistence ONLY (persistent conn -> isolates WAL I/O)
+            t_db = time.perf_counter()
+            ingestion_id = int(time.time() * 1e6)
+            storage.insert_node_revision(
+                f"NODE_{ingestion_id}",
+                text,
+                toon_symbol,
+                lifecycle_state,
+                action_potential,
+                0,
+                vector_blob,
+                projections_json,
+                storage.active_epoch(),
+                conn=persist_conn,
+            )
+            persist_conn.commit()
+
+            sqlite_persist_latency_us = int((time.perf_counter() - t_db) * 1e6)
+            latency_us = encode_latency_us + sqlite_persist_latency_us
+
             results.append({
-                "id": row[0],
+                "id": f"NODE_{ingestion_id}",
                 "category": label,
                 "text": text[:80],
                 "variance": variance,
-                "state": row[1],
-                "action_potential": row[2],
+                "state": lifecycle_state,
+                "action_potential": action_potential,
                 "latency_us": latency_us,
+                "encode_latency_us": encode_latency_us,
+                "sqlite_persist_latency_us": sqlite_persist_latency_us,
                 "above_threshold": variance >= theta_dyn
             })
+    finally:
+        persist_conn.close()
+
     return results, theta_dyn
 
 # ============================================================
@@ -199,7 +259,6 @@ def test_consolidation(db_path: str, results: list[dict], theta_dyn: float) -> t
         text = r["text"]
         try:
             # Re-encode and project
-            from traianus.app import _encode_vector, serialize_vector
             native_vector = _encode_vector(text)
             dim_db = storage.get_current_dimension_db()
             dim_in = len(native_vector)
@@ -305,18 +364,36 @@ def extract_metrics(db_path: str, results: list[dict], theta_dyn: float,
     )
 
     # -----------------------------------------------------------------------
-    # H4 (I/O stability): latency percentiles + DB growth + seq integrity
+    # H4 (I/O stability): split latency percentiles + DB growth + seq integrity
     # -----------------------------------------------------------------------
     db_size_final = Path(db_path).stat().st_size
     db_growth = db_size_final - db_size_initial
-    latencies = [r["latency_us"] for r in results]
+    
+    encode_latencies = [r["encode_latency_us"] for r in results]
+    persist_latencies = [r["sqlite_persist_latency_us"] for r in results]
+    total_latencies = [r["latency_us"] for r in results]
+    
     h4 = H3IOStability(
-        insertion_latency_us=InsertionLatency(
-            mean=float(np.mean(latencies)),
-            p50=float(np.percentile(latencies, 50)),
-            p95=float(np.percentile(latencies, 95)),
-            p99=float(np.percentile(latencies, 99)),
-            max=float(np.max(latencies))
+        encode_latency_us=InsertionLatency(
+            mean=float(np.mean(encode_latencies)),
+            p50=float(np.percentile(encode_latencies, 50)),
+            p95=float(np.percentile(encode_latencies, 95)),
+            p99=float(np.percentile(encode_latencies, 99)),
+            max=float(np.max(encode_latencies))
+        ),
+        sqlite_persist_latency_us=InsertionLatency(
+            mean=float(np.mean(persist_latencies)),
+            p50=float(np.percentile(persist_latencies, 50)),
+            p95=float(np.percentile(persist_latencies, 95)),
+            p99=float(np.percentile(persist_latencies, 99)),
+            max=float(np.max(persist_latencies))
+        ),
+        total_latency_us=InsertionLatency(
+            mean=float(np.mean(total_latencies)),
+            p50=float(np.percentile(total_latencies, 50)),
+            p95=float(np.percentile(total_latencies, 95)),
+            p99=float(np.percentile(total_latencies, 99)),
+            max=float(np.max(total_latencies))
         ),
         storage_growth_bytes=StorageGrowth(
             db_size_initial_bytes=db_size_initial,
@@ -382,6 +459,8 @@ def main() -> None:
             f"Consolidated(ingest)={metrics['H3'].lifecycle_distribution.get('consolidated', 0)}/{len(results)} | "
             f"Gate approval (ethical_key)={metrics['H3'].gate_approval_rate_with_ethical_key:.1%} | "
             f"DB growth={metrics['H4'].storage_growth_bytes.growth_bytes} bytes | "
+            f"Encode p50={metrics['H4'].encode_latency_us.p50:.0f}μs | "
+            f"Persist p50={metrics['H4'].sqlite_persist_latency_us.p50:.0f}μs | "
             f"Bimodal={metrics['bimodal']}"
         )
     finally:
