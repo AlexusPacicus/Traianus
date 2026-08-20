@@ -95,8 +95,8 @@ def ortho_distance(v: np.ndarray, B_0: np.ndarray) -> float:
     """Pure operator: orthogonal residual distance from vector v to base B_0.
 
     Computes the squared L2-norm of the component of v orthogonal to all
-    rows of B_0 (k × d matrix).  This is the "projection distance outside
-    the piscina B_0" used by H3 discrimination.
+    rows of B_0 (k x d matrix).  This is the "projection distance outside
+    the basin B_0" used by H3 discrimination.
 
     Parameters
     ----------
@@ -104,7 +104,7 @@ def ortho_distance(v: np.ndarray, B_0: np.ndarray) -> float:
         Input vector in R^d.
     B_0 : np.ndarray of shape (k, d)
         Reduced base matrix (k < d), rows are orthogonal axes of the
-        geodetic piscina.
+        geodetic basin.
 
     Returns
     -------

@@ -27,7 +27,7 @@ export default function App() {
           Traianus 5D Chromatic Canvas
         </p>
         <input
-          type="text"
+          type="password"
           placeholder="Operator token (required for protected endpoints)"
           value={token}
           onChange={(e) => setToken(e.target.value)}
@@ -62,5 +62,31 @@ export default function App() {
     );
   }
 
-  return <UlpiaCanvas token={token || undefined} />;
+  return (
+    <div style={{ position: "relative" }}>
+      <button
+        onClick={() => {
+          setToken("");
+          setConnected(false);
+        }}
+        style={{
+          position: "absolute",
+          top: 12,
+          right: 12,
+          zIndex: 20,
+          padding: "6px 12px",
+          background: "#1E293B",
+          border: "1px solid #334155",
+          borderRadius: 6,
+          color: "#94A3B8",
+          fontFamily: "monospace",
+          fontSize: 11,
+          cursor: "pointer",
+        }}
+      >
+        Disconnect
+      </button>
+      <UlpiaCanvas token={token || undefined} />
+    </div>
+  );
 }
