@@ -24,6 +24,9 @@ def test_geometry_symbols_identical_in_core_shim():
         "discrimination_ratio",
         "ortho_distance",
         "project_dimensional_relief",
+        "project_to_5d",
+        "sigmoid_scale",
+        "svd_reduce",
     }
     for name in geometry_symbols:
         assert getattr(geometry, name) is getattr(core, name), name
