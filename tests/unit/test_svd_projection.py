@@ -1,4 +1,4 @@
-"""SVD projection and chromatic scaling (5D chromatic).
+"""SVD projection and chromatic scaling (Ulpia 5D).
 
 Pure mathematical functions for dimensionality reduction and chromatic
 channel mapping. These are lab/test helpers — never invoked by app.py.
