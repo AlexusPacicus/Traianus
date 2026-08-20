@@ -158,7 +158,7 @@ def discrimination_ratio(
 
 
 # ---------------------------------------------------------------------------
-# SVD projection & chromatic scaling  (Ulpia 5D — lab / test helpers)
+# SVD projection & chromatic scaling  (5D chromatic — lab / test helpers)
 # ---------------------------------------------------------------------------
 
 def svd_reduce(X: np.ndarray, k: int = 2) -> tuple[np.ndarray, np.ndarray]:
