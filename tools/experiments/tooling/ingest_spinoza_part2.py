@@ -35,6 +35,13 @@ REPO_ROOT = Path(__file__).resolve().parents[3]
 DEFAULT_MANIFEST = REPO_ROOT / "data" / "spinoza" / "part2_mind_manifest.json"
 DEFAULT_SCRATCH_DB = str(REPO_ROOT / ".data" / "spinoza_part2.db")
 
+# Frozen dataset conventions per Ethics part (data/spinoza/).
+CORPUS_STEMS = {1: "part1_god", 2: "part2_mind", 3: "part3_affects"}
+
+
+def corpus_stem(part: int) -> str:
+    return CORPUS_STEMS[part]
+
 
 def scratch_db_path() -> str:
     return DEFAULT_SCRATCH_DB
@@ -125,9 +132,17 @@ def _copy_basis(scratch_db: str, basis_db: Path | None, fixture: Path) -> tuple[
 
 def main() -> int:
     parser = argparse.ArgumentParser(description=__doc__)
-    parser.add_argument("--manifest", type=Path, default=DEFAULT_MANIFEST)
-    parser.add_argument("--db", default=scratch_db_path(),
-                        help="scratch DB path (default: %(default)s)")
+    parser.add_argument("--manifest", type=Path, default=None,
+                        help="explicit manifest path (overrides --part)")
+    parser.add_argument("--part", type=int, choices=sorted(CORPUS_STEMS),
+                        default=None,
+                        help="Ethics part to ingest in isolation "
+                             "(default: 2)")
+    parser.add_argument("--accumulate", action="store_true",
+                        help="ingest ALL parts (1+2+3) in reading order into "
+                             ".data/spinoza_full.db for cross-part analysis")
+    parser.add_argument("--db", type=Path, default=None,
+                        help="scratch DB path (default: derived from --part)")
     parser.add_argument("--basis-db", type=Path, default=None,
                         help="existing substrate to copy the frozen basis from "
                              "(verbatim); omitted = use the committed fixture")
@@ -149,9 +164,40 @@ def main() -> int:
     from traianus.config import resolve_epsilon_edge
     from traianus.core import evaluate_gate_v01, calibrate_critical_threshold
 
-    if not args.manifest.is_file():
-        print(f"ERR: manifest not found: {args.manifest}", file=sys.stderr)
-        return 2
+    if args.accumulate:
+        parts = sorted(CORPUS_STEMS)
+        stem = "spinoza_full"
+        manifests = [REPO_ROOT / "data" / "spinoza"
+                     / f"{CORPUS_STEMS[p]}_manifest.json" for p in parts]
+    else:
+        part = args.part if args.part is not None else 2
+        stem = CORPUS_STEMS[part]
+        manifests = [args.manifest or (REPO_ROOT / "data" / "spinoza"
+                                       / f"{stem}_manifest.json")]
+    db_path = args.db or (REPO_ROOT / ".data" / f"{stem}.db")
+    for manifest in manifests:
+        if not manifest.is_file():
+            print(f"ERR: manifest not found: {manifest}", file=sys.stderr)
+            return 2
+    chunks: list[tuple[str, str]] = []
+    for manifest in manifests:
+        chunks.extend(load_manifest(manifest))
+    if args.limit is not None:
+        chunks = chunks[:args.limit]
+
+    storage.DB_PATH = str(db_path)
+    Path(storage.DB_PATH).parent.mkdir(parents=True, exist_ok=True)
+    storage.init_db()
+
+    with storage.get_db_connection() as conn:
+        existing = conn.execute(
+            "SELECT COUNT(*) FROM manifold_nodes").fetchone()[0]
+    if existing:
+        print(f"ERR: scratch DB already holds {existing} node revisions "
+              f"(append-only); remove {storage.DB_PATH} manually to restart.",
+              file=sys.stderr)
+        return 1
+
     if args.basis_db is not None and not args.basis_db.is_file():
         print(f"ERR: basis DB not found: {args.basis_db}", file=sys.stderr)
         return 2
@@ -161,34 +207,19 @@ def main() -> int:
         print(f"ERR: basis fixture not found: {fixture}", file=sys.stderr)
         return 2
 
-    chunks = load_manifest(args.manifest)
-    if args.limit is not None:
-        chunks = chunks[:args.limit]
-
-    storage.DB_PATH = args.db
-    Path(args.db).parent.mkdir(parents=True, exist_ok=True)
-    storage.init_db()
-
-    with storage.get_db_connection() as conn:
-        existing = conn.execute("SELECT COUNT(*) FROM manifold_nodes").fetchone()[0]
-    if existing:
-        print(f"ERR: scratch DB already holds {existing} node revisions "
-              f"(append-only); remove {args.db} manually to restart.",
-              file=sys.stderr)
-        return 1
-
-    _, epoch = _copy_basis(args.db, args.basis_db, fixture)
+    _, epoch = _copy_basis(str(db_path), args.basis_db, fixture)
     matrix = get_geodetic_matrix_db()
     axis_vectors = {axis_id: entry["vector"] for axis_id, entry in matrix.items()}
     theta_dyn = calibrate_critical_threshold(list(axis_vectors.values()))
     epsilon = resolve_epsilon_edge()
-    print(f"[+] scratch DB: {args.db} | epoch={epoch} | axes={len(axis_vectors)} "
+    print(f"[+] scratch DB: {storage.DB_PATH} | manifests={len(manifests)} "
+          f"| epoch={epoch} | axes={len(axis_vectors)} "
           f"| theta_dyn={theta_dyn:.6f} | epsilon={epsilon}")
     print(f"[+] chunks to ingest: {len(chunks)}")
 
     dim_db = storage.get_current_dimension_db()
     telemetry: list[dict] = []
-    labels_path = REPO_ROOT / ".data" / "spinoza_part2_labels.json"
+    labels_path = REPO_ROOT / ".data" / f"{stem}_labels.json"
 
     for index, (label, text) in enumerate(chunks, 1):
         native_vector = _encode_vector(text)
@@ -241,7 +272,7 @@ def main() -> int:
     summary = telemetry_summary([(t["node_id"], t["label"], t["variance"])
                                  for t in telemetry])
     consolidated = sum(1 for t in telemetry if t["gate_state"] == "consolidated")
-    out_path = REPO_ROOT / ".data" / "spinoza_part2_telemetry.json"
+    out_path = REPO_ROOT / ".data" / f"{stem}_telemetry.json"
     out_path.write_text(json.dumps(
         {"summary": summary, "theta_dyn": theta_dyn, "epsilon": epsilon,
          "n_edges_persisted": n_edges, "rows": telemetry},

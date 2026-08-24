@@ -823,3 +823,30 @@
   ontological alignment still neutral — prior Fase 2-4 conclusions hold.
 * **Gate:** hermetic suite green (see commit).
 * **Status:** `Consolidated`.
+
+### seq 33 — 2026-08-24 — Part III (De Affectibus) frozen; dual-mode manifold diagnostics
+
+* **Corpus:** `part3_affects.md` + `part3_affects_manifest.json` derived via
+  the generalized builder (`--part 3`): 647 sentence-chunks, labels
+  `PART3_AFFECTS_*` incl. the 48 Definitions of the Emotions (`DEFEMO_NN`)
+  and the closing General Definition (`GENDEF`). ROMAN map extended to LXXX;
+  N.B. filter scoped to AXIOMS/POSTULATES (elsewhere it is Spinoza's own
+  text — recovered Def. III activity/passion note). Parts I/II byte-identical
+  under the generalized builder; drift guard extended to part3.
+* **Runner:** `ingest_spinoza_part2.py` now parametrized (`--part {1,2,3}`,
+  `--accumulate`) with per-part scratch DB/labels/telemetry conventions.
+* **Isolated mode** (`.data/part3_affects.db`): 647 nodes / 726 auto-edges;
+  gate 65/647 consolidated (10.0%, non-degenerate); bridges resonance-
+  dominated as in Part II (670 vs 56 contiguous); chromatic rescue 98.6%
+  (146 collisions); Sammon gain 45.2%.
+* **Accumulated mode** (`.data/spinoza_full.db`, parts 1+2+3 in reading
+  order): 1539 nodes / 2251 auto-edges; gate 199/1539 (12.9%). Inter-part
+  epsilon edges: GOD<->MIND 132, MIND<->AFFECTS **199**, GOD<->AFFECTS 64
+  (the Mind-Emotions continuum is the densest inter-part resonance).
+  Densification impact: Sammon gain 45.2% -> 39.8% while collision rescue
+  holds at ~96% — chromatic channels scale with the manifold.
+* **Ontological hypothesis for Part III:** deliberately deferred until the
+  affect-domain data is inspected (falsifiability discipline).
+* **Gate:** hermetic suite **220 passed, 5 deselected**; invariant verifier
+  GREEN (exit 0).
+* **Status:** `Consolidated`.

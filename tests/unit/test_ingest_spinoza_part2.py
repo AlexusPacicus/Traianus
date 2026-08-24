@@ -9,11 +9,18 @@ import pytest
 sys.path.insert(0, str(Path(__file__).resolve().parents[2] / "tools" / "experiments" / "tooling"))
 
 from ingest_spinoza_part2 import (
+    corpus_stem,
     load_manifest,
     node_id,
     scratch_db_path,
     telemetry_summary,
 )
+
+
+def test_corpus_stem_per_part():
+    assert corpus_stem(1) == "part1_god"
+    assert corpus_stem(2) == "part2_mind"
+    assert corpus_stem(3) == "part3_affects"
 
 
 def test_load_manifest_preserves_reading_order(tmp_path):
