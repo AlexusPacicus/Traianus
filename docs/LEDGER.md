@@ -599,3 +599,31 @@
   `tests/security/test_db_isolation.py`); repo-root `audit_log` delta across a
   full suite run = 0 (previously grew on every run).
 * **Status:** `Consolidated`.
+
+### seq 24 — 2026-08-24 — Backlog remediation: error masking, label contract, C1 dedup, doc decontamination
+
+* **Context:** Medium/low findings from the post-v1.0.0 independent audit:
+  six endpoints leaked exception internals via `detail=str(e)`; the
+  `/ingesta/vector` label flowed verbatim into persistent node/edge ids; the
+  spectral-math MCP server re-implemented the C1 kernel (divergent-copy risk);
+  tracked docs carried Spanish residue despite the seq 21 English policy;
+  `contracts/` violated the logographic one-primary-md rule.
+* **Δ executed:**
+  - app.py: all six broad handlers now answer a fixed `Internal server error.`
+    detail (regressions in `tests/security/test_internal_error_masking.py`).
+  - app.py: `/ingesta/vector` label contract `[A-Za-z0-9_-]{1,64}` else 422;
+    empty label keeps routing to the digest node-id path by design.
+  - tools/mcp/spectral_math_mcp.py: delegates `critical_threshold` to
+    `traianus.geometry.observables.calibrate_critical_threshold`; presentation
+    stats computed locally (non-authoritative). Guard tests in
+    `tests/unit/test_spectral_math_mcp.py`.
+  - observables.py: kernel hardening uncovered by dedup — bases with k=1 no
+    longer produce NaN (`np.var([])` skipped); empty basis returns 0.0.
+  - AUDIT.md / ARCHITECTURE.md / PROJECT_IDENTITY.md: Spanish headings and
+    invariant names translated to English. LEDGER history intentionally left
+    untouched (append-only doctrine).
+  - contracts/: POC_FREEZE_v1.md moved to isolated subfolder `freeze/`
+    (logographic rule); README + INDEX links updated.
+* **Gate:** hermetic suite **177 passed, 5 deselected** (+17 regressions);
+  zero Spanish residue outside this ledger.
+* **Status:** `Consolidated`.

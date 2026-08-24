@@ -8,7 +8,7 @@
 **Method:** Static review + empirical execution against `all-MiniLM-L6-v2`. Every quantitative datum was measured.
 **Overall Assessment:** The Control Plane core works at v1.0.0. Several declared "non-negotiable" invariants were contradicted in the PoC phase; all have been remediated (see status below).
 
-> **Hallazgos detallados:** Véase las secciones [Hallazgos Resueltos](./AUDIT.md#hallazgos-resueltos) y [Hallazgos Abiertos](./AUDIT.md#hallazgos-abiertos) arriba.
+> **Detailed findings:** See the [Resolved Findings](./AUDIT.md#resolved-findings) and [Open Findings](./AUDIT.md#open-findings) sections above.
 
 ---
 
@@ -24,11 +24,11 @@
 
 ---
 
-## Hallazgos Resueltos
+## Resolved Findings
 
-Los siguientes hallazgos han sido cerrados con corrección de código y verificación por prueba determinista o el harma empírica:
+The following findings were closed with a code fix verified by a deterministic test or the empirical harness:
 
-| ID | Título | Status |
+| ID | Title | Status |
 |---|---|---|
 | C1 | Consolidation gate dead code (threshold scale mismatch) | ✅ Resolved |
 | H1 | `/ingesta` swallows errors, returns fake 200 | ✅ Resolved |
@@ -39,11 +39,11 @@ Los siguientes hallazgos han sido cerrados con corrección de código y verifica
 | M6 | Magic number `*10.0` contradicts ADR-005 | ✅ Resolved |
 | M8 | Nix devshell / reproducibility | ✅ Resolved | Nix `flake.nix` devshell removed from the v1.0.0 release freeze; reproducibility anchored in pinned `pyproject.toml` (Python 3.11, `requires-python = "~=3.11"`) and the green CI matrix (hermetic + model suites on `ubuntu-latest`). |
 
-## Hallazgos Abiertos
+## Open Findings
 
-Los siguientes hallazgos permanecen abiertos y requieren atención adicional:
+The following findings remain open and require additional attention:
 
-| ID | Título | Status |
+| ID | Title | Status |
 |---|---|---|
 | *None* | *All documentation findings resolved in `docs/excellence-v1.0.0`* | ✅ |
 
@@ -94,4 +94,4 @@ Before refactoring `traianus/app.py`, verify these hold:
 
 ---
 
-*For measured data, code-level evidence, and fix implementations, see the [Hallazgos Abiertos](./AUDIT.md#hallazgos-abiertos) section above.*
+*For measured data, code-level evidence, and fix implementations, see the [Open Findings](./AUDIT.md#open-findings) section above.*

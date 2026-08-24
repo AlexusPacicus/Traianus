@@ -1,8 +1,18 @@
 import sys
+from pathlib import Path
+
+REPO_ROOT = Path(__file__).resolve().parents[2]
+if str(REPO_ROOT) not in sys.path:
+    sys.path.insert(0, str(REPO_ROOT))
+
 import json
 import uuid
 import math
 import numpy as np
+
+from traianus.geometry.observables import (
+    calibrate_critical_threshold as _kernel_calibrate_critical_threshold,
+)
 
 # ---------------------------------------------------------------------------
 # Core Deterministic Math Functions (Executed in compiled NumPy/math)
@@ -20,21 +30,18 @@ def calibrate_c1_threshold(matrix_rows: list[list[float]]) -> dict:
         norm = np.linalg.norm(v)
         normalized.append(v / norm if norm > 0 else v)
 
-    base_variances = []
-    off_diagonals = []
-    
-    for i, axis_vector in enumerate(normalized):
-        projections = [
-            float(np.dot(axis_vector, other))
-            for j, other in enumerate(normalized) if j != i
-        ]
-        if projections:
-            base_variances.append(float(np.var(projections)))
-            off_diagonals.extend(projections)
 
-    critical_threshold = float(np.mean(base_variances)) if base_variances else 0.0
-    mean_off_diag = float(np.mean(off_diagonals)) if off_diagonals else 0.0
-    max_off_diag = float(np.max(off_diagonals)) if off_diagonals else 0.0
+
+    matrix = np.stack(normalized) if normalized else np.zeros((0, 0))
+    # Invariant-critical variance math is delegated to the canonical kernel
+    # (traianus.geometry.observables); this layer keeps presentation only.
+    critical_threshold = (
+        _kernel_calibrate_critical_threshold(list(matrix)) if len(matrix) else 0.0
+    )
+    sims = matrix @ matrix.T if len(matrix) else np.zeros((0, 0))
+    off_diagonals = sims[~np.eye(len(matrix), dtype=bool)] if len(matrix) else []
+    mean_off_diag = float(np.mean(off_diagonals)) if len(off_diagonals) else 0.0
+    max_off_diag = float(np.max(off_diagonals)) if len(off_diagonals) else 0.0
 
     return {
         "status": "SUCCESS",

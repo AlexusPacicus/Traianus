@@ -1,6 +1,7 @@
 import os
 import secrets
 import hashlib
+import re
 from contextlib import asynccontextmanager
 import numpy as np
 import json
@@ -105,6 +106,10 @@ EPSILON_EDGE = float(os.environ.get("TRAIANUS_EPSILON_EDGE", "0.8"))
 # =====================================================================
 
 ALLOWED_INGRESS_TYPES = {"text/plain"}
+
+# /ingesta/vector label contract (node-id namespace protection): the label
+# becomes part of persistent node ids and, downstream, edge ids.
+_SAFE_LABEL_RE = re.compile(r"^[A-Za-z0-9_-]{1,64}$")
 
 
 # =====================================================================
@@ -425,6 +430,16 @@ async def vector_ingestion_endpoint(body: VectorIngestBody, request: Request, re
         for axis_id, value in projections.items()
     })
 
+    if body.label and not _SAFE_LABEL_RE.fullmatch(body.label):
+        log.warning("vector_ingestion_rejected", phase="validation", reason="unsafe_label")
+        raise HTTPException(
+            status_code=422,
+            detail=(
+                "Label must match [A-Za-z0-9_-]{1,64} "
+                "(node-id namespace protection)."
+            ),
+        )
+
     if body.label:
         node_id = f"VEC_{body.label}"
     else:
@@ -583,7 +598,7 @@ async def consolidate_sovereignty(node_id: str, body: ConsolidationBody):
     except HTTPException:
         raise
     except Exception as e:
-        raise HTTPException(status_code=500, detail=str(e)) from e
+        raise HTTPException(status_code=500, detail="Internal server error.") from e
 
 @app.get("/nodos")
 async def get_manifold_nodes():
@@ -600,7 +615,7 @@ async def get_manifold_nodes():
             })
         return {"status": "SUCCESS", "nodes": serialized_nodes}
     except Exception as e:
-        raise HTTPException(status_code=500, detail=str(e)) from e
+        raise HTTPException(status_code=500, detail="Internal server error.") from e
 
 @app.get("/telemetry", dependencies=[Depends(require_token)])
 async def get_telemetry_logs():
@@ -611,7 +626,7 @@ async def get_telemetry_logs():
             for r in rows
         ]
     except Exception as e:
-        raise HTTPException(status_code=500, detail=str(e)) from e
+        raise HTTPException(status_code=500, detail="Internal server error.") from e
 
 @app.get("/relations", dependencies=[Depends(require_token)])
 async def get_relations():
@@ -632,7 +647,7 @@ async def get_relations():
         ]
         return sorted(manual + auto, key=lambda r: r["id"])
     except Exception as e:
-        raise HTTPException(status_code=500, detail=str(e)) from e
+        raise HTTPException(status_code=500, detail="Internal server error.") from e
 
 @app.post("/relations", dependencies=[Depends(require_token)])
 async def forge_relation(relation: HitlRelation):
@@ -660,7 +675,7 @@ async def forge_relation(relation: HitlRelation):
     except HTTPException:
         raise
     except Exception as e:
-        raise HTTPException(status_code=500, detail=str(e)) from e
+        raise HTTPException(status_code=500, detail="Internal server error.") from e
 
 # =====================================================================
 # INTERACTIVE LOGOGRAPHIC GENESIS (ADR-015)
@@ -710,4 +725,4 @@ async def logographic_genesis(new_symbol: str):
     except HTTPException:
         raise
     except Exception as e:
-        raise HTTPException(status_code=500, detail=str(e)) from e
+        raise HTTPException(status_code=500, detail="Internal server error.") from e

@@ -122,7 +122,7 @@ Traianus/
 For thorough theoretical, topological, and architectural specifications, consult the `docs/` directory:
 
 * **🏛️ System Architecture:** [docs/architecture/ARCHITECTURE.md](./docs/architecture/ARCHITECTURE.md) — complete component contracts and dataflow design.
-* **🔒 PoC Freeze Contract:** [docs/architecture/contracts/POC_FREEZE_v1.md](./docs/architecture/contracts/POC_FREEZE_v1.md) — v1.0.0 invariants, reproducibility guarantees, and version sealing rules.
+* **🔒 PoC Freeze Contract:** [docs/architecture/contracts/freeze/POC_FREEZE_v1.md](./docs/architecture/contracts/freeze/POC_FREEZE_v1.md) — v1.0.0 invariants, reproducibility guarantees, and version sealing rules.
 * **🛡️ Security & Boundary Audit:** [docs/audit/AUDIT.md](./docs/audit/AUDIT.md) — invariant verification and hermetic boundary guarantees.
 * **📜 Foundation Manuscripts (SUA POTESTAS, Tomo 0):** declared RESEARCH / FUTURE ROADMAP — experimental reproduction in `tools/experiments/exp_manifesto_tomo0.py`.
 * **Master Index:** [docs/INDEX.md](./docs/INDEX.md) — unified traceability matrix (Concept → Code → Test).

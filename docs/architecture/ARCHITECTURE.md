@@ -15,8 +15,8 @@ Domain: Spatial state transitions ($S_n \to S_{n+1}$), $L_2$ orthogonal projecti
 ## 2. Architectural Invariants
 
 * **Representation Invariance:** Traianus never modifies input vector coordinates emitted by external providers. The control plane exclusively governs lifecycle states, spatial adjacencies, and historical sequences.
-* **Invariante Append-Only (`PRIMARY KEY (id, seq)`):** State mutations are written strictly as incremental append-only events. Operating `UPDATE` or `DELETE` queries on historical records is forbidden.
-* **Invariante C1 (Self-Projection Exclusion):** Dynamic variance calibration ($\theta_{\text{dyn}}$) explicitly excludes diagonal auto-projections ($i \neq j$) to prevent threshold inflation caused by trivial self-similarity.
+* **Append-Only Invariant (`PRIMARY KEY (id, seq)`):** State mutations are written strictly as incremental append-only events. Operating `UPDATE` or `DELETE` queries on historical records is forbidden.
+* **C1 Invariant (Self-Projection Exclusion):** Dynamic variance calibration ($\theta_{\text{dyn}}$) explicitly excludes diagonal auto-projections ($i \neq j$) to prevent threshold inflation caused by trivial self-similarity.
 * **Observation Isolation:** Read-only projections $O_n = P_\theta(S_n)$ operate over state $S_n$. The substrate contains zero 2D/3D rendering code or layout logic.
 
 ---

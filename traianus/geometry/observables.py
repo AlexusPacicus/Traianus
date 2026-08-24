@@ -23,8 +23,9 @@ def calibrate_critical_threshold(vectors: list[np.ndarray]) -> float:
             float(np.dot(axis_vector, other))
             for j, other in enumerate(vectors) if j != i
         ]
-        base_variances.append(np.var(projections))
-    return float(np.mean(base_variances))
+        if projections:
+            base_variances.append(np.var(projections))
+    return float(np.mean(base_variances)) if base_variances else 0.0
 
 
 def compute_epsilon_edges(nodes: dict[str, np.ndarray], epsilon: float) -> list[dict]:

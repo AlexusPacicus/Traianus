@@ -31,7 +31,7 @@ graph TD
     ROOT --> AUD[audit/AUDIT.md]
     ROOT --> STA[STATUS.md]
     
-    ARCH --> CON1[contracts/POC_FREEZE_v1.md]
+    ARCH --> CON1[contracts/freeze/POC_FREEZE_v1.md]
     ARCH --> CON2[contracts/CONTRACTS.md]
 ```
 

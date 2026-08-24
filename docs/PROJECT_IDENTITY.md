@@ -27,10 +27,10 @@ Traianus does not construct or modify external representations of reality. It pr
 
 ## 4. Core System Invariants
 
-* **Invariante Append-Only (`(id, seq)`):**
+* **Append-Only Invariant (`(id, seq)`):**
   State updates and coordinate changes are persisted exclusively as incremental append-only events in SQLite WAL (`PRIMARY KEY (id, seq)`). Operating `UPDATE` or `DELETE` queries on historical records is strictly prohibited.
 
-* **Invariante C1 (Self-Projection Exclusion):**
+* **C1 Invariant (Self-Projection Exclusion):**
   Dynamic variance thresholding ($\theta_{\text{dyn}}$) explicitly excludes diagonal auto-projections ($i \neq j$) to prevent synthetic threshold inflation caused by trivial self-similarity.
 
 * **Cold-Start to Corpus Base Transition (ADR-017):**
