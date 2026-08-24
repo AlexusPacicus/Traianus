@@ -770,3 +770,29 @@
   substrate at repo root is untouched.
 * **Gate:** hermetic suite **201 passed, 5 deselected**.
 * **Status:** `Consolidated`.
+
+### seq 31 — 2026-08-24 — Fases 1-3 executed on Part II manifold; lab-analyst skill born
+
+* **Fase 1 (ingestion):** `tools/experiments/tooling/ingest_spinoza_part2.py`
+  (+ `tests/unit/test_ingest_spinoza_part2.py`) ran all 472 sentence-chunks
+  through the real pipeline into scratch DB `.data/spinoza_part2.db`
+  (epoch PROSTHETIC_NSM_V1 from the frozen nsm_axes_8 fixture; root substrate
+  untouched). Result: 472 nodes, 698 persisted auto-edges (epsilon=0.8),
+  dual-key gate 57/472 consolidated (12.1%, non-degenerate).
+* **Fase 2 (diagnosis):** bridge audit — E_n=698 with 639 non-contiguous
+  bridges vs 59 sequential (resonance-dominated manifold); adaptive epsilon
+  p5 saturates (105k edges) on the narrow-cone embedding cloud, fixed mode
+  retained. Pressure: definitions and P24-P31 (mind-body) hottest; max
+  sigma^2=0.0172 at DEF_05 (duration) = 4x theta_dyn.
+* **Fase 3 (static SVD):** `tools/experiments/tooling/export_svd_projection.py`
+  (+ tests); PC1-3 = 7.05/5.94/4.92% of variance; reading-order continuity
+  ratio 0.64 (consecutive steps shorter than random pairs); mind-body zone
+  most separated cluster — coherent with its pressure maximum.
+* **Fase 4 (skill):** `.opencode/skills/lab-analyst/SKILL.md` registered in
+  AGENTS.md §6.5; companion tool `chromatic_audit.py` (+ tests): effective 5D
+  (X,Y spatial + R,G,B singular-value-weighted PC3-PC5), collision rescue
+  141/148 (95.3%, delta_rgb > 0.15), Sammon stress 2D->5D gain 43.1%
+  (0.4837 -> 0.2751), falsifiable ontological alignment currently neutral
+  (soma r=-0.05, duration r=-0.12 [n=2], potestas r=-0.06).
+* **Gate:** hermetic suite **210 passed, 5 deselected**.
+* **Status:** `Consolidated`.
