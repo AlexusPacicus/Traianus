@@ -732,3 +732,22 @@
 * **Gate:** hermetic suite **201 passed, 5 deselected** (+11: epsilon
   resolution ×4, SVD guards/sign ×4, bridges CLI ×2, frozen-kernel pin).
 * **Status:** `Consolidated`.
+
+### seq 29 — 2026-08-24 — NLnet clarifications sent; flake.nix flips to conditional commitment
+
+* **Context:** Operator emailed NLnet (Re: Proposal 2026-08-198) attaching
+  four exact before/after clarifications ahead of review:
+  1. License → AGPL-3.0-or-later (matches LICENSE / pyproject.toml).
+  2. Abstract determinism → deterministic state transitions reproducible at
+     runtime under an identical pinned environment (finding M1 wording).
+  3. "What is new in Traianus" → runtime-deterministic reproducibility
+     invariant to vector origin (RH-0/1/2) — closes the surviving bitwise
+     claim flagged in review.
+  4. Ecosystem → reproducible developer environments WILL BE provided via
+     Nix (flake.nix) as an infrastructure milestone during grant execution.
+* **Decision flip (supersedes seq 26 deferral):** flake.nix is now a
+  COMMITMENT conditional on funding — to be delivered on the `ngi` branch as
+  an infrastructure milestone, with its own LEDGER entry and AGENTS §1.5
+  reconciliation when implemented. Until then the repo remains flake-free by
+  design; the proposal no longer claims it exists today.
+* **Status:** `Consolidated`.
