@@ -28,10 +28,10 @@ def test_part3_affects_md_matches_manifest():
     _assert_md_matches_manifest("part3_affects.md", "part3_affects_manifest.json")
 
 
-def test_part5_power_md_matches_manifest():
-    _assert_md_matches_manifest("part5_power.md", "part5_power_manifest.json")
-
-
 def test_part4_bondage_md_matches_manifest():
     _assert_md_matches_manifest("part4_bondage.md",
                                 "part4_bondage_manifest.json")
+
+
+def test_part5_power_md_matches_manifest():
+    _assert_md_matches_manifest("part5_power.md", "part5_power_manifest.json")
