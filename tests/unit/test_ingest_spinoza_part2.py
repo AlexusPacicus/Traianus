@@ -28,8 +28,10 @@ def test_node_id_is_numeric_suffix_compatible_with_bridge_audit():
     assert node_id(472) == "NODE_472"
 
 
-def test_scratch_db_path_defaults_to_data_dir():
-    assert str(scratch_db_path()).startswith(".data/")
+def test_scratch_db_path_anchored_to_repo_root():
+    # CWD-independent: artifacts must land under <repo_root>/.data/.
+    assert scratch_db_path().endswith("/.data/spinoza_part2.db")
+    assert scratch_db_path().startswith(str(Path(__file__).resolve().parents[2]))
 
 
 def test_telemetry_summary_percentiles_and_count():

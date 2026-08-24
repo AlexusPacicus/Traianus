@@ -33,7 +33,7 @@ os.environ.setdefault("HF_HUB_OFFLINE", "1")
 REPO_ROOT = Path(__file__).resolve().parents[3]
 
 DEFAULT_MANIFEST = REPO_ROOT / "data" / "spinoza" / "part2_mind_manifest.json"
-DEFAULT_SCRATCH_DB = ".data/spinoza_part2.db"
+DEFAULT_SCRATCH_DB = str(REPO_ROOT / ".data" / "spinoza_part2.db")
 
 
 def scratch_db_path() -> str:
@@ -188,7 +188,7 @@ def main() -> int:
 
     dim_db = storage.get_current_dimension_db()
     telemetry: list[dict] = []
-    labels_path = Path(".data/spinoza_part2_labels.json")
+    labels_path = REPO_ROOT / ".data" / "spinoza_part2_labels.json"
 
     for index, (label, text) in enumerate(chunks, 1):
         native_vector = _encode_vector(text)
@@ -241,7 +241,7 @@ def main() -> int:
     summary = telemetry_summary([(t["node_id"], t["label"], t["variance"])
                                  for t in telemetry])
     consolidated = sum(1 for t in telemetry if t["gate_state"] == "consolidated")
-    out_path = Path(".data/spinoza_part2_telemetry.json")
+    out_path = REPO_ROOT / ".data" / "spinoza_part2_telemetry.json"
     out_path.write_text(json.dumps(
         {"summary": summary, "theta_dyn": theta_dyn, "epsilon": epsilon,
          "n_edges_persisted": n_edges, "rows": telemetry},

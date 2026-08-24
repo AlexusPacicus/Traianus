@@ -24,21 +24,11 @@ REPO_ROOT = Path(__file__).resolve().parents[3]
 
 sys.path.insert(0, str(REPO_ROOT))
 
+from _common import explained_variance_ratios, load_labels, load_nodes
+
 DEFAULT_DB = REPO_ROOT / ".data" / "spinoza_part2.db"
 DEFAULT_LABELS = REPO_ROOT / ".data" / "spinoza_part2_labels.json"
 DEFAULT_OUT = REPO_ROOT / ".data" / "spinoza_part2_svd.json"
-
-
-def explained_variance_ratios(X) -> list[float]:
-    """Full PCA spectrum of the centered data matrix."""
-    import numpy as np
-
-    X_centered = X - np.mean(X, axis=0)
-    S = np.linalg.svd(X_centered, compute_uv=False)
-    total = float(np.sum(S**2))
-    if total == 0.0:
-        raise ValueError("degenerate cloud: zero variance")
-    return [float(v / total) for v in S**2]
 
 
 def assemble_points(node_ids: list[str], coords, residual,
@@ -46,8 +36,6 @@ def assemble_points(node_ids: list[str], coords, residual,
     """Reading-order points with neutral labels and coordinates."""
     points = []
     for i, nid in enumerate(node_ids):
-        if nid not in labels:
-            raise KeyError(f"label missing for {nid}")
         point = {"node_id": nid, "label": labels[nid],
                  "x": float(coords[i, 0]), "y": float(coords[i, 1])}
         if k >= 3:
@@ -56,28 +44,6 @@ def assemble_points(node_ids: list[str], coords, residual,
             point["r"] = float(residual[i, 0])
         points.append(point)
     return points
-
-
-def load_nodes(db_path: Path) -> tuple[list[str], "np.ndarray"]:
-    """Current manifold state from the scratch DB (read-only)."""
-    import numpy as np
-
-    sql = """
-        SELECT id, vector_blob FROM manifold_nodes m
-        WHERE m.lifecycle_state != 'telemetry_error'
-          AND m.seq = (SELECT MAX(seq) FROM manifold_nodes m2 WHERE m2.id = m.id)
-        ORDER BY CAST(SUBSTR(m.id, 6) AS INTEGER), m.id
-    """
-    conn = __import__("sqlite3").connect(f"file:{db_path}?mode=ro", uri=True)
-    try:
-        rows = conn.execute(sql).fetchall()
-    finally:
-        conn.close()
-    if len(rows) < 2:
-        raise SystemExit(f"ERR: need >= 2 nodes in {db_path}, got {len(rows)}")
-    node_ids = [row[0] for row in rows]
-    X = np.vstack([np.frombuffer(row[1], dtype=np.float64) for row in rows])
-    return node_ids, X
 
 
 def main() -> int:
@@ -91,8 +57,8 @@ def main() -> int:
 
     from traianus.geometry.observables import svd_reduce
 
-    node_ids, X = load_nodes(args.db)
-    labels = json.loads(Path(args.labels).read_text(encoding="utf-8"))
+    node_ids, _, X = load_nodes(args.db)
+    labels = load_labels(args.labels)
     ratios = explained_variance_ratios(X)
 
     coords2, residual2 = svd_reduce(X, k=2)

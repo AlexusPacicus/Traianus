@@ -796,3 +796,30 @@
   (soma r=-0.05, duration r=-0.12 [n=2], potestas r=-0.06).
 * **Gate:** hermetic suite **210 passed, 5 deselected**.
 * **Status:** `Consolidated`.
+
+### seq 32 — 2026-08-24 — Provenance correction + dataset hardening (review remediation)
+
+* **Provenance blocker resolved:** `part1_god.md` contained globalgreyebooks.com
+  hyperlink footnotes contradicting the declared PG#3800/Elwes source.
+  Part I **re-derived from PG#3800** via the builder's new `--part {1,2}`
+  flag; Gutenberg footnote markers/text blocks (`[N]`, editorial notes)
+  stripped from both parts. `data/spinoza/PROVENANCE.md` added as the
+  canonical source-of-truth document; superseded sources documented.
+* **Drift guard:** `tests/unit/test_spinoza_dataset_consistency.py` asserts
+  build(md) == manifest for both parts (dual-source-of-truth closed); part1
+  now ships its own frozen manifest (`part1_god_manifest.json`).
+* **Tooling dedup:** shared `_common.py` (load_nodes / load_labels /
+  explained_variance_ratios with zero-variance guard) replaces duplicated
+  copies in export_svd_projection.py and chromatic_audit.py; inline
+  __import__ removed; Spinoza zone patterns renamed
+  SPINOZA_ZONE_PATTERNS and documented as a corpus-specific falsifiable
+  hypothesis; labels[nid] access made loud (no .get() masking).
+* **CWD robustness:** ingest_spinoza_part2.py scratch/telemetry paths
+  anchored to REPO_ROOT (was relative to the caller's directory).
+* **Governance:** AGENTS.md 1.2 now codifies the deliberate exception for
+  frozen datasets under data/** (incl. data/spinoza manifests).
+* **Re-run on purified corpus (474 chunks):** 474 nodes / 703 auto-edges /
+  gate 12.0%; Sammon gain 43.0%; collision rescue 142/149 (95.3%);
+  ontological alignment still neutral — prior Fase 2-4 conclusions hold.
+* **Gate:** hermetic suite green (see commit).
+* **Status:** `Consolidated`.

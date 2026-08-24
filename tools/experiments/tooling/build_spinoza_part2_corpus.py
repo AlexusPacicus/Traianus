@@ -14,7 +14,8 @@ Outputs (frozen research datasets under data/spinoza/):
   == reading order. Labels are neutral metadata (never embedded): the
   chunk text itself is exactly what enters the representation pipeline.
 
-Label scheme (_NN sequential within the unit):
+Label scheme (prefix PART2_MIND_ for Part II, PART1_GOD_ for Part I;
+_NN sequential within the unit):
   PART2_MIND_PREFACE_NN        preface
   PART2_MIND_DEF_NN[_Ckk]      definitions (Explanation absorbed)
   PART2_MIND_AX_NN             axioms (both groups, document order)
@@ -37,11 +38,35 @@ from pathlib import Path
 REPO_ROOT = Path(__file__).resolve().parents[3]
 
 SECTION_HEADERS = {
-    "preface": re.compile(r"^PREFACE\s*$"),
-    "definitions": re.compile(r"^DEFINITIONS\s*$"),
-    "axioms": re.compile(r"^AXIOMS\s*$"),
+    "preface": re.compile(r"^PREFACE\.?\s*$"),
+    "definitions": re.compile(r"^DEFINITIONS\.?\s*$"),
+    "axioms": re.compile(r"^AXIOMS\.?\s*$"),
     "propositions": re.compile(r"^PROPOSITIONS\s*$"),
-    "postulates": re.compile(r"^POSTULATES\s*$"),
+    "postulates": re.compile(r"^POSTULATES\.?\s*$"),
+    "appendix": re.compile(r"^APPENDAGE\.?\s*$|^APPENDIX:?$"),
+}
+
+PART_CONFIG = {
+    1: {
+        "start": re.compile(r"^PART I\..*$", re.M),
+        "end": re.compile(r"^Part II\.\s*$", re.M),
+        "prefix": "PART1_GOD",
+        "md_name": "part1_god.md",
+        "manifest_name": "part1_god_manifest.json",
+        "md_title": "## **Part 1\\. Concerning God**",
+        # Part I lists definitions as roman items under DEFINITIONS.;
+        # Part II uses inline DEFINITION N. markers.
+        "roman_definitions": True,
+    },
+    2: {
+        "start": re.compile(r"^Part II\.\s*$", re.M),
+        "end": re.compile(r"^PART III\.\s*$", re.M),
+        "prefix": "PART2_MIND",
+        "md_name": "part2_mind.md",
+        "manifest_name": "part2_mind_manifest.json",
+        "md_title": "## **Part 2\\. On the Nature and Origin of the Mind**",
+        "roman_definitions": False,
+    },
 }
 
 INLINE_MARKERS = [
@@ -57,6 +82,7 @@ INLINE_MARKERS = [
 
 ROMAN_ITEM = re.compile(r"^([IVXL]+)\.\s+(.*)$")
 EDITORIAL_NOTE = re.compile(r"^N\.B\.\s")
+GUTENBERG_FOOTNOTE = re.compile(r"^\[\d+\]\s")
 
 ROMAN = {
     "I": 1, "II": 2, "III": 3, "IV": 4, "V": 5, "VI": 6, "VII": 7,
@@ -113,13 +139,14 @@ def split_sentences(text: str) -> list[str]:
     return [s for s in merged if s]
 
 
-def extract_part2(raw: str) -> list[str]:
-    """Whitespace-normalized paragraph blocks between 'Part II.' and 'PART III.'."""
-    start = re.search(r"^Part II\.\s*$", raw, re.M)
-    end = re.search(r"^PART III\.\s*$", raw, re.M)
+def extract_part(raw: str, cfg: dict) -> list[str]:
+    """Whitespace-normalized paragraph blocks of one Ethics part."""
+    start = cfg["start"].search(raw)
+    end = cfg["end"].search(raw)
     if not start or not end or start.end() > end.start():
-        raise SystemExit("ERR: Part II boundaries not found in source text")
+        raise SystemExit("ERR: part boundaries not found in source text")
     body = raw[start.end():end.start()]
+    body = re.sub(r"\[\d+\]", "", body)  # Gutenberg footnote reference markers
     blocks, current = [], []
     for line in body.splitlines():
         stripped = line.strip()
@@ -134,11 +161,13 @@ def extract_part2(raw: str) -> list[str]:
     return [b for b in blocks if b]
 
 
-def build_manifest(source_path: Path) -> dict[str, str]:
-    blocks = extract_part2(source_path.read_text(encoding="utf-8"))
+def build_manifest(source_path: Path, part: int) -> dict[str, str]:
+    cfg = PART_CONFIG[part]
+    prefix = cfg["prefix"]
+    blocks = extract_part(source_path.read_text(encoding="utf-8"), cfg)
 
     manifest: dict[str, str] = {}
-    counters = {"axiom": 0, "lemma": 0, "postulate": 0}
+    counters = {"axiom": 0, "lemma": 0, "postulate": 0, "definition": 0}
     child_seq: dict[str, int] = {}
     section = None
     state_label: str | None = None      # label absorbing unmarked blocks
@@ -165,12 +194,16 @@ def build_manifest(source_path: Path) -> dict[str, str]:
 
     buf: list[str] = []
     for block in blocks:
+        if GUTENBERG_FOOTNOTE.match(block):
+            continue
         header_kind = next(
             (k for k, pat in SECTION_HEADERS.items() if pat.match(block)), None)
         if header_kind:
             close(buf)
             section = header_kind
             sub_context = False
+            if header_kind == "appendix":
+                state_label = f"{prefix}_APPENDIX"
             continue
         if EDITORIAL_NOTE.match(block):
             continue
@@ -182,14 +215,19 @@ def build_manifest(source_path: Path) -> dict[str, str]:
                 marker = (kind, matched)
                 break
 
-        if section in ("axioms", "postulates") and not marker:
+        roman_sections = ("axioms", "postulates")
+        if cfg["roman_definitions"]:
+            roman_sections += ("definitions",)
+        if section in roman_sections and not marker:
             item = ROMAN_ITEM.match(block)
             if item:
                 close(buf)
-                family = {"axioms": "axiom", "postulates": "postulate"}[section]
+                family = {"axioms": "axiom", "postulates": "postulate",
+                          "definitions": "definition"}[section]
                 counters[family] += 1
-                code = {"axiom": "AX", "postulate": "POST"}[family]
-                state_label = f"PART2_MIND_{code}_{counters[family]:02d}"
+                code = {"axiom": "AX", "postulate": "POST",
+                        "definition": "DEF"}[family]
+                state_label = f"{prefix}_{code}_{counters[family]:02d}"
                 buf.append(item.group(2))
                 continue
             if state_label is None:
@@ -229,18 +267,18 @@ def build_manifest(source_path: Path) -> dict[str, str]:
                 nn = ROMAN.get(match.group(1).upper())
                 if nn is None:
                     raise SystemExit(f"ERR: unknown roman {match.group(1)!r}")
-                prop_base = f"PART2_MIND_P{nn:02d}_"
+                prop_base = f"{prefix}_P{nn:02d}_"
                 state_label = f"{prop_base}PROP"
                 child_seq = {}
                 prop_open = True
             elif kind == "definition":
                 nn = ROMAN.get(match.group(1).upper())
-                state_label = f"PART2_MIND_DEF_{nn:02d}" if nn else None
+                state_label = f"{prefix}_DEF_{nn:02d}" if nn else None
             elif kind in ("axiom", "lemma", "postulate"):
                 family = kind
                 counters[family] += 1
                 code = {"axiom": "AX", "lemma": "LEMMA", "postulate": "POST"}[kind]
-                state_label = f"PART2_MIND_{code}_{counters[family]:02d}"
+                state_label = f"{prefix}_{code}_{counters[family]:02d}"
                 sub_context = True
                 child_absorbed = False
         rest = block[match.end():].strip()
@@ -254,24 +292,28 @@ def main() -> int:
     parser = argparse.ArgumentParser(description=__doc__)
     parser.add_argument("source", type=Path,
                         help="path to Project Gutenberg #3800 plain text")
+    parser.add_argument("--part", type=int, choices=sorted(PART_CONFIG),
+                        default=2,
+                        help="Ethics part to derive (default: 2)")
     args = parser.parse_args()
 
     if not args.source.is_file():
         print(f"ERR: source not found: {args.source}", file=sys.stderr)
         return 2
 
-    manifest = build_manifest(args.source)
+    cfg = PART_CONFIG[args.part]
+    manifest = build_manifest(args.source, args.part)
 
     out_dir = REPO_ROOT / "data" / "spinoza"
     out_dir.mkdir(parents=True, exist_ok=True)
 
-    md_lines = ["## **Part 2\\. On the Nature and Origin of the Mind**", ""]
+    md_lines = [cfg["md_title"], ""]
     for chunk in manifest.values():
         md_lines.append(chunk)
-    (out_dir / "part2_mind.md").write_text(
+    (out_dir / cfg["md_name"]).write_text(
         "\n".join(md_lines).rstrip() + "\n", encoding="utf-8")
 
-    (out_dir / "part2_mind_manifest.json").write_text(
+    (out_dir / cfg["manifest_name"]).write_text(
         json.dumps(manifest, ensure_ascii=False, indent=2) + "\n",
         encoding="utf-8")
 

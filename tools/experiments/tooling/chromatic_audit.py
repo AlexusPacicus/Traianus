@@ -25,7 +25,6 @@ Output: .data/spinoza_part2_chromatic.json
 import argparse
 import json
 import re
-import sqlite3
 import sys
 from pathlib import Path
 
@@ -34,6 +33,8 @@ import numpy as np
 REPO_ROOT = Path(__file__).resolve().parents[3]
 
 sys.path.insert(0, str(REPO_ROOT))
+
+from _common import explained_variance_ratios, load_labels, load_nodes
 
 DEFAULT_DB = REPO_ROOT / ".data" / "spinoza_part2.db"
 DEFAULT_LABELS = REPO_ROOT / ".data" / "spinoza_part2_labels.json"
@@ -107,7 +108,10 @@ def delta_rgb(rgb: np.ndarray, i: int, j: int) -> float:
     return float(np.linalg.norm(rgb[i] - rgb[j]))
 
 
-ZONE_PATTERNS = {
+# Corpus-specific ontological hypothesis (Spinoza, Part II). The channel
+# assignment is a HYPOTHESIS tested empirically by zone_channel_alignment,
+# never an assumption baked into the projection.
+SPINOZA_ZONE_PATTERNS = {
     "soma": re.compile(r"^PART2_MIND_P(2[4-9]|3[01])_"),
     "duration": re.compile(r"^PART2_MIND_DEF_05(_C\d+)?$"),
     "potestas": re.compile(r"^PART2_MIND_P(3[7-9]|4\d|49)_"),
@@ -131,7 +135,7 @@ def zone_channel_alignment(labels: list[str], rgb: np.ndarray) -> dict:
     Verdicts: r_target >= 0.15 confirmed / <= -0.15 refuted / else neutral.
     """
     zones_report = []
-    for zone_name, pattern in ZONE_PATTERNS.items():
+    for zone_name, pattern in SPINOZA_ZONE_PATTERNS.items():
         indicator = np.array([1.0 if pattern.match(lb) else 0.0
                               for lb in labels])
         entry = {"zone": zone_name,
@@ -153,28 +157,6 @@ def zone_channel_alignment(labels: list[str], rgb: np.ndarray) -> dict:
             "zones": zones_report}
 
 
-def load_nodes(db_path: Path):
-
-    sql = """
-        SELECT id, text, vector_blob FROM manifold_nodes m
-        WHERE m.lifecycle_state != 'telemetry_error'
-          AND m.seq = (SELECT MAX(seq) FROM manifold_nodes m2 WHERE m2.id = m.id)
-        ORDER BY CAST(SUBSTR(m.id, 6) AS INTEGER), m.id
-    """
-
-    conn = sqlite3.connect(f"file:{db_path}?mode=ro", uri=True)
-    try:
-        rows = conn.execute(sql).fetchall()
-    finally:
-        conn.close()
-    if len(rows) < 10:
-        raise SystemExit(f"ERR: need >= 10 nodes in {db_path}, got {len(rows)}")
-    node_ids = [r[0] for r in rows]
-    texts = [" ".join(r[1].split()) for r in rows]
-    X = np.vstack([np.frombuffer(r[2], dtype=np.float64) for r in rows])
-    return node_ids, texts, X
-
-
 def main() -> int:
     parser = argparse.ArgumentParser(description=__doc__)
     parser.add_argument("--db", type=Path, default=DEFAULT_DB)
@@ -182,9 +164,8 @@ def main() -> int:
     parser.add_argument("--out", type=Path, default=DEFAULT_OUT)
     args = parser.parse_args()
 
-
-    node_ids, texts, X = load_nodes(args.db)
-    labels = json.loads(Path(args.labels).read_text(encoding="utf-8"))
+    node_ids, _, X = load_nodes(args.db)
+    labels = load_labels(args.labels)
 
     five_d = effective_5d(X)
     pts2d = five_d[:, 0:2]
@@ -194,7 +175,7 @@ def main() -> int:
 
     collision_rows = [{
         "pair": f"{node_ids[c[0]]}<->{node_ids[c[1]]}",
-        "labels": [labels.get(node_ids[c[0]]), labels.get(node_ids[c[1]])],
+        "labels": [labels[node_ids[c[0]]], labels[node_ids[c[1]]]],
         "d2d": round(c[2], 4),
         "d384": round(c[3], 4),
         "delta_rgb": round(delta_rgb(rgb, c[0], c[1]), 4),
@@ -205,7 +186,7 @@ def main() -> int:
 
     duplicate_rows = [{
         "pair": f"{node_ids[i]}<->{node_ids[j]}",
-        "labels": [labels.get(node_ids[i]), labels.get(node_ids[j])],
+        "labels": [labels[node_ids[i]], labels[node_ids[j]]],
         "note": "stylistic duplicate (identical text); not rescuable",
     } for i, j, _ in duplicates]
 
@@ -216,7 +197,9 @@ def main() -> int:
     payload = {
         "n_points": len(node_ids),
         "channel_weighting": "singular_value_weighted_pc3_pc5_minmax",
-        "explained_variance_top5": explained_top5(X),
+        "explained_variance_top5":
+            [round(r, 4) for r in
+             explained_variance_ratios(X, top=5)],
         "sammon": {
             "stress_2d": round(stress_2d, 4),
             "stress_5d": round(stress_5d, 4),
@@ -251,14 +234,6 @@ def main() -> int:
               f"{channel_key}={z[channel_key]}")
     print(f"[+] output: {args.out}")
     return 0
-
-
-def explained_top5(X) -> list[float]:
-
-    Xc = X - np.mean(X, axis=0)
-    S = np.linalg.svd(Xc, compute_uv=False)
-    total = float(np.sum(S**2))
-    return [round(float(v / total), 4) for v in S**2][:5]
 
 
 if __name__ == "__main__":
