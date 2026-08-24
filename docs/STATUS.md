@@ -7,7 +7,7 @@ This document establishes the canonical and immutable classification of all comp
 
 
 ## A. Implemented (Control Plane / Canonical)
-*Components present in `traianus/` with determinism verified by hermetic tests, and 143/143 tests passing.*
+*Components present in `traianus/` with determinism verified by hermetic tests, and a green hermetic suite (190 passed, 5 deselected).*
 
 
 * **Ingestion and HTTP Servability:** `/ingesta/vector` endpoint in `traianus/app.py`.

@@ -111,7 +111,8 @@ Traianus/
 │   ├── representation/      # Provider independence tests
 │   ├── security/            # Boundary & permission audits
 │   └── unit/                # Core substrate invariant tests
-├── tools/                   # Audits, MCP servers & simulation experiments
+├── tools/                   # Audits, MCP servers, ε-bridge auditor & experiments
+├── frontend/                # Ulpia client layer (sources-only policy)
 └── docs/                    # Architectural specs, audits & status ledger
 ```
 

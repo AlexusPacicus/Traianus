@@ -9,8 +9,9 @@
 | Document | Role |
 |---|---|
 | **LEDGER.md** (this file) | Operational delta history (append-only) |
-| **LOGOGRAPHY.md** | Structural index; mutates only when the file-tree topology changes |
-| **TRAIANUS_AUDIT.md** | Per-finding snapshots and remediation status |
+| **docs/audit/AUDIT.md** | Per-finding audit snapshots and remediation status |
+| **docs/audit/remediation/** | Session evidence records (findings→fixes maps, gate case-id ledgers) |
+| **docs/INDEX.md** | Structural index and traceability matrix |
 | **IMPLEMENTATION_STATUS.md** | Declared implemented capabilities vs. R&D roadmap |
 
 ## Ledger entries

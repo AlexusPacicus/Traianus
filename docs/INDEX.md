@@ -15,6 +15,8 @@
 | **Bootstrap Geodesy (8D)** | `traianus/bootstrap.py`<br>`tests/fixtures/nsm_axes_8.json` | `tests/unit/test_substrate.py` | Implemented in production |
 | **Corpus Variance Test (WP1 / EAS-01)** | `tools/experiments/_wp1_corpus.py` | `tools/experiments/validate_wp1_empirical.py` | **Demonstrates the Representation-Governance Coupling Problem** (Pure variance $p=0.58$ / $0.68$ ➔ Requires decoupling governance from representation) |
 | **NCD Text Coupling (EAS-01 Phase 1c)** | `tools/experiments/logographic/exp_entropy_spectral.py` | `docs/specifications/EAS-01_LOGOGRAPHIC_PHYSICS.md` | **Validated Solution** ($AUC > 0.93$, defeats C4 injection) |
+| **SVD Projection & Chromatic Scaling (Ulpia 5D)** | `traianus/geometry/observables.py`<br>`frontend/src/projection.ts` | `tests/unit/test_svd_projection.py` | Implemented (client-facing observational helpers) |
+| **ε-Bridge Audit (non-sequential E_n)** | `tools/analyze_bridges.py` | `tests/unit/test_analyze_bridges.py` | Implemented (read-only audit tool) |
 
 ---
 
@@ -29,6 +31,7 @@ graph TD
     ROOT --> ADR[architecture/ADR/ADR.md]
     ROOT --> EAS[specifications/EAS-01_LOGOGRAPHIC_PHYSICS.md]
     ROOT --> AUD[audit/AUDIT.md]
+    ROOT --> REM[audit/remediation/]
     ROOT --> STA[STATUS.md]
     
     ARCH --> CON1[contracts/freeze/POC_FREEZE_v1.md]
