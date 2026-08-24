@@ -18,7 +18,7 @@ This document formalizes the closure of the Proof of Concept (PoC) and freezes T
 ## 3. Reproducibility & Verification
 
 * **Hermetic Execution:** Runs 100% offline on commodity hardware ($\le 8\text{ GB RAM}$) with no network or cloud infrastructure dependencies.
-* **Determinism:** Given the identical input vector history, the state sequence generated in the ledger is identical across any execution environment.
+* **Determinism:** Under an identical pinned environment (Python ~=3.11 and the dependency set locked in pyproject.toml, model revision 1110a243fdf4706b3f48f1d95db1a4f5529b4d41) and an identical input vector history, the state sequence generated in the ledger is identical at runtime. No bitwise cross-build or cross-platform guarantee is claimed (see docs/STATUS.md, finding M1).
 
 ---
 

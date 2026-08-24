@@ -568,3 +568,34 @@
   - `total_latency_us`: p50=11,956μs, p95=33,455μs, p99=40,397μs, max=56,520μs
 * **Verdict:** **H3 I/O stability VALIDATED for SQLite persistence** (p50 < 1ms, p95 < 1ms). The encoding latency is a provider-layer concern (sentence-transformer), not a control-plane defect. Architecture correctly isolates WAL I/O via persistent connection.
 * **Status:** `Consolidated`. Telemetry at `docs/audit/telemetry_real_corpus_v1.json`.
+
+### seq 23 — 2026-08-24 — Post-v1.0.0 audit remediation: security-suite DB isolation + strict 5-Radicals gate conformance
+
+* **Context:** Independent repository audit found (A) every `validate_proposal()`
+  call in the security suite wrote its audit row into the real repo-root
+  `traianus.db` (~4k polluted rows): `validator.py` bound `DB_PATH` by value at
+  import time, immune to the autouse `isolate_db` monkeypatch; (B) the
+  Zero-Trust gate accepted schema-violating payloads fail-open: an empty `{}`
+  payload returned EXECUTE_SAFE and an invented `Intent_Class` (e.g. "HACK")
+  skipped the mandatory literal-grounding gate.
+* **Δ executed:**
+  - Lazy DB resolution: `_persist_audit` reads `storage.DB_PATH` at call time;
+    the MCP stdio integration test (SEC-M-06) runs under an isolated CWD so the
+    spawned server never touches the repo-root database.
+  - Strict conformance: `AgentMutationProposal.model_validate` runs after
+    content screening; `Target_File` is merged out-of-band (MCP argument);
+    unknown enums, extra fields and non-dict payloads return INVALID_JSON;
+    a present-but-invalid `Safety_Abort` returns BLOCKED_BY_SAFETY_GATE.
+  - Contract alignment: `IntentClass` gains AUDIT (validator SEC-M-07 logic,
+    MCP tool docs and committed tests already treated it as a grounding-gated
+    mutating intent; only the normative schema lagged behind).
+  - Ordering fix: forbidden-token screening now precedes protocol conformance.
+* **Finding registered:** the denylist makes any proposal containing its own
+  literals (e.g. future edits to the token list itself) ungateable — a
+  self-referential blind spot. This session restructured around the list
+  without touching it; a durable governance decision for modifying the list
+  remains open.
+* **Gate:** hermetic suite **160 passed, 5 deselected** (6 new regressions in
+  `tests/security/test_db_isolation.py`); repo-root `audit_log` delta across a
+  full suite run = 0 (previously grew on every run).
+* **Status:** `Consolidated`.
