@@ -1,4 +1,4 @@
-## **Part 5\. Of the Power of the Intellect, or of Human Liberty**
+## **Part 5\. Of the Power of the Understanding, or of Human Freedom**
 
 If two contrary actions be started in the same subject, a change must necessarily take place, either in both, or in one of the two, and continue until they cease to be contrary.
 The power of an effect is defined by the power of its cause, in so far as its essence is explained or defined by the essence of its cause. (This axiom is evident from III. vii.)

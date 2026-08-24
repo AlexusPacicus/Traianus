@@ -7,6 +7,27 @@
     "note": "Aggregate summaries distilled from ephemeral .data/ artifacts; manifold findings are conditional on this representation provider (RH-1 independence untested here)."
   },
   "runs": {
+    "part1_isolated": {
+      "n_nodes": 409,
+      "n_edges_persisted": 420,
+      "gate_consolidated": 77,
+      "sigma2": {
+        "variance_min": 0.000492,
+        "variance_p50": 0.002734,
+        "variance_p95": 0.00616,
+        "variance_max": 0.014004
+      },
+      "theta_dyn": 0.004292,
+      "epsilon": 0.8,
+      "chromatic": {
+        "sammon_stress_2d": 0.4749,
+        "sammon_stress_5d": 0.2656,
+        "decompression_gain_pct": 44.07,
+        "collisions": 92,
+        "collision_rescue_rate": 0.9891,
+        "stylistic_duplicates": 0
+      }
+    },
     "part2_isolated": {
       "n_nodes": 458,
       "n_edges_persisted": 691,

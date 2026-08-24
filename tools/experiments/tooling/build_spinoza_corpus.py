@@ -105,7 +105,7 @@ PART_CONFIG = {
         "prefix": "PART5_POWER",
         "md_name": "part5_power.md",
         "manifest_name": "part5_power_manifest.json",
-        "md_title": "## **Part 5\\. Of the Power of the Intellect, or of Human Liberty**",
+        "md_title": "## **Part 5\\. Of the Power of the Understanding, or of Human Freedom**",
         "roman_sections": ["axioms"],
     },
 }
