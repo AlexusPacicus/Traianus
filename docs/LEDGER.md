@@ -654,3 +654,21 @@
   tracked `.py` = 0; runtime smoke of `exp_dimensional_relief.py` prints
   English end-to-end (`Verdict: H2 VALIDATED`).
 * **Status:** `Consolidated`.
+
+### seq 26 — 2026-08-24 — NGI/NLnet grant infrastructure (code 2026-08-198)
+
+* **Context:** Traianus was submitted to the NLnet Foundation
+  (Fediversity_Fund call, €17,500 / 6 months, WP1–WP4) on 2026-07-31. The
+  pre-session main tip (`a40a577`) is exactly what reviewers received.
+* **Δ executed:**
+  - Annotated tag `ngi-proposal-2026-08` pinned to `a40a577` — immutable
+    snapshot of the submitted state.
+  - Development branch `ngi` created from current main (`6807e49`, includes
+    all seven post-audit hardening commits): future home of WP1–WP4 work.
+  - Redundant pointer branch `NGI` deleted (superseded by the tag; case-
+    collision on APFS forced deletion-before-recreation anyway).
+  - Proposal-text corrections owned by the OPERATOR before resubmission:
+    GPL-3.0 → AGPL-3.0-or-later (matches LICENSE/pyproject); "bitwise
+    reproducible" → runtime determinism under pinned environment (finding
+    M1). flake.nix restoration DEFERRED until grant outcome is known.
+* **Status:** `Consolidated`.
