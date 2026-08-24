@@ -699,3 +699,36 @@
 * **Gate:** hermetic suite **190 passed, 5 deselected** (+13 from
   `tests/unit/test_svd_projection.py` and module-split additions).
 * **Status:** `Consolidated`.
+
+### seq 28 — 2026-08-24 — Hygiene wave N1–N10 + release 1.0.1 (patch)
+
+* **Context:** Exhaustive re-audit of the unified main surfaced findings the
+  pre-unification passes could not see (SVD helpers never audited, frontend
+  now tracked, multi-epoch visualization path). Operator chose a PATCH bump:
+  stability/security/hygiene corrections with zero functional-scope change
+  to the sealed Control Plane.
+* **Δ executed:**
+  - Docs: current suite figures, ~12ms p50 latency, README layout (+frontend,
+    ε-bridge auditor), INDEX traceability rows + remediation node, ownership
+    table phantom entries replaced by real owners.
+  - ε single source of truth: `traianus.config.resolve_epsilon_edge()`
+    consumed by HTTP layer, `tools/analyze_bridges.py` and experiments —
+    closes the divergent-copy class for ε that C1 closed for θ_dyn.
+  - SVD hardening: ValueError on empty/non-finite input; svd_flip sign
+    canonicalization mirrored in `frontend/src/projection.ts`; docstring
+    corrections ((n,k) shape, d>=k domain); duplicated line removed.
+  - analyze_bridges CLI: clean exits for missing DB / <2 nodes; percentile
+    range validation; O(n²) adjacency computed once per mode.
+  - Append-only static scanners cover `manifold_edges`; background ingestion
+    logs via structlog instead of bare print; all SVD tests seeded.
+  - Kernel namespace: svd_reduce/sigmoid_scale/project_to_5d removed from
+    `traianus.core.__all__` (canonical home = geometry.observables);
+    regression pins core exports to the v1.0.0 surface byte-for-byte.
+* **Classification (patch-bump audit trail):** fixes = security/stability/
+  hygiene incl. fail-closed gate conformance and ingress label contract;
+  additive non-normative tooling = svd_* lab helpers (geometry only),
+  bridge-audit pair, [viz] extra; governance semantics, storage schema and
+  kernel namespace = UNCHANGED vs v1.0.0.
+* **Gate:** hermetic suite **201 passed, 5 deselected** (+11: epsilon
+  resolution ×4, SVD guards/sign ×4, bridges CLI ×2, frozen-kernel pin).
+* **Status:** `Consolidated`.

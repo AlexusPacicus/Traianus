@@ -15,21 +15,33 @@ def _modules():
     return core, geometry, governance
 
 
+KERNEL_EXPORTS_V1_0_0 = {
+    "calibrate_critical_threshold",
+    "compute_epsilon_edges",
+    "compute_kinetic_resistance",
+    "discrimination_ratio",
+    "ortho_distance",
+    "project_dimensional_relief",
+}
+
+
 def test_geometry_symbols_identical_in_core_shim():
     core, geometry, _ = _modules()
-    geometry_symbols = {
-        "calibrate_critical_threshold",
-        "compute_epsilon_edges",
-        "compute_kinetic_resistance",
-        "discrimination_ratio",
-        "ortho_distance",
-        "project_dimensional_relief",
-        "project_to_5d",
-        "sigmoid_scale",
-        "svd_reduce",
-    }
-    for name in geometry_symbols:
+    for name in KERNEL_EXPORTS_V1_0_0:
         assert getattr(geometry, name) is getattr(core, name), name
+
+
+def test_core_kernel_exports_frozen_at_v1_0_0():
+    """The decision-kernel namespace stays identical to v1.0.0: the Ulpia
+    visualization helpers live in geometry.observables only (seq 28)."""
+    core, geometry, _ = _modules()
+    assert set(core.__all__) == KERNEL_EXPORTS_V1_0_0 | {
+        "evaluate_gate",
+        "evaluate_gate_v01",
+    }
+    # Client-facing helpers remain available at their canonical home.
+    for name in ("project_to_5d", "sigmoid_scale", "svd_reduce"):
+        assert hasattr(geometry, name), name
 
 
 def test_gate_symbols_identical_in_core_shim():

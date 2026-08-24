@@ -13,4 +13,4 @@ Usage as an installable application::
     traianus-bootstrap   # anchors the geodetic basis in SQLite
 """
 
-__version__ = "1.0.0"
+__version__ = "1.0.1"
