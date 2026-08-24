@@ -40,10 +40,10 @@ REPO_ROOT = Path(__file__).resolve().parents[3]
 SECTION_HEADERS = {
     "preface": re.compile(r"^PREFACE\.?\s*$"),
     "definitions": re.compile(r"^DEFINITIONS\.?\s*$"),
-    "axioms": re.compile(r"^AXIOMS\.?\s*$"),
-    "propositions": re.compile(r"^PROPOSITIONS\s*$"),
+    "axioms": re.compile(r"^AXIOMS?\.?\s*$"),
+    "propositions": re.compile(r"^PROPOSITIONS\.?\s*$"),
     "postulates": re.compile(r"^POSTULATES\.?\s*$"),
-    "appendix": re.compile(r"^APPENDAGE\.?\s*$|^APPENDIX:?$"),
+    "appendix": re.compile(r"^APPENDAGE\.?\s*$|^APPENDIX[:.]?\s*$"),
     "definitions_of_emotions": re.compile(
         r"^DEFINITIONS OF THE EMOTIONS\.?\s*$"),
     "general_definition": re.compile(
@@ -89,6 +89,15 @@ PART_CONFIG = {
         "md_title": "## **Part 3\\. On the Origin and Nature of the Emotions**",
         "roman_sections": ["definitions", "postulates",
                            "definitions_of_emotions"],
+    },
+    4: {
+        "start": re.compile(r"^PART IV:\s*$", re.M),
+        "end": re.compile(r"^PART V:\s*$", re.M),
+        "prefix": "PART4_BONDAGE",
+        "md_name": "part4_bondage.md",
+        "manifest_name": "part4_bondage_manifest.json",
+        "md_title": "## **Part 4\\. Of Human Bondage, or the Strength of the Emotions**",
+        "roman_sections": ["definitions", "axioms"],
     },
 }
 
@@ -252,12 +261,12 @@ def build_manifest(source_path: Path, part: int) -> dict[str, str]:
         roman_sections: tuple[str, ...] = tuple(cfg["roman_sections"])
         if section in roman_sections and not marker:
             item = ROMAN_ITEM.match(block)
-            if item:
+            if item or counters[ROMAN_ITEM_SECTIONS[section][0]] == 0:
                 close(buf)
                 family, code = ROMAN_ITEM_SECTIONS[section]
                 counters[family] += 1
                 state_label = f"{prefix}_{code}_{counters[family]:02d}"
-                buf.append(item.group(2))
+                buf.append(item.group(2) if item else block)
                 continue
             if state_label is None:
                 continue  # stray preamble before first numbered item

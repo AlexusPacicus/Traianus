@@ -19,7 +19,6 @@ The knowledge of an effect depends on and involves the knowledge of a cause.
 Things which have nothing in common cannot be understood, the one by means of the other; the conception of one does not involve the conception of the other.
 A true idea must correspond with its ideate or object.
 If a thing can be conceived as non--existing, its essence does not involve existence.
-PROPOSITIONS.
 Substance is by nature prior to its modifications.
 This is clear from Deff. iii. and v.
 Two substances, whose attributes are different, have nothing in common.

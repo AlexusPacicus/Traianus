@@ -12,7 +12,7 @@ def _assert_md_matches_manifest(md_name: str, manifest_name: str):
         if line and not line.startswith("## ")
     ]
     assert list(manifest.values()) == md_lines
-    assert all(label.startswith(("PART1_GOD_", "PART2_MIND_", "PART3_AFFECTS_"))
+    assert all(label.startswith(("PART1_GOD_", "PART2_MIND_", "PART3_AFFECTS_", "PART4_BONDAGE_"))
                for label in manifest)
 
 
