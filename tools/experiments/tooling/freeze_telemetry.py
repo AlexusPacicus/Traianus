@@ -25,11 +25,12 @@ RUNS = [
     ("part2_isolated", "part2_mind"),
     ("part3_isolated", "part3_affects"),
     ("part4_isolated", "part4_bondage"),
-    ("accumulated_1234", "spinoza_full"),
+    ("part5_isolated", "part5_power"),
+    ("accumulated_12345", "spinoza_full"),
 ]
 
 PART_BY_PREFIX = {"PART1": "P1_GOD", "PART2": "P2_MIND", "PART3": "P3_AFFECTS",
-                   "PART4": "P4_BONDAGE"}
+                   "PART4": "P4_BONDAGE", "PART5": "P5_POWER"}
 
 TOP_BRIDGES_LIMIT = 10
 

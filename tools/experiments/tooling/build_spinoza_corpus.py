@@ -99,6 +99,15 @@ PART_CONFIG = {
         "md_title": "## **Part 4\\. Of Human Bondage, or the Strength of the Emotions**",
         "roman_sections": ["definitions", "axioms"],
     },
+    5: {
+        "start": re.compile(r"^PART V:\s*$", re.M),
+        "end": re.compile(r"^End of the Ethics.*$", re.M),
+        "prefix": "PART5_POWER",
+        "md_name": "part5_power.md",
+        "manifest_name": "part5_power_manifest.json",
+        "md_title": "## **Part 5\\. Of the Power of the Intellect, or of Human Liberty**",
+        "roman_sections": ["axioms"],
+    },
 }
 
 INLINE_MARKERS = [
