@@ -944,3 +944,18 @@
   was measured during the v1-era corpus and is retained as historical.
 * **Gate:** hermetic suite **243 passed, 5 deselected**.
 * **Status:** `Consolidated`.
+
+### seq 38 — 2026-08-24 — Part V merge reverted pending external audit
+
+* **Event:** PR #81 (Part V corpus + 5-part accumulated manifold) was merged
+  before the external audit pass required by the operator. Merge undone via
+  `git revert -m 1 94d9209` (cbac362) — history preserved, no force-push.
+* **Branch restored:** `feature/pkm-spinoza-part5-power` re-created at
+  5ea898d and pushed; all Part V artifacts (corpus, manifest, telemetry/v4)
+  remain intact on that branch, out of main.
+* **Re-landing procedure:** once the audit passes, revert cbac362 on a
+  fresh branch (revert-of-the-revert) and merge — or open a new PR from
+  the restored branch after reverting the revert on it.
+* **Process rule adopted:** merges touching frozen datasets require an
+  explicit operator audit sign-off BEFORE merge, without exception.
+* **Status:** `Pending approval`.
