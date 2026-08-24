@@ -823,3 +823,57 @@
   ontological alignment still neutral — prior Fase 2-4 conclusions hold.
 * **Gate:** hermetic suite green (see commit).
 * **Status:** `Consolidated`.
+
+### seq 33 — 2026-08-24 — Part III (De Affectibus) frozen; dual-mode manifold diagnostics
+
+* **Corpus:** `part3_affects.md` + `part3_affects_manifest.json` derived via
+  the generalized builder (`--part 3`): 647 sentence-chunks, labels
+  `PART3_AFFECTS_*` incl. the 48 Definitions of the Emotions (`DEFEMO_NN`)
+  and the closing General Definition (`GENDEF`). ROMAN map extended to LXXX;
+  N.B. filter scoped to AXIOMS/POSTULATES (elsewhere it is Spinoza's own
+  text — recovered Def. III activity/passion note). Parts I/II byte-identical
+  under the generalized builder; drift guard extended to part3.
+* **Runner:** `ingest_spinoza_part2.py` now parametrized (`--part {1,2,3}`,
+  `--accumulate`) with per-part scratch DB/labels/telemetry conventions.
+* **Isolated mode** (`.data/part3_affects.db`): 647 nodes / 726 auto-edges;
+  gate 65/647 consolidated (10.0%, non-degenerate); bridges resonance-
+  dominated as in Part II (670 vs 56 contiguous); chromatic rescue 98.6%
+  (146 collisions); Sammon gain 45.2%.
+* **Accumulated mode** (`.data/spinoza_full.db`, parts 1+2+3 in reading
+  order): 1539 nodes / 2251 auto-edges; gate 199/1539 (12.9%). Inter-part
+  epsilon edges: GOD<->MIND 132, MIND<->AFFECTS **199**, GOD<->AFFECTS 64
+  (the Mind-Emotions continuum is the densest inter-part resonance).
+  Densification impact: Sammon gain 45.2% -> 39.8% while collision rescue
+  holds at ~96% — chromatic channels scale with the manifold.
+* **Ontological hypothesis for Part III:** deliberately deferred until the
+  affect-domain data is inspected (falsifiability discipline).
+* **Gate:** hermetic suite **220 passed, 5 deselected**; invariant verifier
+  GREEN (exit 0).
+* **Status:** `Consolidated`.
+
+### seq 34 — 2026-08-24 — External-audit remediation: honest naming, version truth, frozen evidence
+
+* **Trigger:** external agent audit of `feature/pkm-spinoza-part3-affects`
+  (naming debt, doc drift, Ulpia contradiction, unversioned evidence).
+* **Honest naming:** `build_spinoza_part2_corpus.py` -> `build_spinoza_corpus.py`;
+  `ingest_spinoza_part2.py` -> `ingest_spinoza_corpus.py` (tests renamed in
+  step). No shims: tooling is unreleased; historical LEDGER mentions left
+  untouched (append-only).
+* **Version truth:** README badge/text and IMPLEMENTATION_STATUS header
+  reconciled with pyproject v1.0.1 (substrate frozen at v1.0.0; zero scope
+  change). IMPLEMENTATION_STATUS amended 2026-08-24.
+* **Ulpia status corrected:** the "no UI code" claim replaced by the actual
+  state — a client prototype exists under `frontend/` (ulpia-line merge);
+  its integration with the read-only observation contract remains RESEARCH /
+  FUTURE ROADMAP, out of substrate scope.
+* **Evidence freeze:** `data/spinoza/telemetry/v1.json` (via committed
+  `freeze_telemetry.py`) distills the ephemeral `.data/` artifacts into a
+  versioned dataset: per-run nodes/edges/gate/sigma^2, chromatic Sammon +
+  rescue rates, inter-part edge distribution (MIND<->AFFECTS = 199, densest
+  continuum) and top cross-part bridges. Epistemic scope recorded: findings
+  are conditional on the MiniLM-L6-v2 representation provider.
+* **Not remediated (documented):** root-level `traianus.db` retained — it is
+  the substrate-default DB_PATH of `traianus/storage.py`; CONTRIBUTING.md
+  deferred to its own post-merge cycle.
+* **Gate:** hermetic suite green (see commit); invariant verifier GREEN.
+* **Status:** `Consolidated`.

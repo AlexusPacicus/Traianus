@@ -18,13 +18,16 @@ declared public-domain source by a committed, offline builder script.
 
 | File | Derived by | Notes |
 |---|---|---|
-| `part1_god.md` + `part1_god_manifest.json` | `tools/experiments/tooling/build_spinoza_part2_corpus.py --part 1` | Part I ("Concerning God"), 418 sentence-chunks, labels `PART1_GOD_*`. |
-| `part2_mind.md` + `part2_mind_manifest.json` | `tools/experiments/tooling/build_spinoza_part2_corpus.py --part 2` | Part II ("On the Nature and Origin of the Mind"), labels `PART2_MIND_*`. |
+| `part1_god.md` + `part1_god_manifest.json` | `tools/experiments/tooling/build_spinoza_corpus.py --part 1` | Part I ("Concerning God"), 418 sentence-chunks, labels `PART1_GOD_*`. |
+| `part2_mind.md` + `part2_mind_manifest.json` | `tools/experiments/tooling/build_spinoza_corpus.py --part 2` | Part II ("On the Nature and Origin of the Mind"), labels `PART2_MIND_*`. |
+| `part3_affects.md` + `part3_affects_manifest.json` | `tools/experiments/tooling/build_spinoza_corpus.py --part 3` | Part III ("On the Origin and Nature of the Emotions"), 647 sentence-chunks, labels `PART3_AFFECTS_*` (incl. the 48 Definitions of the Emotions as `DEFEMO_NN` and the closing General Definition as `GENDEF`). |
+| `telemetry/v1.json` | `tools/experiments/tooling/freeze_telemetry.py` | Versioned aggregate summaries of the manifold experiments (isolated parts 2/3 and accumulated 1+2+3): nodes, edges, gate rates, sigma^2, Sammon stress, collision rescue, inter-part edge distribution, top cross-part bridges. Distilled from ephemeral `.data/` artifacts; findings conditional on the MiniLM-L6-v2 representation provider. |
 
-Derivation rules (both parts): ONE SENTENCE = ONE CHUNK; `{label -> chunk}`
+Derivation rules (all parts): ONE SENTENCE = ONE CHUNK; `{label -> chunk}`
 manifest with insertion order == reading order; labels are neutral metadata
 never embedded; Gutenberg footnote reference markers (`[N]`) and footnote
-text blocks removed; Elwes editorial "N.B." notes excluded.
+text blocks removed; Elwes editorial "N.B." cross-reference notes excluded
+(only under AXIOMS/POSTULATES — elsewhere "N.B." is Spinoza's own text).
 
 ## History / superseded sources
 

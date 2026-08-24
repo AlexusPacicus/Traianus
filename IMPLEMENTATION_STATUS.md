@@ -1,8 +1,8 @@
-# Implementation Status: Control Plane v1.0.0 (IMPLEMENTED)
+# Implementation Status: Control Plane v1.0.1 (IMPLEMENTED)
 
-> **Purpose:** Transparent declaration of the correspondence between the R&D theoretical framework and the executable Core/Control Plane **v1.0.0**. Everything declared as IMPLEMENTED must be verifiable in `traianus/`; everything that remains a hypothesis is declared as RESEARCH / FUTURE ROADMAP in the consolidated status documentation (docs/STATUS.md).
+> **Purpose:** Transparent declaration of the correspondence between the R&D theoretical framework and the executable Core/Control Plane (substrate frozen at **v1.0.0**; current release **v1.0.1** — stability/security/hygiene, zero scope change). Everything declared as IMPLEMENTED must be verifiable in `traianus/`; everything that remains a hypothesis is declared as RESEARCH / FUTURE ROADMAP in the consolidated status documentation (docs/STATUS.md).
 
-**Date:** 2026-08-14 · **Scope:** `traianus/` (executable substrate) vs consolidated status documentation (docs/STATUS.md)
+**Date:** 2026-08-14 · *Amended 2026-08-24:* version reconciliation and Ulpia client status correction (LEDGER seq 34) · **Scope:** `traianus/` (executable substrate) vs consolidated status documentation (docs/STATUS.md)
 
 ---
 
@@ -36,7 +36,7 @@ Every element of the repository belongs to exactly one of these five categories.
 | **Zero-Trust perimeter & C1 gate** | 🟢 100% Implemented | `traianus/` | Fail-closed auth `x-traianus-token` (`traianus/app.py:118`); enumerated CORS, no wildcard (`traianus/app.py:72-79`); ingress restricted to `text/plain` (`traianus/app.py:107`, `traianus/app.py:314`); dynamic variance threshold calibrated excluding self-projection (`traianus/geometry/observables.py`), observed consolidation rate 30-45% (`tools/audit/audit_harness.py`). |
 | **Latency** | 🟢 Measured | `traianus/` | ~12ms p50 total pipeline (encode ~11.5ms + SQLite WAL persist ~0.5ms; LEDGER seq 22 measurement). Verified offline with `HF_HUB_OFFLINE=1` + `local_files_only=True`. |
 | **Provider agnosticism (RH-1)** | 🟡 Partial | `traianus/` | Dimension mismatch handled explicitly: zero-padding when d_db > d_in; HTTP 422 rejection when d_in > d_db (traianus/app.py:221-229, traianus/app.py:367, traianus/app.py:518-529). THE v1.0.0 CORE IS FROZEN AT 384D (all-MiniLM-L6-v2, pinned, offline). Multi-provider dynamic switching and experimental dimensionalities (e.g., 14D) remain active R&D (RH-1, see LEDGER.md seq 8) and are out of scope for the current validation phase. |
-| **Observation layer ($O_n = P_\theta(S_n)$)** | 🟢 Contract + 🔵 Client | `traianus/` | Read-only perspective projections declared in ADR-022/ADR-024; zero-side-effect reads verified (G5/OB, ADR-025 #2). The Ulpia client itself is RESEARCH / FUTURE ROADMAP (no UI code). |
+| **Observation layer ($O_n = P_\theta(S_n)$)** | 🟢 Contract + 🟡 Client (code exists, integration pending) | `traianus/` + `frontend/` | Read-only perspective projections declared in ADR-022/ADR-024; zero-side-effect reads verified (G5/OB, ADR-025 #2). The read-only contract is implemented in `traianus/`; a Ulpia client prototype lives under `frontend/` (React/Vite, arrived via the ulpia-line merge) but its integration with the observation contract remains RESEARCH / FUTURE ROADMAP — it is not part of the v1.0.x substrate scope and carries no substrate code. |
 
 ---
 
@@ -48,7 +48,7 @@ Formal classification of the project tree. Each element belongs to exactly one c
 | :--- | :--- |
 | 🟢 **IMPLEMENTED** | `traianus/app.py` · `traianus/storage.py` · `traianus/core.py` · `traianus/bootstrap.py` · `traianus/observability.py` · `traianus/geometry/` · `traianus/governance/` · `traianus/representation/` · `traianus/security/` · `traianus/__init__.py` |
 | 🟡 **EXPERIMENTAL** | `tools/experiments/` — `shared/` (corpus, kinematics engine), `hypothesis/` (H1/H2/H3), `logographic/` (EAS-01), `representation/` (independence), `validation/` (C1, WP1), `tooling/` (fixture export, ingest, simulation), `exp_manifesto_tomo0.py` |
-| 🔵 **RESEARCH / FUTURE WORK** | Work Packages WP1–WP4, Persistent Homology, RH-1 (multi-provider), Ulpia observation client — see §4. No code exists in `traianus/` for these. |
+| 🔵 **RESEARCH / FUTURE WORK** | Work Packages WP1–WP4, Persistent Homology, RH-1 (multi-provider), Ulpia observation client *integration* — see §4. No code for these exists in `traianus/`; the Ulpia client prototype under `frontend/` is out of substrate scope. |
 | ⚪ **DOCUMENTATION** | `docs/` (INDEX, LEDGER, PROJECT_IDENTITY, STATUS, architecture/, audit/, specifications/) · `README.md` · `IMPLEMENTATION_STATUS.md` · `LICENSE` |
 | 🔧 **INFRASTRUCTURE** | `pyproject.toml` · `opencode.jsonc` · `AGENTS.md` · `.gitignore` · `.github/` (CI) · `.opencode/` (skills) · `tests/` (verification harness) · `tools/audit/` (audit harness, invariant verifier) · `tools/mcp/` (spectral math MCP) |
 

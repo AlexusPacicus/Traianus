@@ -1,0 +1,178 @@
+{
+  "provenance": {
+    "source_edition": "Project Gutenberg eBook #3800 (Elwes translation), public domain",
+    "encoder": "sentence-transformers all-MiniLM-L6-v2, 384D float32, offline",
+    "geodetic_basis": "tests/fixtures/nsm_axes_8.json (epoch PROSTHETIC_NSM_V1)",
+    "epsilon_edge": 0.8,
+    "note": "Aggregate summaries distilled from ephemeral .data/ artifacts; manifold findings are conditional on this representation provider (RH-1 independence untested here)."
+  },
+  "runs": {
+    "part2_isolated": {
+      "n_nodes": 474,
+      "n_edges_persisted": 703,
+      "gate_consolidated": 57,
+      "sigma2": {
+        "variance_min": 0.000274,
+        "variance_p50": 0.002335,
+        "variance_p95": 0.005478,
+        "variance_max": 0.017246
+      },
+      "theta_dyn": 0.004292,
+      "epsilon": 0.8,
+      "chromatic": {
+        "sammon_stress_2d": 0.484,
+        "sammon_stress_5d": 0.2756,
+        "decompression_gain_pct": 43.05,
+        "collisions": 149,
+        "collision_rescue_rate": 0.953,
+        "stylistic_duplicates": 1
+      }
+    },
+    "part3_isolated": {
+      "n_nodes": 647,
+      "n_edges_persisted": 726,
+      "gate_consolidated": 65,
+      "sigma2": {
+        "variance_min": 0.00015,
+        "variance_p50": 0.002254,
+        "variance_p95": 0.005087,
+        "variance_max": 0.011604
+      },
+      "theta_dyn": 0.004292,
+      "epsilon": 0.8,
+      "chromatic": {
+        "sammon_stress_2d": 0.488,
+        "sammon_stress_5d": 0.2676,
+        "decompression_gain_pct": 45.16,
+        "collisions": 146,
+        "collision_rescue_rate": 0.9863,
+        "stylistic_duplicates": 3
+      }
+    },
+    "accumulated_123": {
+      "n_nodes": 1539,
+      "n_edges_persisted": 2251,
+      "gate_consolidated": 199,
+      "sigma2": {
+        "variance_min": 0.00015,
+        "variance_p50": 0.002362,
+        "variance_p95": 0.005457,
+        "variance_max": 0.017246
+      },
+      "theta_dyn": 0.004292,
+      "epsilon": 0.8,
+      "chromatic": {
+        "sammon_stress_2d": 0.491,
+        "sammon_stress_5d": 0.2954,
+        "decompression_gain_pct": 39.83,
+        "collisions": 1143,
+        "collision_rescue_rate": 0.9589,
+        "stylistic_duplicates": 6
+      }
+    }
+  },
+  "inter_part_analysis": {
+    "intra_part_edges": {
+      "P1_GOD": 427,
+      "P2_MIND": 703,
+      "P3_AFFECTS": 726
+    },
+    "inter_part_edges": {
+      "P1_GOD <-> P2_MIND": 132,
+      "P1_GOD <-> P3_AFFECTS": 64,
+      "P2_MIND <-> P3_AFFECTS": 199
+    },
+    "top_cross_part_bridges": [
+      {
+        "pair": "NODE_1010<->NODE_616",
+        "labels": [
+          "PART3_AFFECTS_P14_DEMO_01_C01",
+          "PART2_MIND_P18_PROP"
+        ],
+        "distance": 0.371,
+        "resonance_axis": "AXIS_6"
+      },
+      {
+        "pair": "NODE_1266<->NODE_592",
+        "labels": [
+          "PART3_AFFECTS_P51_DEMO_01_C01",
+          "PART2_MIND_P14_DEMO_01_C01"
+        ],
+        "distance": 0.4311,
+        "resonance_axis": "AXIS_2"
+      },
+      {
+        "pair": "NODE_634<->NODE_919",
+        "labels": [
+          "PART2_MIND_P21_ESC_01_C02",
+          "PART3_AFFECTS_P02_ESC_01_C01"
+        ],
+        "distance": 0.4469,
+        "resonance_axis": "AXIS_2"
+      },
+      {
+        "pair": "NODE_1010<->NODE_779",
+        "labels": [
+          "PART3_AFFECTS_P14_DEMO_01_C01",
+          "PART2_MIND_P44_ESC_01_C03"
+        ],
+        "distance": 0.518,
+        "resonance_axis": "AXIS_6"
+      },
+      {
+        "pair": "NODE_1266<->NODE_587",
+        "labels": [
+          "PART3_AFFECTS_P51_DEMO_01_C01",
+          "PART2_MIND_POST_03"
+        ],
+        "distance": 0.5233,
+        "resonance_axis": "AXIS_2"
+      },
+      {
+        "pair": "NODE_1098<->NODE_651",
+        "labels": [
+          "PART3_AFFECTS_P27_DEMO_01_C02",
+          "PART2_MIND_P25_DEMO_01_C01"
+        ],
+        "distance": 0.5331,
+        "resonance_axis": "AXIS_4"
+      },
+      {
+        "pair": "NODE_530<->NODE_982",
+        "labels": [
+          "PART2_MIND_P12_ESC_01",
+          "PART3_AFFECTS_P11_DEMO_01"
+        ],
+        "distance": 0.5388,
+        "resonance_axis": "AXIS_3"
+      },
+      {
+        "pair": "NODE_1105<->NODE_640",
+        "labels": [
+          "PART3_AFFECTS_P27_DEMO_02_C01",
+          "PART2_MIND_P22_DEMO_01_C02"
+        ],
+        "distance": 0.5918,
+        "resonance_axis": "AXIS_6"
+      },
+      {
+        "pair": "NODE_702<->NODE_905",
+        "labels": [
+          "PART2_MIND_P36_DEMO_01",
+          "PART3_AFFECTS_P01_DEMO_01_C02"
+        ],
+        "distance": 0.5918,
+        "resonance_axis": "AXIS_2"
+      },
+      {
+        "pair": "NODE_1211<->NODE_445",
+        "labels": [
+          "PART3_AFFECTS_P41_DEMO_01_C01",
+          "PART2_MIND_P02_DEMO_01"
+        ],
+        "distance": 0.595,
+        "resonance_axis": "AXIS_3"
+      }
+    ]
+  }
+}
