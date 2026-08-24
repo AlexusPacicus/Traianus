@@ -751,3 +751,22 @@
   reconciliation when implemented. Until then the repo remains flake-free by
   design; the proposal no longer claims it exists today.
 * **Status:** `Consolidated`.
+
+### seq 30 — 2026-08-24 — Research datasets dir; Spinoza Ethics corpus frozen (Parts I+II)
+
+* **Dataset unification:** `Ethics_1.md` (operator-local, gitignored) moved to
+  `data/spinoza/part1_god.md` and versioned; `/Ethics_1.md` exception removed
+  from `.gitignore`. `tests/fixtures/` remains reserved for harness artifacts;
+  `data/spinoza/` is the new research-dataset node.
+* **Part II ("On the Nature and Origin of the Mind") frozen:** continuous text
+  `part2_mind.md` + immutable sentence-level manifest `part2_mind_manifest.json`
+  ({label -> chunk}, insertion order == reading order; ONE SENTENCE = ONE CHUNK).
+  Source: Project Gutenberg eBook #3800 (Elwes translation, public domain);
+  builder `tools/experiments/tooling/build_spinoza_part2_corpus.py` (offline,
+  no network primitives, AGENTS §2.1). Label scheme: neutral metadata only,
+  never embedded — `PART2_MIND_{DEF|AX|LEMMA|POST|PNN_PROP|_DEMO|_COR|_ESC}`.
+  472 sentence-chunks (median 31 words); Elwes editorial "N.B." notes excluded.
+* **Ephemeral SQLite work artifacts** stay under `.data/` (ignored); the frozen
+  substrate at repo root is untouched.
+* **Gate:** hermetic suite **201 passed, 5 deselected**.
+* **Status:** `Consolidated`.
