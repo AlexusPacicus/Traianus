@@ -627,3 +627,30 @@
 * **Gate:** hermetic suite **177 passed, 5 deselected** (+17 regressions);
   zero Spanish residue outside this ledger.
 * **Status:** `Consolidated`.
+
+### seq 25 — 2026-08-24 — Monorepo coexistence policy + terminology canon
+
+* **Context:** Operator decisions on RefApp-01 PoC material living inside the
+  Traianus tree: keep everything in one repository, with an explicit boundary
+  instead of loose untracked files. Also: canonical English terms for the
+  H2/H1/H3 experiment vocabulary.
+* **Δ executed:**
+  - Quarantine via `.gitignore`: global `node_modules/`, `.vite/`, `dist/`
+    patterns; RefApp-01 local materials (`tools/results/`,
+    `docs/manifesto/TOMO_0.md`, `Ethics_1.md`) ignored — durable, not lost,
+    never committed by accident.
+  - Promoted to tracked code: the ε-bridge audit TDD pair
+    (`tools/analyze_bridges.py` + `tests/unit/test_analyze_bridges.py`).
+    CI collection == local collection == **177** for the first time.
+  - `frontend/` (Ulpia client layer) adopts a SOURCES-ONLY policy:
+    only `package.json`, lockfile, vite config, `index.html` and `src/` will
+    ever be committed; vendored/build artifacts stay ignored. Sources pending
+    regeneration by the operator (none exist on disk today).
+  - Terminology canon: `piscina` → **basin**, `relaminate` →
+    **relaminarize** (fluid-dynamics term); verdict literals across H1/H2/H3
+    experiments → `VALIDATED` / `FALSIFIED` (no consumers parse them;
+    verified before rename).
+* **Gate:** hermetic suite **177 passed, 5 deselected**; Spanish residue in
+  tracked `.py` = 0; runtime smoke of `exp_dimensional_relief.py` prints
+  English end-to-end (`Verdict: H2 VALIDATED`).
+* **Status:** `Consolidated`.
