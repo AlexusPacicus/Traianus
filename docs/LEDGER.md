@@ -751,3 +751,75 @@
   reconciliation when implemented. Until then the repo remains flake-free by
   design; the proposal no longer claims it exists today.
 * **Status:** `Consolidated`.
+
+### seq 30 — 2026-08-24 — Research datasets dir; Spinoza Ethics corpus frozen (Parts I+II)
+
+* **Dataset unification:** `Ethics_1.md` (operator-local, gitignored) moved to
+  `data/spinoza/part1_god.md` and versioned; `/Ethics_1.md` exception removed
+  from `.gitignore`. `tests/fixtures/` remains reserved for harness artifacts;
+  `data/spinoza/` is the new research-dataset node.
+* **Part II ("On the Nature and Origin of the Mind") frozen:** continuous text
+  `part2_mind.md` + immutable sentence-level manifest `part2_mind_manifest.json`
+  ({label -> chunk}, insertion order == reading order; ONE SENTENCE = ONE CHUNK).
+  Source: Project Gutenberg eBook #3800 (Elwes translation, public domain);
+  builder `tools/experiments/tooling/build_spinoza_part2_corpus.py` (offline,
+  no network primitives, AGENTS §2.1). Label scheme: neutral metadata only,
+  never embedded — `PART2_MIND_{DEF|AX|LEMMA|POST|PNN_PROP|_DEMO|_COR|_ESC}`.
+  472 sentence-chunks (median 31 words); Elwes editorial "N.B." notes excluded.
+* **Ephemeral SQLite work artifacts** stay under `.data/` (ignored); the frozen
+  substrate at repo root is untouched.
+* **Gate:** hermetic suite **201 passed, 5 deselected**.
+* **Status:** `Consolidated`.
+
+### seq 31 — 2026-08-24 — Fases 1-3 executed on Part II manifold; lab-analyst skill born
+
+* **Fase 1 (ingestion):** `tools/experiments/tooling/ingest_spinoza_part2.py`
+  (+ `tests/unit/test_ingest_spinoza_part2.py`) ran all 472 sentence-chunks
+  through the real pipeline into scratch DB `.data/spinoza_part2.db`
+  (epoch PROSTHETIC_NSM_V1 from the frozen nsm_axes_8 fixture; root substrate
+  untouched). Result: 472 nodes, 698 persisted auto-edges (epsilon=0.8),
+  dual-key gate 57/472 consolidated (12.1%, non-degenerate).
+* **Fase 2 (diagnosis):** bridge audit — E_n=698 with 639 non-contiguous
+  bridges vs 59 sequential (resonance-dominated manifold); adaptive epsilon
+  p5 saturates (105k edges) on the narrow-cone embedding cloud, fixed mode
+  retained. Pressure: definitions and P24-P31 (mind-body) hottest; max
+  sigma^2=0.0172 at DEF_05 (duration) = 4x theta_dyn.
+* **Fase 3 (static SVD):** `tools/experiments/tooling/export_svd_projection.py`
+  (+ tests); PC1-3 = 7.05/5.94/4.92% of variance; reading-order continuity
+  ratio 0.64 (consecutive steps shorter than random pairs); mind-body zone
+  most separated cluster — coherent with its pressure maximum.
+* **Fase 4 (skill):** `.opencode/skills/lab-analyst/SKILL.md` registered in
+  AGENTS.md §6.5; companion tool `chromatic_audit.py` (+ tests): effective 5D
+  (X,Y spatial + R,G,B singular-value-weighted PC3-PC5), collision rescue
+  141/148 (95.3%, delta_rgb > 0.15), Sammon stress 2D->5D gain 43.1%
+  (0.4837 -> 0.2751), falsifiable ontological alignment currently neutral
+  (soma r=-0.05, duration r=-0.12 [n=2], potestas r=-0.06).
+* **Gate:** hermetic suite **210 passed, 5 deselected**.
+* **Status:** `Consolidated`.
+
+### seq 32 — 2026-08-24 — Provenance correction + dataset hardening (review remediation)
+
+* **Provenance blocker resolved:** `part1_god.md` contained globalgreyebooks.com
+  hyperlink footnotes contradicting the declared PG#3800/Elwes source.
+  Part I **re-derived from PG#3800** via the builder's new `--part {1,2}`
+  flag; Gutenberg footnote markers/text blocks (`[N]`, editorial notes)
+  stripped from both parts. `data/spinoza/PROVENANCE.md` added as the
+  canonical source-of-truth document; superseded sources documented.
+* **Drift guard:** `tests/unit/test_spinoza_dataset_consistency.py` asserts
+  build(md) == manifest for both parts (dual-source-of-truth closed); part1
+  now ships its own frozen manifest (`part1_god_manifest.json`).
+* **Tooling dedup:** shared `_common.py` (load_nodes / load_labels /
+  explained_variance_ratios with zero-variance guard) replaces duplicated
+  copies in export_svd_projection.py and chromatic_audit.py; inline
+  __import__ removed; Spinoza zone patterns renamed
+  SPINOZA_ZONE_PATTERNS and documented as a corpus-specific falsifiable
+  hypothesis; labels[nid] access made loud (no .get() masking).
+* **CWD robustness:** ingest_spinoza_part2.py scratch/telemetry paths
+  anchored to REPO_ROOT (was relative to the caller's directory).
+* **Governance:** AGENTS.md 1.2 now codifies the deliberate exception for
+  frozen datasets under data/** (incl. data/spinoza manifests).
+* **Re-run on purified corpus (474 chunks):** 474 nodes / 703 auto-edges /
+  gate 12.0%; Sammon gain 43.0%; collision rescue 142/149 (95.3%);
+  ontological alignment still neutral — prior Fase 2-4 conclusions hold.
+* **Gate:** hermetic suite green (see commit).
+* **Status:** `Consolidated`.
