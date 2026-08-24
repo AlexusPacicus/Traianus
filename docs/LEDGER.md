@@ -877,3 +877,70 @@
   deferred to its own post-merge cycle.
 * **Gate:** hermetic suite green (see commit); invariant verifier GREEN.
 * **Status:** `Consolidated`.
+
+### seq 35 — 2026-08-24 — Part IV (Of Human Bondage) frozen; 4-part accumulated manifold
+
+* **Corpus:** `part4_bondage.md` + `part4_bondage_manifest.json` via
+  `build_spinoza_corpus.py --part 4`: 549 sentence-chunks, labels
+  `PART4_BONDAGE_*`, 73/73 propositions, full Appendix (72 chunks).
+* **Parser hardening (PG#3800 punctuation variants):** trailing-period
+  section headers (`PROPOSITIONS.`, `APPENDIX.`, singular `AXIOM.`) now
+  matched; unnumbered single-item families auto-numbered instead of
+  dropped. Side-effect fix on Part I: a spurious `PROPOSITIONS.` header
+  chunk absorbed into AX_07 eliminated (418 -> 417 clean chunks).
+* **Isolated mode** (`.data/part4_bondage.db`): 549 nodes / 382 edges;
+  gate 86/549 consolidated (15.7%); chromatic rescue 97.9%; Sammon gain
+  44.3%; zero stylistic duplicates.
+* **Accumulated mode** (`.data/spinoza_full.db`, parts 1+2+3+4): 2087
+  nodes / 2931 edges; gate 285/2087 (13.7%). Inter-part epsilon edges:
+  **AFFECTS<->BONDAGE = 223, densest continuum** (MIND<->AFFECTS 199,
+  GOD<->MIND 132) — Part IV's doctrine of the bondage to passions is the
+  most strongly coupled layer, as its subject matter predicts.
+* **Chromatic scalability gate:** collision rescue at n=2087 is 97.7%
+  over 2352 collisions — holds above the 95% bar. Densification trend of
+  Sammon gain: 45.2% (n=647) -> 39.8% (n=1539) -> 38.4% (n=2087).
+* **Memory-safety fix:** `pairwise_dists` switched to the projected
+  |x|^2+|y|^2-2xy form after the (n,n,d) intermediate OOM-killed the
+  accumulated audit at n=2087 (~104MB peak after fix).
+* **Evidence freeze:** `data/spinoza/telemetry/v2.json` supersedes v1.
+* **Gate:** hermetic suite green (see commit); invariant verifier GREEN.
+* **Status:** `Consolidated`.
+
+### seq 36 — 2026-08-24 — Syntactic segmentation hardening; reproducibility source committed
+
+* **Trigger:** operator-directed segmentation strategy + second audit round
+  (drift-guard gap on Part IV, no builder reproducibility guard, fragile
+  auto-number heuristic, pairwise_dists equivalence unpinned, Sammon trend
+  provenance mixing).
+* **Segmentation hardening** (`build_spinoza_corpus.py`): root-cause fix in
+  `split_sentences` — the boundary-evidence window was anchored at the last
+  emitted sentence, hiding the whitespace that abbreviation anchors require;
+  window is now absolute. Abbreviation set extended (N.B., cf., vol., p./pp.,
+  l./ll., n., ed., transl., St./Mr./Dr., roman numerals up to 6 chars for
+  appendix items); citation debris ("Pollock.", "Gloria.", "N.B.") merges
+  backwards into its carrier sentence. Lossless property (joined sentences ==
+  normalized input) enforced by tests/unit/test_build_spinoza_corpus.py.
+* **Corpus regenerated under the hardened tokenizer:** Part I 417 -> 409,
+  Part II 474 -> 458, Part III 647 -> 627, Part IV 549 -> 507 (total 2001);
+  <=2-word debris census now zero except the legitimate "Man thinks."
+  All four scratch DBs re-ingested; chromatic audits re-run.
+* **Reproducibility guard:** PG#3800 snapshot committed at
+  `data/spinoza/source/pg3800.txt` (SHA-256 647f0227...);
+  tests/unit/test_builder_reproducibility.py asserts byte-exact manifest
+  reproduction for all four parts, documented proposition counts
+  (36/49/59/73), the 48 Definitions of the Emotions, Part IV Appendix
+  presence, and source-snapshot integrity.
+* **Drift-guard gap closed:** test_part4_bondage_md_matches_manifest added
+  (Part IV was the only part without md<->manifest enforcement).
+* **pairwise_dists equivalence pinned:** projected form matches the naive
+  formula within rtol=1e-9 / atol=1e-5 (documented catastrophic-cancellation
+  trade-off); exact-zero clamp tested.
+* **Evidence freeze:** `data/spinoza/telemetry/v3.json` supersedes v2
+  (per-part runs under the new conventions: part1_god/part2_mind/
+  part3_affects/part4_bondage + spinoza_full). Isolated Sammon gains:
+  46.8% / 45.4% / 45.1%; accumulated (n=2001): 39.4% with rescue 97.4%
+  over 1909 collisions. Inter-part edges: AFFECTS<->BONDAGE 215 remains
+  the densest continuum. Note: the seq 35 densification midpoint (n=1539)
+  was measured during the v1-era corpus and is retained as historical.
+* **Gate:** hermetic suite **243 passed, 5 deselected**.
+* **Status:** `Consolidated`.

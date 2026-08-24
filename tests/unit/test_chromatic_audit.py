@@ -10,9 +10,28 @@ sys.path.insert(0, str(Path(__file__).resolve().parents[2] / "tools" / "experime
 from chromatic_audit import (
     effective_5d,
     find_collisions,
+    pairwise_dists,
     sammon_stress,
     zone_channel_alignment,
 )
+
+
+def test_pairwise_dists_matches_naive_formula():
+    # Projected form trades ~1e-6 absolute accuracy on near-zero distances
+    # (catastrophic cancellation) for O(n^2) memory — pinned here.
+    rng = np.random.default_rng(11)
+    P = rng.normal(size=(60, 384))
+    got = pairwise_dists(P)
+    expected = np.linalg.norm(P[:, None, :] - P[None, :, :], axis=2)
+    assert np.allclose(got, expected, rtol=1e-9, atol=1e-5)
+
+
+def test_pairwise_dists_handles_near_zero_distances():
+    # Catastrophic-cancellation guard: identical rows must yield exactly 0.
+    P = np.vstack([np.ones(16), np.ones(16), np.full(16, 1.0 + 1e-12)])
+    D = pairwise_dists(P)
+    assert D[0, 1] == 0.0
+    assert D[0, 2] < 1e-9
 
 
 def test_effective_5d_shape_and_rgb_range():

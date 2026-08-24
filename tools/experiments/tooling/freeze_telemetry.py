@@ -22,12 +22,14 @@ sys.path.insert(0, str(REPO_ROOT))
 from _common import load_labels
 
 RUNS = [
-    ("part2_isolated", "spinoza_part2"),
+    ("part2_isolated", "part2_mind"),
     ("part3_isolated", "part3_affects"),
-    ("accumulated_123", "spinoza_full"),
+    ("part4_isolated", "part4_bondage"),
+    ("accumulated_1234", "spinoza_full"),
 ]
 
-PART_BY_PREFIX = {"PART1": "P1_GOD", "PART2": "P2_MIND", "PART3": "P3_AFFECTS"}
+PART_BY_PREFIX = {"PART1": "P1_GOD", "PART2": "P2_MIND", "PART3": "P3_AFFECTS",
+                   "PART4": "P4_BONDAGE"}
 
 TOP_BRIDGES_LIMIT = 10
 
