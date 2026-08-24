@@ -44,6 +44,19 @@ SECTION_HEADERS = {
     "propositions": re.compile(r"^PROPOSITIONS\s*$"),
     "postulates": re.compile(r"^POSTULATES\.?\s*$"),
     "appendix": re.compile(r"^APPENDAGE\.?\s*$|^APPENDIX:?$"),
+    "definitions_of_emotions": re.compile(
+        r"^DEFINITIONS OF THE EMOTIONS\.?\s*$"),
+    "general_definition": re.compile(
+        r"^GENERAL DEFINITION OF THE EMOTIONS\.?\s*$"),
+}
+
+# Sections whose units are roman-numbered items ("I. ...") rather than
+# inline markers, mapped to their label codes.
+ROMAN_ITEM_SECTIONS = {
+    "definitions": ("definition", "DEF"),
+    "axioms": ("axiom", "AX"),
+    "postulates": ("postulate", "POST"),
+    "definitions_of_emotions": ("emotion_definition", "DEFEMO"),
 }
 
 PART_CONFIG = {
@@ -56,7 +69,7 @@ PART_CONFIG = {
         "md_title": "## **Part 1\\. Concerning God**",
         # Part I lists definitions as roman items under DEFINITIONS.;
         # Part II uses inline DEFINITION N. markers.
-        "roman_definitions": True,
+        "roman_sections": ["definitions", "axioms", "postulates"],
     },
     2: {
         "start": re.compile(r"^Part II\.\s*$", re.M),
@@ -65,7 +78,17 @@ PART_CONFIG = {
         "md_name": "part2_mind.md",
         "manifest_name": "part2_mind_manifest.json",
         "md_title": "## **Part 2\\. On the Nature and Origin of the Mind**",
-        "roman_definitions": False,
+        "roman_sections": ["axioms", "postulates"],
+    },
+    3: {
+        "start": re.compile(r"^PART III\.\s*$", re.M),
+        "end": re.compile(r"^PART IV:\s*$", re.M),
+        "prefix": "PART3_AFFECTS",
+        "md_name": "part3_affects.md",
+        "manifest_name": "part3_affects_manifest.json",
+        "md_title": "## **Part 3\\. On the Origin and Nature of the Emotions**",
+        "roman_sections": ["definitions", "postulates",
+                           "definitions_of_emotions"],
     },
 }
 
@@ -93,7 +116,13 @@ ROMAN = {
     "XXXI": 31, "XXXII": 32, "XXXIII": 33, "XXXIV": 34, "XXXV": 35,
     "XXXVI": 36, "XXXVII": 37, "XXXVIII": 38, "XXXIX": 39, "XL": 40,
     "XLI": 41, "XLII": 42, "XLIII": 43, "XLIV": 44, "XLV": 45, "XLVI": 46,
-    "XLVII": 47, "XLVIII": 48, "XLIX": 49,
+    "XLVII": 47, "XLVIII": 48, "XLIX": 49, "L": 50, "LI": 51, "LII": 52,
+    "LIII": 53, "LIV": 54, "LV": 55, "LVI": 56, "LVII": 57, "LVIII": 58,
+    "LIX": 59, "LX": 60, "LXI": 61, "LXII": 62, "LXIII": 63, "LXIV": 64,
+    "LXV": 65, "LXVI": 66, "LXVII": 67, "LXVIII": 68, "LXIX": 69,
+    "LXX": 70, "LXXI": 71, "LXXII": 72, "LXXIII": 73, "LXXIV": 74,
+    "LXXV": 75, "LXXVI": 76, "LXXVII": 77, "LXXVIII": 78, "LXXIX": 79,
+    "LXXX": 80,
 }
 
 CHILD_CODES = {"proof": "DEMO", "corollary": "COR", "note": "ESC"}
@@ -167,7 +196,8 @@ def build_manifest(source_path: Path, part: int) -> dict[str, str]:
     blocks = extract_part(source_path.read_text(encoding="utf-8"), cfg)
 
     manifest: dict[str, str] = {}
-    counters = {"axiom": 0, "lemma": 0, "postulate": 0, "definition": 0}
+    counters = {"axiom": 0, "lemma": 0, "postulate": 0, "definition": 0,
+                "emotion_definition": 0}
     child_seq: dict[str, int] = {}
     section = None
     state_label: str | None = None      # label absorbing unmarked blocks
@@ -204,8 +234,12 @@ def build_manifest(source_path: Path, part: int) -> dict[str, str]:
             sub_context = False
             if header_kind == "appendix":
                 state_label = f"{prefix}_APPENDIX"
+            elif header_kind == "general_definition":
+                state_label = f"{prefix}_GENDEF"
             continue
-        if EDITORIAL_NOTE.match(block):
+        # Elwes' cross-reference notes appear under AXIOMS/POSTULATES;
+        # elsewhere an "N.B." is Spinoza's own text and must be kept.
+        if EDITORIAL_NOTE.match(block) and section in ("axioms", "postulates"):
             continue
 
         marker = None
@@ -215,18 +249,13 @@ def build_manifest(source_path: Path, part: int) -> dict[str, str]:
                 marker = (kind, matched)
                 break
 
-        roman_sections = ("axioms", "postulates")
-        if cfg["roman_definitions"]:
-            roman_sections += ("definitions",)
+        roman_sections: tuple[str, ...] = tuple(cfg["roman_sections"])
         if section in roman_sections and not marker:
             item = ROMAN_ITEM.match(block)
             if item:
                 close(buf)
-                family = {"axioms": "axiom", "postulates": "postulate",
-                          "definitions": "definition"}[section]
+                family, code = ROMAN_ITEM_SECTIONS[section]
                 counters[family] += 1
-                code = {"axiom": "AX", "postulate": "POST",
-                        "definition": "DEF"}[family]
                 state_label = f"{prefix}_{code}_{counters[family]:02d}"
                 buf.append(item.group(2))
                 continue
