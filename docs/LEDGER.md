@@ -982,3 +982,13 @@
 * **Process rule adopted:** merges touching frozen datasets require an
   explicit operator audit sign-off BEFORE merge, without exception.
 * **Status:** `Pending approval`.
+
+### seq 39 — 2026-08-24 — Part V re-landed after audit sign-off
+
+* **Audit round 3 remediations merged** (title fidelity to the Elwes
+  edition wording, PROVENANCE telemetry chain completed, part1_isolated
+  run base created, test ordering): commit 6c72895 on
+  `feature/pkm-spinoza-part5-power`.
+* **Re-landing executed per seq 38 procedure:** cbac362 reverted
+  (cd1927b "Reapply"), then the feature branch merged (206dc79).
+* **Status:** `Consolidated` — operator merge approval recorded in chat.
