@@ -36,7 +36,7 @@ DEFAULT_MANIFEST = REPO_ROOT / "data" / "spinoza" / "part2_mind_manifest.json"
 DEFAULT_SCRATCH_DB = str(REPO_ROOT / ".data" / "spinoza_part2.db")
 
 # Frozen dataset conventions per Ethics part (data/spinoza/).
-CORPUS_STEMS = {1: "part1_god", 2: "part2_mind", 3: "part3_affects", 4: "part4_bondage", 5: "part5_power"}
+CORPUS_STEMS = {1: "part1_god", 2: "part2_mind", 3: "part3_affects", 4: "part4_bondage"}
 
 
 def corpus_stem(part: int) -> str:

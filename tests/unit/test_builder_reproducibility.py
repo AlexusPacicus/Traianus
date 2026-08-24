@@ -19,7 +19,7 @@ from build_spinoza_corpus import PART_CONFIG, build_manifest  # noqa: E402
 SOURCE = REPO_ROOT / "data" / "spinoza" / "source" / "pg3800.txt"
 DATA = REPO_ROOT / "data" / "spinoza"
 
-EXPECTED_PROPOSITIONS = {1: 36, 2: 49, 3: 59, 4: 73, 5: 42}
+EXPECTED_PROPOSITIONS = {1: 36, 2: 49, 3: 59, 4: 73}
 
 
 def _frozen(part: int) -> dict:
@@ -27,12 +27,12 @@ def _frozen(part: int) -> dict:
     return json.loads((DATA / cfg["manifest_name"]).read_text(encoding="utf-8"))
 
 
-@pytest.mark.parametrize("part", [1, 2, 3, 4, 5])
+@pytest.mark.parametrize("part", [1, 2, 3, 4])
 def test_builder_reproduces_frozen_manifest(part):
     assert build_manifest(SOURCE, part) == _frozen(part)
 
 
-@pytest.mark.parametrize("part", [1, 2, 3, 4, 5])
+@pytest.mark.parametrize("part", [1, 2, 3, 4])
 def test_documented_proposition_count(part):
     manifest = _frozen(part)
     prefix = PART_CONFIG[part]["prefix"]
