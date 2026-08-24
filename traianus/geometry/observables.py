@@ -96,7 +96,6 @@ def ortho_distance(v: np.ndarray, B_0: np.ndarray) -> float:
     """Pure operator: orthogonal residual distance from vector v to base B_0.
 
     Computes the squared L2-norm of the component of v orthogonal to all
-    Computes the squared L2-norm of the component of v orthogonal to all
     rows of B_0 (k × d matrix).  This is the "projection distance outside
     the B_0 basin" used by H3 discrimination.
 
@@ -166,27 +165,45 @@ def discrimination_ratio(
 def svd_reduce(X: np.ndarray, k: int = 2) -> tuple[np.ndarray, np.ndarray]:
     """SVD-based PCA reduction: (n, d) -> coords (n, k), residual (n, min(d-k, 3)).
 
+    Sign convention: each principal component is flipped so its
+    largest-|entry| is positive (svd_flip style); output is stable across
+    BLAS builds and matches the TypeScript port in frontend/src/projection.ts.
+
     Parameters
     ----------
-    X : np.ndarray of shape (n, d), d >= k + 1
+    X : np.ndarray of shape (n, d), d >= k, n >= 1, all-finite
         Input data matrix (rows are samples).
     k : int, default 2
         Number of principal components for spatial coordinates.
 
     Returns
     -------
-    coords : np.ndarray of shape (k, k)
+    coords : np.ndarray of shape (n, k)
         Top-k principal coordinates: U[:, :k] * S[:k].
     residual : np.ndarray of shape (n, r)
-        Next r = min(d - k, 3) left singular vectors (chromatic sources).
+        Next r = min(d - k, 3) left singular vectors (chromatic sources),
+        sign-canonicalized with the same convention.
+
+    Raises
+    ------
+    ValueError
+        Non-2-D input, d < k, empty sample set, or non-finite entries.
     """
     if X.ndim != 2:
         raise ValueError(f"Expected 2-D array, got {X.ndim}-D")
     n, d = X.shape
     if d < k:
         raise ValueError(f"Need d >= k ({k}), got d = {d}")
+    if n == 0:
+        raise ValueError("Need at least one sample row, got n = 0")
+    if not np.all(np.isfinite(X)):
+        raise ValueError("Input contains non-finite values (NaN or Inf)")
     X_centered = X - np.mean(X, axis=0)
     U, S, _ = np.linalg.svd(X_centered, full_matrices=False)
+    # Deterministic sign convention: largest-|entry| of each component > 0.
+    signs = np.sign(U[np.argmax(np.abs(U), axis=0), np.arange(U.shape[1])])
+    signs[signs == 0] = 1.0
+    U = U * signs
     actual_k = min(k, U.shape[1])
     coords = np.zeros((n, k), dtype=np.float64)
     coords[:, :actual_k] = U[:, :actual_k] * S[:actual_k]

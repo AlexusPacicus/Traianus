@@ -21,6 +21,7 @@ from traianus.geometry.observables import (
 )
 from traianus.governance.gate import evaluate_gate
 from traianus import storage
+from traianus.config import resolve_epsilon_edge
 from traianus.observability import (
     get_logger,
     generate_request_id,
@@ -96,9 +97,10 @@ def get_provider():
 # =====================================================================
 # SERVER-SIDE EPSILON FOR DETERMINISTIC E_n (ADR-023/H5, RE-09/CO-12)
 # Epsilon is a server-side constant, never a client parameter (Zero-Trust).
-# Configurable only at boot via TRAIANUS_EPSILON_EDGE.
+# Configurable only at boot via TRAIANUS_EPSILON_EDGE; resolved through the
+# central config module (single source of truth shared with audit tooling).
 # =====================================================================
-EPSILON_EDGE = float(os.environ.get("TRAIANUS_EPSILON_EDGE", "0.8"))
+EPSILON_EDGE = resolve_epsilon_edge()
 
 # =====================================================================
 # ZERO-TRUST INGRESS PERIMETER (audit H2): ALLOWLIST.
@@ -284,7 +286,9 @@ def async_spectral_processor(ingestion_id: int, raw_text: str):
             )
             storage.mark_queue_processed(conn, ingestion_id)
 
-        print(f"[Traianus Core] Idea #{ingestion_id} registered in limbo. Variance: {variance:.4f}")
+        get_logger(request_id=f"bg-{ingestion_id}").info(
+            "ingestion_processed", variance=round(variance, 6)
+        )
 
     except Exception as e:
         import traceback

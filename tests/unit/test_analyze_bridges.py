@@ -1,5 +1,6 @@
 """Unit tests for tools/analyze_bridges.py — non-sequential E_n bridge audit."""
 import numpy as np
+import pytest
 
 from tools.analyze_bridges import (
     adaptive_epsilon,
@@ -129,3 +130,25 @@ def test_exclusion_collapses_contiguity():
     filtered = apply_exclusions(NODES, {"NODE_2", "NODE_3"})
     assert [n["id"] for n in filtered] == ["NODE_1", "NODE_4", "NODE_5", "NODE_6"]
     assert find_bridges(filtered, EPSILON) == []
+
+
+def test_percentile_out_of_range_rejected(monkeypatch):
+    from tools.analyze_bridges import main
+
+    monkeypatch.setattr("sys.argv", ["analyze_bridges", "--percentile", "150"])
+    with pytest.raises(SystemExit) as excinfo:
+        main()
+    assert excinfo.value.code == 2
+
+
+def test_missing_db_clean_exit(monkeypatch, capsys):
+    from tools.analyze_bridges import main
+
+    monkeypatch.setattr(
+        "sys.argv",
+        ["analyze_bridges", "--db", "/nonexistent/audit_target.db"],
+    )
+    with pytest.raises(SystemExit) as excinfo:
+        main()
+    assert excinfo.value.code == 2
+    assert "not found" in capsys.readouterr().out

@@ -25,7 +25,7 @@ from traianus.core import calibrate_critical_threshold, evaluate_gate_v01
 
 REPO_ROOT = Path(__file__).resolve().parent.parent
 DESTRUCTIVE_RE = re.compile(
-    r"(UPDATE|REPLACE|DELETE)\s+(manifold_nodes|geodesic_axes)\b",
+    r"(UPDATE|REPLACE|DELETE)\s+(manifold_nodes|manifold_edges|geodesic_axes)\b",
     re.IGNORECASE,
 )
 

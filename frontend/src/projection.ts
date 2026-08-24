@@ -135,12 +135,26 @@ export interface SvdResult {
  */
 export function svdReduce(X: number[][], k: number = 2): SvdResult {
   const n = X.length;
+  if (n === 0) throw new Error("Need at least one sample row");
   const d = X[0].length;
   if (d < k) throw new Error(`Need d >= k (${k}), got d = ${d}`);
+  for (const row of X)
+    if (row.some((v) => !Number.isFinite(v)))
+      throw new Error("Input contains non-finite values");
 
   const mu = meanColumns(X);
   const Xc = centerRows(X, mu);
   const { U, S } = svd(Xc);
+
+  // Deterministic sign convention (mirrors Python svd_flip): largest-|entry|
+  // of each component column is made positive.
+  for (let j = 0; j < U[0].length; j++) {
+    let maxRow = 0;
+    for (let i = 1; i < n; i++)
+      if (Math.abs(U[i][j]) > Math.abs(U[maxRow][j])) maxRow = i;
+    if (U[maxRow][j] < 0)
+      for (let i = 0; i < n; i++) U[i][j] = -U[i][j];
+  }
 
   const actualK = Math.min(k, U[0].length);
   const coords: number[][] = Array.from({ length: n }, () =>

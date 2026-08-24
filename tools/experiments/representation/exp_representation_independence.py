@@ -51,8 +51,10 @@ from traianus import app as main_module  # noqa: E402
 from traianus import storage as storage  # noqa: E402
 from traianus.representation.mock_provider import MockRepresentationProvider  # noqa: E402
 
+from traianus.config import resolve_epsilon_edge  # noqa: E402
+
 ALLOWED_STATES = {"pending_approval", "incubating", "consolidated", "telemetry_error"}
-EPSILON = 0.8
+EPSILON = resolve_epsilon_edge()
 DEFAULT_EDGE_DENSITY = 0.05
 DEFAULT_TOKEN = "exp-representation-independence"
 

@@ -31,10 +31,10 @@ import numpy as np
 
 sys.path.insert(0, str(Path(__file__).resolve().parents[1]))
 
+from traianus.config import resolve_epsilon_edge
 from traianus.geometry.observables import compute_epsilon_edges
 
 DEFAULT_DB = Path(__file__).resolve().parents[1] / "traianus.db"
-EPSILON = 0.8
 
 _CURRENT_NODES_SQL = """
     SELECT m.id, m.text, m.vector_blob, m.projections_json
@@ -179,14 +179,27 @@ def print_report(nodes: list[dict], total_edges: int, bridges: list[dict],
         print(f"  '- {bridge['target']}: {_preview(texts[bridge['target']])}")
 
 
+def _percentile_arg(value: str) -> float:
+    """argparse type: percentile within [0, 100]."""
+    try:
+        p = float(value)
+    except ValueError:
+        raise argparse.ArgumentTypeError(f"invalid percentile: {value!r}")
+    if not 0.0 <= p <= 100.0:
+        raise argparse.ArgumentTypeError(
+            f"percentile must be within [0, 100], got {p}")
+    return p
+
+
 def main() -> None:
     parser = argparse.ArgumentParser(
         description="Audit non-sequential semantic bridges in the E_n adjacency.")
     parser.add_argument("--db", type=Path, default=DEFAULT_DB,
                         help=f"SQLite database path (default: {DEFAULT_DB})")
-    parser.add_argument("--epsilon", type=float, default=EPSILON,
-                        help=f"fixed E_n adjacency threshold (default: {EPSILON})")
-    parser.add_argument("--percentile", type=float, default=None,
+    resolved_epsilon = resolve_epsilon_edge()
+    parser.add_argument("--epsilon", type=float, default=resolved_epsilon,
+                        help=f"fixed E_n adjacency threshold (default: {resolved_epsilon})")
+    parser.add_argument("--percentile", type=_percentile_arg, default=None,
                         help="derive an adaptive epsilon keeping the closest "
                              "PERCENTILE%% of null-model pairs and compare modes")
     parser.add_argument("--exclude", default="",
@@ -195,6 +208,10 @@ def main() -> None:
                         help="limit printed bridges per mode (strongest first)")
     args = parser.parse_args()
 
+    if not Path(args.db).exists():
+        print(f"error: database not found: {args.db}")
+        sys.exit(2)
+
     nodes = load_current_nodes(args.db)
     excluded = {token.strip() for token in args.exclude.split(",") if token.strip()}
     if excluded:
@@ -202,6 +219,9 @@ def main() -> None:
     vectors = {node["id"]: node["vector"] for node in nodes}
 
     distances = pairwise_distances(vectors)
+    if distances.size == 0:
+        print(f"notice: fewer than 2 manifold nodes in {args.db}; nothing to audit.")
+        return
     print(distance_summary(distances))
 
     runs = [("fixed", args.epsilon)]

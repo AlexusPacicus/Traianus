@@ -41,7 +41,7 @@ def check_static(app_code: str, findings: list) -> None:
     observables_code = OBSERVABLES_PY.read_text(encoding="utf-8")
     # TR-H4-001: destructive statements against manifold_nodes
     destructive = re.findall(
-        r"(UPDATE|REPLACE|DELETE)\s+manifold_nodes\b",
+        r"(UPDATE|REPLACE|DELETE)\s+(manifold_nodes|manifold_edges|geodesic_axes)\b",
         app_code,
         flags=re.IGNORECASE,
     )

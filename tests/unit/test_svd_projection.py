@@ -16,25 +16,30 @@ from traianus.geometry.observables import (
 
 class TestSvdReduce:
     def test_output_shape(self):
-        X = np.random.randn(10, 8).astype(np.float32)
+        rng = np.random.default_rng(42)
+        X = rng.standard_normal((10, 8)).astype(np.float32)
         coords, residual = svd_reduce(X, k=2)
         assert coords.shape == (10, 2)
         assert residual.shape == (10, 3)
 
     def test_single_vector(self):
-        X = np.random.randn(1, 8).astype(np.float32)
+        rng = np.random.default_rng(43)
+        X = rng.standard_normal((1, 8)).astype(np.float32)
         coords, residual = svd_reduce(X, k=2)
         assert coords.shape == (1, 2)
         assert residual.shape == (1, 3)
 
     def test_coords_are_centered(self):
-        rng = np.random.RandomState(42)
-        X = rng.randn(20, 8).astype(np.float32)
+        rng = np.random.default_rng(42)
+        X = rng.standard_normal((20, 8)).astype(np.float32)
         coords, _ = svd_reduce(X, k=2)
         assert coords.shape == (20, 2)
+        # PCA on centered input yields zero-mean coordinates.
+        assert np.allclose(coords.mean(axis=0), 0.0, atol=1e-6)
 
     def test_dimension_error_too_few_columns(self):
-        X = np.random.randn(5, 1).astype(np.float32)
+        rng = np.random.default_rng(44)
+        X = rng.standard_normal((5, 1)).astype(np.float32)
         with pytest.raises(ValueError):
             svd_reduce(X, k=2)
 
@@ -47,7 +52,7 @@ class TestSigmoidScale:
         assert result.max() <= 1.0
 
     def test_deterministic(self):
-        vals = np.random.randn(50)
+        vals = np.random.default_rng(45).standard_normal(50)
         r1 = sigmoid_scale(vals)
         r2 = sigmoid_scale(vals)
         np.testing.assert_array_equal(r1, r2)
@@ -68,7 +73,8 @@ class TestSigmoidScale:
 
 class TestProjectTo5d:
     def test_output_shape(self):
-        X = np.random.randn(10, 8).astype(np.float32)
+        rng = np.random.default_rng(46)
+        X = rng.standard_normal((10, 8)).astype(np.float32)
         result = project_to_5d(X)
         assert result.shape == (10, 5)
 
@@ -100,6 +106,40 @@ class TestProjectTo5d:
         np.testing.assert_array_equal(r1, r2)
 
     def test_dimension_error(self):
-        X = np.random.randn(5, 3).astype(np.float32)
+        rng = np.random.default_rng(47)
+        X = rng.standard_normal((5, 3)).astype(np.float32)
         with pytest.raises(ValueError):
             project_to_5d(X)
+
+
+def test_svd_reduce_rejects_empty_matrix():
+    with pytest.raises(ValueError):
+        svd_reduce(np.zeros((0, 6)))
+
+
+def test_svd_reduce_rejects_non_finite_input():
+    X = np.ones((5, 6))
+    X[2, 3] = np.nan
+    with pytest.raises(ValueError):
+        svd_reduce(X)
+    X[2, 3] = np.inf
+    with pytest.raises(ValueError):
+        svd_reduce(X)
+
+
+def test_svd_reduce_sign_canonicalization():
+    """Global input flip must not flip canonical component signs."""
+    rng = np.random.default_rng(11)
+    X = rng.standard_normal((12, 7))
+    c1, r1 = svd_reduce(X, k=2)
+    c2, r2 = svd_reduce(-X, k=2)
+    assert np.allclose(c1, c2)
+    assert np.allclose(r1, r2)
+
+
+def test_project_to_5d_stable_under_global_sign_flip():
+    rng = np.random.default_rng(13)
+    X = rng.standard_normal((10, 8))
+    p1 = project_to_5d(X / np.linalg.norm(X, axis=1, keepdims=True))
+    p2 = project_to_5d(-X / np.linalg.norm(-X, axis=1, keepdims=True))
+    assert np.allclose(p1, p2)
