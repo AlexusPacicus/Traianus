@@ -944,3 +944,26 @@
   was measured during the v1-era corpus and is retained as historical.
 * **Gate:** hermetic suite **243 passed, 5 deselected**.
 * **Status:** `Consolidated`.
+
+### seq 37 — 2026-08-24 — Part V (Of the Power of the Intellect) frozen; Ethics corpus complete
+
+* **Corpus:** `part5_power.md` + `part5_power_manifest.json` via
+  `build_spinoza_corpus.py --part 5`: 220 sentence-chunks, labels
+  `PART5_POWER_*`, 42/42 propositions, zero debris. Boundary end =
+  "End of the Ethics" line. The five-part Ethics corpus is now complete
+  (2001 + 220 = 2221 chunks).
+* **Isolated mode** (`.data/part5_power.db`): 220 nodes / 143 edges;
+  gate 21/220 consolidated (9.5%); chromatic rescue 93.1% over only
+  29 collisions (small-sample floor; accumulated mode governs);
+  Sammon gain 47.4% — highest of all parts.
+* **Accumulated mode** (`.data/spinoza_full.db`, parts 1-5): 2221 nodes /
+  3195 edges; gate 299/2221 (13.5%); rescue 97.3% over 2566 collisions;
+  Sammon gain 39.4%. Inter-part matrix completed:
+  **MIND<->POWER = 126** — second-strongest continuum overall, ahead of
+  GOD<->MIND (122): the intellect-power doctrine of Part V resonates
+  primarily with Part II, as its subject predicts. AFFECTS<->POWER 76,
+  BONDAGE<->POWER 60, GOD<->
+  POWER 14 (weakest link).
+* **Evidence freeze:** `data/spinoza/telemetry/v4.json` supersedes v3.
+* **Gate:** hermetic suite **246 passed, 5 deselected**.
+* **Status:** `Consolidated`.
