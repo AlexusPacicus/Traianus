@@ -1,13 +1,13 @@
 """
-Experiment: Test Hypothesis H2 (Alivio Dimensional / Dimensional Relief)
+Experiment: Test Hypothesis H2 (Dimensional Relief)
 Module: Uses kinematics_engine core (pure functions, no side effects).
 
 H2 validated: Projection of compressed vectors to R^{d+1} via
 dimensional relief (appending K_cin) reduces orthogonality loss
-and relaminates the trajectory.
+and relaminarizes the trajectory.
 
 Theory: In the Traianus substrate, B_0 is a reduced basis (k < d) 
-representing the "piscina" (rest substrate). Projecting onto a full 
+representing the "basin" (rest substrate). Projecting onto a full 
 identity base I_d is trivial (no variance). Real measurement requires 
 a reduced basis to capture "disalignment" from the known subspace.
 """
@@ -33,7 +33,7 @@ def generate_reduced_base(dim: int, k: int, seed: int) -> np.ndarray:
     """
     Generate a reduced orthogonal base B_0 of shape (k, d) where k < d.
 
-    This represents the "piscina" (rest substrate) - a known subspace
+    This represents the "basin" (rest substrate) - a known subspace
     against which projections are measured. The remaining d-k dimensions
     are the "unknown" space where vorticity/pressure manifests.
 
@@ -52,16 +52,16 @@ def run_experiment(dim: int = 384, n_points: int = 80, compression: float = 3.0,
     Run H2 validation experiment.
 
     Workflow:
-    1. Generate reduced base B_0 (k < d) representing the "piscina"
+    1. Generate reduced base B_0 (k < d) representing the "basin"
     2. Generate compressed region in R^d (high vorticity, low orthogonality)
     3. Measure orthogonality loss in R^d relative to B_0
     4. Apply dimensional relief d -> d+1: append K_cin per vector
     5. Measure orthogonality loss in R^{d+1} with augmented base
-    6. Compare: if loss decreases, H2 VALIDADA
+    6. Compare: if loss decreases, H2 VALIDATED
 
     Returns (ortho_loss_d, ortho_loss_d_plus_1, laminarity_d, laminarity_d_plus_1, verdict)
     """
-    # Step 0: Generate reduced base B_0 (k < d) - the "piscina"
+    # Step 0: Generate reduced base B_0 (k < d) - the "basin"
     k = max(2, dim // 4)  # e.g., k=96 for dim=384
     B_0 = generate_reduced_base(dim, k, seed)
 
@@ -105,17 +105,17 @@ def run_experiment(dim: int = 384, n_points: int = 80, compression: float = 3.0,
 
     # Step 5: Compare and verdict
     # H2: Projection to R^{d+1} should reduce orthogonality loss
-    # because K_cin absorbs the solenoidal energy, relaminating the flow.
-    # We expect ortho_loss_d_plus_1 < ortho_loss_d when K_cin helps relaminar.
+    # because K_cin absorbs the solenoidal energy, relaminarizing the flow.
+    # We expect ortho_loss_d_plus_1 < ortho_loss_d when K_cin helps relaminarize.
     ortho_improvement = ortho_loss_d - ortho_loss_d_plus_1
     laminarity_change = laminarity_d_plus_1 - laminarity_d
 
     # H2 validation: if orthogonality loss decreases (improvement > 0) OR
     # laminarity increases (smoother flow), that supports H2
     if ortho_improvement > 0.001 or laminarity_change > 0.001:
-        verdict = "H2 VALIDADA"
+        verdict = "H2 VALIDATED"
     else:
-        verdict = "H2 FALSADA"
+        verdict = "H2 FALSIFIED"
 
     return ortho_loss_d, ortho_loss_d_plus_1, laminarity_d, laminarity_d_plus_1, verdict
 
@@ -125,11 +125,11 @@ def main():
     n_points = 80
     compression = 3.0
 
-    print("=== Experimento H2: Alivio Dimensional d -> d+1 ===")
-    print(f"Espacio: R{dim} -> R{dim+1}")
-    print(f"Puntos: {n_points}")
-    print(f"Condicion: Alta compresion/densidad (factor {compression})")
-    print(f"Base reducida k={dim // 4} < d (piscina del sustrato)")
+    print("=== H2 Experiment: Dimensional Relief d -> d+1 ===")
+    print(f"Space: R{dim} -> R{dim+1}")
+    print(f"Points: {n_points}")
+    print(f"Condition: High compression/density (factor {compression})")
+    print(f"Reduced base k={dim // 4} < d (substrate basin)")
     print("")
 
     (
@@ -140,17 +140,17 @@ def main():
         verdict,
     ) = run_experiment(dim=dim, n_points=n_points, compression=compression)
 
-    print("Resultados de perdida de ortogonalidad:")
-    print(f"  R{dim} (original, comprimido, base B_0 reducida k={dim // 4}): {ortho_loss_d:.6f}")
-    print(f"  R{dim+1} (proyectado con K_cin, base I_{{d+1}}): {ortho_loss_d_plus_1:.6f}")
-    print(f"  Mejora (reduccion): {ortho_loss_d - ortho_loss_d_plus_1:.6f}")
+    print("Orthogonality loss results:")
+    print(f"  R{dim} (original, compressed, reduced B_0 base k={dim // 4}): {ortho_loss_d:.6f}")
+    print(f"  R{dim+1} (projected with K_cin, base I_{{d+1}}): {ortho_loss_d_plus_1:.6f}")
+    print(f"  Improvement (reduction): {ortho_loss_d - ortho_loss_d_plus_1:.6f}")
     print("")
-    print("Proxy de laminaridad (mean squared Delta-v, menor = mas suave):")
+    print("Laminarity proxy (mean squared Delta-v; lower is smoother):")
     print(f"  R{dim}: {laminarity_d:.6f}")
     print(f"  R{dim+1}: {laminarity_d_plus_1:.6f}")
-    print(f"  Cambio: {laminarity_d_plus_1 - laminarity_d:.6f}")
+    print(f"  Change: {laminarity_d_plus_1 - laminarity_d:.6f}")
     print("")
-    print(f"Veredicto: {verdict}")
+    print(f"Verdict: {verdict}")
 
 
 if __name__ == "__main__":

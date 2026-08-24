@@ -211,7 +211,7 @@ def run_h3_experiment(
         # Projection distance alone separates → moderate support
         h3_support = True
 
-    verdict = "H3 VALIDA" if h3_support else "H3 FALSADA"
+    verdict = "H3 VALIDATED" if h3_support else "H3 FALSIFIED"
 
     return {
         "noise_k_cin_mean": noise_k_cin_mean,

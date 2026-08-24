@@ -53,7 +53,7 @@ def project_dimensional_relief(v: np.ndarray, k_cin: float) -> np.ndarray:
     """Pure operator: map v ∈ R^d → v̂ ∈ R^{d+1} via dimensional relief.
 
     The K_cin scalar absorbs solenoidal/kinetic energy into the new coordinate,
-    allowing the spectral variance to relaminate and the node to be evaluated
+    allowing the spectral variance to relaminarize and the node to be evaluated
     with lower distortion on the augmented base B_0 ∈ R^{k × (d+1)}.
 
     Parameters
@@ -97,7 +97,7 @@ def ortho_distance(v: np.ndarray, B_0: np.ndarray) -> float:
 
     Computes the squared L2-norm of the component of v orthogonal to all
     rows of B_0 (k × d matrix).  This is the "projection distance outside
-    the piscina B_0" used by H3 discrimination.
+    the B_0 basin" used by H3 discrimination.
 
     Parameters
     ----------
@@ -105,7 +105,7 @@ def ortho_distance(v: np.ndarray, B_0: np.ndarray) -> float:
         Input vector in R^d.
     B_0 : np.ndarray of shape (k, d)
         Reduced base matrix (k < d), rows are orthogonal axes of the
-        geodetic piscina.
+        geodetic basin.
 
     Returns
     -------

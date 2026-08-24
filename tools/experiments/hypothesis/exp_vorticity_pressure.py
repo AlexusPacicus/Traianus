@@ -141,9 +141,9 @@ def run_experiment(
 
     # H1: Increasing compression/density → monotonically increasing K_cin
     if compressed_k_cin_avg > free_k_cin_avg:
-        verdict = "H1 VALIDA"
+        verdict = "H1 VALIDATED"
     else:
-        verdict = "H1 FALSADA"
+        verdict = "H1 FALSIFIED"
 
     return free_k_cin_avg, compressed_k_cin_avg, verdict
 
