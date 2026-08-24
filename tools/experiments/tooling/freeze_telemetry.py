@@ -24,7 +24,8 @@ from _common import load_labels
 RUNS = [
     ("part2_isolated", "spinoza_part2"),
     ("part3_isolated", "part3_affects"),
-    ("accumulated_123", "spinoza_full"),
+    ("part4_isolated", "part4_bondage"),
+    ("accumulated_1234", "spinoza_full"),
 ]
 
 PART_BY_PREFIX = {"PART1": "P1_GOD", "PART2": "P2_MIND", "PART3": "P3_AFFECTS",

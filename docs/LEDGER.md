@@ -877,3 +877,31 @@
   deferred to its own post-merge cycle.
 * **Gate:** hermetic suite green (see commit); invariant verifier GREEN.
 * **Status:** `Consolidated`.
+
+### seq 35 — 2026-08-24 — Part IV (Of Human Bondage) frozen; 4-part accumulated manifold
+
+* **Corpus:** `part4_bondage.md` + `part4_bondage_manifest.json` via
+  `build_spinoza_corpus.py --part 4`: 549 sentence-chunks, labels
+  `PART4_BONDAGE_*`, 73/73 propositions, full Appendix (72 chunks).
+* **Parser hardening (PG#3800 punctuation variants):** trailing-period
+  section headers (`PROPOSITIONS.`, `APPENDIX.`, singular `AXIOM.`) now
+  matched; unnumbered single-item families auto-numbered instead of
+  dropped. Side-effect fix on Part I: a spurious `PROPOSITIONS.` header
+  chunk absorbed into AX_07 eliminated (418 -> 417 clean chunks).
+* **Isolated mode** (`.data/part4_bondage.db`): 549 nodes / 382 edges;
+  gate 86/549 consolidated (15.7%); chromatic rescue 97.9%; Sammon gain
+  44.3%; zero stylistic duplicates.
+* **Accumulated mode** (`.data/spinoza_full.db`, parts 1+2+3+4): 2087
+  nodes / 2931 edges; gate 285/2087 (13.7%). Inter-part epsilon edges:
+  **AFFECTS<->BONDAGE = 223, densest continuum** (MIND<->AFFECTS 199,
+  GOD<->MIND 132) — Part IV's doctrine of the bondage to passions is the
+  most strongly coupled layer, as its subject matter predicts.
+* **Chromatic scalability gate:** collision rescue at n=2087 is 97.7%
+  over 2352 collisions — holds above the 95% bar. Densification trend of
+  Sammon gain: 45.2% (n=647) -> 39.8% (n=1539) -> 38.4% (n=2087).
+* **Memory-safety fix:** `pairwise_dists` switched to the projected
+  |x|^2+|y|^2-2xy form after the (n,n,d) intermediate OOM-killed the
+  accumulated audit at n=2087 (~104MB peak after fix).
+* **Evidence freeze:** `data/spinoza/telemetry/v2.json` supersedes v1.
+* **Gate:** hermetic suite green (see commit); invariant verifier GREEN.
+* **Status:** `Consolidated`.

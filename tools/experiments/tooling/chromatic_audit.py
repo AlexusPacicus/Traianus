@@ -63,7 +63,11 @@ def effective_5d(X) -> np.ndarray:
 
 
 def pairwise_dists(P) -> np.ndarray:
-    return np.linalg.norm(P[:, None, :] - P[None, :, :], axis=2)
+    """Memory-safe L2 matrix via |x|^2+|y|^2-2xy (no (n,n,d) intermediate)."""
+    sq = np.einsum("ij,ij->i", P, P)
+    d2 = sq[:, None] + sq[None, :] - 2.0 * (P @ P.T)
+    np.maximum(d2, 0.0, out=d2)
+    return np.sqrt(d2)
 
 
 def _offdiag_percentile(D: np.ndarray, pct: float) -> float:
