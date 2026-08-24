@@ -3,7 +3,7 @@
 > Decoupling vector representation systems from state management over $v \in \mathbb{R}^d$.
 
 [![CI](https://github.com/AlexusPacicus/Traianus/actions/workflows/ci.yml/badge.svg)](https://github.com/AlexusPacicus/Traianus/actions/workflows/ci.yml)
-[![Version](https://img.shields.io/badge/version-1.0.0-blue.svg)](pyproject.toml)
+[![Version](https://img.shields.io/badge/version-1.0.1-blue.svg)](pyproject.toml)
 [![License](https://img.shields.io/badge/license-AGPLv3-green.svg)](LICENSE)
 [![Python](https://img.shields.io/badge/python-3.11%2B-blue)](pyproject.toml)
 
@@ -11,7 +11,7 @@
 
 ## ⚡ Quickstart & Hermetic Verification
 
-Traianus is frozen in `v1.0.0` with a hermetic, offline-isolated test suite. You can run the deterministic core and verify system invariants locally:
+Traianus is at `v1.0.1` (substrate frozen at `v1.0.0`; v1.0.1 shipped stability/security/hygiene fixes — zero scope change) with a hermetic, offline-isolated test suite. You can run the deterministic core and verify system invariants locally:
 
 ```bash
 # 1. Clone the repository

@@ -2,7 +2,7 @@
 """Static SVD projection of the Spinoza Part II scratch manifold (Fase 3).
 
 Reads the current-state nodes (MAX(seq)/id, telemetry_error excluded) from
-the scratch DB built by ingest_spinoza_part2.py, reduces the 384-D cloud to
+the scratch DB built by ingest_spinoza_corpus.py, reduces the 384-D cloud to
 2-D/3-D principal coordinates with traianus.geometry.svd_reduce (sign-
 canonicalized, stable across BLAS builds), and emits a frozen JSON for
 logical-separation inspection before Ulpia ingestion.

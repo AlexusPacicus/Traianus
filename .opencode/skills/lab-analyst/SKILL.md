@@ -13,8 +13,8 @@ screen (effective 5D in Ulpia: X, Y, R, G, B).
 ## Workflow
 
 1. Build/refresh artifacts with committed tools ONLY (never inline Python):
-   - `python3 tools/experiments/tooling/build_spinoza_part2_corpus.py <source>`
-   - `python3 tools/experiments/tooling/ingest_spinoza_part2.py`
+   - `python3 tools/experiments/tooling/build_spinoza_corpus.py <source>`
+   - `python3 tools/experiments/tooling/ingest_spinoza_corpus.py`
    - `python3 tools/experiments/tooling/export_svd_projection.py`
    - `python3 tools/experiments/tooling/chromatic_audit.py`
    - `python3 tools/analyze_bridges.py --db .data/<scratch>.db [--percentile N]`

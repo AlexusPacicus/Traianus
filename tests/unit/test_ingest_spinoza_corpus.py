@@ -8,7 +8,7 @@ import pytest
 
 sys.path.insert(0, str(Path(__file__).resolve().parents[2] / "tools" / "experiments" / "tooling"))
 
-from ingest_spinoza_part2 import (
+from ingest_spinoza_corpus import (
     corpus_stem,
     load_manifest,
     node_id,

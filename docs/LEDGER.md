@@ -850,3 +850,30 @@
 * **Gate:** hermetic suite **220 passed, 5 deselected**; invariant verifier
   GREEN (exit 0).
 * **Status:** `Consolidated`.
+
+### seq 34 — 2026-08-24 — External-audit remediation: honest naming, version truth, frozen evidence
+
+* **Trigger:** external agent audit of `feature/pkm-spinoza-part3-affects`
+  (naming debt, doc drift, Ulpia contradiction, unversioned evidence).
+* **Honest naming:** `build_spinoza_part2_corpus.py` -> `build_spinoza_corpus.py`;
+  `ingest_spinoza_part2.py` -> `ingest_spinoza_corpus.py` (tests renamed in
+  step). No shims: tooling is unreleased; historical LEDGER mentions left
+  untouched (append-only).
+* **Version truth:** README badge/text and IMPLEMENTATION_STATUS header
+  reconciled with pyproject v1.0.1 (substrate frozen at v1.0.0; zero scope
+  change). IMPLEMENTATION_STATUS amended 2026-08-24.
+* **Ulpia status corrected:** the "no UI code" claim replaced by the actual
+  state — a client prototype exists under `frontend/` (ulpia-line merge);
+  its integration with the read-only observation contract remains RESEARCH /
+  FUTURE ROADMAP, out of substrate scope.
+* **Evidence freeze:** `data/spinoza/telemetry/v1.json` (via committed
+  `freeze_telemetry.py`) distills the ephemeral `.data/` artifacts into a
+  versioned dataset: per-run nodes/edges/gate/sigma^2, chromatic Sammon +
+  rescue rates, inter-part edge distribution (MIND<->AFFECTS = 199, densest
+  continuum) and top cross-part bridges. Epistemic scope recorded: findings
+  are conditional on the MiniLM-L6-v2 representation provider.
+* **Not remediated (documented):** root-level `traianus.db` retained — it is
+  the substrate-default DB_PATH of `traianus/storage.py`; CONTRIBUTING.md
+  deferred to its own post-merge cycle.
+* **Gate:** hermetic suite green (see commit); invariant verifier GREEN.
+* **Status:** `Consolidated`.
