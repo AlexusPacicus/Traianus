@@ -96,6 +96,7 @@ def ortho_distance(v: np.ndarray, B_0: np.ndarray) -> float:
     """Pure operator: orthogonal residual distance from vector v to base B_0.
 
     Computes the squared L2-norm of the component of v orthogonal to all
+    Computes the squared L2-norm of the component of v orthogonal to all
     rows of B_0 (k × d matrix).  This is the "projection distance outside
     the B_0 basin" used by H3 discrimination.
 
@@ -156,3 +157,92 @@ def discrimination_ratio(
     if k_cin < epsilon:
         return float(od / epsilon)  # avoid div‑0; very high ratio
     return float(od / k_cin)
+
+
+# ---------------------------------------------------------------------------
+# SVD projection & chromatic scaling  (Ulpia 5D — lab / test helpers)
+# ---------------------------------------------------------------------------
+
+def svd_reduce(X: np.ndarray, k: int = 2) -> tuple[np.ndarray, np.ndarray]:
+    """SVD-based PCA reduction: (n, d) -> coords (n, k), residual (n, min(d-k, 3)).
+
+    Parameters
+    ----------
+    X : np.ndarray of shape (n, d), d >= k + 1
+        Input data matrix (rows are samples).
+    k : int, default 2
+        Number of principal components for spatial coordinates.
+
+    Returns
+    -------
+    coords : np.ndarray of shape (k, k)
+        Top-k principal coordinates: U[:, :k] * S[:k].
+    residual : np.ndarray of shape (n, r)
+        Next r = min(d - k, 3) left singular vectors (chromatic sources).
+    """
+    if X.ndim != 2:
+        raise ValueError(f"Expected 2-D array, got {X.ndim}-D")
+    n, d = X.shape
+    if d < k:
+        raise ValueError(f"Need d >= k ({k}), got d = {d}")
+    X_centered = X - np.mean(X, axis=0)
+    U, S, _ = np.linalg.svd(X_centered, full_matrices=False)
+    actual_k = min(k, U.shape[1])
+    coords = np.zeros((n, k), dtype=np.float64)
+    coords[:, :actual_k] = U[:, :actual_k] * S[:actual_k]
+    r = min(d - k, 3)
+    residual = np.zeros((n, r), dtype=np.float64)
+    if r > 0 and U.shape[1] > k:
+        cols = min(r, U.shape[1] - k)
+        residual[:, :cols] = U[:, k : k + cols]
+    return coords, residual
+
+
+def sigmoid_scale(
+    val: np.ndarray,
+    min_val: float = 0.15,
+    max_val: float = 1.0,
+    eps: float = 1e-6,
+) -> np.ndarray:
+    """Z-score + sigmoid mapping to [min_val, max_val].
+
+    Pure element-wise transformation: z = (val - mean) / (std + eps),
+    then sigmoid(z) = 1 / (1 + e^{-z}), rescaled to [min_val, max_val].
+    """
+    z = (val - np.mean(val)) / (np.std(val) + eps)
+    sig = 1.0 / (1.0 + np.exp(-z))
+    return min_val + (max_val - min_val) * sig
+
+
+def project_to_5d(vectors: np.ndarray) -> np.ndarray:
+    """Project (n, d) L2-normalized vectors to 5D effective space.
+
+    X, Y = top-2 SVD principal components, min-max normalized to [-1, 1].
+    R, G, B = sigmoid-scaled residual channels from components 3-5.
+
+    Parameters
+    ----------
+    vectors : np.ndarray of shape (n, d), d >= 5
+        L2-normalized input vectors.
+
+    Returns
+    -------
+    np.ndarray of shape (n, 5)
+        Columns: [X, Y, R, G, B].
+    """
+    if vectors.ndim != 2:
+        raise ValueError(f"Expected 2-D array, got {vectors.ndim}-D")
+    n, d = vectors.shape
+    if d < 5:
+        raise ValueError(f"Need d >= 5, got d = {d}")
+
+    coords, residual = svd_reduce(vectors, k=2)
+
+    max_abs = np.max(np.abs(coords)) if np.max(np.abs(coords)) > 0 else 1.0
+    xy = coords / max_abs
+
+    channels = np.column_stack([np.ones(n) * 0.5] * 3)
+    for col in range(min(residual.shape[1], 3)):
+        channels[:, col] = sigmoid_scale(residual[:, col])
+
+    return np.column_stack([xy, channels])

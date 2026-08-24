@@ -672,3 +672,29 @@
     reproducible" → runtime determinism under pinned environment (finding
     M1). flake.nix restoration DEFERRED until grant outcome is known.
 * **Status:** `Consolidated`.
+
+### seq 27 — 2026-08-24 — Unification: origin/main (ulpia line) merged into hardened main
+
+* **Context:** Discovery during push planning — `origin/main` pointed at the
+  tip of the local-only `ulpia` branch (`d3c448b`, published directly as
+  main), while the eight post-audit hardening commits existed only locally.
+  The public repo and the hardened line had diverged; leaving that split
+  visible during the NLnet review window was worse than integrating.
+* **Classification (freeze coherence):** the ulpia substrate additions are
+  CLIENT-FACING OBSERVATIONAL HELPERS (`svd_reduce`, chromatic scaling in
+  `traianus/geometry/observables.py`; pure functions for Ulpia canvas
+  projection) plus their tests — additive read-side tooling, NOT state-
+  governance modifications. No gate semantics, storage schema, or state
+  transition changed; POC_FREEZE §4 remains honored.
+* **Δ executed:**
+  - Pushed `ulpia` branch to origin (preservation) BEFORE any integration.
+  - Pushed `ngi` branch + annotated tag `ngi-proposal-2026-08`.
+  - Merged `origin/main` into local main: single conflict resolved in
+    `ortho_distance` docstring (kept `k × d` typographic sign + `B_0 basin`
+    phrasing; both lines had independently converged on `basin`).
+    `.gitignore` auto-merged (local version is a strict superset).
+  - Frontend sources (`package.json`, lockfile, vite config, `index.html`,
+    `src/`) now live on main per the seq 25 sources-only policy.
+* **Gate:** hermetic suite **190 passed, 5 deselected** (+13 from
+  `tests/unit/test_svd_projection.py` and module-split additions).
+* **Status:** `Consolidated`.

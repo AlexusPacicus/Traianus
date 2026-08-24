@@ -14,6 +14,9 @@ from traianus.geometry.observables import (
     discrimination_ratio,
     ortho_distance,
     project_dimensional_relief,
+    project_to_5d,
+    sigmoid_scale,
+    svd_reduce,
 )
 from traianus.governance.gate import evaluate_gate, evaluate_gate_v01
 
@@ -24,6 +27,9 @@ __all__ = [
     "discrimination_ratio",
     "ortho_distance",
     "project_dimensional_relief",
+    "project_to_5d",
+    "sigmoid_scale",
+    "svd_reduce",
     "evaluate_gate",
     "evaluate_gate_v01",
 ]
