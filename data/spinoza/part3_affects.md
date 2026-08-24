@@ -5,8 +5,7 @@ By an inadequate or partial cause, I mean a cause through which, by itself, its 
 I say that we act when anything takes place, either within us or externally to us, whereof we are the adequate cause; that is (by the foregoing definition) when through our nature something takes place within us or externally to us, which can through our nature alone be clearly and distinctly understood.
 On the other hand, I say that we are passive as regards something when that something takes place within us, or follows from our nature externally, we being only the partial cause.
 By emotion I mean the modifications of the body, whereby the active power of the said body is increased or diminished, aided or constrained, and also the ideas of such modifications.
-N.B.
-If we can be the adequate cause of any of these modifications, I then call the emotion an activity, otherwise I call it a passion, or state wherein the mind is passive.
+N.B. If we can be the adequate cause of any of these modifications, I then call the emotion an activity, otherwise I call it a passion, or state wherein the mind is passive.
 The human body can be affected in many ways, whereby its power of activity is increased or diminished, and also in other ways which do not render its power of activity either greater or less.
 The human body can undergo many changes, and, nevertheless, retain the impressions or traces of objects (cf. II. Post. v.), and, consequently, the same images of things (see note II. xvii.).
 Our mind is in certain cases active, and in certain cases passive.
@@ -28,8 +27,7 @@ This was our second point.
 Therefore body cannot determine mind, &c. Q.E.D.
 This is made more clear by what was said in the note to II. vii., namely, that mind and body are one and the same thing, conceived first under the attribute of thought, secondly, under the attribute of extension.
 Thus it follows that the order or concatenation of things is identical, whether nature be conceived under the one attribute or the other; consequently the order of states of activity and passivity in our body is simultaneous in nature with the order of states of activity and passivity in the mind.
-The same conclusion is evident from the manner in which we proved II. xii.
-Nevertheless, though such is the case, and though there be no further room for doubt, I can scarcely believe, until the fact is proved by experience, that men can be induced to consider the question calmly and fairly, so firmly are they convinced that it is merely at the bidding of the mind, that the body is set in motion or at rest, or performs a variety of actions depending solely on the mind's will or the exercise of thought.
+The same conclusion is evident from the manner in which we proved II. xii. Nevertheless, though such is the case, and though there be no further room for doubt, I can scarcely believe, until the fact is proved by experience, that men can be induced to consider the question calmly and fairly, so firmly are they convinced that it is merely at the bidding of the mind, that the body is set in motion or at rest, or performs a variety of actions depending solely on the mind's will or the exercise of thought.
 However, no one has hitherto laid down the limits to the powers of the body, that is, no one has as yet been taught by experience what the body can accomplish solely by the laws of nature, in so far as she is regarded as extension.
 No one hitherto has gained such an accurate knowledge of the bodily mechanism, that he can explain all its functions; nor need I call attention to the fact that many actions are observed in the lower animals, which far transcend human sagacity, and that somnambulists do many things in their sleep, which they would not venture to do when awake: these instances are enough to show, that the body can by the sole laws of its nature do many things which the mind wonders at.
 Again, no one knows how or by what means the mind moves the body, nor how many various degrees of motion it can impart to the body, nor how quickly it can move it.
@@ -108,8 +106,7 @@ The mind, as far as it can, endeavours to conceive those things, which increase 
 So long as the human body is affected in a mode, which involves the nature of any external body, the human mind will regard that external body as present (II. xvii.), and consequently (II. vii.), so long as the human mind regards an external body as present, that is (II. xvii. note), conceives it, the human body is affected in a mode, which involves the nature of the said external body; thus so long as the mind conceives things, which increase or help the power of activity in our body, the body is affected in modes which increase or help its power of activity (III. Post. i.); consequently (III. xi.) the mind's power of thinking is for that period increased or helped.
 Thus (III. vi., ix.) the mind, as far as it can, endeavours to imagine such things. Q.E.D.
 When the mind conceives things which diminish or hinder the body's power of activity, it endeavours, as far as possible, to remember things which exclude the existence of the first--named things.
-So long as the mind conceives anything of the kind alluded to, the power of the mind and body is diminished or constrained (cf. III. xii.
-Proof); nevertheless it will continue to conceive it, until the mind conceives something else, which excludes the present existence thereof (II. xvii.); that is (as I have just shown), the power of the mind and of the body is diminished, or constrained, until the mind conceives something else, which excludes the existence of the former thing conceived: therefore the mind (III. ix.), as far as it can, will endeavour to conceive or remember the latter. Q.E.D.
+So long as the mind conceives anything of the kind alluded to, the power of the mind and body is diminished or constrained (cf. III. xii. Proof); nevertheless it will continue to conceive it, until the mind conceives something else, which excludes the present existence thereof (II. xvii.); that is (as I have just shown), the power of the mind and of the body is diminished, or constrained, until the mind conceives something else, which excludes the existence of the former thing conceived: therefore the mind (III. ix.), as far as it can, will endeavour to conceive or remember the latter. Q.E.D.
 Hence it follows that the mind shrinks from conceiving those things, which diminish or constrain the power of itself and of the body.
 From what has been said we may clearly understand the nature of Love and Hate.
 Love is nothing else but pleasure accompanied by the idea of an external cause:
@@ -153,8 +150,7 @@ If the element of doubt be removed from these emotions, hope becomes Confidence 
 In other words, Pleasure or Pain arising from the image of something concerning which we have hoped or feared.
 Again, Joy is Pleasure arising from the image of something past whereof we have doubted the issue.
 Disappointment is the Pain opposed to Joy.
-Conscientiæ morsus--thus rendered by Mr.
-Pollock.
+Conscientiæ morsus--thus rendered by Mr. Pollock.
 He who conceives that the object of his love is destroyed will feel pain; if he conceives that it is preserved he will feel pleasure.
 The mind, as far as possible, endeavours to conceive those things which increase or help the body's power of activity (III. xii.); in other words (III. xii. note), those things which it loves.
 But conception is helped by those things which postulate the existence of a thing, and contrariwise is hindered by those which exclude the existence of a thing (II. xvii.); therefore the images of things, which postulate the existence of an object of love, help the mind's endeavour to conceive the object of love, in other words (III. xi. note), affect the mind pleasurably; contrariwise those things, which exclude the existence of an object of love, hinder the aforesaid mental endeavour; in other words, affect the mind painfully.
@@ -212,8 +208,7 @@ If, however, we hate the said thing like ourselves, we shall, to that extent, be
 Note I.--This imitation of emotions, when it is referred to pain, is called compassion (cf. III. xxii. note); when it is referred to desire, it is called emulation, which is nothing else but the desire of anything, engendered in us by the fact that we conceive that others have the like desire.
 Corollary I.--If we conceive that anyone, whom we have hitherto regarded with no emotion, pleasurably affects something similar to ourselves, we shall be affected with love towards him.
 If, on the other hand, we conceive that he painfully affects the same, we shall be affected with hatred towards him.
-This is proved from the last proposition in the same manner as III. xxii. is proved from III. xxi.
-Corollary II.--We cannot hate a thing which we pity, because its misery affects us painfully.
+This is proved from the last proposition in the same manner as III. xxii. is proved from III. xxi. Corollary II.--We cannot hate a thing which we pity, because its misery affects us painfully.
 If we could hate it for this reason, we should rejoice in its pain, which is contrary to the hypothesis.
 Corollary III.--We seek to free from misery, as far as we can, a thing which we pity.
 That, which painfully affects the object of our pity, affects us also with similar pain (by the foregoing proposition); therefore, we shall endeavour to recall everything which removes its existence, or which destroys it (cf. III. xiii.); in other words (III. ix. note), we shall desire to destroy it, or we shall be determined for its destruction; thus, we shall endeavour to free from misery a thing which we pity. Q.E.D.
@@ -243,8 +238,7 @@ Again, as it may happen (II. xvii. Coroll.) that the pleasure, wherewith a man c
 So Van Vloten and Bruder.
 The Dutch version and Camerer read, "an internal cause." "Honor" = Gloria.
 See previous endnote.
-If we conceive that anyone loves, desires, or hates anything which we ourselves love, desire, or hate, we shall thereupon regard the thing in question with more steadfast love, &c.
-On the contrary, if we think that anyone shrinks from something that we love, we shall undergo vacillations of soul.
+If we conceive that anyone loves, desires, or hates anything which we ourselves love, desire, or hate, we shall thereupon regard the thing in question with more steadfast love, &c. On the contrary, if we think that anyone shrinks from something that we love, we shall undergo vacillations of soul.
 From the mere fact of conceiving that anyone loves anything we shall ourselves love that thing (III. xxvii.): but we are assumed to love it already; there is, therefore, a new cause of love, whereby our former emotion is fostered; hence we shall thereupon love it more steadfastly.
 Again, from the mere fact of conceiving that anyone shrinks from anything, we shall ourselves shrink from that thing (III. xxvii.).
 If we assume that we at the same time love it, we shall then simultaneously love it and shrink from it; in other words, we shall be subject to vacillation (III. xvii. note). Q.E.D.
@@ -346,10 +340,8 @@ The beloved object feels reciprocal hatred towards him who hates it (III. xl.); 
 If a man has been affected pleasurably or painfully by anyone, of a class or nation different from his own, and if the pleasure or pain has been accompanied by the idea of the said stranger as cause, under the general category of the class or nation: the man will feel love or hatred, not only to the individual stranger, but also to the whole class or nation whereto he belongs.
 This is evident from III. xvi.
 Joy arising from the fact, that anything we hate is destroyed, or suffers other injury, is never unaccompanied by a certain pain in us.
-This is evident from III. xxvii.
-For in so far as we conceive a thing similar to ourselves to be affected with pain, we ourselves feel pain.
-This proposition can also be proved from the Corollary to II. xvii.
-Whenever we remember anything, even if it does not actually exist, we regard it only as present, and the body is affected in the same manner; wherefore, in so far as the remembrance of the thing is strong, a man is determined to regard it with pain; this determination, while the image of the thing in question lasts, is indeed checked by the remembrance of other things excluding the existence of the aforesaid thing, but is not destroyed: hence, a man only feels pleasure in so far as the said determination is checked: for this reason the joy arising from the injury done to what we hate is repeated, every time we remember that object of hatred.
+This is evident from III. xxvii. For in so far as we conceive a thing similar to ourselves to be affected with pain, we ourselves feel pain.
+This proposition can also be proved from the Corollary to II. xvii. Whenever we remember anything, even if it does not actually exist, we regard it only as present, and the body is affected in the same manner; wherefore, in so far as the remembrance of the thing is strong, a man is determined to regard it with pain; this determination, while the image of the thing in question lasts, is indeed checked by the remembrance of other things excluding the existence of the aforesaid thing, but is not destroyed: hence, a man only feels pleasure in so far as the said determination is checked: for this reason the joy arising from the injury done to what we hate is repeated, every time we remember that object of hatred.
 For, as we have said, when the image of the thing in question, is aroused, inasmuch as it involves the thing's existence, it determines the man to regard the thing with the same pain as he was wont to do, when it actually did exist.
 However, since he has joined to the image of the thing other images, which exclude its existence, this determination to pain is forthwith checked, and the man rejoices afresh as often as the repetition takes place.
 This is the cause of men's pleasure in recalling past evils, and delight in narrating dangers from which they have escaped.
@@ -361,8 +353,7 @@ When this condition of causality is either wholly or partly removed, the emotion
 Love or hatred towards a thing, which we conceive to be free, must, other conditions being similar, be greater than if it were felt towards a thing acting by necessity.
 A thing which we conceive as free must (I. Def. vii.) be perceived through itself without anything else.
 If, therefore, we conceive it as the cause of pleasure or pain, we shall therefore (III. xiii. note) love it or hate it, and shall do so with the utmost love or hatred that can arise from the given emotion.
-But if the thing which causes the emotion be conceived as acting by necessity, we shall then (by the same Def. vii.
-Part I.) conceive it not as the sole cause, but as one of the causes of the emotion, and therefore our love or hatred towards it will be less. Q.E.D.
+But if the thing which causes the emotion be conceived as acting by necessity, we shall then (by the same Def. vii. Part I.) conceive it not as the sole cause, but as one of the causes of the emotion, and therefore our love or hatred towards it will be less. Q.E.D.
 Hence it follows, that men, thinking themselves to be free, feel more love or hatred towards one another than towards anything else: to this consideration we must add the imitation of emotions treated of in III. xxvii., xxxiv., xl. and xliii.
 Anything whatever can be, accidentally, a cause of hope or fear.
 This proposition is proved in the same way as III. xv., which see, together with the note to III. xviii.
@@ -431,8 +422,7 @@ There are as many kinds of pleasure, of pain, of desire, and of every emotion co
 Pleasure and pain, and consequently the emotions compounded thereof, or derived therefrom, are passions, or passive states (III. xi. note); now we are necessarily passive (III. i.), in so far as we have inadequate ideas; and only in so far as we have such ideas are we passive (III. iii.); that is, we are only necessarily passive (II. xl. note), in so far as we conceive, or (II. xvii. and note) in so far as we are affected by an emotion, which involves the nature of our own body, and the nature of an external body.
 Wherefore the nature of every passive state must necessarily be so explained, that the nature of the object whereby we are affected be expressed.
 Namely, the pleasure, which arises from, say, the object A, involves the nature of that object A, and the pleasure, which arises from the object B, involves the nature of the object B; wherefore these two pleasurable emotions are by nature different, inasmuch as the causes whence they arise are by nature different.
-So again the emotion of pain, which arises from one object, is by nature different from the pain arising from another object, and, similarly, in the case of love, hatred, hope, fear, vacillation, &c.
-Thus, there are necessarily as many kinds of pleasure, pain, love, hatred, &c., as there are kinds of objects whereby we are affected.
+So again the emotion of pain, which arises from one object, is by nature different from the pain arising from another object, and, similarly, in the case of love, hatred, hope, fear, vacillation, &c. Thus, there are necessarily as many kinds of pleasure, pain, love, hatred, &c., as there are kinds of objects whereby we are affected.
 Now desire is each man's essence or nature, in so far as it is conceived as determined to a particular action by any given modification of itself (III. ix. note); therefore, according as a man is affected through external causes by this or that kind of pleasure, pain, love, hatred, &c., in other words, according as his nature is disposed in this or that manner, so will his desire be of one kind or another, and the nature of one desire must necessarily differ from the nature of another desire, as widely as the emotions differ, wherefrom each desire arose.
 Thus there are as many kinds of desire, as there are kinds of pleasure, pain, love, &c., consequently (by what has been shown) there are as many kinds of desire, as there are kinds of objects whereby we are affected. Q.E.D.
 Among the kinds of emotions, which, by the last proposition, must be very numerous, the chief are luxury, drunkenness, lust, avarice, and ambition, being merely species of love or desire, displaying the nature of those emotions in a manner varying according to the object, with which they are concerned.
@@ -486,8 +476,7 @@ Explanation.--We have said above, in the note to Prop. ix. of this part, that de
 But, in the same note, I also remarked that, strictly speaking, I recognize no distinction between appetite and desire.
 For whether a man be conscious of his appetite or not, it remains one and the same appetite.
 Thus, in order to avoid the appearance of tautology, I have refrained from explaining desire by appetite; but I have take care to define it in such a manner, as to comprehend, under one head, all those endeavours of human nature, which we distinguish by the terms appetite, will, desire, or impulse. I might, indeed, have said, that desire is the essence of man, in so far as it is conceived as determined to a particular activity; but from such a definition (cf. II. xxiii.) it would not follow that the mind can be conscious of its desire or appetite.
-Therefore, in order to imply the cause of such consciousness, it was necessary to add, in so far as it is determined by some given modification, &c.
-For, by a modification of man's essence, we understand every disposition of the said essence, whether such disposition be innate, or whether it be conceived solely under the attribute of thought, or solely under the attribute of extension, or whether, lastly, it be referred simultaneously to both these attributes.
+Therefore, in order to imply the cause of such consciousness, it was necessary to add, in so far as it is determined by some given modification, &c. For, by a modification of man's essence, we understand every disposition of the said essence, whether such disposition be innate, or whether it be conceived solely under the attribute of thought, or solely under the attribute of extension, or whether, lastly, it be referred simultaneously to both these attributes.
 By the term desire, then, I here mean all man's endeavours, impulses, appetites, and volitions, which vary according to each man's disposition, and are, therefore, not seldom opposed one to another, according as a man is drawn in different directions, and knows not where to turn.
 Pleasure is the transition of a man from a less to a greater perfection.
 Pain is the transition of a man from a greater to a less perfection.
@@ -540,13 +529,11 @@ As for the cause of the above--named emotions see III. xxvii. Coroll. i., and II
 Partiality is thinking too highly of anyone because of the love we bear him.
 Disparagement is thinking too meanly of anyone because we hate him.
 Explanation--Thus partiality is an effect of love, and disparagement an effect of hatred: so that partiality may also be defined as love, in so far as it induces a man to think too highly of a beloved object.
-Contrariwise, disparagement may be defined as hatred, in so far as it induces a man to think too meanly of a hated object.
-Cf. III. xxvi. note.
+Contrariwise, disparagement may be defined as hatred, in so far as it induces a man to think too meanly of a hated object. Cf. III. xxvi. note.
 Envy is hatred, in so far as it induces a man to be pained by another's good fortune, and to rejoice in another's evil fortune.
 Explanation--Envy is generally opposed to sympathy, which, by doing some violence to the meaning of the word, may therefore be thus defined:
 Sympathy (misericordia) is love, in so far as it induces a man to feel pleasure at another's good fortune, and pain at another's evil fortune.
-Explanation--Concerning envy see the notes to III. xxiv. and xxxii.
-These emotions also arise from pleasure or pain accompanied by the idea of something external, as cause either in itself or accidentally. I now pass on to other emotions, which are accompanied by the idea of something within as a cause.
+Explanation--Concerning envy see the notes to III. xxiv. and xxxii. These emotions also arise from pleasure or pain accompanied by the idea of something external, as cause either in itself or accidentally. I now pass on to other emotions, which are accompanied by the idea of something within as a cause.
 Self--approval is pleasure arising from a man's contemplation of himself and his own power of action.
 Humility is pain arising from a man's contemplation of his own weakness of body or mind.
 Explanation--Self--complacency is opposed to humility, in so far as we thereby mean pleasure arising from a contemplation of our own power of action; but, in so far as we mean thereby pleasure accompanied by the idea of any action which we believe we have performed by the free decision of our mind, it is opposed to repentance, which we may thus define:
@@ -568,8 +555,7 @@ For whatsoever a man imagines that he is incapable of doing, he imagines this of
 For, so long as he conceives that he cannot do it, so long is he not determined to do it, and consequently so long is it impossible for him to do it.
 However, if we consider such matters as only depend on opinion, we shall find it conceivable that a man may think too meanly of himself; for it may happen, that a man, sorrowfully regarding his own weakness, should imagine that he is despised by all men, while the rest of the world are thinking of nothing less than of despising him.
 Again, a man may think too meanly of himself, if he deny of himself in the present something in relation to a future time of which he is uncertain.
-As, for instance, if he should say that he is unable to form any clear conceptions, or that he can desire and do nothing but what is wicked and base, &c.
-We may also say, that a man thinks too meanly of himself, when we see him from excessive fear of shame refusing to do things which others, his equals, venture.
+As, for instance, if he should say that he is unable to form any clear conceptions, or that he can desire and do nothing but what is wicked and base, &c. We may also say, that a man thinks too meanly of himself, when we see him from excessive fear of shame refusing to do things which others, his equals, venture.
 We can, therefore, set down as a contrary to pride an emotion which I will call self--abasement, for as from self--complacency springs pride, so from humility springs self--abasement, which I will accordingly thus define:
 Self--abasement is thinking too meanly of one's self by reason of pain.
 Explanation--We are nevertheless generally accustomed to oppose pride to humility, but in that case we pay more attention to the effect of either emotion than to its nature.
@@ -577,11 +563,9 @@ We are wont to call proud the man who boasts too much (III. xxx. note), who talk
 On the other hand, we call humble the man who too often blushes, who confesses his faults, who sets forth other men's virtues, and who, lastly, walks with bent head and is negligent of his attire.
 However, these emotions, humility and self--abasement, are extremely rare.
 For human nature, considered in itself, strives against them as much as it can (see III. xiii., liv.); hence those, who are believed to be most self--abased and humble, are generally in reality the most ambitious and envious.
-Honour is pleasure accompanied by the idea of some action of our own, which we believe to be praised by others.
-Gloria.
+Honour is pleasure accompanied by the idea of some action of our own, which we believe to be praised by others. Gloria.
 Shame is pain accompanied by the idea of some action of our own, which we believe to be blamed by others.
-Explanation--On this subject see the note to III. xxx.
-But we should here remark the difference which exists between shame and modesty.
+Explanation--On this subject see the note to III. xxx. But we should here remark the difference which exists between shame and modesty.
 Shame is the pain following the deed whereof we are ashamed.
 Modesty is the fear or dread of shame, which restrains a man from committing a base action.
 Modesty is usually opposed to shamelessness, but the latter is not an emotion, as I will duly show; however, the names of the emotions (as I have remarked already) have regard rather to their exercise than to their nature. I have now fulfilled the task of explaining the emotions arising from pleasure and pain. I therefore proceed to treat of those which I refer to desire.
@@ -594,16 +578,13 @@ Emulation is the desire of something, engendered in us by our conception that ot
 Explanation--He who runs away, because he sees others running away, or he who fears, because he sees others in fear; or again, he who, on seeing that another man has burnt his hand, draws towards him his own hand, and moves his body as though his own were burnt; such an one can be said to imitate another's emotion, but not to emulate him; not because the causes of emulation and imitation are different, but because it has become customary to speak of emulation only in him, who imitates that which we deem to be honourable, useful, or pleasant.
 As to the cause of emulation, cf. III. xxvii. and note.
 The reason why this emotion is generally coupled with envy may be seen from III. xxxii. and note.
-Thankfulness or Gratitude is the desire or zeal springing from love, whereby we endeavour to benefit him, who with similar feelings of love has conferred a benefit on us.
-Cf. III. xxxix. note and xl.
-Benevolence is the desire of benefiting one whom we pity.
-Cf. III. xxvii. note.
+Thankfulness or Gratitude is the desire or zeal springing from love, whereby we endeavour to benefit him, who with similar feelings of love has conferred a benefit on us. Cf. III. xxxix. note and xl.
+Benevolence is the desire of benefiting one whom we pity. Cf. III. xxvii. note.
 Anger is the desire, whereby through hatred we are induced to injure one whom we hate, III. xxxix.
 Revenge is the desire whereby we are induced, through mutual hatred, to injure one who, with similar feelings, has injured us. (See III. xl. Coroll. ii and note.)
 Cruelty or savageness is the desire, whereby a man is impelled to injure one whom we love or pity.
 Explanation--To cruelty is opposed clemency, which is not a passive state of the mind, but a power whereby man restrains his anger and revenge.
-Timidity is the desire to avoid a greater evil, which we dread, by undergoing a lesser evil.
-Cf. III. xxxix. note.
+Timidity is the desire to avoid a greater evil, which we dread, by undergoing a lesser evil. Cf. III. xxxix. note.
 Daring is the desire, whereby a man is set on to do something dangerous which his equals fear to attempt.
 Cowardice is attributed to one, whose desire is checked by the fear of some danger which his equals dare to encounter.
 Explanation--Cowardice is, therefore, nothing else but the fear of some evil, which most men are wont not to fear; hence I do not reckon it among the emotions springing from desire.
@@ -624,8 +605,7 @@ Avarice is the excessive desire and love of riches.
 Lust is desire and love in the matter of sexual intercourse.
 Explanation--Whether this desire be excessive or not, it is still called lust.
 These last five emotions (as I have shown in III. lvi.) have on contraries.
-For deference is a species of ambition.
-Cf. III. xxix. note.
+For deference is a species of ambition. Cf. III. xxix. note.
 Again, I have already pointed out, that temperance, sobriety, and chastity indicate rather a power than a passivity of the mind.
 It may, nevertheless, happen, that an avaricious, an ambitious, or a timid man may abstain from excess in eating, drinking, or sexual indulgence, yet avarice, ambition, and fear are not contraries to luxury, drunkenness, and debauchery.
 For an avaricious man often is glad to gorge himself with food and drink at another man's expense.

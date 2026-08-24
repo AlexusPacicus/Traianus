@@ -140,11 +140,13 @@ CHILD_KINDS = set(CHILD_CODES)
 SENTENCE_SPLIT = re.compile(r"(?<=[.;:!?])\s+")
 
 # Citation/abbreviation tails that must NOT terminate a sentence
-# ("Pt. i.", "II., Def. i.", "(I. xxviii.)", "Q.E.D.", "&c." ...).
+# ("Pt. i.", "II., Def. i.", "(I. xxviii.)", "Q.E.D.", "&c.", "p. 47" ...).
 NOT_BOUNDARY = re.compile(
     r"(?:\s|\()("
-    r"Pt|Def|Prop|Cor|Ax|Lem|Post|Schol|Pref|App"
-    r"|i\.e|e\.g|etc|&c|[ivxlIVXL]{1,5}|[A-Z]"
+    r"Pt|Def|Prop|Cor|Coroll|Ax|Lem|Lemma|Post|Schol|Pref|App"
+    r"|N\.B|i\.e|e\.g|etc|&c|cf|vol|pp?|ll?|n|ed|transl"
+    r"|St|Mr|Dr|Messrs"
+    r"|[ivxlIVXL]{1,6}|[A-Z]"
     r")\.$"
 )
 
@@ -153,7 +155,9 @@ def split_sentences(text: str) -> list[str]:
     """One chunk per real sentence; abbreviation/citation dots protected."""
     sentences, start = [], 0
     for m in SENTENCE_SPLIT.finditer(text):
-        tail = text[max(start, m.start() - 16):m.end()]
+        # Absolute 16-char window (NOT anchored at `start`: the preceding
+        # whitespace is part of the abbreviation evidence).
+        tail = text[max(0, m.start() - 16):m.end()].rstrip()
         nxt = text[m.end():m.end() + 1]
         if NOT_BOUNDARY.search(tail) or (nxt and not nxt.isupper()):
             continue  # keep current sentence open
@@ -162,11 +166,14 @@ def split_sentences(text: str) -> list[str]:
     tail = text[start:].strip()
     if tail:
         sentences.append(tail)
-    # Citation debris ("Coroll.).", "Nov.", "i., Prop.") merges backwards.
+    # Citation debris ("Coroll.).", "Nov.", "i., Prop.", "Pollock.",
+    # "Gloria.", "N.B.") merges backwards into its carrier sentence.
     cite_start = re.compile(
-        r"^(?:[a-z]|\d|[ivxlIVXL]{1,5}\b"
+        r"^(?:[a-z]|\d|[ivxlIVXL]{1,6}\b"
         r"|(?:Pt|Def|Prop|Cor|Coroll|Dem|Ax|Lem|Lemma|Post|Schol"
-        r"|Pref|App|Note|Nov|Org|i\.e|e\.g|etc|&c)\.)")
+        r"|Pref|App|Note|Nov|Org|i\.e|e\.g|etc|&c)\."
+        r"|N\.B\.$"
+        r"|[A-Z][a-z]+\.$)")
     merged: list[str] = []
     for sentence in sentences:
         if merged and (re.fullmatch(r"Q\.E\.D\.", sentence)

@@ -26,3 +26,8 @@ def test_part2_mind_md_matches_manifest():
 
 def test_part3_affects_md_matches_manifest():
     _assert_md_matches_manifest("part3_affects.md", "part3_affects_manifest.json")
+
+
+def test_part4_bondage_md_matches_manifest():
+    _assert_md_matches_manifest("part4_bondage.md",
+                                "part4_bondage_manifest.json")
