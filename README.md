@@ -6,6 +6,7 @@
 [![Version](https://img.shields.io/badge/version-1.0.1-blue.svg)](pyproject.toml)
 [![License](https://img.shields.io/badge/license-AGPLv3-green.svg)](LICENSE)
 [![Python](https://img.shields.io/badge/python-3.11%2B-blue)](pyproject.toml)
+[![Sponsor Traianus](https://img.shields.io/badge/Sponsor-Polar.sh-6366f1?style=for-the-badge)](https://buy.polar.sh/polar_cl_oCZqVWSDsszpwF52h80lqakG9GmmqJ1BetFiB3cOcxO)
 
 ---
 
