@@ -19,7 +19,7 @@ REPO_ROOT = Path(__file__).resolve().parents[3]
 
 sys.path.insert(0, str(REPO_ROOT))
 
-from _common import load_labels
+from tools.experiments.tooling._common import load_labels
 
 RUNS = [
     ("part1_isolated", "part1_god"),
@@ -125,11 +125,26 @@ def inter_part_edges(full_db: Path, labels_path: Path) -> dict:
     }
 
 
+def merge_extra_reports(payload: dict, paths: list[Path]) -> dict:
+    """Embed dynamic-audit JSON reports under dynamic_epsilon_audit/<stem>."""
+    extra = {}
+    for path in paths:
+        extra[path.stem] = json.loads(
+            path.read_text(encoding="utf-8"))
+    if extra:
+        payload["dynamic_epsilon_audit"] = extra
+    return payload
+
+
 def main() -> int:
     parser = argparse.ArgumentParser(description=__doc__)
     parser.add_argument("--out", type=Path,
                         default=REPO_ROOT / "data" / "spinoza" / "telemetry"
                         / "v1.json")
+    parser.add_argument("--extra-report", type=Path, action="append",
+                        default=[],
+                        help="dynamic audit JSON (Otsu sweep, axis anisotropy, "
+                             "inter-part enrichment) to embed; repeatable")
     args = parser.parse_args()
 
     payload = {
@@ -147,6 +162,7 @@ def main() -> int:
             REPO_ROOT / ".data" / "spinoza_full.db",
             REPO_ROOT / ".data" / "spinoza_full_labels.json"),
     }
+    payload = merge_extra_reports(payload, list(args.extra_report))
     args.out.parent.mkdir(parents=True, exist_ok=True)
     args.out.write_text(json.dumps(payload, ensure_ascii=False, indent=2) + "\n",
                         encoding="utf-8")
