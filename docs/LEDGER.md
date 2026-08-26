@@ -1041,3 +1041,19 @@
 * **Gate:** hermetic suite green (281 passed, 5 deselected).
 * **Branch:** `audit/multithreshold-knee-v5`.
 * **Status:** `Consolidated`.
+
+### seq 41 — 2026-08-26 — PR #82 merged; dynamic audit consolidated on main
+
+* **Merge:** PR #82 (`audit/multithreshold-knee-v5`, commits c3dd02c +
+  695964a) merged into main as 938f873 after green CI on both partitions
+  (hermetic + model suites).
+* **Operator approval:** explicit operator merge sign-off recorded in chat
+  BEFORE merge (seq 38 process rule; the PR includes frozen dataset
+  `data/spinoza/telemetry/v5.json`).
+* **Scope:** Otsu-adaptive epsilon*, permutation-null axis anisotropy,
+  enrichment-ratio 5x5 matrix, 8x5 axis-part Fisher battery, telemetry v5
+  freeze with structural guard test and light e2e pipeline test.
+  No changes to `traianus/`.
+* **Follow-up (deferred to WP1):** unified orchestration of experimental
+  tooling imports (sys.path bootstrap convention documented in review).
+* **Status:** `Consolidated`.
