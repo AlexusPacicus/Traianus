@@ -98,7 +98,9 @@ def adjusted_residuals(table):
     with np.errstate(divide="ignore", invalid="ignore"):
         denom = np.sqrt(expected * (1 - table.sum(axis=1, keepdims=True) / n)
                         * (1 - table.sum(axis=0, keepdims=True) / n))
-    return np.where(denom > 0, (table - expected) / denom, 0.0)
+        residuals = np.where(denom > 0, (table - expected) / np.where(
+            denom > 0, denom, 1.0), 0.0)
+    return residuals
 
 
 def monte_carlo_pvalue(units, replicas, seed):
