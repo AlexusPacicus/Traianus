@@ -992,3 +992,52 @@
 * **Re-landing executed per seq 38 procedure:** cbac362 reverted
   (cd1927b "Reapply"), then the feature branch merged (206dc79).
 * **Status:** `Consolidated` — operator merge approval recorded in chat.
+
+### seq 40 — 2026-08-25 — Dynamic multithreshold bridge audit; telemetry v5 frozen
+
+* **Method shift:** all analytic constants removed from the bridge audit.
+  The operating point is no longer a fixed epsilon: it is derived per
+  manifold from the empirical pairwise-distance structure (Otsu two-class
+  threshold, optimal-plateau center) with bootstrap stability reported.
+* **New committed tooling** (`tools/experiments/tooling/`):
+  `epsilon_knee_audit.py` (dense kept-percentile sweep + Otsu epsilon*),
+  `audit_axis_anisotropy.py` (Q1-Q8 co-activation mass shares vs empirical
+  permutation null), `inter_part_enrichment.py` (5x5 block matrix as
+  size-normalized enrichment ratios), `fisher_axis_part_test.py` (8x5
+  axis-part independence battery over four units of analysis);
+  `freeze_telemetry.py` extended with repeatable `--extra-report`.
+* **Otsu epsilon\***: accumulated manifold (N=2221): epsilon*=1.2032,
+  kept mass 37.89%, 934,147 edges / 932,329 non-contiguous bridges;
+  bootstrap std 0.0015 (100 replicas). Isolated parts:
+  I=1.1642, II=1.1574, III=1.1722, IV=1.1801, V=1.1507 (all std <=0.002).
+* **Axis anisotropy (permutation null, 400 replicas, p=0.0025 in every
+  manifold):** Q1 mass share attenuates across the Ethics:
+  I 0.618 -> II 0.537 -> III 0.462 -> IV 0.221 (AXIS_2 dominant, 0.389)
+  -> V 0.314; accumulated Q1 = 0.416. Attenuation is evidence against a
+  purely syntactic MiniLM bias; dominance remains statistically
+  significant against the per-endpoint permutation null everywhere.
+* **Enrichment matrix at epsilon*=1.2032** (vs raw counts at fixed 0.8 of
+  seq 37 — different threshold, not directly comparable): strongest
+  inter-part continuum AFFECTS<->POWER = 1.256, then BONDAGE<->POWER =
+  1.197 and AFFECTS<->BONDAGE = 1.170; weakest GOD<->AFFECTS = 0.533.
+  Strongest intra-block cohesion P5_POWER = 1.501.
+* **Memory:** peak measured 259.5 MB for the O(N^2) pass at N=2221
+  (tracemalloc), within the <= 8 GB envelope.
+* **Axis x Part independence battery (8x5, `fisher_axis_part_test.py`):**
+  the association between dominant spectral axis and Ethics part is
+  significant in every unit of analysis (MC conditional p=0.001, seed 0):
+  all vertices N=2221 chi2=200.1 V=0.139; active loads sigma^2>=theta_dyn
+  N=299 chi2=69.1 V=0.187; variance-weighted chi2=271.1 V=0.166;
+  edge-level references V=0.221 (eps=0.8, N=2944) and V=0.120
+  (eps*=1.2032, N=932734, dependent-inflated). Driving cells among active
+  loads: AXIS_6<->POWER (+4.21), AXIS_2<->BONDAGE (+3.79),
+  AXIS_2<->GOD (-3.51). V is HIGHER among kinetic loads than over the
+  global mean — matching the ex-ante falsifiable prediction for
+  content-driven (not purely syntactic) axis use. Deterministic
+  leave-one-block-out jackknife of V: mean 0.1397, std 0.0066.
+* **Evidence freeze:** `data/spinoza/telemetry/v5.json` supersedes v4,
+  embedding the Otsu sweep, axis-anisotropy, enrichment and axis-part
+  independence reports under `dynamic_epsilon_audit`.
+* **Gate:** hermetic suite green (281 passed, 5 deselected).
+* **Branch:** `audit/multithreshold-knee-v5`.
+* **Status:** `Consolidated`.
