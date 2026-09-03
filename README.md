@@ -91,6 +91,8 @@ This separation addresses the **Representation-State Coupling Problem** and guar
 
 Core/Control Plane **v1.0.0 (IMPLEMENTED)**. Work Packages WP1–WP4 (including Persistent Homology) and the Ulpia observation client remain **RESEARCH / FUTURE ROADMAP**. See [IMPLEMENTATION_STATUS.md](./IMPLEMENTATION_STATUS.md) and [docs/STATUS.md](./docs/STATUS.md).
 
+**Ulpia Observation Layer (`mode=ro`):** Ulpia is declared **RESEARCH / FUTURE ROADMAP** and has no code in `traianus/`. When implemented, its observation layer will operate over connections strictly and physically configured as read-only (`mode=ro`), guaranteeing **zero mutations** — it will never write, update, or delete over `data_plane` or `manifold_nodes`. Every projection is a pure function $O_n = P_\theta(S_n)$ with no side effects on the geometric state.
+
 ---
 
 ## 📂 Repository Layout
