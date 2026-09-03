@@ -275,24 +275,39 @@ def handle_request(req: dict):
         args = params.get("arguments") or {}
 
         try:
+            # Validate required arguments per inputSchema before dispatch.
+            REQUIRED_ARGS = {
+                "calibrate_c1_threshold": ["matrix"],
+                "calculate_simplex_volume": ["vertices"],
+                "compute_barycentric_coordinates": ["point", "simplex_vertices"],
+                "analyze_float_drift": ["vector"],
+            }
+            if name is None:
+                return _rpc_error(request_id, -32602, "Missing tool name")
+            required = REQUIRED_ARGS.get(name)
+            if required is None:
+                return _rpc_error(request_id, -32602, f"Unknown tool: {name!r}")
+            missing = [k for k in required if k not in args]
+            if missing:
+                return _rpc_error(request_id, -32602, f"Missing required args: {missing}")
+
             if name == "calibrate_c1_threshold":
-                res = calibrate_c1_threshold(args.get("matrix", []))
+                res = calibrate_c1_threshold(args["matrix"])
             elif name == "calculate_simplex_volume":
-                res = calculate_simplex_volume(args.get("vertices", []))
+                res = calculate_simplex_volume(args["vertices"])
             elif name == "compute_barycentric_coordinates":
                 res = compute_barycentric_coordinates(
-                    args.get("point", []), args.get("simplex_vertices", [])
+                    args["point"], args["simplex_vertices"]
                 )
             elif name == "analyze_float_drift":
-                res = analyze_float_drift(args.get("vector", []))
-            else:
-                return _rpc_error(request_id, -32602, f"Unknown tool: {name!r}")
+                res = analyze_float_drift(args["vector"])
 
+            is_error = res.get("status") == "ERROR" if isinstance(res, dict) else False
             return _rpc_result(
                 request_id,
                 {
                     "content": [{"type": "text", "text": json.dumps(res, indent=2)}],
-                    "isError": False,
+                    "isError": is_error,
                 },
             )
         except Exception as e:
