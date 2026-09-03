@@ -1,7 +1,9 @@
 """Unit tests for SQLiteEngine - schema, serialization, basic CRUD."""
-import numpy as np
-import tempfile
 import os
+import tempfile
+
+import numpy as np
+
 from traianus.storage.sqlite_engine import SQLiteEngine
 
 

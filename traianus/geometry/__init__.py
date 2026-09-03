@@ -20,6 +20,7 @@ from traianus.geometry.observables import (
 from traianus.geometry.polar_projector import PolarProjector
 
 __all__ = [
+    "PolarProjector",
     "calibrate_critical_threshold",
     "compute_epsilon_edges",
     "compute_kinetic_resistance",
@@ -29,5 +30,4 @@ __all__ = [
     "project_to_5d",
     "sigmoid_scale",
     "svd_reduce",
-    "PolarProjector",
 ]

@@ -80,7 +80,8 @@ jobs:
           python -m pip install --upgrade pip
           pip install -e ".[test]"
           pip install -e .
-          pip install ruff mypy coverage
+          # Pinned toolchain: CI must behave exactly like the verified local env.
+          pip install "ruff==0.16.5" "mypy==1.19.1" coverage
       - name: Ruff (scoped to ADR-025 surface; legacy files excluded)
         run: |
           ruff check traianus/geometry/ traianus/storage/ traianus/telemetry/ \

@@ -634,9 +634,8 @@ def _persist_epsilon_edges(conn: sqlite3.Connection, epsilon: float) -> int:
         if prev.get(edge_id) is None or prev[edge_id][2] != "auto":
             _insert_edge_revision(conn, edge_id, edge["source"], edge["target"], "auto")
 
-    for edge_id in prev:
+    for edge_id, (source, target, _) in prev.items():
         if edge_id not in desired:
-            source, target, _ = prev[edge_id]
             _insert_edge_revision(conn, edge_id, source, target, "removed")
 
     return len(edges)

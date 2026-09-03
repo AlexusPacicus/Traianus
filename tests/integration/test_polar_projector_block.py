@@ -1,8 +1,14 @@
 """Block tests for PolarProjector - full pipeline scenarios."""
-import numpy as np
 import time
+
+import numpy as np
+
+from tests.fixtures.polar_fixtures import (
+    collinear_centroids,
+    random_unit_vector,
+    simulate_drift_trajectory,
+)
 from traianus.geometry.polar_projector import PolarProjector
-from tests.fixtures.polar_fixtures import random_unit_vector, simulate_drift_trajectory, collinear_centroids
 
 
 class TestPolarProjectorBlock:

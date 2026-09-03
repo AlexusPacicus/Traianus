@@ -1,7 +1,9 @@
 """Block tests for SQLiteEngine - realistic read/write cycles."""
-import numpy as np
-import tempfile
 import os
+import tempfile
+
+import numpy as np
+
 from traianus.storage.sqlite_engine import SQLiteEngine
 
 

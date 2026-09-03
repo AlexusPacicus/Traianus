@@ -5,6 +5,7 @@ dimensions produce bitwise identical outputs, lambda stays bounded, and
 escape distance satisfies the triangle inequality.
 """
 import numpy as np
+
 from traianus.geometry.polar_projector import PolarProjector
 
 

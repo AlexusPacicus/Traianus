@@ -3,8 +3,8 @@ import sqlite3
 
 import numpy as np
 
-import traianus.storage as storage
 from tests.helpers.db_factory import create_schema
+from traianus import storage
 from traianus.storage.sqlite_engine import SQLiteEngine
 
 

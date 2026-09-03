@@ -8,7 +8,7 @@ connection so callers can join a wider atomic transaction.
 
 import sqlite3
 from contextlib import contextmanager
-from typing import Optional, Tuple
+
 import numpy as np
 from numpy.typing import NDArray
 
@@ -128,7 +128,7 @@ class SQLiteEngine:
                 return self._insert_data_plane(own_conn, node_id, vector)
         return self._insert_data_plane(conn, node_id, vector)
 
-    def get_data_plane(self, node_id: str) -> Optional[Tuple[NDArray[np.float64], int]]:
+    def get_data_plane(self, node_id: str) -> tuple[NDArray[np.float64], int] | None:
         """
         Retrieve the LATEST vector revision and dimension.
 
@@ -175,7 +175,7 @@ class SQLiteEngine:
                     version = excluded.version
             """, (node_id, centroid_id, version))
 
-    def get_control_plane(self, node_id: str) -> Optional[Tuple[int, int]]:
+    def get_control_plane(self, node_id: str) -> tuple[int, int] | None:
         """
         Retrieve (centroid_id, version).
 

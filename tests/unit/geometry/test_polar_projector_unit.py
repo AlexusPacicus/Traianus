@@ -1,5 +1,6 @@
 """Unit tests for PolarProjector - isolated, deterministic, < 1ms each."""
 import numpy as np
+
 from traianus.geometry.polar_projector import PolarProjector
 
 

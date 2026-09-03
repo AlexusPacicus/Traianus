@@ -1,11 +1,13 @@
 """Concurrency block tests for SQLiteEngine - real WAL concurrency."""
-import pytest
 import asyncio
-import numpy as np
-import tempfile
 import os
 import sys
+import tempfile
 import time
+
+import numpy as np
+import pytest
+
 from traianus.storage.sqlite_engine import SQLiteEngine
 
 

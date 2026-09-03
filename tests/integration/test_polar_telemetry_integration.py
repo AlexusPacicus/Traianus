@@ -1,8 +1,9 @@
 """Block tests: PolarProjector → VarianceTracker integration."""
 import numpy as np
+
+from tests.fixtures.polar_fixtures import random_unit_vector
 from traianus.geometry.polar_projector import PolarProjector
 from traianus.telemetry.variance_tracker import VarianceTracker
-from tests.fixtures.polar_fixtures import random_unit_vector
 
 
 class TestPolarTelemetryIntegration:

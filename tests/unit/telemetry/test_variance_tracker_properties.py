@@ -5,6 +5,7 @@ constant input, scale invariance of the drift ratio, bounded variance for
 bounded input, non-negativity, and mean convergence.
 """
 import numpy as np
+
 from traianus.telemetry.variance_tracker import VarianceTracker
 
 

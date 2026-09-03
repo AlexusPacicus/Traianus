@@ -1,6 +1,7 @@
 """Unit tests for VarianceTracker - EWMA variance tracking with Welford."""
-import pytest
 import numpy as np
+import pytest
+
 from traianus.telemetry.variance_tracker import VarianceTracker
 
 
