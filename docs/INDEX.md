@@ -31,6 +31,7 @@ graph TD
     ROOT --> ADR[architecture/ADR/ADR.md]
     ROOT --> EAS[specifications/EAS-01_LOGOGRAPHIC_PHYSICS.md]
     ROOT --> AUD[audit/AUDIT.md]
+    ROOT --> ROAD[roadmap/NEXT_RESEARCH.md]
     ROOT --> REM[audit/remediation/]
     ROOT --> STA[STATUS.md]
     
@@ -45,6 +46,7 @@ graph TD
 * **[architecture/ADR/ADR.md](./architecture/ADR/ADR.md):** *Append-only* Architecture Decision Record log (ADR-001 to ADR-027).
 * **[specifications/EAS-01_LOGOGRAPHIC_PHYSICS.md](./specifications/EAS-01_LOGOGRAPHIC_PHYSICS.md):** Normative specification of the spectral dispersion experiment, NCD coupling, and Representation-Governance Coupling Problem report.
 * **[audit/AUDIT.md](./audit/AUDIT.md):** Technical audit report with remediation status.
+* **[roadmap/NEXT_RESEARCH.md](./roadmap/NEXT_RESEARCH.md):** Research backlog — Ulpia Spatial Observation Framework, projection/observation theory, nuclear invariants, and future research directions.
 * **[STATUS.md](./STATUS.md):** Formal classification (Implemented / Experimental / Research) + Known Limitations.
 
 ---
