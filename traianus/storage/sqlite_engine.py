@@ -1,10 +1,18 @@
-"""SQLite engine with WAL mode for polar projector data/control planes."""
+"""SQLite engine with WAL mode for polar projector data/control planes.
+
+Table DDL is owned by ``traianus.storage._storage`` (ADR-025 amendment A1:
+DATA_PLANE_DDL / CONTROL_PLANE_DDL are the single source of truth); this
+module only adds query indexes. ``upsert_data_plane`` accepts an external
+connection so callers can join a wider atomic transaction.
+"""
 
 import sqlite3
 from contextlib import contextmanager
 from typing import Optional, Tuple
 import numpy as np
 from numpy.typing import NDArray
+
+from traianus.storage._storage import CONTROL_PLANE_DDL, DATA_PLANE_DDL
 
 
 class SQLiteEngine:
@@ -59,31 +67,36 @@ class SQLiteEngine:
             conn.close()
 
     def _init_schema(self) -> None:
-        """Create tables and indexes if they don't exist."""
+        """Create tables (shared DDL) and indexes if they don't exist."""
         with self._transaction() as conn:
-            conn.execute("""
-                CREATE TABLE IF NOT EXISTS data_plane (
-                    node_id TEXT PRIMARY KEY,
-                    vector_blob BLOB NOT NULL,
-                    dimension INTEGER NOT NULL,
-                    updated_at TIMESTAMP DEFAULT CURRENT_TIMESTAMP
-                )
-            """)
-            conn.execute("""
-                CREATE TABLE IF NOT EXISTS control_plane (
-                    node_id TEXT PRIMARY KEY,
-                    centroid_id INTEGER NOT NULL,
-                    version INTEGER NOT NULL DEFAULT 0,
-                    FOREIGN KEY (node_id) REFERENCES data_plane(node_id)
-                )
-            """)
-            # Indexes for common queries
+            conn.execute(DATA_PLANE_DDL)
+            conn.execute(CONTROL_PLANE_DDL)
+            # Indexes for common queries (optimization, owned here)
             conn.execute("CREATE INDEX IF NOT EXISTS idx_data_plane_updated ON data_plane(updated_at)")
             conn.execute("CREATE INDEX IF NOT EXISTS idx_control_plane_centroid ON control_plane(centroid_id)")
 
     # --- Data Plane ---
 
-    def upsert_data_plane(self, node_id: str, vector: NDArray[np.float64]) -> None:
+    @staticmethod
+    def _upsert_data_plane(conn: sqlite3.Connection, node_id: str, vector: NDArray[np.float64]) -> None:
+        vec64 = np.asarray(vector, dtype=np.float64)
+        blob = vec64.tobytes()
+        dim = vec64.shape[0]
+        conn.execute("""
+            INSERT INTO data_plane (node_id, vector_blob, dimension, updated_at)
+            VALUES (?, ?, ?, CURRENT_TIMESTAMP)
+            ON CONFLICT(node_id) DO UPDATE SET
+                vector_blob = excluded.vector_blob,
+                dimension = excluded.dimension,
+                updated_at = CURRENT_TIMESTAMP
+        """, (node_id, blob, dim))
+
+    def upsert_data_plane(
+        self,
+        node_id: str,
+        vector: NDArray[np.float64],
+        conn: sqlite3.Connection | None = None,
+    ) -> None:
         """
         Insert or replace vector with dimension metadata.
 
@@ -92,20 +105,14 @@ class SQLiteEngine:
         Args:
             node_id: Unique node identifier.
             vector: Vector to store (any dimension, float64).
+            conn: Optional external connection to join a wider atomic
+                transaction (caller owns commit); otherwise commits alone.
         """
-        vec64 = np.asarray(vector, dtype=np.float64)
-        blob = vec64.tobytes()
-        dim = vec64.shape[0]
-
-        with self._transaction() as conn:
-            conn.execute("""
-                INSERT INTO data_plane (node_id, vector_blob, dimension, updated_at)
-                VALUES (?, ?, ?, CURRENT_TIMESTAMP)
-                ON CONFLICT(node_id) DO UPDATE SET
-                    vector_blob = excluded.vector_blob,
-                    dimension = excluded.dimension,
-                    updated_at = CURRENT_TIMESTAMP
-            """, (node_id, blob, dim))
+        if conn is None:
+            with self._transaction() as own_conn:
+                self._upsert_data_plane(own_conn, node_id, vector)
+        else:
+            self._upsert_data_plane(conn, node_id, vector)
 
     def get_data_plane(self, node_id: str) -> Optional[Tuple[NDArray[np.float64], int]]:
         """

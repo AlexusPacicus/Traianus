@@ -8,6 +8,15 @@ of the former ``traianus/storage.py`` module is re-exported here.
 """
 
 from traianus.storage._storage import (
+    DATA_PLANE_DDL,
+    CONTROL_PLANE_DDL,
+    INGESTION_QUEUE_DDL,
+    MANIFOLD_NODES_DDL,
+    MANIFOLD_EDGES_DDL,
+    GEODESIC_AXES_DDL,
+    AUDIT_LOG_DDL,
+    EVENT_ERROR,
+    EVENT_RECALIBRATION_SIGNAL,
     init_db,
     init_relational_tables,
     get_db_connection,
@@ -38,6 +47,15 @@ DB_PATH = "traianus.db"
 
 __all__ = [
     "DB_PATH",
+    "DATA_PLANE_DDL",
+    "CONTROL_PLANE_DDL",
+    "INGESTION_QUEUE_DDL",
+    "MANIFOLD_NODES_DDL",
+    "MANIFOLD_EDGES_DDL",
+    "GEODESIC_AXES_DDL",
+    "AUDIT_LOG_DDL",
+    "EVENT_ERROR",
+    "EVENT_RECALIBRATION_SIGNAL",
     "init_db",
     "init_relational_tables",
     "get_db_connection",

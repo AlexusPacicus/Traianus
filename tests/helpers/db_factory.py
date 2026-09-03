@@ -17,68 +17,29 @@ import numpy as np
 from traianus.app import serialize_vector
 
 # ---------------------------------------------------------------------------
-# Canonical DDL (only permitted definition in tests; grep "CREATE TABLE" == 1)
+# Canonical DDL: consumed from traianus.storage (single source of truth,
+# ADR-025 amendment A1). No CREATE TABLE text lives here; grep for DDL
+# definitions must resolve to traianus/storage/_storage.py.
 # ---------------------------------------------------------------------------
 
+from traianus.storage import (
+    AUDIT_LOG_DDL,
+    DATA_PLANE_DDL,
+    CONTROL_PLANE_DDL,
+    GEODESIC_AXES_DDL,
+    INGESTION_QUEUE_DDL,
+    MANIFOLD_EDGES_DDL,
+    MANIFOLD_NODES_DDL,
+)
+
 SCHEMA_STATEMENTS = [
-    """
-    CREATE TABLE IF NOT EXISTS geodesic_axes (
-        id TEXT NOT NULL,
-        simbolo TEXT NOT NULL,
-        tag TEXT NOT NULL,
-        vector_blob BLOB NOT NULL,
-        epoch_provenance TEXT NOT NULL DEFAULT 'PROSTHETIC_NSM_V1',
-        created_at TIMESTAMP DEFAULT CURRENT_TIMESTAMP,
-        PRIMARY KEY (id, epoch_provenance)
-    )
-    """,
-    """
-    CREATE TABLE IF NOT EXISTS manifold_nodes (
-        id TEXT NOT NULL,
-        seq INTEGER NOT NULL,
-        text TEXT NOT NULL,
-        toon_factor TEXT NOT NULL,
-        lifecycle_state TEXT NOT NULL,
-        action_potential REAL NOT NULL,
-        revision_milestone INTEGER NOT NULL,
-        vector_blob BLOB NOT NULL,
-        projections_json TEXT NOT NULL,
-        epoch_provenance TEXT NOT NULL DEFAULT 'PROSTHETIC_NSM_V1',
-        sys_internal_timestamp DATETIME DEFAULT CURRENT_TIMESTAMP,
-        PRIMARY KEY (id, seq),
-        CHECK (lifecycle_state IN ('pending_approval', 'incubating', 'consolidated', 'telemetry_error'))
-    )
-    """,
-    """
-    CREATE TABLE IF NOT EXISTS ingestion_queue (
-        id INTEGER PRIMARY KEY AUTOINCREMENT,
-        payload TEXT NOT NULL,
-        idempotency_key TEXT UNIQUE,
-        status TEXT DEFAULT 'PENDING',
-        created_at DATETIME DEFAULT CURRENT_TIMESTAMP
-    )
-    """,
-    """
-    CREATE TABLE IF NOT EXISTS manifold_edges (
-        id TEXT NOT NULL,
-        seq INTEGER NOT NULL,
-        source TEXT NOT NULL,
-        target TEXT NOT NULL,
-        state TEXT NOT NULL,
-        sys_internal_timestamp DATETIME DEFAULT CURRENT_TIMESTAMP,
-        PRIMARY KEY (id, seq)
-    )
-    """,
-    """
-    CREATE TABLE IF NOT EXISTS audit_log (
-        case_id TEXT PRIMARY KEY,
-        timestamp TEXT DEFAULT (datetime('now')),
-        intent_class TEXT,
-        target_file TEXT,
-        decision TEXT NOT NULL,
-        safety_abort TEXT
-    )
-    """,
+    GEODESIC_AXES_DDL,
+    MANIFOLD_NODES_DDL,
+    INGESTION_QUEUE_DDL,
+    MANIFOLD_EDGES_DDL,
+    AUDIT_LOG_DDL,
+    DATA_PLANE_DDL,
+    CONTROL_PLANE_DDL,
 ]
 
 AXIS_COUNT = 8

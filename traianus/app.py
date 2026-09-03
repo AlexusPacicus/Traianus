@@ -251,14 +251,6 @@ def async_spectral_processor(ingestion_id: int, raw_text: str):
         norm = np.linalg.norm(padded_vector)
         norm_idea_vector = padded_vector / norm if norm > 0 else padded_vector
 
-        # ADR-025 §2.3 step 1: unconditional data-plane write (float64).
-        # The data plane is the immutable source of truth; failures here
-        # propagate to the outer handler (no silent masking, AGENTS.md §1.3).
-        SQLiteEngine(db_path=storage.DB_PATH).upsert_data_plane(
-            f"NODE_{ingestion_id}",
-            np.asarray(norm_idea_vector, dtype=np.float64),
-        )
-
         projections = {}
         for axis_id, axis_entry in geodetic_matrix.items():
             projections[axis_id] = float(np.dot(norm_idea_vector, axis_entry["vector"]))
@@ -312,9 +304,16 @@ def async_spectral_processor(ingestion_id: int, raw_text: str):
             for axis_id, value in zip(geodetic_matrix.keys(), validated_entity.projections)
         })
 
+        # ADR-025 amendment A1: validation strictly precedes ANY insert, and
+        # all data writes commit in ONE atomic transaction. A validation
+        # failure above leaves zero rows (no orphan data_plane rows); a
+        # failure inside rolls everything back together.
         with storage.get_db_connection() as conn:
-            # Node revision + queue-status update commit atomically: a queue
-            # failure rolls back the node revision (single transaction).
+            SQLiteEngine(db_path=storage.DB_PATH).upsert_data_plane(
+                f"NODE_{ingestion_id}",
+                np.asarray(norm_idea_vector, dtype=np.float64),
+                conn=conn,
+            )
             storage.insert_node_revision(
                 f"NODE_{ingestion_id}",
                 raw_text,
@@ -332,7 +331,7 @@ def async_spectral_processor(ingestion_id: int, raw_text: str):
         # ADR-025 §2.3 step 4: the append-only node revision above is ALWAYS
         # written (ADR-025 invariant #1 monotonic history wins over the
         # freeze). An out-of-band polar evaluation additionally records a
-        # recalibration trigger (async re-orthogonalization from data_plane)
+        # recalibration signal (async re-orthogonalization from data_plane)
         # without blocking ingestion.
         if polar_band != VarianceTracker.NOMINAL:
             storage.insert_error_log(
@@ -348,6 +347,7 @@ def async_spectral_processor(ingestion_id: int, raw_text: str):
                     "lambda": float(polar_lambda),
                     "d_esc": float(polar_d_esc),
                 }),
+                event_type=storage.EVENT_RECALIBRATION_SIGNAL,
             )
             get_logger(request_id=f"bg-{ingestion_id}").info(
                 "recalibration_triggered",
@@ -699,7 +699,8 @@ async def get_telemetry_logs():
     try:
         rows = storage.get_telemetry_errors()
         return [
-            {"id": r[0], "trace": r[1], "meta": json.loads(r[2]), "time": r[3]}
+            {"id": r[0], "trace": r[1], "meta": json.loads(r[2]), "time": r[3],
+             "event_type": r[4]}
             for r in rows
         ]
     except Exception as e:

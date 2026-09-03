@@ -1,6 +1,10 @@
 """Wiring tests: PolarProjector closed-circuit in POST /ingesta (ADR-025 §2.3)."""
+import sqlite3
+
 import numpy as np
 
+import traianus.storage as storage
+from tests.helpers.db_factory import create_schema
 from traianus.storage.sqlite_engine import SQLiteEngine
 
 
@@ -45,4 +49,29 @@ class TestPolarIngestaWiring:
         for row in recal_rows:
             assert "band" in row["trace"]
             assert ("ALERT_HIGH" in row["trace"]) != ("ALERT_LOW" in row["trace"])
+            assert row["event_type"] == "RECALIBRATION_SIGNAL"
         assert isinstance(telemetry, list)
+
+    def test_validation_failure_leaves_zero_rows(self, client, ingesta, auth_headers, tmp_path, monkeypatch):
+        """ADR-025 A1 atomicity: empty basis fails validation with zero data rows."""
+        db_path = str(tmp_path / "empty_basis_atomic.db")
+        monkeypatch.setattr(storage, "DB_PATH", db_path)
+        with sqlite3.connect(db_path) as conn:
+            create_schema(conn)  # full schema incl. data_plane, NO seeded axes
+
+        res = ingesta("Orphan probe")
+        assert res.status_code == 200  # accepted; background validation fails
+
+        with sqlite3.connect(db_path) as conn:
+            assert conn.execute("SELECT COUNT(*) FROM data_plane").fetchone()[0] == 0
+            assert conn.execute(
+                "SELECT COUNT(*) FROM manifold_nodes WHERE lifecycle_state != 'telemetry_error'"
+            ).fetchone()[0] == 0
+
+        nodes = client.get("/nodos", headers=auth_headers).json().get("nodes", [])
+        assert nodes == []
+
+        telemetry = client.get("/telemetry", headers=auth_headers).json()
+        error_rows = [r for r in telemetry if r["id"].startswith("LOG_")]
+        assert len(error_rows) == 1
+        assert error_rows[0]["event_type"] == "ERROR"
