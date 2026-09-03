@@ -66,3 +66,36 @@ jobs:
       - name: WP0 semantics validation (Step 4)
         run: |
           HF_HUB_OFFLINE=1 python tools/experiments/validation/validate_c1_semantics.py
+
+  static-and-coverage:
+    name: Lint, types and coverage gate (ADR-025 A1)
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v4
+      - uses: actions/setup-python@v5
+        with:
+          python-version: "3.11"
+      - name: Install dependencies
+        run: |
+          python -m pip install --upgrade pip
+          pip install -e ".[test]"
+          pip install -e .
+          pip install ruff mypy coverage
+      - name: Ruff (scoped to ADR-025 surface; legacy files excluded)
+        run: |
+          ruff check traianus/geometry/ traianus/storage/ traianus/telemetry/ \
+            tests/unit/geometry/ tests/unit/storage/ tests/unit/telemetry/ \
+            tests/integration/test_polar_ingesta_wiring.py \
+            tests/integration/test_polar_projector_block.py \
+            tests/integration/test_polar_telemetry_integration.py \
+            tests/integration/test_sqlite_engine_block.py \
+            tests/fixtures/polar_fixtures.py
+      - name: Mypy (strict, whole control plane)
+        run: |
+          mypy traianus/
+      - name: Coverage gate (>=85% over traianus/)
+        # NOTE: coverage CLI (not pytest --cov) — the plugin crashes on
+        # numpy re-import in some environments; `coverage run` is reliable.
+        run: |
+          HF_HUB_OFFLINE=1 coverage run -m pytest tests/ -q
+          coverage report --include="traianus/*" --fail-under=85

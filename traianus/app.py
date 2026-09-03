@@ -19,8 +19,11 @@ from traianus.geometry.observables import (
     calibrate_critical_threshold,
     compute_kinetic_resistance,
 )
+from traianus.geometry.polar_projector import PolarProjector
 from traianus.governance.gate import evaluate_gate
+from traianus.telemetry.variance_tracker import VarianceTracker
 from traianus import storage
+from traianus.storage.sqlite_engine import SQLiteEngine
 from traianus.config import resolve_epsilon_edge
 from traianus.observability import (
     get_logger,
@@ -86,6 +89,16 @@ app.add_middleware(
 # representation provider on first use and caches it. Unit tests run with the
 # deterministic mock provider injected (conftest `_hermetic_model`).
 _provider = None
+
+
+# =====================================================================
+# POLAR CINEMATIC PIPELINE (ADR-025 §2.3): process-lifetime singletons.
+# The projector is stateless/pure; the tracker carries EWMA continuity
+# across ingestions (α=0.05, θ_lower=10.0, θ_upper=500.0, Δ=2.0).
+# Both are side-effect free at import (hermeticity, L1).
+# =====================================================================
+_polar_projector = PolarProjector()
+_variance_tracker = VarianceTracker()
 
 
 def get_provider():
@@ -250,6 +263,28 @@ def async_spectral_processor(ingestion_id: int, raw_text: str):
         )
         toon_symbol = geodetic_matrix[dominant_attractor]["symbol"]
 
+        # ADR-025 §2.3 steps 2-3: 8D kinematic projection over the active
+        # basis (anchor = dominant axis, dipole = next two by projection)
+        # evaluated through the bidirectional EWMA Schmitt Trigger.
+        ranked_axes = sorted(projections.keys(), key=lambda k: projections[k], reverse=True)
+        polar_lambda, polar_d_esc = 0.0, 0.0
+        polar_band = VarianceTracker.NOMINAL
+        if len(ranked_axes) >= 3:
+            axis_vectors = {
+                axis_id: np.asarray(geodetic_matrix[axis_id]["vector"], dtype=np.float64)
+                for axis_id in ranked_axes[:3]
+            }
+            centroid_id = sorted(geodetic_matrix.keys()).index(dominant_attractor)
+            _, polar_lambda, polar_d_esc = _polar_projector.project(
+                np.asarray(norm_idea_vector, dtype=np.float64),
+                axis_vectors[ranked_axes[0]],
+                axis_vectors[ranked_axes[1]],
+                axis_vectors[ranked_axes[2]],
+                centroid_id,
+            )
+            _variance_tracker.update(float(polar_lambda), float(polar_d_esc))
+            polar_band = _variance_tracker.update_alert()
+
         lifecycle_state: LifecycleState = "pending_approval"
         # action_potential derives from the projection spectrum without magic
         # constants (ADR-005); the old *10.0 had no declared semantics (M6).
@@ -269,9 +304,16 @@ def async_spectral_processor(ingestion_id: int, raw_text: str):
             for axis_id, value in zip(geodetic_matrix.keys(), validated_entity.projections)
         })
 
+        # ADR-025 amendment A1: validation strictly precedes ANY insert, and
+        # all data writes commit in ONE atomic transaction. A validation
+        # failure above leaves zero rows (no orphan data_plane rows); a
+        # failure inside rolls everything back together.
         with storage.get_db_connection() as conn:
-            # Node revision + queue-status update commit atomically: a queue
-            # failure rolls back the node revision (single transaction).
+            SQLiteEngine(db_path=storage.DB_PATH).insert_data_plane(
+                f"NODE_{ingestion_id}",
+                np.asarray(norm_idea_vector, dtype=np.float64),
+                conn=conn,
+            )
             storage.insert_node_revision(
                 f"NODE_{ingestion_id}",
                 raw_text,
@@ -286,8 +328,39 @@ def async_spectral_processor(ingestion_id: int, raw_text: str):
             )
             storage.mark_queue_processed(conn, ingestion_id)
 
+        # ADR-025 §2.3 step 4: the append-only node revision above is ALWAYS
+        # written (ADR-025 invariant #1 monotonic history wins over the
+        # freeze). An out-of-band polar evaluation additionally records a
+        # recalibration signal (async re-orthogonalization from data_plane)
+        # without blocking ingestion.
+        if polar_band != VarianceTracker.NOMINAL:
+            storage.insert_error_log(
+                f"RECAL_{ingestion_id}",
+                f"[RecalibrationTrigger] band={polar_band} ingestion_id={ingestion_id}",
+                "▱",
+                0.0,
+                0,
+                b"",
+                json.dumps({
+                    "band": polar_band,
+                    "ratio": _variance_tracker.drift_ratio,
+                    "lambda": float(polar_lambda),
+                    "d_esc": float(polar_d_esc),
+                }),
+                event_type=storage.EVENT_RECALIBRATION_SIGNAL,
+            )
+            get_logger(request_id=f"bg-{ingestion_id}").info(
+                "recalibration_triggered",
+                band=polar_band,
+                ratio=round(_variance_tracker.drift_ratio, 6)
+                if _variance_tracker.drift_ratio != float("inf") else "inf",
+            )
+
         get_logger(request_id=f"bg-{ingestion_id}").info(
-            "ingestion_processed", variance=round(variance, 6)
+            "ingestion_processed", variance=round(variance, 6),
+            polar_lambda=round(float(polar_lambda), 6),
+            polar_d_esc=round(float(polar_d_esc), 6),
+            polar_band=polar_band,
         )
 
     except Exception as e:
@@ -626,7 +699,8 @@ async def get_telemetry_logs():
     try:
         rows = storage.get_telemetry_errors()
         return [
-            {"id": r[0], "trace": r[1], "meta": json.loads(r[2]), "time": r[3]}
+            {"id": r[0], "trace": r[1], "meta": json.loads(r[2]), "time": r[3],
+             "event_type": r[4]}
             for r in rows
         ]
     except Exception as e:
