@@ -12,6 +12,7 @@
 | **Representation Layer (Provider Protocol)** | `traianus/representation/` | `tests/unit/test_representation_protocol.py`<br>`tests/representation/test_representation_providers.py` | Implemented in production |
 | **Append-Only SQLite WAL Persistence (`id, seq`)** | `traianus/storage.py` | `tests/unit/test_storage_hardening.py`<br>`tools/audit/traianus_invariant_verifier.py` | Implemented in production |
 | **Zero-Trust Perimeter & Dual Boundary Gate** | `traianus/security/validator.py`<br>`traianus/app.py` | `tests/security/test_boundary_validator.py` | Implemented in production |
+| **Semantic Capability Vulnerability & Silent Denial** | `traianus/security/validator.py` | `tests/security/test_boundary_validator.py`<br>`tests/security/test_internal_error_masking.py` | Documented in `docs/security/THREAT_MODEL.md` |
 | **Bootstrap Geodesy (8D)** | `traianus/bootstrap.py`<br>`tests/fixtures/nsm_axes_8.json` | `tests/unit/test_substrate.py` | Implemented in production |
 | **Corpus Variance Test (WP1 / EAS-01)** | `tools/experiments/_wp1_corpus.py` | `tools/experiments/validate_wp1_empirical.py` | **Demonstrates the Representation-Governance Coupling Problem** (Pure variance $p=0.58$ / $0.68$ ➔ Requires decoupling governance from representation) |
 | **NCD Text Coupling (EAS-01 Phase 1c)** | `tools/experiments/logographic/exp_entropy_spectral.py` | `docs/specifications/EAS-01_LOGOGRAPHIC_PHYSICS.md` | **Validated Solution** ($AUC > 0.93$, defeats C4 injection) |
@@ -31,6 +32,7 @@ graph TD
     ROOT --> ADR[architecture/ADR/ADR.md]
     ROOT --> EAS[specifications/EAS-01_LOGOGRAPHIC_PHYSICS.md]
     ROOT --> AUD[audit/AUDIT.md]
+    ROOT --> SEC[security/THREAT_MODEL.md]
     ROOT --> REM[audit/remediation/]
     ROOT --> STA[STATUS.md]
     

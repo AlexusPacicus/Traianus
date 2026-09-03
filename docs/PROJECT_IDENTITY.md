@@ -23,6 +23,31 @@ Traianus does not construct or modify external representations of reality. It pr
 * **Content & Domain Agnosticism:** Core algebraic operations operate strictly on $L_2$-normalized coordinate vectors $\mathbf{v} \in \mathbb{R}^d$, regardless of whether they represent natural language embeddings or continuous physical telemetry.
 * **Separation of Concerns:** Representation generation (encoders/sensors) exists outside Traianus. State governance, temporal sequencing (`seq`), and persistence exist strictly inside Traianus.
 
+### 3.1 Theoretical Grounding
+
+Traianus operates within the Conceptual Spaces paradigm (Gärdenfors, 2000), which posits three levels of cognitive representation:
+* **Symbolic Level:** Rule-based manipulation of discrete symbols.
+* **Subsymbolic Level:** High-dimensional connectionist activation patterns (neural networks).
+* **Conceptual Level (Geometric/Topological):** Structures organized via metric spaces, quality dimensions, and convex regions.
+
+Traianus operates strictly at the **Conceptual Level**. The spatial state is a finite simplicial complex $S_n = (V_n, E_n, K_n)$ where $V_n \subset \mathbb{R}^d$ (L2-normalized vertices), $E_n$ (deterministic ε-adjacency edges), and $K_n$ (higher-order simplicial faces, deferred to WP2).
+
+#### SOTA Failure Taxonomy
+
+Existing state management paradigms fall into three failure modes that Traianus explicitly avoids:
+
+| Paradigm | Exemplars | Failure Mechanism |
+|---|---|---|
+| Stateless / Atemporal | Vector DBs (Pinecone, Qdrant) | Static top-k retrieval without continuous state tracking → contextual fragmentation. |
+| Stochastic / Probabilistic | LLM Memory Agents (MemGPT) | Probabilistic token completion for state mutation → non-reproducible decay and unmonitored drift. |
+| Rigid / Coupled | Knowledge Graphs (Neo4j) | Manual triple extraction with static schemas → failure to adapt to continuous high-dimensional drift. |
+
+#### Inverse Adaptation Error
+
+When an adaptive system modifies its internal state through unconstrained probabilistic or heuristic updates, it induces **Inverse Adaptation Error**: the state representation drifts away from the underlying topology of the domain to accommodate short-term noise, leading to spatial collapse and loss of determinism.
+
+Traianus mitigates this error via L2-normalized orthogonal projections, dynamic variance circuit breaking, and dual-key consolidation (ADR-022).
+
 ---
 
 ## 4. Core System Invariants
