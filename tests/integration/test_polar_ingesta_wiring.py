@@ -11,8 +11,8 @@ from traianus.storage.sqlite_engine import SQLiteEngine
 class TestPolarIngestaWiring:
     """ADR-025 §2.3 sequence over the real HTTP pipeline (hermetic encoder)."""
 
-    def test_ingesta_writes_data_plane_unconditionally(self, client, ingesta, auth_headers, isolate_db):
-        """Step 1: every accepted ingestion persists its float64 vector in data_plane."""
+    def test_ingesta_writes_data_plane(self, client, ingesta, auth_headers, isolate_db):
+        """Validated ingestion persists its float64 vector as a data_plane revision."""
         res = ingesta("Polar wiring probe")
         assert res.status_code == 200
         node_id = f"NODE_{res.json()['ingestion_id']}"

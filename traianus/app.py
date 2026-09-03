@@ -309,7 +309,7 @@ def async_spectral_processor(ingestion_id: int, raw_text: str):
         # failure above leaves zero rows (no orphan data_plane rows); a
         # failure inside rolls everything back together.
         with storage.get_db_connection() as conn:
-            SQLiteEngine(db_path=storage.DB_PATH).upsert_data_plane(
+            SQLiteEngine(db_path=storage.DB_PATH).insert_data_plane(
                 f"NODE_{ingestion_id}",
                 np.asarray(norm_idea_vector, dtype=np.float64),
                 conn=conn,

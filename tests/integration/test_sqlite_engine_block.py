@@ -21,7 +21,7 @@ class TestSQLiteEngineBlock:
         """Full cycle: write → read → verify for multiple dimensions."""
         for d in [384, 768, 1536]:
             vec = np.random.default_rng(d).normal(size=d).astype(np.float64)
-            self.engine.upsert_data_plane(f"cycle_{d}", vec)
+            self.engine.insert_data_plane(f"cycle_{d}", vec)
             retrieved, dim = self.engine.get_data_plane(f"cycle_{d}")
             assert dim == d
             assert np.array_equal(retrieved, vec)
@@ -40,12 +40,9 @@ class TestSQLiteEngineBlock:
 
         with self.engine._transaction() as conn:
             conn.execute("""
-                INSERT INTO data_plane (node_id, vector_blob, dimension)
-                VALUES (?, ?, ?)
-                ON CONFLICT(node_id) DO UPDATE SET
-                    vector_blob = excluded.vector_blob,
-                    dimension = excluded.dimension
-            """, ("atomic_node", vec.tobytes(), 384))
+                INSERT INTO data_plane (node_id, seq, vector_blob, dimension)
+                VALUES (?, ?, ?, ?)
+            """, ("atomic_node", 1, vec.tobytes(), 384))
 
             conn.execute("""
                 INSERT INTO control_plane (node_id, centroid_id, version)
@@ -67,7 +64,7 @@ class TestSQLiteEngineBlock:
     def test_large_vector_storage_1536d(self):
         """Stress test: 1536D vectors (12KB each)."""
         vec = np.random.default_rng(1536).normal(size=1536).astype(np.float64)
-        self.engine.upsert_data_plane("large_1536", vec)
+        self.engine.insert_data_plane("large_1536", vec)
         retrieved, dim = self.engine.get_data_plane("large_1536")
         assert dim == 1536
         assert np.array_equal(retrieved, vec)
@@ -88,7 +85,7 @@ class TestSQLiteEngineBlock:
         n_nodes = 500
         for i in range(n_nodes):
             vec = np.random.default_rng(i).normal(size=384).astype(np.float64)
-            self.engine.upsert_data_plane(f"many_{i}", vec)
+            self.engine.insert_data_plane(f"many_{i}", vec)
             self.engine.upsert_control_plane(f"many_{i}", i % 20, 1)
 
         # Verify random sample
@@ -106,8 +103,8 @@ class TestSQLiteEngineBlock:
         vec1 = np.random.default_rng(1).normal(size=384).astype(np.float64)
         vec2 = np.random.default_rng(2).normal(size=384).astype(np.float64)
 
-        self.engine.upsert_data_plane("update_test", vec1)
-        self.engine.upsert_data_plane("update_test", vec2)
+        self.engine.insert_data_plane("update_test", vec1)
+        self.engine.insert_data_plane("update_test", vec2)
 
         retrieved, _ = self.engine.get_data_plane("update_test")
         assert np.array_equal(retrieved, vec2)
@@ -117,8 +114,8 @@ class TestSQLiteEngineBlock:
         vec1 = np.random.default_rng(1).normal(size=384).astype(np.float64)
         vec2 = np.random.default_rng(2).normal(size=768).astype(np.float64)
 
-        self.engine.upsert_data_plane("dim_change", vec1)
-        self.engine.upsert_data_plane("dim_change", vec2)
+        self.engine.insert_data_plane("dim_change", vec1)
+        self.engine.insert_data_plane("dim_change", vec2)
 
         retrieved, dim = self.engine.get_data_plane("dim_change")
         assert dim == 768

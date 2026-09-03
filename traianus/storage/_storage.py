@@ -48,10 +48,12 @@ def _active_db_path() -> str:
 
 DATA_PLANE_DDL = """
 CREATE TABLE IF NOT EXISTS data_plane (
-    node_id TEXT PRIMARY KEY,
+    node_id TEXT NOT NULL,
+    seq INTEGER NOT NULL,
     vector_blob BLOB NOT NULL,
     dimension INTEGER NOT NULL,
-    updated_at TIMESTAMP DEFAULT CURRENT_TIMESTAMP
+    updated_at TIMESTAMP DEFAULT CURRENT_TIMESTAMP,
+    PRIMARY KEY (node_id, seq)
 )
 """
 
@@ -59,8 +61,7 @@ CONTROL_PLANE_DDL = """
 CREATE TABLE IF NOT EXISTS control_plane (
     node_id TEXT PRIMARY KEY,
     centroid_id INTEGER NOT NULL,
-    version INTEGER NOT NULL DEFAULT 0,
-    FOREIGN KEY (node_id) REFERENCES data_plane(node_id)
+    version INTEGER NOT NULL DEFAULT 0
 )
 """
 
@@ -90,7 +91,7 @@ CREATE TABLE IF NOT EXISTS manifold_nodes (
     vector_blob BLOB NOT NULL,
     projections_json TEXT NOT NULL,
     epoch_provenance TEXT NOT NULL DEFAULT 'PROSTHETIC_NSM_V1',
-    event_type TEXT NOT NULL DEFAULT 'ERROR' CHECK (event_type IN ('ERROR', 'RECALIBRATION_SIGNAL')),
+    event_type TEXT CHECK (event_type IS NULL OR event_type IN ('ERROR', 'RECALIBRATION_SIGNAL')),
     sys_internal_timestamp DATETIME DEFAULT CURRENT_TIMESTAMP,
     PRIMARY KEY (id, seq),
     CHECK (lifecycle_state IN ('pending_approval', 'incubating', 'consolidated', 'telemetry_error'))
@@ -200,12 +201,13 @@ def init_relational_tables():
         if legacy_cols and "seq" not in legacy_cols:
             conn.execute("ALTER TABLE manifold_nodes RENAME TO manifold_nodes_legacy")
             conn.execute(MANIFOLD_NODES_DDL)
-            conn.execute("""
+            conn.execute(f"""
                 INSERT INTO manifold_nodes
                 (id, seq, text, toon_factor, lifecycle_state, action_potential,
                  revision_milestone, vector_blob, projections_json, event_type)
                 SELECT id, 1, text, toon_factor, lifecycle_state, action_potential,
-                       revision_milestone, vector_blob, projections_json, 'ERROR'
+                       revision_milestone, vector_blob, projections_json,
+                       CASE WHEN lifecycle_state = 'telemetry_error' THEN '{EVENT_ERROR}' ELSE NULL END
                 FROM manifold_nodes_legacy
             """)
             conn.execute("DROP TABLE manifold_nodes_legacy")
@@ -218,27 +220,28 @@ def init_relational_tables():
         if v02_cols and "epoch_provenance" not in v02_cols:
             conn.execute("ALTER TABLE manifold_nodes RENAME TO manifold_nodes_v01")
             conn.execute(MANIFOLD_NODES_DDL)
-            conn.execute("""
+            conn.execute(f"""
                 INSERT INTO manifold_nodes
                 (id, seq, text, toon_factor, lifecycle_state, action_potential,
                  revision_milestone, vector_blob, projections_json, event_type)
                 SELECT id, seq, text, toon_factor, lifecycle_state, action_potential,
-                       revision_milestone, vector_blob, projections_json, 'ERROR'
+                       revision_milestone, vector_blob, projections_json,
+                       CASE WHEN lifecycle_state = 'telemetry_error' THEN '{EVENT_ERROR}' ELSE NULL END
                 FROM manifold_nodes_v01
             """)
             conn.execute("DROP TABLE manifold_nodes_v01")
-        # Telemetry disambiguation (ADR-025 amendment A1): event_type
+        # Telemetry disambiguation (ADR-025 amendment A1/A2): event_type
         # separates persistence failures ('ERROR') from Schmitt Trigger
-        # recalibration signals ('RECALIBRATION_SIGNAL'). Pre-A1 databases
-        # backfill to 'ERROR' via the column DEFAULT.
+        # recalibration signals ('RECALIBRATION_SIGNAL'). Non-telemetry
+        # rows carry NULL (never the misleading 'ERROR' default). Pre-A1
+        # databases gain a nullable column; legacy telemetry rows read
+        # back as 'ERROR' via COALESCE in get_telemetry_errors (no UPDATE
+        # on history, AGENTS.md §4.1).
         event_cols = [
             row[1] for row in conn.execute("PRAGMA table_info(manifold_nodes)").fetchall()
         ]
         if event_cols and "event_type" not in event_cols:
-            conn.execute(
-                "ALTER TABLE manifold_nodes ADD COLUMN "
-                "event_type TEXT NOT NULL DEFAULT 'ERROR'"
-            )
+            conn.execute("ALTER TABLE manifold_nodes ADD COLUMN event_type TEXT")
         conn.execute(MANIFOLD_EDGES_DDL)
         # Schema migration for pre-H4 DBs: each existing edge becomes its
         # revision seq=1. History is preserved (append-only invariant #1).
@@ -253,9 +256,22 @@ def init_relational_tables():
                 SELECT id, 1, source, target, state FROM manifold_edges_legacy
             """)
             conn.execute("DROP TABLE manifold_edges_legacy")
-        # Data/control planes (ADR-025 §2.1): owned here, consumed by
-        # SQLiteEngine and the test harness from the shared DDL above.
+        # Data/control planes (ADR-025 §2.1, amendment A2): owned here,
+        # consumed by SQLiteEngine and the test harness from the shared
+        # DDL above. data_plane is append-only PRIMARY KEY (node_id, seq)
+        # mirroring manifold_nodes — never UPDATE (upsert prohibited).
         conn.execute(DATA_PLANE_DDL)
+        data_plane_cols = [
+            row[1] for row in conn.execute("PRAGMA table_info(data_plane)").fetchall()
+        ]
+        if data_plane_cols and "seq" not in data_plane_cols:
+            conn.execute("ALTER TABLE data_plane RENAME TO data_plane_legacy")
+            conn.execute(DATA_PLANE_DDL)
+            conn.execute("""
+                INSERT INTO data_plane (node_id, seq, vector_blob, dimension)
+                SELECT node_id, 1, vector_blob, dimension FROM data_plane_legacy
+            """)
+            conn.execute("DROP TABLE data_plane_legacy")
         conn.execute(CONTROL_PLANE_DDL)
         _init_geodesic_axes(conn)
 
@@ -531,10 +547,15 @@ def get_current_nodes() -> list[tuple]:
 
 
 def get_telemetry_errors() -> list[tuple]:
-    """Append-only telemetry_error log rows (current revision each)."""
+    """Append-only telemetry_error log rows (current revision each).
+
+    event_type is COALESCE'd to 'ERROR' so pre-A1 rows (NULL) keep their
+    historical meaning without any UPDATE on history (AGENTS.md §4.1).
+    """
     with get_db_connection() as conn:
-        return conn.execute("""
-            SELECT id, text, projections_json, sys_internal_timestamp, event_type
+        return conn.execute(f"""
+            SELECT id, text, projections_json, sys_internal_timestamp,
+                   COALESCE(event_type, '{EVENT_ERROR}')
             FROM manifold_nodes m
             WHERE lifecycle_state = 'telemetry_error'
               AND seq = (SELECT MAX(seq) FROM manifold_nodes m2 WHERE m2.id = m.id)

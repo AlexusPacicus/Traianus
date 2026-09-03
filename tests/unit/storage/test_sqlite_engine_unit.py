@@ -41,6 +41,7 @@ class TestSQLiteEngineUnit:
             
             cols = [row[1] for row in conn.execute("PRAGMA table_info(data_plane)").fetchall()]
             assert "node_id" in cols
+            assert "seq" in cols
             assert "vector_blob" in cols
             assert "dimension" in cols
             assert "updated_at" in cols
@@ -70,7 +71,7 @@ class TestSQLiteEngineUnit:
     def test_serialize_float64_roundtrip(self):
         """Vector roundtrip: upsert → get returns identical array."""
         vector = np.random.default_rng(42).normal(size=384).astype(np.float64)
-        self.engine.upsert_data_plane("test_node", vector)
+        self.engine.insert_data_plane("test_node", vector)
         retrieved, dim = self.engine.get_data_plane("test_node")
         assert dim == 384
         assert np.array_equal(retrieved, vector)
@@ -79,21 +80,28 @@ class TestSQLiteEngineUnit:
         """Vectors of different dimensions stored and retrieved correctly."""
         for d in [384, 768, 1536]:
             vector = np.random.default_rng(d).normal(size=d).astype(np.float64)
-            self.engine.upsert_data_plane(f"node_{d}", vector)
+            self.engine.insert_data_plane(f"node_{d}", vector)
             retrieved, dim = self.engine.get_data_plane(f"node_{d}")
             assert dim == d
             assert np.array_equal(retrieved, vector)
 
-    def test_upsert_data_plane_idempotent(self):
-        """Multiple upserts of same node_id → last wins."""
+    def test_insert_data_plane_appends_revisions(self):
+        """Re-ingestion of same node_id INSERTS new revisions, never overwrites (A2)."""
         vector1 = np.random.default_rng(1).normal(size=384).astype(np.float64)
         vector2 = np.random.default_rng(2).normal(size=384).astype(np.float64)
-        
-        self.engine.upsert_data_plane("node", vector1)
-        self.engine.upsert_data_plane("node", vector2)
-        
+
+        assert self.engine.insert_data_plane("node", vector1) == 1
+        assert self.engine.insert_data_plane("node", vector2) == 2
+
         retrieved, _ = self.engine.get_data_plane("node")
         assert np.array_equal(retrieved, vector2)
+
+        with self.engine._connect() as conn:
+            rows = conn.execute(
+                "SELECT seq FROM data_plane WHERE node_id = ? ORDER BY seq",
+                ("node",),
+            ).fetchall()
+        assert [r[0] for r in rows] == [1, 2]
 
     def test_upsert_control_plane_version_increment(self):
         """Version increments correctly on upsert."""
@@ -106,7 +114,7 @@ class TestSQLiteEngineUnit:
     def test_get_data_plane_returns_dimension(self):
         """get_data_plane returns correct dimension metadata."""
         vector = np.random.default_rng(2).normal(size=768).astype(np.float64)
-        self.engine.upsert_data_plane("node", vector)
+        self.engine.insert_data_plane("node", vector)
         _, dim = self.engine.get_data_plane("node")
         assert dim == 768
 
@@ -155,7 +163,7 @@ class TestSQLiteEngineUnit:
         """control_plane.node_id references data_plane.node_id."""
         # This should work - insert data_plane first
         vec = np.random.default_rng(99).normal(size=384).astype(np.float64)
-        self.engine.upsert_data_plane("fk_test", vec)
+        self.engine.insert_data_plane("fk_test", vec)
         self.engine.upsert_control_plane("fk_test", 1, 1)
         
         # Verify both exist

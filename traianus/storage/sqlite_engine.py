@@ -1,8 +1,8 @@
 """SQLite engine with WAL mode for polar projector data/control planes.
 
-Table DDL is owned by ``traianus.storage._storage`` (ADR-025 amendment A1:
+Table DDL is owned by ``traianus.storage._storage`` (ADR-025 amendment A1/A2:
 DATA_PLANE_DDL / CONTROL_PLANE_DDL are the single source of truth); this
-module only adds query indexes. ``upsert_data_plane`` accepts an external
+module only adds query indexes. ``insert_data_plane`` accepts an external
 connection so callers can join a wider atomic transaction.
 """
 
@@ -19,7 +19,8 @@ class SQLiteEngine:
     """
     Dual-plane SQLite storage with WAL mode.
 
-    data_plane:  Immutable semantic vectors (node_id PK, vector BLOB, dimension, updated_at)
+    data_plane:  Immutable semantic vectors, append-only PRIMARY KEY
+        (node_id, seq) mirroring manifold_nodes (ADR-025 A2)
     control_plane: Hot execution cache (node_id PK, centroid_id, version)
 
     Both tables in same DB file for atomic cross-plane transactions.
@@ -75,31 +76,42 @@ class SQLiteEngine:
             conn.execute("CREATE INDEX IF NOT EXISTS idx_data_plane_updated ON data_plane(updated_at)")
             conn.execute("CREATE INDEX IF NOT EXISTS idx_control_plane_centroid ON control_plane(centroid_id)")
 
-    # --- Data Plane ---
+    # --- Data Plane (append-only revision log, ADR-025 A2) ---
 
     @staticmethod
-    def _upsert_data_plane(conn: sqlite3.Connection, node_id: str, vector: NDArray[np.float64]) -> None:
+    def _next_data_plane_seq(conn: sqlite3.Connection, node_id: str) -> int:
+        row = conn.execute(
+            "SELECT COALESCE(MAX(seq), 0) + 1 FROM data_plane WHERE node_id = ?",
+            (node_id,),
+        ).fetchone()
+        return int(row[0])
+
+    @classmethod
+    def _insert_data_plane(
+        cls, conn: sqlite3.Connection, node_id: str, vector: NDArray[np.float64]
+    ) -> int:
+        """Appends one vector revision; returns its seq. Never UPDATEs."""
         vec64 = np.asarray(vector, dtype=np.float64)
         blob = vec64.tobytes()
         dim = vec64.shape[0]
+        seq = cls._next_data_plane_seq(conn, node_id)
         conn.execute("""
-            INSERT INTO data_plane (node_id, vector_blob, dimension, updated_at)
-            VALUES (?, ?, ?, CURRENT_TIMESTAMP)
-            ON CONFLICT(node_id) DO UPDATE SET
-                vector_blob = excluded.vector_blob,
-                dimension = excluded.dimension,
-                updated_at = CURRENT_TIMESTAMP
-        """, (node_id, blob, dim))
+            INSERT INTO data_plane (node_id, seq, vector_blob, dimension, updated_at)
+            VALUES (?, ?, ?, ?, CURRENT_TIMESTAMP)
+        """, (node_id, seq, blob, dim))
+        return seq
 
-    def upsert_data_plane(
+    def insert_data_plane(
         self,
         node_id: str,
         vector: NDArray[np.float64],
         conn: sqlite3.Connection | None = None,
-    ) -> None:
+    ) -> int:
         """
-        Insert or replace vector with dimension metadata.
+        Append a vector revision with dimension metadata.
 
+        Append-only PRIMARY KEY (node_id, seq): re-ingestion of an existing
+        node_id INSERTS a new revision, never overwrites (ADR-025 A2).
         Uses zero-copy serialization: float64.tobytes() / frombuffer(dtype=float64).
 
         Args:
@@ -107,16 +119,18 @@ class SQLiteEngine:
             vector: Vector to store (any dimension, float64).
             conn: Optional external connection to join a wider atomic
                 transaction (caller owns commit); otherwise commits alone.
+
+        Returns:
+            The seq assigned to the new revision.
         """
         if conn is None:
             with self._transaction() as own_conn:
-                self._upsert_data_plane(own_conn, node_id, vector)
-        else:
-            self._upsert_data_plane(conn, node_id, vector)
+                return self._insert_data_plane(own_conn, node_id, vector)
+        return self._insert_data_plane(conn, node_id, vector)
 
     def get_data_plane(self, node_id: str) -> Optional[Tuple[NDArray[np.float64], int]]:
         """
-        Retrieve vector and dimension.
+        Retrieve the LATEST vector revision and dimension.
 
         Args:
             node_id: Node identifier.
@@ -126,7 +140,8 @@ class SQLiteEngine:
         """
         with self._connect() as conn:
             row = conn.execute(
-                "SELECT vector_blob, dimension FROM data_plane WHERE node_id = ?",
+                "SELECT vector_blob, dimension FROM data_plane WHERE node_id = ? "
+                "ORDER BY seq DESC LIMIT 1",
                 (node_id,)
             ).fetchone()
 

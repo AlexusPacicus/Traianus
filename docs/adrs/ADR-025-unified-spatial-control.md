@@ -28,9 +28,13 @@ El flujo de entrada en `app.py` ejecutará la siguiente secuencia determinista:
 ---
 ## Enmienda A1 (implementación, misma rama)
 * **Escritura validada, no incondicional (§2.3 paso 1 enmendado):** la validación (encode, base no vacía, dimensiones, proyecciones, polar, EWMA) precede a CUALQUIER `INSERT`; `data_plane` + revisión `manifold_nodes` + `mark_queue_processed` commitean en UNA transacción. Un fallo deja cero filas (sin huérfanos).
-* **DDL único:** `traianus/storage/_storage.py` (`*_DDL`) es la única fuente; `SQLiteEngine`, `db_factory.py` y el validador (`audit_log`) la consumen.
-* **Desambiguación:** `manifold_nodes.event_type CHECK (ERROR | RECALIBRATION_SIGNAL) DEFAULT 'ERROR'`; `/telemetry` lo expone. Sin nuevo lifecycle state (compatible con AGENTS.md §4.2).
+* **DDL único:** `traianus/storage/_storage.py` (`*_DDL`) es la única fuente; `SQLiteEngine`, `db_factory` y el validador (`audit_log`) la consumen.
+* **Desambiguación:** `manifold_nodes.event_type` nullable con `CHECK (NULL OR ERROR|RECALIBRATION_SIGNAL)`; filas no-telemétricas llevan NULL (nunca el confuso `'ERROR'` por defecto). `/telemetry` expone `COALESCE(event_type,'ERROR')` para filas pre-A1 sin UPDATE sobre histórico (§4.1). Sin nuevo lifecycle state (compatible con AGENTS.md §4.2).
 * **`control_plane`:** DDL presente, sin cablear al pipeline (decisión pendiente).
+
+## Enmienda A2 (append-only real en data_plane)
+* **`data_plane` es `PRIMARY KEY (node_id, seq)`**, espejo de `manifold_nodes`: la re-ingestión INSERTA revisiones, el `ON CONFLICT DO UPDATE` queda prohibido y eliminado. Migración legacy (PK simple → compuesta, `seq=1`) incluida en `init_relational_tables`.
+* **Sin FK `control_plane → data_plane`** (inválida contra PK compuesta; SQLite no la enforcea por defecto, pero se elimina por corrección).
 
 ## 3. Consecuencias y Beneficios
 * **Consistencia de Código:** Desaparecen las colisiones en la inyección de rutas de base de datos al estabilizar `traianus/storage/__init__.py`.* **Seguridad Defensiva:** Inmunidad contra ataques de evasión semántica por inyección de ruido o vectores desalineados gracias a la detección en la banda inferior $\theta_{lower}$.* **Evolución Ontológica sin Pérdida:** Posibilidad de re-indexar o alterar el grafo de control en cualquier momento sin riesgo de corrupción o pérdida de histórico, manteniendo `data_plane` intacto.* **Eliminación de Código Muerto:** Activación del `PolarProjector` directamente en la tubería de producción de FastAPI.
