@@ -24,7 +24,17 @@ import numpy as np
 
 from traianus.core import compute_epsilon_edges
 
-DB_PATH = "traianus.db"
+
+def _active_db_path() -> str:
+    """Resolves the active DB path from the storage package (ADR-025 §2.1).
+
+    Single source of truth is ``traianus.storage.DB_PATH``. Resolved lazily
+    at call time (never bound at import) so test/tool overrides via
+    ``storage.DB_PATH = X`` take effect globally without dual patches.
+    """
+    from traianus import storage as _pkg
+
+    return _pkg.DB_PATH
 
 
 @contextmanager
@@ -37,7 +47,7 @@ def get_db_connection() -> Iterator[sqlite3.Connection]:
     so closure is deterministic and independent of the garbage collector.
     Callers use `with get_db_connection() as conn:` — never as a raw factory.
     """
-    conn = sqlite3.connect(DB_PATH)
+    conn = sqlite3.connect(_active_db_path())
     conn.execute("PRAGMA journal_mode=WAL;")
     conn.execute("PRAGMA busy_timeout = 5000")
     try:
@@ -403,6 +413,8 @@ def enqueue_ingest(text: str, idempotency_key: str | None) -> tuple[int, bool]:
                     (idempotency_key,),
                 ).fetchone()
                 return int(row[0]), True
+            if cur.lastrowid is None:
+                raise StorageError("ingestion INSERT returned no row id")
             return int(cur.lastrowid), False
     except sqlite3.Error as e:
         raise StorageError(str(e)) from e

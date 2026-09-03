@@ -17,6 +17,7 @@ from traianus.geometry.observables import (
     sigmoid_scale,
     svd_reduce,
 )
+from traianus.geometry.polar_projector import PolarProjector
 
 __all__ = [
     "calibrate_critical_threshold",
@@ -28,4 +29,5 @@ __all__ = [
     "project_to_5d",
     "sigmoid_scale",
     "svd_reduce",
+    "PolarProjector",
 ]
