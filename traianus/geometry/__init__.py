@@ -22,7 +22,7 @@ from traianus.geometry.parabolic import ParabolicCorrector
 from traianus.geometry.polar_projector import PolarProjector
 from traianus.geometry.simplex import RECALIBRATION_SIGNAL, SemanticSimplex
 from traianus.geometry.svd_filter import SVDAnisotropyFilter
-from traianus.geometry.zero_copy import ZeroCopyExporter
+from traianus.geometry.zero_copy import ZeroCopyExporter, note_id_from_label
 
 __all__ = [
     "RECALIBRATION_SIGNAL",
@@ -35,6 +35,7 @@ __all__ = [
     "compute_epsilon_edges",
     "compute_kinetic_resistance",
     "discrimination_ratio",
+    "note_id_from_label",
     "ortho_distance",
     "project_dimensional_relief",
     "project_to_5d",
