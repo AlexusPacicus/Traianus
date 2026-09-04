@@ -20,6 +20,7 @@ from traianus.geometry.observables import (
     compute_kinetic_resistance,
 )
 from traianus.geometry.polar_projector import PolarProjector
+from traianus.geometry.spatial_observables import derive_spatial_observables
 from traianus.governance.gate import evaluate_gate
 from traianus.telemetry.variance_tracker import VarianceTracker
 from traianus import storage
@@ -724,6 +725,28 @@ async def get_relations():
             for e in storage.rebuild_epsilon_edges(EPSILON_EDGE)
         ]
         return sorted(manual + auto, key=lambda r: r["id"])
+    except Exception as e:
+        raise HTTPException(status_code=500, detail="Internal server error.") from e
+
+@app.get("/spatial", dependencies=[Depends(require_token)])
+async def get_spatial_observables():
+    """Per-node spatial observables (Ulpia Fase 0, observational).
+
+    Derives {id, x, y, z, l, c, h} for each current node from its persisted
+    384D vector and the active geodetic basis. Pure read (no writes, no
+    lifecycle mutation) — mirrors /relations (ADR-023/H5).
+    """
+    try:
+        full_basis = get_geodetic_matrix_db()
+        if not full_basis:
+            return {"nodes": []}
+        basis = {k: v["vector"] for k, v in full_basis.items()}
+        vectors = storage.get_current_node_vectors()
+        nodes = [
+            {"id": node_id, **derive_spatial_observables(vector, basis)}
+            for node_id, vector in vectors.items()
+        ]
+        return {"nodes": sorted(nodes, key=lambda n: n["id"])}
     except Exception as e:
         raise HTTPException(status_code=500, detail="Internal server error.") from e
 

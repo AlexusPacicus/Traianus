@@ -7,8 +7,9 @@ import {
   type Edge,
 } from "@xyflow/react";
 import "@xyflow/react/dist/style.css";
-import { fetchNodes, fetchRelations, ingestText, type NodesNode } from "../api";
+import { fetchNodes, fetchRelations, ingestText, type NodesNode, type Relation } from "../api";
 import { projectTo5d } from "../projection";
+import UlpiaWebGL from "./UlpiaWebGL";
 
 const SCALE = 400;
 
@@ -54,7 +55,7 @@ function buildFlowNodes(
   });
 }
 
-function buildFlowEdges(relations: { source: string; target: string; state: string }[]): Edge[] {
+function buildFlowEdges(relations: Relation[]): Edge[] {
   return relations.map((r, i) => ({
     id: r.id ?? `edge-${i}`,
     source: r.source,
@@ -194,6 +195,7 @@ export default function UlpiaCanvas({ token }: UlpiaCanvasProps) {
           style={{ background: "#1E293B", borderColor: "#334155" }}
         />
       </ReactFlow>
+      {token ? <UlpiaWebGL token={token} /> : null}
     </div>
   );
 }

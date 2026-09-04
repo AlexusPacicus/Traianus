@@ -90,6 +90,7 @@ jobs:
             tests/integration/test_polar_projector_block.py \
             tests/integration/test_polar_telemetry_integration.py \
             tests/integration/test_sqlite_engine_block.py \
+            tests/integration/test_spatial_observables_endpoint.py \
             tests/fixtures/polar_fixtures.py
       - name: Mypy (strict, whole control plane)
         run: |
@@ -100,3 +101,21 @@ jobs:
         run: |
           HF_HUB_OFFLINE=1 coverage run -m pytest tests/ -q
           coverage report --include="traianus/*" --fail-under=85
+
+  test-frontend:
+    name: Frontend typecheck and build (Ulpia)
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v4
+      - uses: actions/setup-node@v4
+        with:
+          node-version: "20"
+      - name: Install frontend dependencies
+        working-directory: frontend
+        run: npm ci
+      - name: Typecheck (tsc --noEmit)
+        working-directory: frontend
+        run: npm run typecheck
+      - name: Production build (vite build)
+        working-directory: frontend
+        run: npm run build

@@ -22,6 +22,7 @@ from traianus.geometry.parabolic import ParabolicCorrector
 from traianus.geometry.polar_projector import PolarProjector
 from traianus.geometry.simplex import RECALIBRATION_SIGNAL, SemanticSimplex
 from traianus.geometry.svd_filter import SVDAnisotropyFilter
+from traianus.geometry.zero_copy import ZeroCopyExporter
 
 __all__ = [
     "RECALIBRATION_SIGNAL",
@@ -29,6 +30,7 @@ __all__ = [
     "PolarProjector",
     "SVDAnisotropyFilter",
     "SemanticSimplex",
+    "ZeroCopyExporter",
     "calibrate_critical_threshold",
     "compute_epsilon_edges",
     "compute_kinetic_resistance",

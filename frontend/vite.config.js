@@ -9,6 +9,7 @@ export default defineConfig({
     proxy: {
       "/nodos": "http://localhost:8000",
       "/relations": "http://localhost:8000",
+      "/spatial": "http://localhost:8000",
       "/ingesta": "http://localhost:8000",
     },
   },

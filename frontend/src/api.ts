@@ -24,6 +24,20 @@ export interface Relation {
   state: string;
 }
 
+export interface SpatialObservable {
+  id: string;
+  x: number;
+  y: number;
+  z: number;
+  l: number;
+  c: number;
+  h: number;
+}
+
+export interface SpatialResponse {
+  nodes: SpatialObservable[];
+}
+
 export async function fetchNodes(): Promise<NodesNode[]> {
   const res = await fetch("/nodos");
   if (!res.ok) throw new Error(`GET /nodos failed: ${res.status}`);
@@ -41,6 +55,15 @@ export async function fetchRelations(token?: string): Promise<Relation[]> {
   } catch {
     return [];
   }
+}
+
+export async function fetchSpatial(token: string): Promise<SpatialObservable[]> {
+  const res = await fetch("/spatial", {
+    headers: { "X-Traianus-Token": token },
+  });
+  if (!res.ok) throw new Error(`GET /spatial failed: ${res.status}`);
+  const data: SpatialResponse = await res.json();
+  return data.nodes ?? [];
 }
 
 export async function ingestText(text: string, token: string): Promise<string> {

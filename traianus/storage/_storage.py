@@ -598,6 +598,16 @@ def _current_node_vectors(conn: sqlite3.Connection) -> dict[str, np.ndarray]:
     return {nid: np.frombuffer(blob, dtype=np.float64) for nid, blob in rows}
 
 
+def get_current_node_vectors() -> dict[str, np.ndarray]:
+    """Current-state node vectors (MAX(seq) per id), telemetry_error excluded.
+
+    Public observable reader for spatial derivation (Ulpia Fase 0 / GET
+    /spatial). Recomputed on read; never mutates persisted state.
+    """
+    with get_db_connection() as conn:
+        return _current_node_vectors(conn)
+
+
 def rebuild_epsilon_edges(epsilon: float) -> list[dict]:
     """Deterministic E_n (ADR-023/H5, RE-08): (v_i, v_j) ∈ E_n iff ||v_i − v_j||₂ ≤ epsilon.
 
