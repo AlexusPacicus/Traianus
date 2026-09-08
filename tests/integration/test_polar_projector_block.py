@@ -144,3 +144,46 @@ class TestPolarProjectorBlock:
         r2 = p2.project(v_n, c_1, c_A, c_B, 42)
 
         assert r1 == r2
+
+    def test_collinear_fallback_pipeline_transition(self):
+        """Collinear centroids force the canonical 2δ·u⊥ fallback; near-threshold
+        centroids keep the natural dipole cA_perp - cB_perp."""
+        d = 384
+        c_1 = random_unit_vector(d, 1)
+        c1_hat = c_1 / np.linalg.norm(c_1)
+        P_perp = self.projector._orthogonal_projector(c1_hat)
+        u = self.projector._canonical_u_perp(c1_hat)
+
+        v_n = random_unit_vector(d, 8)
+        v_n_proj = P_perp @ (v_n - c_1)
+
+        # (a) Fully collinear centroids -> canonical fallback dipole 2δ·u⊥
+        cA_coll, cB_coll = collinear_centroids(c_1, d)
+        _, lambda_coll, _ = self.projector.project(v_n, c_1, cA_coll, cB_coll, 1)
+        v_dipole_fallback = 2.0 * self.projector.delta * u
+        expected_lambda = float(
+            np.dot(v_n_proj, v_dipole_fallback) / np.dot(v_dipole_fallback, v_dipole_fallback)
+        )
+        expected_lambda = np.clip(expected_lambda, -1.0, 1.0)
+        assert np.isclose(lambda_coll, expected_lambda, atol=1e-10), (
+            "collinear fallback should use the canonical 2δ·u⊥ dipole"
+        )
+
+        # (b) Wide-apart centroids projecting to a unit tangent displacement ->
+        #     natural dipole. The separation lives wholly in the tangent plane
+        #     (P⊥(w) = w by construction), so its norm is order 1 - far above
+        #     eps_collinear without any magic margin factor.
+        rng = np.random.default_rng(7)
+        w = P_perp @ rng.normal(size=d).astype(np.float64)
+        w = w / np.linalg.norm(w)
+        cA_wide = c_1 + w
+        cB_wide = c_1 - w
+        _, lambda_wide, _ = self.projector.project(v_n, c_1, cA_wide, cB_wide, 1)
+        v_dipole_natural = P_perp @ (cA_wide - cB_wide)
+        expected_wide = float(
+            np.dot(v_n_proj, v_dipole_natural) / np.dot(v_dipole_natural, v_dipole_natural)
+        )
+        expected_wide = np.clip(expected_wide, -1.0, 1.0)
+        assert np.isclose(lambda_wide, expected_wide, atol=1e-10), (
+            "wide centroids should use the natural cA_perp - cB_perp dipole"
+        )

@@ -275,3 +275,22 @@ class TestVarianceTrackerUnit:
             t2.update(1.0, 1.0)
 
         assert t1.var_lambda > t2.var_lambda
+
+    def test_band_edges_are_nominal(self):
+        """check_band() NOMINAL at exactly θ_lower and θ_upper (exclusive edges)."""
+        tracker = VarianceTracker(theta_lower=10.0, theta_upper=500.0)
+        # Exact upper edge -> NOMINAL (ratio > θ_upper required for alert)
+        tracker._lambda_initialized = True
+        tracker._esc_initialized = True
+        tracker._var_lambda = 500.0
+        tracker._var_esc = 1.0
+        assert tracker.check_band() == VarianceTracker.NOMINAL
+        # Just above upper edge -> ALERT_HIGH
+        tracker._var_lambda = 500.0 + 1e-9
+        assert tracker.check_band() == VarianceTracker.ALERT_HIGH
+        # Exact lower edge -> NOMINAL (ratio < θ_lower required for alert)
+        tracker._var_lambda = 10.0
+        assert tracker.check_band() == VarianceTracker.NOMINAL
+        # Just below lower edge -> ALERT_LOW
+        tracker._var_lambda = 10.0 - 1e-9
+        assert tracker.check_band() == VarianceTracker.ALERT_LOW

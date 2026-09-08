@@ -1,5 +1,6 @@
 """Unit tests for PolarProjector - isolated, deterministic, < 1ms each."""
 import numpy as np
+import pytest
 
 from traianus.geometry.polar_projector import PolarProjector
 
@@ -192,3 +193,43 @@ class TestPolarProjectorUnit:
     def test_custom_eps_collinear(self):
         projector = PolarProjector(eps_collinear=1e-4)
         assert projector.eps_collinear == 1e-4
+
+    @pytest.mark.parametrize("d", [128, 384, 768])
+    @pytest.mark.parametrize("seed", range(20))
+    def test_associative_projection_equivalence(self, d, seed):
+        """P⊥v = v - ⟨v, ĉ₁⟩ĉ₁ (O(d)) matches P⊥ @ v (O(d²))."""
+        rng = np.random.default_rng(seed)
+        c1_hat = rng.normal(size=d).astype(np.float64)
+        c1_hat = c1_hat / np.linalg.norm(c1_hat)
+        P_perp = self.projector._orthogonal_projector(c1_hat)
+        for _ in range(5):
+            v = rng.normal(size=d).astype(np.float64)
+            matrix_result = P_perp @ v
+            assoc_result = v - np.dot(v, c1_hat) * c1_hat
+            assert np.allclose(matrix_result, assoc_result, atol=1e-12), (
+                f"seed={seed}: associative form diverges from matrix form"
+            )
+
+    # --- Fallback dipole non-vanishing ---
+
+    @pytest.mark.parametrize("delta", [0.01, 0.1, 0.5, 1.0])
+    @pytest.mark.parametrize("d", [128, 384])
+    def test_fallback_dipole_nonvanishing(self, delta, d):
+        """||v_dipole||₂ ≥ 2δ > 0 in the collinear fallback path.
+
+        Any nonzero scalar multiple of ĉ₁ is collinear with it (projects to
+        exactly 0); the two positive factors guarantee the dipole difference
+        stays below eps_collinear without cancellation.
+        """
+        projector = PolarProjector(delta=delta)
+        c1_hat = np.ones(d, dtype=np.float64) / np.sqrt(d)
+        c_A = 2.0 * c1_hat
+        c_B = 0.5 * c1_hat
+        cA_perp = projector._orthogonal_projector(c1_hat) @ c_A
+        cB_perp = projector._orthogonal_projector(c1_hat) @ c_B
+        v_dipole = projector._compute_dipole(cA_perp, cB_perp, c1_hat)
+        norm = np.linalg.norm(v_dipole)
+        assert norm >= 2.0 * delta - 1e-15, (
+            f"delta={delta}: ||v_dipole||₂ = {norm} < 2δ = {2*delta}"
+        )
+        assert norm > 0.0

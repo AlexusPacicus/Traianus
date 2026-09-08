@@ -11,6 +11,7 @@ import numpy as np
 import pytest
 
 from tests.fixtures.polar_fixtures import random_unit_vector
+from traianus.geometry.polar_projector import PolarProjector
 from traianus.geometry.spatial_observables import derive_spatial_observables
 
 
@@ -70,3 +71,52 @@ class TestSpatialObservables:
     def test_requires_at_least_three_axes(self):
         with pytest.raises(ValueError):
             derive_spatial_observables(random_unit_vector(384, 1), _onehot_matrix(2))
+
+    @pytest.mark.parametrize("d", [128, 384, 768])
+    @pytest.mark.parametrize("seed", range(25))
+    def test_chromatic_channel_exact_formulae(self, d, seed):
+        """C = (λ+1)/2 and H = tanh(d_esc), locked to PolarProjector output."""
+        basis = _onehot_matrix(dim=d)
+        projector = PolarProjector()
+        axis_ids = sorted(basis.keys())
+        v = random_unit_vector(d, 2000 + seed)
+        obs = derive_spatial_observables(v, basis)
+        # Mirror derive_spatial_observables ranking: top-3 by projection
+        proj_rank = sorted(
+            axis_ids,
+            key=lambda k: float(np.dot(v, basis[k])),
+            reverse=True,
+        )
+        a1, a2, a3 = proj_rank[0], proj_rank[1], proj_rank[2]
+        _, lambda_val, d_esc = projector.project(
+            v,
+            np.asarray(basis[a1], dtype=np.float64),
+            np.asarray(basis[a2], dtype=np.float64),
+            np.asarray(basis[a3], dtype=np.float64),
+            axis_ids.index(a1),
+        )
+        expected_c = float((lambda_val + 1.0) / 2.0)
+        expected_h = float(np.tanh(d_esc))
+        assert np.isclose(obs["c"], expected_c, atol=1e-12), (
+            f"seed={seed}: C formula mismatch"
+        )
+        assert np.isclose(obs["h"], expected_h, atol=1e-12), (
+            f"seed={seed}: H formula mismatch"
+        )
+
+    @pytest.mark.parametrize("d", [128, 384, 768])
+    @pytest.mark.parametrize("seed", range(25))
+    def test_density_channel_exact_formula(self, d, seed):
+        """L = 1 / (1 + σ²) where σ² = var(projections onto geodetic basis)."""
+        basis = _onehot_matrix(dim=d)
+        axis_ids = sorted(basis.keys())
+        basis_vecs = [np.asarray(basis[k], dtype=np.float64) for k in axis_ids]
+        B = np.vstack(basis_vecs).T  # (d, k) orthonormal columns
+        v = random_unit_vector(d, 3000 + seed)
+        obs = derive_spatial_observables(v, basis)
+        projections = np.dot(v, B)  # (k,)
+        sigma_sq = float(np.var(projections))
+        expected_l = 1.0 / (1.0 + sigma_sq)
+        assert np.isclose(obs["l"], expected_l, atol=1e-12), (
+            f"seed={seed}: L formula mismatch"
+        )
