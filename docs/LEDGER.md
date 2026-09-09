@@ -1057,3 +1057,33 @@
 * **Follow-up (deferred to WP1):** unified orchestration of experimental
   tooling imports (sys.path bootstrap convention documented in review).
 * **Status:** `Consolidated`.
+
+### seq 42 — 2026-09-09 — Polar Projector: static numbers parametrized; P⊥ refactored to associative O(d)
+
+* **Parametrization (e2d97d0):** replaced hardcoded loops/static numbers with declarative
+  `@pytest.mark.parametrize` across d×seed in the Polar Projector suite.
+  * `test_polar_projector_properties.py` — `P_DIMS(128,384,768)` / `P_DIMS_LIGHT` / `P_SEED_25`/
+    `P_SEED_20`; saturation drive derived (`_SATURATION_DRIVE=2.0` forces λ*=2>1); shared-noise bug
+    in the λ-sign test removed (exact v⁺/v⁻ along the dipole axis).
+  * `test_polar_projector_unit.py` — δ∈{0.01,0.1,0.5,1.0}×d{128,384}, seeds parametrized; collinear
+    factors 1.5/−0.7 → 2.0/0.5 (both positive, cancellation-free).
+  * `test_spatial_observables.py` — `seed∈range(25)`×d{128,384,768} on the exact C/H/L formulae.
+  * `test_polar_projector_block.py` — `10*eps` wide-separation replaced by construction in the
+    tangent plane (unit displacement, no eps-dependent margin).
+* **Refactor (92cec55):** `traianus/geometry/polar_projector.py` removed the dense (d,d) projector
+  `_orthogonal_projector` (`np.eye − np.outer`, O(d²), ~1.18 MiB temporary at d=384) in favor of the
+  associative O(d) form `_project_perp(v, ĉ₁) = v − ⟨v, ĉ₁⟩ĉ₁`; `_is_collinear` wired into
+  `_compute_dipole` (no longer dead); "bitwise identical across architectures" docstrings reworded to
+  "deterministic execution for fixed inputs in a floating-point environment" (consistent with the M1
+  audit resolution). Production callers (`app.py`, `spatial_observables.py`) untouched (public API only).
+* **Benchmark (§5.2/5.3, committed tool `tools/experiments/scale_stress_spinoza_25k.py`):**
+  `python3 tools/experiments/scale_stress_spinoza_25k.py`
+  - Control-plane projection flat ~13.7 µs mean for N = 2221 → 25000 (was ~189 µs with the matrix).
+  - O(N²) force pass measured at N ∈ {1000, 2221, 4000}: 0.955 / 5.595 / 19.800 s; least-squares fit
+    t(N) = 1.228e−06·N² → t(25000) = 767.2 s (12.8 min) — empirical extrapolation (manuscript §5.2 to
+    declare as such).
+  - SQLite WAL at 25k: ingest 1381 ms, 76.8 MB, 0 lock events across 191 concurrent hot readers.
+* **Gate:** `pytest tests/` → 1018 passed / 5 deselected; ruff + mypy (strict) clean;
+  `tools/audit/audit_harness.py` → C1 GUARD PASSED IN GREEN (9/20); batch-latency test 5/5 runs
+  (p95 < 1 ms).
+* **Status:** `Consolidated`.
