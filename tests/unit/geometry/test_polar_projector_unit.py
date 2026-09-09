@@ -35,34 +35,50 @@ class TestPolarProjectorUnit:
         c1_hat = self.projector._normalize_anchor(c_1)
         assert np.isclose(np.linalg.norm(c1_hat), 1.0)
 
-    # --- Orthogonal projector ---
+    # --- Orthogonal projection (associative O(d) form) ---
 
-    def test_orthogonal_operator_construction(self):
-        c1_hat = np.array([1.0, 0.0, 0.0], dtype=np.float64)
-        P_perp = self.projector._orthogonal_projector(c1_hat)
-        assert P_perp.shape == (3, 3)
-        assert np.allclose(P_perp @ c1_hat, 0.0)
-        assert np.allclose(P_perp @ np.array([0.0, 1.0, 0.0]), np.array([0.0, 1.0, 0.0]))
-
-    def test_orthogonal_projector_idempotent(self):
-        """P⊥ @ P⊥ = P⊥"""
+    def test_project_perp_eliminates_anchor_component(self):
+        """⟨P⊥v, ĉ₁⟩ = 0: the residue is orthogonal to the anchor."""
         c1_hat = np.array([0.6, 0.8, 0.0], dtype=np.float64)
-        P_perp = self.projector._orthogonal_projector(c1_hat)
-        assert np.allclose(P_perp @ P_perp, P_perp)
+        v = np.array([1.0, 2.0, 3.0], dtype=np.float64)
+        v_perp = self.projector._project_perp(v, c1_hat)
+        assert np.isclose(np.dot(v_perp, c1_hat), 0.0, atol=1e-15)
+        assert np.isclose(v_perp[2], 3.0)
 
-    def test_orthogonal_projector_symmetric(self):
-        """P⊥ = P⊥.T"""
+    def test_project_perp_keeps_parallel_component(self):
+        """P⊥v = v - ⟨v, ĉ₁⟩ĉ₁ removes exactly the anchor-direction part."""
         c1_hat = np.array([0.6, 0.8, 0.0], dtype=np.float64)
-        P_perp = self.projector._orthogonal_projector(c1_hat)
-        assert np.allclose(P_perp, P_perp.T)
+        v = np.array([1.0, 2.0, 3.0], dtype=np.float64)
+        v_perp = self.projector._project_perp(v, c1_hat)
+        parallel = np.dot(v, c1_hat) * c1_hat
+        assert np.allclose(v, v_perp + parallel)
 
-    # --- Centroid projection ---
+    def test_project_perp_idempotent_on_vector(self):
+        """P⊥(P⊥v) = P⊥v on a vector."""
+        c1_hat = np.array([0.6, 0.8, 0.0], dtype=np.float64)
+        v = np.array([1.0, 2.0, 3.0], dtype=np.float64)
+        v_perp = self.projector._project_perp(v, c1_hat)
+        assert np.allclose(self.projector._project_perp(v_perp, c1_hat), v_perp)
 
-    def test_project_centroids(self):
+    def test_project_perp_linearity(self):
+        """P⊥(u + v) = P⊥u + P⊥v."""
+        c1_hat = np.array([0.6, 0.8, 0.0], dtype=np.float64)
+        u = np.array([1.0, 0.0, 2.0], dtype=np.float64)
+        v = np.array([0.0, 1.0, 3.0], dtype=np.float64)
+        left = self.projector._project_perp(u + v, c1_hat)
+        right = self.projector._project_perp(u, c1_hat) + self.projector._project_perp(v, c1_hat)
+        assert np.allclose(left, right)
+
+    def test_project_perp_identity_for_zero_anchor(self):
+        """Zero anchor (ĉ₁ = 0) degrades to the identity operator."""
+        c1_hat = np.zeros(3, dtype=np.float64)
+        v = np.array([1.0, 2.0, 3.0], dtype=np.float64)
+        assert np.array_equal(self.projector._project_perp(v, c1_hat), v)
+
+    def test_project_perp_centroid(self):
         c1_hat = np.array([1.0, 0.0, 0.0], dtype=np.float64)
-        P_perp = self.projector._orthogonal_projector(c1_hat)
         c_A = np.array([2.0, 3.0, 4.0], dtype=np.float64)
-        cA_perp = P_perp @ c_A
+        cA_perp = self.projector._project_perp(c_A, c1_hat)
         assert np.isclose(cA_perp[0], 0.0)
         assert np.isclose(cA_perp[1], 3.0)
 
@@ -197,15 +213,15 @@ class TestPolarProjectorUnit:
     @pytest.mark.parametrize("d", [128, 384, 768])
     @pytest.mark.parametrize("seed", range(20))
     def test_associative_projection_equivalence(self, d, seed):
-        """P⊥v = v - ⟨v, ĉ₁⟩ĉ₁ (O(d)) matches P⊥ @ v (O(d²))."""
+        """P⊥v = v - ⟨v, ĉ₁⟩ĉ₁ (O(d)) matches the closed-form matrix (O(d²))."""
         rng = np.random.default_rng(seed)
         c1_hat = rng.normal(size=d).astype(np.float64)
         c1_hat = c1_hat / np.linalg.norm(c1_hat)
-        P_perp = self.projector._orthogonal_projector(c1_hat)
+        P_perp = np.eye(d) - np.outer(c1_hat, c1_hat)  # closed-form oracle (test-only)
         for _ in range(5):
             v = rng.normal(size=d).astype(np.float64)
             matrix_result = P_perp @ v
-            assoc_result = v - np.dot(v, c1_hat) * c1_hat
+            assoc_result = self.projector._project_perp(v, c1_hat)
             assert np.allclose(matrix_result, assoc_result, atol=1e-12), (
                 f"seed={seed}: associative form diverges from matrix form"
             )
@@ -225,8 +241,8 @@ class TestPolarProjectorUnit:
         c1_hat = np.ones(d, dtype=np.float64) / np.sqrt(d)
         c_A = 2.0 * c1_hat
         c_B = 0.5 * c1_hat
-        cA_perp = projector._orthogonal_projector(c1_hat) @ c_A
-        cB_perp = projector._orthogonal_projector(c1_hat) @ c_B
+        cA_perp = projector._project_perp(c_A, c1_hat)
+        cB_perp = projector._project_perp(c_B, c1_hat)
         v_dipole = projector._compute_dipole(cA_perp, cB_perp, c1_hat)
         norm = np.linalg.norm(v_dipole)
         assert norm >= 2.0 * delta - 1e-15, (

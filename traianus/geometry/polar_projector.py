@@ -8,11 +8,13 @@ class PolarProjector:
     """
     Stateless projector for dynamic orthogonal decomposition.
 
-    All computations in float64. Deterministic: same inputs → bitwise identical outputs.
+    All computations in float64. Deterministic execution for fixed inputs in
+    a fixed floating-point environment.
 
     Mathematical formulation:
     - Anchor normalization: ĉ₁ = c₁/||c₁|| if ||c₁|| > eps_norm else 0
-    - Orthogonal projector: P⊥ = I - ĉ₁ĉ₁ᵀ
+    - Orthogonal projector: P⊥ = I - ĉ₁ĉ₁ᵀ, evaluated, without materializing
+      the dense (d, d) matrix, as the associative O(d) form P⊥v = v - ⟨v, ĉ₁⟩ĉ₁
     - Dipole projection: cₐ⊥ = P⊥cₐ, c_b⊥ = P⊥c_b
     - Collinearity check: ||cₐ⊥ - c_b⊥|| < eps_collinear
     - Canonical u⊥: k = argmin|ĉ₁[i]|, u⊥ = normalize(e_k - ⟨e_k, ĉ₁⟩ĉ₁)
@@ -55,17 +57,23 @@ class PolarProjector:
             return c_1 / c1_norm
         return np.zeros_like(c_1)
 
-    def _orthogonal_projector(self, c1_hat: NDArray[np.float64]) -> NDArray[np.float64]:
+    def _project_perp(
+        self,
+        v: NDArray[np.float64],
+        c1_hat: NDArray[np.float64],
+    ) -> NDArray[np.float64]:
         """
-        Construct orthogonal projector P⊥ = I - ĉ₁ĉ₁ᵀ.
+        Apply the orthogonal projector P⊥ = I - ĉ₁ĉ₁ᵀ associatively in O(d):
+        P⊥v = v - ⟨v, ĉ₁⟩ĉ₁. No dense (d, d) matrix is materialized.
 
         Args:
-            c1_hat: Normalized anchor vector.
+            v: Vector to project (d,).
+            c1_hat: Normalized anchor; the zero vector degrades to identity.
 
         Returns:
-            Orthogonal projector matrix.
+            Projected vector orthogonal to ĉ₁.
         """
-        return np.eye(len(c1_hat)) - np.outer(c1_hat, c1_hat)
+        return v - np.dot(v, c1_hat) * c1_hat
 
     def _is_collinear(self, cA_perp: NDArray[np.float64], cB_perp: NDArray[np.float64]) -> bool:
         """
@@ -86,7 +94,8 @@ class PolarProjector:
         where k = argmin |ĉ₁[i]|.
 
         This is fully analytical, no iterative loops or ambiguous sign choices,
-        guaranteeing bitwise identical results across architectures.
+        guaranteeing deterministic execution for fixed inputs in a
+        floating-point environment.
 
         Args:
             c1_hat: Normalized anchor vector.
@@ -136,7 +145,7 @@ class PolarProjector:
             Dipole vector.
         """
         dipole_diff = cA_perp - cB_perp
-        if np.linalg.norm(dipole_diff) < self.eps_collinear:
+        if self._is_collinear(cA_perp, cB_perp):
             u_perp = self._canonical_u_perp(c1_hat)
             return 2.0 * self.delta * u_perp
         return dipole_diff
@@ -173,20 +182,17 @@ class PolarProjector:
         # 1. Normalize anchor with null guard
         c1_hat = self._normalize_anchor(c_1)
 
-        # 2. Orthogonal projector P⊥ = I - ĉ₁ĉ₁ᵀ
-        P_perp = self._orthogonal_projector(c1_hat)
+        # 2. Orthogonal projection (associative O(d) form, no dense matrix)
+        cA_perp = self._project_perp(c_A, c1_hat)
+        cB_perp = self._project_perp(c_B, c1_hat)
 
-        # 3. Project dipole centroids
-        cA_perp = P_perp @ c_A
-        cB_perp = P_perp @ c_B
-
-        # 4. Compute dipole vector (with collinearity handling)
+        # 3. Compute dipole vector (with collinearity handling)
         v_dipole = self._compute_dipole(cA_perp, cB_perp, c1_hat)
 
-        # 5. Projected residual
-        r = P_perp @ (v_n - c_1)
+        # 4. Projected residual
+        r = self._project_perp(v_n - c_1, c1_hat)
 
-        # 6. Affective voltage λ = ⟨r, v_dipole⟩ / ||v_dipole||²
+        # 5. Affective voltage λ = ⟨r, v_dipole⟩ / ||v_dipole||²
         v_dipole_norm_sq = np.dot(v_dipole, v_dipole)
         if v_dipole_norm_sq > 0:
             lambda_val = float(np.dot(r, v_dipole) / v_dipole_norm_sq)
@@ -197,7 +203,7 @@ class PolarProjector:
             # eps_collinear > 0, or 2*delta*u_perp with norm 2*delta > 0.
             lambda_val = 0.0  # pragma: no cover
 
-        # 7. Escape distance d_esc = ||r - λ·v_dipole||
+        # 6. Escape distance d_esc = ||r - λ·v_dipole||
         d_esc = float(np.linalg.norm(r - lambda_val * v_dipole))
 
         return (centroid_id, lambda_val, d_esc)

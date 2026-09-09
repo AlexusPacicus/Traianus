@@ -151,11 +151,10 @@ class TestPolarProjectorBlock:
         d = 384
         c_1 = random_unit_vector(d, 1)
         c1_hat = c_1 / np.linalg.norm(c_1)
-        P_perp = self.projector._orthogonal_projector(c1_hat)
         u = self.projector._canonical_u_perp(c1_hat)
 
         v_n = random_unit_vector(d, 8)
-        v_n_proj = P_perp @ (v_n - c_1)
+        v_n_proj = self.projector._project_perp(v_n - c_1, c1_hat)
 
         # (a) Fully collinear centroids -> canonical fallback dipole 2δ·u⊥
         cA_coll, cB_coll = collinear_centroids(c_1, d)
@@ -174,12 +173,12 @@ class TestPolarProjectorBlock:
         #     (P⊥(w) = w by construction), so its norm is order 1 - far above
         #     eps_collinear without any magic margin factor.
         rng = np.random.default_rng(7)
-        w = P_perp @ rng.normal(size=d).astype(np.float64)
+        w = self.projector._project_perp(rng.normal(size=d).astype(np.float64), c1_hat)
         w = w / np.linalg.norm(w)
         cA_wide = c_1 + w
         cB_wide = c_1 - w
         _, lambda_wide, _ = self.projector.project(v_n, c_1, cA_wide, cB_wide, 1)
-        v_dipole_natural = P_perp @ (cA_wide - cB_wide)
+        v_dipole_natural = self.projector._project_perp(cA_wide - cB_wide, c1_hat)
         expected_wide = float(
             np.dot(v_n_proj, v_dipole_natural) / np.dot(v_dipole_natural, v_dipole_natural)
         )

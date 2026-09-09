@@ -1,8 +1,8 @@
 """Property tests for PolarProjector mathematical invariants.
 
-Deterministic seeded sweeps (numpy + stdlib only): same inputs across
-dimensions produce bitwise identical outputs, lambda stays bounded, and
-escape distance satisfies the triangle inequality.
+Deterministic seeded sweeps (numpy + stdlib only): repeatable execution for
+fixed inputs in a fixed floating-point environment (lambda stays bounded, and
+escape distance satisfies the triangle inequality).
 
 Dimensions/seed counts are declarative @pytest.mark.parametrize (not
 hardcoded loops). L2 normalization makes the invariant geometry invariant
@@ -46,11 +46,10 @@ def _recompute_internals(
 ) -> dict:
     """Reconstruct intermediate quantities from the project() pipeline."""
     c1_hat = projector._normalize_anchor(c_1)
-    P_perp = projector._orthogonal_projector(c1_hat)
-    cA_perp = P_perp @ c_A
-    cB_perp = P_perp @ c_B
+    cA_perp = projector._project_perp(c_A, c1_hat)
+    cB_perp = projector._project_perp(c_B, c1_hat)
     v_dipole = projector._compute_dipole(cA_perp, cB_perp, c1_hat)
-    r = P_perp @ (v_n - c_1)
+    r = projector._project_perp(v_n - c_1, c1_hat)
     v_dipole_norm_sq = float(np.dot(v_dipole, v_dipole))
     if v_dipole_norm_sq > 0:
         lambda_raw = float(np.dot(r, v_dipole) / v_dipole_norm_sq)
@@ -58,7 +57,6 @@ def _recompute_internals(
         lambda_raw = 0.0
     return {
         "c1_hat": c1_hat,
-        "P_perp": P_perp,
         "v_dipole": v_dipole,
         "r": r,
         "lambda_raw": lambda_raw,
@@ -70,7 +68,7 @@ class TestPolarProjectorProperties:
     """Property tests for mathematical invariants."""
 
     def test_polar_projector_deterministic_all_dims(self):
-        """Same inputs -> bitwise identical outputs across dimensions."""
+        """Repeatability: same inputs in the same environment produce identical outputs."""
         for d in (384, 768, 1536):
             for seed in range(20):
                 v_n, c_1, c_A, c_B = _random_unit_vectors(d, seed)
