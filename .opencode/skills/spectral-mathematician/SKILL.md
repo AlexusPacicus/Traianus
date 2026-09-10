@@ -13,7 +13,13 @@ tools below — never by eyeballing numbers or re-deriving the math inline.
 1. **C1 threshold calibration** — confirm `auto_calibrate_critical_threshold()`
    (`traianus/app.py:216`) and its self-projection exclusion (`i != j`,
    AGENTS.md §3.4) hold under the current geodetic basis. Use
-   `calibrate_c1_threshold`.
+   `calibrate_c1_threshold`. Caveat: the MCP normalizes to cosine
+   internally before excluding self-projection, while
+   `calibrate_critical_threshold()` (`traianus/geometry/observables.py:12`)
+   takes a raw dot product and assumes pre-normalized input — the two
+   agree only on vectors that are already L2-normalized (§3.1). Feeding
+   un-normalized synthetic vectors to the MCP as a smoke test will
+   disagree with the Python function; that disagreement is not a code bug.
 2. **Simplex volumes & barycentric coordinates** — verify Cayley-Menger
    volumes and convex-hull inclusion for geodesic-axis / polar-projector
    work (`traianus/geometry/`). Use `calculate_simplex_volume`,
@@ -24,10 +30,13 @@ tools below — never by eyeballing numbers or re-deriving the math inline.
 
 ## Tools (MCP `spectral-math-engine`)
 
-- `calibrate_c1_threshold` — dynamic θ from a vector set, self-projection excluded.
+- `calibrate_c1_threshold` — dynamic θ from a vector set, self-projection
+  excluded; normalizes to cosine internally (see caveat above).
 - `calculate_simplex_volume` — Cayley-Menger volume from a point set.
-- `compute_barycentric_coordinates` — coordinates of a point relative to a simplex.
-- `analyze_float_drift` — float32 vs float64 divergence for a computation.
+- `compute_barycentric_coordinates` — barycentric coordinates of a point
+  relative to a simplex, plus a convex-hull inclusion test.
+- `analyze_float_drift` — Chebyshev/L2 drift between the float32 and
+  float64 representations of a raw coordinate vector.
 
 ## Guardrails
 
