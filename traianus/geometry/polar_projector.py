@@ -1,4 +1,16 @@
-"""Polar Projector: stateless orthogonal decomposition over S^{d-1}."""
+"""Polar Projector: stateless orthogonal decomposition over S^{d-1}.
+
+Vendored mirror. The canonical source is the standalone polar-projector
+repository, whose CI verifies this operator against the figures published in the
+manuscript; this file is kept aligned by hand. Change the canonical copy first
+and port here - a fix applied only on this side makes the paper's reference
+implementation stop matching what Traianus actually runs.
+
+Deliberate, time-boxed duplication: depending on the package would touch the
+pinned pyproject.toml and tie the v1.0.0 release freeze to an unpublished 0.1.0.
+When the freeze lifts, this file is deleted in favour of that dependency. The
+trade and its exit condition are recorded in docs/LEDGER.md seq 44.
+"""
 
 from typing import NamedTuple
 

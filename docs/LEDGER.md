@@ -1175,3 +1175,60 @@
   cited, but appeared nowhere in its text. Corrected here before commit.
 
 * **Status:** `Consolidated`.
+
+### seq 44 — 2026-09-11 — Polar Projector extracted to a canonical standalone repository
+
+* **Extraction:** the operator, its 499 tests and the manuscript's reproducibility tooling were
+  carved out of this repository with `git-filter-repo` (202 → 6 commits, preserving the full history
+  of every extracted file; no file had ever been renamed, so path filtering captured all of it) into
+  a standalone `polar-projector` repository. What travelled: `polar_projector.py`, the property/unit/
+  frame/block suites, `polar_fixtures.py`, the three `tools/experiments/*polar*` scripts and
+  `docs/papers/polar-projector-paper.md`. What stayed: `spatial_observables.py` and its 156 tests
+  (the first *consumer*, not the operator — keeping it here is what holds the manuscript to operator
+  scope), the endpoint wiring suites, and `scale_stress_spinoza_25k.py`.
+
+* **Motivation, measured not asserted:** the operator's dependency surface is numpy and nothing
+  else, while this substrate pins `fastapi`, `torch` and `sentence-transformers`. Reproducing the
+  manuscript's §3 therefore required installing a deep-learning stack to exercise 69 lines of
+  float64 linear algebra. In the extracted repository the same 499 tests run in 0.7 s against
+  `pip install numpy`, and §3.3 reproduces **18/18 cells PASS** against the published
+  δ-sweep table. Its CI runs that verification on every push, so a change that silently moves a
+  published number now fails a build rather than surviving to print.
+
+* **Defects the extraction surfaced (all pre-existing here):**
+  * `PolarFrame` was never exported from `traianus.geometry` despite being the return type of the
+    public `prepare()`. Closed in the standalone package's `__init__`; this repository still does not
+    export it (`traianus/geometry/__init__.py` `__all__`), which remains open.
+  * The `sys.path` bootstrap carried by the experimental tooling — the follow-up deferred in seq 41 —
+    was removed rather than reproduced, by promoting the deterministic constructions into
+    `polar_projector.fixtures` so reproduction works from an installed distribution.
+  * `random_centroids` in `tests/fixtures/polar_fixtures.py` has no callers in either repository.
+    Dropped there; still dead code here (§1.1), which remains open.
+  * Ruff configuration in this repository is implicit — inherited from a developer's local config,
+    absent from `pyproject.toml`. CI and a contributor's machine can therefore disagree on which
+    rules apply; seq 42's "ruff clean" was measured under whichever config happened to be present.
+    The standalone repository pins its rule set in-tree. Open here.
+
+* **Canonical/mirror decision (deliberate, time-boxed):** the standalone repository is **canonical**
+  for the operator; `traianus/geometry/polar_projector.py` is a **vendored mirror**, and both files
+  now carry a header saying so. The alternative — this repository depending on the package — was
+  chosen first and then rejected on evidence: it touches the pinned `pyproject.toml` (§1.5) and ties
+  a frozen v1.0.0 release to an unpublished `0.1.0` with no resolvable remote, so CI could not
+  install it. The cost accepted is two copies of the same 69 lines, mitigated by the fact that the
+  operator is finished code (100% coverage, closed-form, no open TODOs) rather than a file under
+  churn. **Exit condition:** when the v1.0.0 freeze lifts, the mirror is deleted and the package
+  becomes a dependency. The failure mode being guarded against is not untidiness — it is a fix
+  applied only on the substrate side, after which the manuscript's reference implementation no
+  longer matches what runs in production.
+
+* **Also this session:** the uncommitted p99 bound in
+  `tests/unit/storage/test_sqlite_engine_concurrency.py` had been relaxed from 5 ms to 10 ms with no
+  justification recorded anywhere (§6.3). Measured rather than assumed: 20/20 green at 5 ms
+  individually, and green under full-suite load. Reverted — if it flakes again it should be
+  re-opened with a measurement attached.
+
+* **Gate:** `pytest tests/` → 1099 passed / 5 deselected; ruff clean; `mypy traianus/` clean. In the
+  standalone repository: 499 passed, ruff and mypy clean, 100% coverage over the operator,
+  §3.3 18/18 PASS.
+
+* **Status:** `Consolidated`.
