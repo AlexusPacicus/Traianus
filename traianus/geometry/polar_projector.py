@@ -1,7 +1,22 @@
 """Polar Projector: stateless orthogonal decomposition over S^{d-1}."""
 
+from typing import NamedTuple
+
 import numpy as np
 from numpy.typing import NDArray
+
+
+class PolarFrame(NamedTuple):
+    """Local frame induced by an anchor and a dipole pair.
+
+    Depends only on (c₁, cₐ, c_b), so it is invariant across every stimulus
+    evaluated under the same active context. See PolarProjector.prepare.
+    """
+
+    c_1: NDArray[np.float64]
+    c1_hat: NDArray[np.float64]
+    v_dipole: NDArray[np.float64]
+    v_dipole_norm_sq: float
 
 
 class PolarProjector:
@@ -37,7 +52,20 @@ class PolarProjector:
             delta: Scaling factor for fallback dipole when centroids are collinear.
             eps_norm: Threshold below which anchor norm is treated as zero.
             eps_collinear: Threshold for collinearity detection.
+
+        Raises:
+            ValueError: If any guard is non-positive. Each one carries a lower bound the
+                geometry depends on: the fallback dipole has norm 2·delta, so delta <= 0
+                collapses it; a non-positive eps_norm disables the null-anchor guard; a
+                non-positive eps_collinear disables collinearity detection entirely.
         """
+        if delta <= 0.0:
+            raise ValueError(f"delta must be > 0 (fallback dipole norm is 2*delta), got {delta}")
+        if eps_norm <= 0.0:
+            raise ValueError(f"eps_norm must be > 0, got {eps_norm}")
+        if eps_collinear <= 0.0:
+            raise ValueError(f"eps_collinear must be > 0, got {eps_collinear}")
+
         self.delta = delta
         self.eps_norm = eps_norm
         self.eps_collinear = eps_collinear
@@ -97,6 +125,12 @@ class PolarProjector:
         guaranteeing deterministic execution for fixed inputs in a
         floating-point environment.
 
+        Closed form: since e_k is one-hot, ⟨e_k, ĉ₁⟩ = ĉ₁[k], and because ‖ĉ₁‖₂ = 1,
+        ‖e_k - ĉ₁[k]·ĉ₁‖₂ reduces algebraically to sqrt(1 - ĉ₁[k]²) (see the Remark
+        after Proposition 2 in docs/papers/polar-projector-paper.md §2). This builds
+        u⊥ directly by scaling ĉ₁ and overwriting index k, with no e_k allocation,
+        no dot product, and no vector-norm reduction — same result, fewer passes.
+
         Args:
             c1_hat: Normalized anchor vector.
 
@@ -106,23 +140,14 @@ class PolarProjector:
         # Find index of minimum absolute component (deterministic tie-breaking)
         k = int(np.argmin(np.abs(c1_hat)))
 
-        # Canonical basis vector e_k
-        e_k = np.zeros_like(c1_hat)
-        e_k[k] = 1.0
+        # s = ĉ₁[k]; the sqrt below is non-vanishing because k = argmin|ĉ₁| gives
+        # |s| <= 1/sqrt(d) < 1, guaranteed by the d >= 2 precondition prepare() enforces.
+        s = c1_hat[k]
+        raw_norm = np.sqrt(1.0 - s * s)
 
-        # Project out ĉ₁ component: e_k - ⟨e_k, ĉ₁⟩ĉ₁
-        proj = np.dot(e_k, c1_hat)
-        u_perp_raw = e_k - proj * c1_hat
-
-        # Normalize
-        norm = np.linalg.norm(u_perp_raw)
-        if norm > 0:
-            return u_perp_raw / norm
-
-        # Unreachable defensive fallback: u_perp_raw == 0 requires e_k ∥ ĉ₁,
-        # but k = argmin|ĉ₁| guarantees |ĉ₁[k]| <= 1/sqrt(d) < 1 for d >= 2,
-        # so e_k - ⟨e_k,ĉ₁⟩ĉ₁ never vanishes. Kept to avoid div-by-zero.
-        return e_k  # pragma: no cover
+        u_perp = (-s / raw_norm) * c1_hat
+        u_perp[k] = raw_norm
+        return u_perp
 
     def _compute_dipole(
         self,
@@ -150,6 +175,110 @@ class PolarProjector:
             return 2.0 * self.delta * u_perp
         return dipole_diff
 
+    def prepare(
+        self,
+        c_1: NDArray[np.float64],
+        c_A: NDArray[np.float64],
+        c_B: NDArray[np.float64],
+    ) -> PolarFrame:
+        """
+        Build the local frame shared by every stimulus under the same anchor.
+
+        Anchor normalization, dipole-pole projection and dipole construction depend
+        only on (c_1, c_A, c_B). A caller holding an active context fixed across many
+        stimuli builds the frame once here and passes it to evaluate(), instead of
+        rebuilding it on every call as project() does.
+
+        Args:
+            c_1: Static anchor centroid (d,).
+            c_A: Dipole pole A (d,).
+            c_B: Dipole pole B (d,).
+
+        Returns:
+            Immutable PolarFrame carrying ĉ₁, v_dipole and ||v_dipole||².
+
+        Raises:
+            ValueError: If the inputs are not 1-D vectors of one common dimension d >= 2
+                (d >= 2 is what makes the orthogonal complement of the anchor non-empty,
+                and mismatched ranks would otherwise broadcast into a (d, d) matrix), or
+                if the resulting dipole is degenerate.
+        """
+        c_1 = np.asarray(c_1, dtype=np.float64)
+        c_A = np.asarray(c_A, dtype=np.float64)
+        c_B = np.asarray(c_B, dtype=np.float64)
+
+        if c_1.ndim != 1 or c_A.ndim != 1 or c_B.ndim != 1:
+            raise ValueError(
+                "anchor and dipole poles must be 1-D vectors; got shapes "
+                f"c_1{c_1.shape}, c_A{c_A.shape}, c_B{c_B.shape}"
+            )
+        if c_A.shape != c_1.shape or c_B.shape != c_1.shape:
+            raise ValueError(
+                "anchor and dipole poles must share shape; got "
+                f"c_1{c_1.shape}, c_A{c_A.shape}, c_B{c_B.shape}"
+            )
+        if c_1.shape[0] < 2:
+            raise ValueError(f"d >= 2 required for a non-empty orthogonal complement, got d={c_1.shape[0]}")
+
+        c1_hat = self._normalize_anchor(c_1)
+        cA_perp = self._project_perp(c_A, c1_hat)
+        cB_perp = self._project_perp(c_B, c1_hat)
+        v_dipole = self._compute_dipole(cA_perp, cB_perp, c1_hat)
+
+        v_dipole_norm_sq = float(np.dot(v_dipole, v_dipole))
+        if v_dipole_norm_sq <= 0.0:
+            raise ValueError(
+                "degenerate dipole: ||v_dipole||^2 underflowed to zero in float64 "
+                f"(delta={self.delta}, eps_collinear={self.eps_collinear})"
+            )
+
+        return PolarFrame(c_1, c1_hat, v_dipole, v_dipole_norm_sq)
+
+    def evaluate(
+        self,
+        v_n: NDArray[np.float64],
+        frame: PolarFrame,
+        centroid_id: int,
+    ) -> tuple[int, float, float]:
+        """
+        Evaluate one stimulus against a prepared frame.
+
+        Args:
+            v_n: Input stimulus vector (d,).
+            frame: Frame returned by prepare().
+            centroid_id: External codebook centroid identifier.
+
+        Returns:
+            Tuple (centroid_id, lambda_val, d_esc) where:
+            - lambda_val ∈ [-1.0, 1.0] (affective voltage)
+            - d_esc ≥ 0 (escape distance)
+
+        Raises:
+            ValueError: If v_n does not match the frame's dimension.
+        """
+        v_n = np.asarray(v_n, dtype=np.float64)
+
+        if v_n.shape != frame.c_1.shape:
+            raise ValueError(
+                f"v_n shape {v_n.shape} does not match frame dimension {frame.c_1.shape}"
+            )
+
+        # Projected residual
+        r = self._project_perp(v_n - frame.c_1, frame.c1_hat)
+
+        # Affective voltage λ = ⟨r, v_dipole⟩ / ||v_dipole||², clamped.
+        # prepare() rejects a degenerate frame, so the denominator is positive here.
+        lambda_val = float(
+            np.clip(np.dot(r, frame.v_dipole) / frame.v_dipole_norm_sq, -1.0, 1.0)
+        )
+
+        # Escape distance d_esc = ||r - λ·v_dipole||, kept in vector space: the
+        # algebraically equivalent scalar form loses all precision once
+        # d_esc/||r|| falls below ~1e-6 (tools/experiments/decompose_polar_latency.py).
+        d_esc = float(np.linalg.norm(r - lambda_val * frame.v_dipole))
+
+        return (centroid_id, lambda_val, d_esc)
+
     def project(
         self,
         v_n: NDArray[np.float64],
@@ -159,7 +288,10 @@ class PolarProjector:
         centroid_id: int,
     ) -> tuple[int, float, float]:
         """
-        Execute full polar projection pipeline.
+        Execute full polar projection pipeline for a single stimulus.
+
+        Equivalent to prepare() followed by evaluate(); prefer that pair when the
+        anchor and dipole poles are fixed across a run of stimuli.
 
         Args:
             v_n: Input stimulus vector (d,).
@@ -173,37 +305,4 @@ class PolarProjector:
             - lambda_val ∈ [-1.0, 1.0] (affective voltage)
             - d_esc ≥ 0 (escape distance)
         """
-        # Ensure float64
-        v_n = np.asarray(v_n, dtype=np.float64)
-        c_1 = np.asarray(c_1, dtype=np.float64)
-        c_A = np.asarray(c_A, dtype=np.float64)
-        c_B = np.asarray(c_B, dtype=np.float64)
-
-        # 1. Normalize anchor with null guard
-        c1_hat = self._normalize_anchor(c_1)
-
-        # 2. Orthogonal projection (associative O(d) form, no dense matrix)
-        cA_perp = self._project_perp(c_A, c1_hat)
-        cB_perp = self._project_perp(c_B, c1_hat)
-
-        # 3. Compute dipole vector (with collinearity handling)
-        v_dipole = self._compute_dipole(cA_perp, cB_perp, c1_hat)
-
-        # 4. Projected residual
-        r = self._project_perp(v_n - c_1, c1_hat)
-
-        # 5. Affective voltage λ = ⟨r, v_dipole⟩ / ||v_dipole||²
-        v_dipole_norm_sq = np.dot(v_dipole, v_dipole)
-        if v_dipole_norm_sq > 0:
-            lambda_val = float(np.dot(r, v_dipole) / v_dipole_norm_sq)
-            # Clamp to [-1, 1] for numerical stability
-            lambda_val = np.clip(lambda_val, -1.0, 1.0)
-        else:
-            # Unreachable: v_dipole is either cA_perp - cB_perp with norm >=
-            # eps_collinear > 0, or 2*delta*u_perp with norm 2*delta > 0.
-            lambda_val = 0.0  # pragma: no cover
-
-        # 6. Escape distance d_esc = ||r - λ·v_dipole||
-        d_esc = float(np.linalg.norm(r - lambda_val * v_dipole))
-
-        return (centroid_id, lambda_val, d_esc)
+        return self.evaluate(v_n, self.prepare(c_1, c_A, c_B), centroid_id)
