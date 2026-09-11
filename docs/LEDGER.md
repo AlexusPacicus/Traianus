@@ -1087,3 +1087,91 @@
   `tools/audit/audit_harness.py` → C1 GUARD PASSED IN GREEN (9/20); batch-latency test 5/5 runs
   (p95 < 1 ms).
 * **Status:** `Consolidated`.
+
+### seq 43 — 2026-09-10 — Polar Projector: prepare()/evaluate() split, enforced preconditions, closed-form fallback
+
+* **API extension (`traianus/geometry/polar_projector.py`):** the operator gained a
+  `prepare()` / `evaluate()` split around a new immutable `PolarFrame` NamedTuple
+  (`c_1`, `c1_hat`, `v_dipole`, `v_dipole_norm_sq`). Anchor normalization, dipole-pole
+  projection and dipole construction depend only on `(c₁, c_A, c_B)`, so they are invariant
+  across every stimulus evaluated under one active context; `prepare()` builds that frame once
+  and `evaluate()` consumes it per stimulus. `project()` is retained verbatim as
+  `evaluate(v_n, prepare(c_1, c_A, c_B), centroid_id)` — the public API is strictly extended,
+  never broken, and both production callers (`app.py:279`, `spatial_observables.py:89`) remain
+  untouched and still hold the stateless contract.
+  * **Measured (`tools/experiments/decompose_polar_latency.py`, committed):** at d=384, float64,
+    three runs of 25,000 stimuli, fixed seeds — full stateless call 13.68 µs mean / 14.64 µs p95;
+    `prepare()` 6.87 / 7.18; `evaluate()` 6.34 / 6.68. Frame construction is 50.2% of a stateless
+    call, so hoisting it out of the loop leaves **2.16× less work per interaction** whenever the
+    active context outlives one stimulus. Run-to-run spread under 2%; the 13.68 µs baseline agrees
+    with the independent 13.65–13.73 µs range of seq 42.
+  * **Not yet claimed by the substrate:** this is an operator-level result. `app.py` and
+    `spatial_observables.py` still call `project()`, so Traianus does not currently collect the
+    2.16×. Wiring it is a behavioral change with its own TDD cycle and ledger entry — deliberately
+    **not** bundled here.
+
+* **Enforced preconditions (fail-loud, replacing silent garbage):** the constructor now rejects
+  non-positive `delta` / `eps_norm` / `eps_collinear`, each with the lower bound the geometry
+  depends on (the fallback dipole has norm 2·delta, so delta ≤ 0 collapses it; non-positive
+  epsilons disable the null-anchor and collinearity guards outright). `prepare()` rejects
+  non-1-D inputs, mismatched pole shapes, `d < 2` (the orthogonal complement of the anchor would
+  be empty), and a dipole whose squared norm underflows to zero in float64. `evaluate()` rejects a
+  stimulus whose shape does not match the frame. The load-bearing case is the column vector: a
+  `(d, 1)` input previously broadcast into a `(d, d)` matrix and returned a plausible-looking
+  wrong answer instead of raising — regression `test_prepare_rejects_column_vector`.
+
+* **Closed-form `_canonical_u_perp`:** replaced the `e_k` allocation + `np.dot` + `np.linalg.norm`
+  construction with a closed scalar form. Since `e_k` is one-hot, `⟨e_k, ĉ₁⟩ = ĉ₁[k]`, and because
+  `‖ĉ₁‖₂ = 1`, the raw fallback norm reduces algebraically to `√(1 − ĉ₁[k]²)` (exact identity:
+  expanding `‖e_k − ĉ₁[k]·ĉ₁‖₂²` and using `Σ_{i≠k}ĉ₁[i]² = 1 − ĉ₁[k]²` collapses the cross-term).
+  `u_perp` is built directly — `u_perp[k] = √(1−ĉ₁[k]²)`, `u_perp[i] = α·ĉ₁[i]` for `i≠k` with
+  `α = −ĉ₁[k]/√(1−ĉ₁[k]²)` — one scalar sqrt plus a single scaled pass over `ĉ₁`, same numerical
+  result. The sqrt is non-vanishing because `k = argmin|ĉ₁|` forces `|ĉ₁[k]| ≤ 1/√d < 1` under the
+  `d ≥ 2` precondition `prepare()` now enforces, which is what let the previously unreachable
+  `# pragma: no cover` defensive branch be deleted rather than merely bypassed.
+  * **Micro-benchmark (ad hoc, not committed — not reproducible from this repo alone):** 200,000
+    calls/dim, old vs. closed form — d=128: 4.77→2.01 µs (2.37×); d=384: 5.51→2.19 µs (2.51×);
+    d=768: 10.52→4.16 µs (2.53×); max abs output diff 2.2e-16–4.4e-16 (float rounding). Applies
+    only to the rare collinear-fallback branch inside `prepare()`, never to the `evaluate()` hot
+    loop the §3 latency figures characterize — it changes no headline number.
+
+* **`d_esc` deliberately kept in vector space:** Proposition 3's scalar rearrangement
+  (`d_esc² = ⟨r,r⟩ − 2λ⟨r,v_dipole⟩ + λ²‖v_dipole‖²`) is 1.23× faster and was rejected on
+  conditioning grounds, not performance. Measured against a construction with analytically known
+  escape distance, the scalar form's relative error degrades 1.1e-10 → 1.0e+0 as `d_esc/‖r‖₂` falls
+  1e-3 → 1e-8, while the vector form stays at 1.2e-14 → 6.7e-10. Below `d_esc/‖r‖₂ ≈ 1e-6` the
+  scalar form returns values uncorrelated with the true distance — and that regime is exactly where
+  λ saturates, so the precision is not incidental. The identity stands as a theorem, not as an
+  algorithm; recorded in the source comment so it is not "optimized" back in later.
+
+* **Reproducibility tooling committed** (closing the seq 42/43-draft gap where paper figures rested
+  on uncommitted ad-hoc scripts):
+  * `tools/experiments/decompose_polar_latency.py` — frame-invariant vs. per-stimulus decomposition
+    (§3.1) and the two `d_esc` formulations at equal frame cost (§3.2). Calls the projector's own
+    private helpers rather than re-implementing them, so it measures the identical code paths.
+  * `tools/experiments/generate_polar_delta_table.py` — produces the §3.3 δ-sweep table at
+    N=10,000 (2σ sampling bound ≈2.8% on the reported variances).
+  * `tools/experiments/verify_polar_delta_table.py` — independently re-derives that table and
+    reports PASS/MISMATCH per cell. An earlier N=1,000 pass reproduced only 4 of 6 rows within 5%
+    (the two small-δ rows deviated 9–12%, consistent with ≈4.5% sampling error at that N); the
+    N=10,000 table supersedes it, and the discrepancy is recorded in the manuscript as a
+    methodological note rather than quietly dropped.
+
+* **Manuscript:** `docs/papers/polar-projector-paper.md` — §3.1 (frame vs. per-stimulus cost),
+  §3.2 (conditioning of `d_esc`), §3.3 (δ-sweep) now rest on the committed tools above. The
+  closed-form fallback is documented as an extension of the existing Duff et al. (2017) Remark in
+  §2 after Proposition 2 — operator internals, not the external prior-art positioning that §5 is
+  scoped to. §4 (Extensions) and §6 (Open Questions) remain marked draft/unreviewed.
+
+* **Gate:** `pytest tests/` → **1087 passed / 5 deselected**. Polar coverage is 499 tests
+  (`test_polar_projector_properties` 341, `test_polar_projector_unit` 96, `test_polar_frame` 53,
+  `test_polar_projector_block` 9). `test_polar_frame.py` asserts the split is behavior-preserving
+  by exact equality against `project()` across d∈{128,384,768}×10 seeds and over 50 stimuli reusing
+  one frame — the split is a refactor, not a new numerical path.
+
+* **Scope note:** this entry supersedes an earlier seq 43 draft that recorded only the closed-form
+  fallback. That draft under-documented the change: the API extension and the enforced
+  preconditions above were already in the working tree and already covered by the gate run it
+  cited, but appeared nowhere in its text. Corrected here before commit.
+
+* **Status:** `Consolidated`.
