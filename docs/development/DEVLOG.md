@@ -69,3 +69,65 @@ ahora.
    (base espectral dinámica), releer Direcciones A-D de
    `docs/roadmap/NEXT_RESEARCH.md` antes de tocar de nuevo el proyector
    polar.
+
+---
+
+## 2026-09-11
+
+**Contexto:** retomar tras la sesión del 10. El trabajo de la noche (split
+`prepare()`/`evaluate()` del proyector polar + paper + tooling) estaba sin
+commitear, y el ledger seq 43 documentaba solo la mitad.
+
+**Se hizo:**
+- **Auditoría del working tree.** Encontrado que seq 43 describía únicamente
+  el closed-form de `_canonical_u_perp`, cuando el árbol contenía además una
+  extensión de API pública (`PolarFrame`, `prepare()`, `evaluate()`) y
+  precondiciones nuevas que lanzan `ValueError`. El paper §3.1 ya publicaba
+  cifras de una API que el ledger no registraba. Seq 43 reescrito antes de
+  commitear.
+- **Bound de SQLite revertido.** `test_sqlite_engine_concurrency.py` tenía el
+  p99 relajado de 5 ms a 10 ms, sin justificar en ningún sitio (AGENTS §6.3).
+  Medido en vez de asumido: 20/20 en verde a 5 ms, y suite completa también.
+  Sin evidencia que lo sostuviera → descartado. Si vuelve a flaquear, que sea
+  con un dato delante.
+- **Frente polar cerrado:** 3 commits (código+tests, paper+tooling, ledger).
+  Gates: 1087 passed / 5 deselected, ruff limpio, `mypy traianus/` limpio,
+  coverage 90%.
+- **Repo `polar-projector` extraído** en `/Users/test/Documents/NGI/polar-projector`,
+  con historia git preservada vía `git-filter-repo` (202 → 6 commits, los 10
+  ficheros del operador). Scaffolding propio: `pyproject.toml` (numpy y nada
+  más), README, CI (3.11/3.12/3.13), LICENSE AGPL heredada.
+  - `PolarFrame` ahora sí exportado — nunca lo estuvo en `traianus.geometry`
+    pese a ser el tipo de retorno de `prepare()`.
+  - Fixtures deterministas promovidos a `polar_projector.fixtures`: elimina el
+    bootstrap de `sys.path` de las tools (el follow-up diferido en seq 41) en
+    vez de replicarlo. `random_centroids` cae: sin llamantes en ningún repo.
+  - Config de ruff explícita. Traianus depende de una config local implícita,
+    así que su CI y la máquina de un colaborador pueden discrepar sobre qué
+    reglas aplican — aquí está pinneada en el repo.
+  - Verificado: 499 tests en 0.7 s, mypy y ruff limpios, coverage 100% sobre
+    el operador, y §3.3 reproduce **18/18 celdas PASS** contra la tabla
+    publicada. CI corre esa verificación en cada push.
+
+**Resultado:** el paper es reproducible con `pip install numpy`, sin fastapi
+ni torch. Repo local, 8 commits, sin remote.
+
+**Sin resolver / decisión pendiente:**
+- **Bloqueante para el siguiente paso:** se decidió que Traianus dependa del
+  paquete (fuente única de verdad), pero eso exige que el repo sea resoluble
+  — GitHub o PyPI. Hasta que exista remote, el swap no se puede hacer sin
+  romper CI. Una path-dependency local funcionaría en la máquina y fallaría
+  en Actions.
+- Licencia: AGPL-3.0 heredada de Traianus. Para la implementación de
+  referencia de un paper es restrictiva y desincentiva la adopción. Es
+  reversible (autor único), pero conviene decidirlo a propósito.
+- El paper sigue siendo espejo manual de Corca; §4 y §6 siguen en borrador.
+- `random_centroids` es código muerto también en Traianus — limpiar allí.
+- Higiene de Traianus pendiente: `.coverage` sin gitignorear, `compendio.md`
+  suelto en la raíz, `CLAUDE.md` y `.mcp.json` sin trackear.
+- **AGENTS §6.5 sigue siendo falso en git:** los cinco skills están
+  trackeados en `.opencode/skills/`, pero en `.claude/skills/` solo
+  `spectral-mathematician`. Los otros cuatro están en disco sin trackear.
+- Cola del 10 intacta: verificar el hook en vivo, alcance de `.claude/skills/`
+  en el gate, schema de `PreToolUse`, `window_seconds`.
+- Siguiente bloque grande según lo hablado: modularización de la PKM.
