@@ -206,3 +206,41 @@ def test_consolidar_empty_basis_returns_400(client, auth_headers, tmp_path, monk
         headers=auth_headers,
     )
     assert resp.status_code == 400
+
+
+def test_relations_does_not_recompute_full_epsilon_set_on_unchanged_nodes(
+    client, auth_headers, isolate_db, monkeypatch
+):
+    """R8/INV-9: GET /relations serves a cached E_n while the node log is
+    unchanged and recomputes only after a node revision is appended."""
+    import numpy as np
+
+    import traianus.storage._storage as impl
+
+    real = impl.compute_epsilon_edges
+    calls = []
+
+    def counting(nodes, epsilon):
+        calls.append(len(nodes))
+        return real(nodes, epsilon)
+
+    monkeypatch.setattr(impl, "compute_epsilon_edges", counting)
+
+    def ingest(label, seed):
+        vec = np.random.default_rng(seed).standard_normal(384)
+        res = client.post(
+            "/ingesta/vector",
+            json={"vector": (vec / np.linalg.norm(vec)).tolist(), "label": label},
+            headers={**auth_headers, "X-Idempotency-Key": f"rel-{label}"},
+        )
+        assert res.status_code == 201
+
+    ingest("a", 1)
+    ingest("b", 2)
+    for _ in range(3):
+        assert client.get("/relations", headers=auth_headers).status_code == 200
+    assert len(calls) == 1, f"E_n recomputed {len(calls)} times over 3 reads of an unchanged log"
+
+    ingest("c", 3)
+    assert client.get("/relations", headers=auth_headers).status_code == 200
+    assert len(calls) == 2

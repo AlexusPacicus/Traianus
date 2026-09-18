@@ -627,16 +627,33 @@ def get_current_node_vectors() -> dict[str, np.ndarray]:
         return _current_node_vectors(conn)
 
 
+_EDGE_CACHE: tuple[tuple[str, float, int], list[dict]] | None = None
+
+
 def rebuild_epsilon_edges(epsilon: float) -> list[dict]:
     """Deterministic E_n (ADR-023/H5, RE-08): (v_i, v_j) ∈ E_n iff ||v_i − v_j||₂ ≤ epsilon.
 
     Reads current states (MAX(seq)) from manifold_nodes (telemetry_error
     excluded), projects L2 vectors, and returns ε-adjacent edges. Does not
     mutate DB: E_n reconstruction is a pure function over persisted state.
+
+    The O(n²) result is cached (R8) under (db path, epsilon, MAX(rowid) of
+    manifold_nodes). The log is append-only (AGENTS §4.1), so MAX(rowid) is a
+    strictly increasing version: any appended revision invalidates the entry,
+    an unchanged log costs one O(1) query per read, and another process
+    writing to the same file is detected because the version is read from the
+    database on every call, not held in memory.
     """
+    global _EDGE_CACHE
     with get_db_connection() as conn:
+        version = conn.execute("SELECT COALESCE(MAX(rowid), 0) FROM manifold_nodes").fetchone()[0]
+        key = (_active_db_path(), epsilon, int(version))
+        if _EDGE_CACHE is not None and _EDGE_CACHE[0] == key:
+            return list(_EDGE_CACHE[1])
         nodes = _current_node_vectors(conn)
-    return compute_epsilon_edges(nodes, epsilon)
+    edges = compute_epsilon_edges(nodes, epsilon)
+    _EDGE_CACHE = (key, edges)
+    return list(edges)
 
 
 def build_edge_id(prefix: str, source: str, target: str) -> str:

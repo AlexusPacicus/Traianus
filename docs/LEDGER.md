@@ -1455,3 +1455,36 @@
   no change needed (§1.6).
 
 * **Status:** `Consolidated`.
+
+### seq 50 — 2026-09-18 — REMEDIATION-01 Delta4: `GET /relations` no longer recomputes E_n on every read (INV-9)
+
+* **Defect:** `GET /relations` called `storage.rebuild_epsilon_edges` on every request, a full
+  Θ(n²) `compute_epsilon_edges` over the current nodes, while `manifold_nodes` only ever grows
+  (AGENTS §4.1). Reproduced RED: 3 recomputations over 3 reads of an unchanged log.
+
+* **The drafted fix was wrong, and this entry records why it was not followed.** The spec said to
+  serve the read from "the already-implemented `persist_epsilon_edges` incremental log". Reading the
+  code: `persist_epsilon_edges` is not incremental (it recomputes the full ε-adjacency and diffs it
+  against the stored rows), and it is deliberately not on the request path — SPEC M-a makes E_n
+  observational and "computed on read", and two tests pin that (`/consolidar` must not persist
+  `auto-edge-*`; `/relations` computes them on read). Following the draft would have turned a read
+  into a write path, moved the Θ(n²) cost to every ingestion, and contradicted AGENTS §4.3.
+
+* **Fix (R8's second branch, "explicitly cached with a documented invalidation rule"):**
+  `rebuild_epsilon_edges` caches its result under `(db path, epsilon, MAX(rowid) of manifold_nodes)`.
+  Because the log is append-only, `MAX(rowid)` is a strictly increasing version: any appended
+  revision invalidates the entry; an unchanged log costs one O(1) query per read. The version is read
+  from the database on every call rather than held in process memory, so a second process writing to
+  the same file (an ingestion tool, say) invalidates the cache too.
+
+* **Not achieved, stated plainly:** spec §3.7's preferred `C_write(1) = O(n)` incremental
+  maintenance. The first read after a write still pays Θ(n²); only repeated reads over an unchanged
+  log are now O(1). Incremental maintenance is a design problem of its own — a revised vector changes
+  and removes existing edges, not only adds new ones — and is left for a delta that can afford it.
+  Known limit of the key: it cannot tell a database file replaced at the same path with the same
+  `MAX(rowid)` inside one process; not reachable through the API.
+
+* **Gate:** `pytest tests/` → 1160 passed / 5 deselected; model partition 5 passed; `mypy traianus/`
+  clean; C1 GUARD PASSED (9/20).
+
+* **Status:** `Consolidated` (via the cache branch; the incremental branch is open).
