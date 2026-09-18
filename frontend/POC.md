@@ -164,3 +164,24 @@ shared bias its spec describes; it must not be wired as is.
 Records live in [`audits/`](audits/), one file per measurement, so a blind review never opens this
 file: [`definitions.md`](audits/definitions.md) (shared), [`K6.md`](audits/K6.md) (colour channel
 independence, day 2), [`R4.md`](audits/R4.md) (neighbourhood recall per perspective, day 6).
+
+## Smoke run, day 1 (2026-09-18) — exploration, not results
+
+Engine from the working tree as it stood (including uncommitted engine work), run from a scratch
+directory so SQLite created its own `traianus.db` there — `DB_PATH` is relative and has no
+environment override; the repository's database was not touched. Bootstrap (8 axes), 30 Spinoza
+chunks (six per part) through `/ingesta`, then the client.
+
+| Step | Outcome |
+|---|---|
+| Text ingest (`/ingesta`, `X-Traianus-Token`, `X-Idempotency-Key`) | Works: 30/30 accepted, 30 nodes in `pending_approval` |
+| `/spatial` | Returns all nodes, pending included; the client does not show lifecycle state |
+| Consolidate with the ethical key | Node goes to `incubating`, not `consolidated`: topological key failed (variance 0.0016 < threshold 0.0043). Feature 4 may rarely reach `consolidated` on this corpus |
+| Map | Renders; every node in one small overlapping blob, one colour — consistent with K2/K3 |
+| Note entry from the UI | Reaches the engine (node 31), but the client refetches `/nodos` and `/relations`, not `/spatial`, so the new note is not drawn until reload |
+| Zoom, click on a node | Not implemented: the WebGL layer has `pointerEvents: "none"` |
+| Console | One warning: `gl.enable(PROGRAM_POINT_SIZE)` is invalid in WebGL2 (point size is always on) |
+
+Consequences for the plan: feature 4 must show `incubating` as a state of its own; the client
+must refetch `/spatial` after ingest; zoom, click and perspective are all new client work (days
+3–5), none of it exists yet. A `DB_PATH` environment override would make isolated runs routine.
