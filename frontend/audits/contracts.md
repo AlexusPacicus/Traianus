@@ -24,6 +24,23 @@ Artefacts (inputs)
                    sha256 b14e5d6700d1a7478a357ca26f0f38f5240f97a42daad45722d21f1c3f964e35.
   Every script checks all three digests before reading and refuses to run on a mismatch.
 
+Integrity: no nulls in, no silent bit flips
+  Null elimination, after the digest check and before any computation; any violation stops the
+  run with the row or key named:
+    every value finite (no NaN, no ±Inf); every row's ‖v‖ within 3e-5 of 1 (a binary32
+    normalisation over d = 384 terms errs by at most ≈ d·2⁻²⁴ ≈ 2.3e-5); no JSON null, empty or
+    duplicate label; label count = row count; 8 axes, each 384 finite values, ‖a_k‖ > 0.
+  Bit flips — each layer must catch what it can, and the tests prove it by flipping one bit:
+    file layer: any single bit flipped in any input artefact or consumed result changes its
+      sha256, and the script refuses to run (test: flip bits at the header, the first and the
+      last data byte, and a random position of each file; every one must be refused);
+    memory layer: a flipped sign or exponent bit in a vector component changes its scale and
+      must be rejected by null elimination (test: for sign, exponent MSB and exponent LSB of a
+      random component, validation must fail);
+    declared blind spot: a flipped low mantissa bit in memory changes one component by ≈ 1e-7,
+      inside binary32 rounding; no semantic check can see it, only the file digest can (test:
+      the flip passes validation — documenting the limit, not hiding it).
+
 Conversions
   V64 = V32.astype('<f8')                       exact: every binary32 is a binary64.
   v̂ = v / np.sqrt(v @ v), row by row, binary64  re-normalisation; bits depend on the dot's
@@ -64,7 +81,11 @@ Wire to the client (rendering, not measured)
 ```
 
 En palabras: los datos de entrada se identifican por su huella SHA-256, y ningún script corre si no
-coinciden. Pasar de float32 a float64 no cambia ningún bit del valor; renormalizar sí, y depende
+coinciden. Después se eliminan los nulos: ningún NaN ni infinito, ninguna fila con longitud fuera
+de 1 ± 3e-5, ninguna etiqueta vacía o repetida. Y se demuestra rompiéndolo: los tests cambian un
+solo bit y exigen que se detecte. En el archivo lo detecta siempre la huella. En memoria, un bit de
+signo o de exponente cambia la escala y lo detecta la validación; un bit bajo de la mantisa es
+indistinguible del redondeo y solo lo ve la huella del archivo, y el test lo deja escrito. Pasar de float32 a float64 no cambia ningún bit del valor; renormalizar sí, y depende
 del orden en que se suman los productos. Por eso los resultados solo son idénticos bit a bit en el
 mismo entorno (versión de numpy, BLAS, hilos, CPU); entre máquinas coinciden dentro de una
 tolerancia, y cada decisión guarda su margen al umbral para que un cambio por redondeo se vea. El
