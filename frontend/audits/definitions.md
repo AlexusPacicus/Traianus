@@ -16,7 +16,7 @@ Operator     traianus/geometry/polar_projector.py, for anchor c₁ and poles c_A
                ĉ₁ = c₁ / ‖c₁‖;  P⊥x = x − ⟨x, ĉ₁⟩ĉ₁                          (:235-237)
                v_dipole = P⊥c_A − P⊥c_B  (collinear fallback 2δ·u⊥)          (:184-188)
                r = P⊥(v − c₁)                                                (:279)
-               λ = clip(⟨r, v_dipole⟩ / ‖v_dipole‖², −1, 1)                  (:283-284)
+               λ = clip(⟨r, v_dipole⟩ / ‖v_dipole‖², −1, 1)                  (:283-285)
                d_esc = ‖r − λ·v_dipole‖                                      (:290)
              Since P⊥c₁ = 0 and v_dipole ⊥ ĉ₁ in both branches: r = P⊥v, ‖r‖² = 1 − y², and
              λ = clip(⟨v, v_dipole⟩ / ‖v_dipole‖², −1, 1).
