@@ -56,6 +56,16 @@ matches its artifact, not that the artifact measures what the text says.
 | 4. Register | the test joins the suite as a permanent regression | status `checked`, enforced by the verifier |
 | Enforced by | `tdd-cycle` skill | `instrument-audit` skill (step 2(a)); planned: `research-loop` |
 
+**Proportionality.** A full instrument audit is for figures that decide a pre-registered
+outcome; any other figure is exploration, labelled as such. Phase 1 gets at most three review
+rounds; after the third, the record freezes and remaining items are resolved in phase 2 against
+the code.
+
+**Mathematical contract.** Every record states its input and output exactly; every shortcut it
+takes (a simplified form standing for a full one) is an equality with its conditions and proof in
+a derivations file, and each equality becomes a unit test in phase 2. A shortcut without its
+equality is a defect.
+
 A **PoC** runs both instances at once: engine code through the code column, every figure through
 the claims column (a claims table in the PoC document, without a CI verifier unless a claim heads
 to a publication). Client code without a test suite is validated by the PoC's checkpoint and
