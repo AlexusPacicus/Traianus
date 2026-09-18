@@ -1275,3 +1275,54 @@
 * **Gate:** `pytest tests/` → 1135 passed / 5 deselected; `mypy traianus/` clean (32 files).
 
 * **Status:** `Consolidated`.
+
+### seq 46 — 2026-09-18 — REMEDIATION-01 Delta1: Zero-Trust gate integrity (INV-1, INV-2)
+
+* **Defect (confirmed empirically against the running code, not inferred from the
+  spec draft):** `traianus/security/validator.py::_persist_audit` connected with
+  `storage.DB_PATH` raw. When that value is relative (the real default,
+  `"traianus.db"`), `sqlite3.connect` resolves it against the *process's* cwd,
+  while `traianus/security/hook_gate.py::_db_path()` always anchors a relative
+  value to `REPO_ROOT`. Two processes with different cwd silently read/write
+  different audit databases (INV-1). Separately,
+  `tools/hooks/require_boundary_validation.py` treated malformed stdin JSON as
+  "nothing to gate" and returned 0 (allow) instead of the blocking exit code
+  every other unverifiable case uses (INV-2) — the hook's own fail-closed claim
+  (AGENTS.md §6.2) was partial, not total.
+
+* **Fix:** `_persist_audit` now resolves `storage.DB_PATH` the same way
+  `hook_gate._db_path()` does — anchored to `REPO_ROOT` when relative, cwd
+  otherwise irrelevant. `require_boundary_validation.py`'s `JSONDecodeError`
+  handler now writes a diagnostic to stderr and returns 2, matching the other
+  fail-closed paths in the same file.
+
+* **TDD (§1.4):** both regression tests written first and confirmed RED for the
+  stated reason before the fix — `test_audit_db_path_matches_validator_regardless_of_cwd`
+  (drives `validate_proposal` from a `monkeypatch.chdir`'d cwd with a relative
+  `DB_PATH` and asserts the file lands at `REPO_ROOT`, not cwd) and
+  `test_malformed_stdin_json_blocks` (loads the hook script as a plain module —
+  no subprocess needed — and drives `main()` through a replaced `sys.stdin`).
+
+* **Side effect found and fixed:** the INV-1 fix broke the cwd-based isolation
+  `tests/security/test_boundary_validator.py::test_security_SEC_M_06_mcp_stdio_jsonrpc`
+  relied on to keep its spawned-subprocess MCP call out of the real repo-root
+  `traianus.db`. Verified empirically before patching the test: the real
+  `audit_log` row count went 91 → 92 after one run. The test now captures its
+  own `case_id` from the JSON-RPC response and deletes that row after asserting,
+  instead of relying on `chdir` (which no longer isolates anything once path
+  resolution is cwd-independent).
+
+* **Retracted (see seq 51):** an earlier draft of this entry said INV-10 (Δ5) was
+  narrower than the spec claimed — one unclosed-connection site instead of three.
+  That was wrong. It rested on searching for the literal `sqlite3.connect`, which
+  finds only `sqlite_engine.py:46` (wrapped correctly in `_transaction()`); the two
+  sites the spec cites, `:141` and `:188`, are `with self._connect() as conn:`
+  and do leak. The spec was right; Δ5 confirmed all three by test.
+
+* **Gate:** `pytest tests/` → 1146 passed / 5 deselected; `ruff` clean on every
+  touched file (pre-existing debt on untouched lines in the same files left as
+  found — legacy surface, out of the ADR-025 CI scope); `mypy traianus/` clean
+  (32 files); `python3 tools/audit/audit_harness.py` → C1 GUARD PASSED
+  (9/20 non-degenerate).
+
+* **Status:** `Consolidated`.
