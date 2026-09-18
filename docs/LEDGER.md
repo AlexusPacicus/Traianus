@@ -1351,3 +1351,62 @@
 * **Scope:** documentation only; no code, tests or configuration touched.
 
 * **Status:** `Incubating`.
+
+### seq 48 — 2026-09-18 — REMEDIATION-01 Delta2: ingestion integrity (INV-3, INV-4 partial, INV-5, INV-6)
+
+* **Defects (each reproduced RED before any fix):**
+  - INV-3: `/ingesta` declared `X-Idempotency-Key` optional. SQLite's `UNIQUE` treats `NULL` as
+    pairwise-distinct, so a keyless request bypassed the dedup guarantee entirely.
+  - INV-4: `/ingesta/vector` had no idempotency parameter at all.
+  - INV-5: `_insert_node_revision` inserted whatever `lifecycle_state` it was given, so
+    re-ingesting a label whose node was `consolidated` appended an `incubating` revision — new
+    content that never passed the ethical key, silently demoting the node.
+  - INV-6: `edge_id = f"edge-{a}-{b}"` collides on hyphenated labels: `("VEC_x", "VEC_y-VEC_z")`
+    and `("VEC_x-VEC_y", "VEC_z")` both produced `edge-VEC_x-VEC_y-VEC_z`, so forging the second
+    edge was recorded as a new revision of the first and one relation vanished. Reproduced
+    end-to-end through `POST /relations`. The same collision existed in `auto-edge-*`.
+
+* **Fix:** the header is a required `Header(...)` on both endpoints (422 when absent).
+  `insert_node_revision(..., guard_consolidated=True)` folds the check into the `INSERT ... SELECT
+  ... WHERE NOT (guard AND current revision is consolidated)` statement, so a consolidation landing
+  between a read and the write cannot slip through — that would have been a TOCTOU window under a
+  read-then-insert guard, because Python's `sqlite3` opens no transaction before a `SELECT`;
+  `/ingesta/vector` maps `ConsolidatedRegressionError` to 409. `storage.build_edge_id` escapes `~`
+  and `-` inside each endpoint, which makes the joining `-` unambiguous.
+
+* **Decisions worth recording:**
+  - *Escape-based, not length-prefixed, edge ids.* The spec offered a length prefix; escaping is the
+    identity on labels with neither character, so every existing `edge-*` / `auto-edge-*` id stays
+    valid. A length prefix would have re-keyed the whole edge log.
+  - *INV-4 is partial, on purpose.* Requiring the header is done; rejecting a *repeated* key is
+    not. Unlike `/ingesta`, the vector endpoint writes directly to `manifold_nodes`, which has no
+    `idempotency_key` column: real dedup needs a `UNIQUE` column and the rename→recreate→copy→drop
+    migration already used for `ingestion_queue`. That is its own delta, confirmed with the
+    operator, not something to bundle into a session that had already grown.
+  - *R4 is enforced only for exits from `consolidated`.* Moving between `pending_approval` and
+    `incubating` on re-ingestion is driven by the new content's topological key; forbidding it would
+    remove the ability to revise an unconsolidated node. Spec §3.2 now says so.
+
+* **Blast radius, measured:** making the header mandatory broke 31 tests, all of them clients that
+  never sent it (36 direct `/ingesta/vector` call sites across 5 files, 6 raw `/ingesta` calls,
+  plus the shared `ingesta` fixture, which now generates a unique key by default). Three tools
+  needed it too: `tools/audit/audit_harness.py` failed loudly at `0/0` (`CONSOLIDATION GATE
+  DEGENERATE`) instead of reporting a green it had not earned, and
+  `tools/experiments/validation/validate_c1_semantics.py` and
+  `tools/experiments/representation/exp_representation_independence.py` — the latter's
+  `probe_415` would have silently become 422, and its whole downstream pipeline would have run on
+  zero ingested nodes. Some tests asserting `== 422` kept passing for the wrong reason (missing
+  header instead of NaN/Inf/label); those were updated too, so they test what their names say.
+
+* **Concurrent-session note:** a parallel session appended `seq 47` (research methodology) to this
+  file and touched `docs/INDEX.md` while this delta was in flight; this entry was renumbered from
+  the 47 it was drafted as. Nothing in that session's files was edited here.
+
+* **Gate:** `pytest tests/` → 1152 passed / 5 deselected; model partition (`-m model`) → 5 passed;
+  `ruff` clean on the exact CI scope (one `RUF022` from this change, `__all__` ordering, fixed);
+  `mypy traianus/` clean (32 files); `python3 tools/audit/audit_harness.py` → C1 GUARD PASSED
+  (9/20 non-degenerate). `.github/workflows/ci.yml` needs no change (§1.6): every touched test file
+  already sits under `pytest tests/`, and the new `tests/security/test_ingesta_idempotency.py` is
+  collected by it.
+
+* **Status:** `Consolidated` except the INV-4 dedup half, which is open.

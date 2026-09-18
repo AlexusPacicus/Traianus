@@ -162,7 +162,12 @@ class TestDualKeyC1Gate:
         rng = np.random.default_rng(7)
         vec = rng.standard_normal(384)
         vec = (vec / np.linalg.norm(vec)).tolist()
-        res = client.post("/ingesta/vector", json={"vector": vec}, headers=auth_headers)
+        import uuid
+
+        res = client.post(
+            "/ingesta/vector", json={"vector": vec},
+            headers={**auth_headers, "X-Idempotency-Key": str(uuid.uuid4())},
+        )
         assert res.status_code == 201
         body = res.json()
         node_id = body["node_id"]

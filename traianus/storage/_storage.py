@@ -413,6 +413,10 @@ class StorageError(Exception):
     """Raised by persistence functions on unrecoverable storage failures."""
 
 
+class ConsolidatedRegressionError(StorageError):
+    """An ingestion write would supersede a consolidated revision (R4)."""
+
+
 def enqueue_ingest(text: str, idempotency_key: str | None) -> tuple[int, bool]:
     """Persists a raw ingestion payload; returns (ingestion_id, duplicate).
 
@@ -455,18 +459,28 @@ def mark_queue_processed(conn: sqlite3.Connection, ingestion_id: int) -> None:
 def _insert_node_revision(conn: sqlite3.Connection, node_id: str, text: str,
                           toon_factor: str, lifecycle_state: str, action_potential: float,
                           revision_milestone: int, vector_blob: bytes,
-                          projections_json: str, epoch_provenance: str) -> int:
+                          projections_json: str, epoch_provenance: str,
+                          guard_consolidated: bool = False) -> int:
+    # guard_consolidated makes the check part of the INSERT statement itself, so
+    # a concurrent consolidation cannot slip between a read and the write.
     for attempt in range(3):
         seq = next_node_seq(conn, node_id)
         try:
-            conn.execute("""
+            cur = conn.execute("""
                 INSERT INTO manifold_nodes
                 (id, seq, text, toon_factor, lifecycle_state, action_potential, revision_milestone, vector_blob, projections_json, epoch_provenance)
-                VALUES (?, ?, ?, ?, ?, ?, ?, ?, ?, ?)
+                SELECT ?, ?, ?, ?, ?, ?, ?, ?, ?, ?
+                WHERE NOT (? AND EXISTS (
+                    SELECT 1 FROM manifold_nodes c
+                    WHERE c.id = ? AND c.lifecycle_state = 'consolidated'
+                      AND c.seq = (SELECT MAX(seq) FROM manifold_nodes WHERE id = c.id)))
             """, (
                 node_id, seq, text, toon_factor, lifecycle_state, action_potential,
                 revision_milestone, vector_blob, projections_json, epoch_provenance,
+                int(guard_consolidated), node_id,
             ))
+            if cur.rowcount == 0:
+                raise ConsolidatedRegressionError(node_id)
             return seq
         except sqlite3.IntegrityError:
             if attempt == 2:
@@ -478,21 +492,26 @@ def insert_node_revision(node_id: str, text: str, toon_factor: str,
                          lifecycle_state: str, action_potential: float,
                          revision_milestone: int, vector_blob: bytes,
                          projections_json: str, epoch_provenance: str,
-                         conn: sqlite3.Connection | None = None) -> int:
+                         conn: sqlite3.Connection | None = None,
+                         guard_consolidated: bool = False) -> int:
     """Inserts a new node revision (append-only, H4); returns the seq used.
 
     When `conn` is provided, operates inside that transaction (no commit —
     the caller owns it); otherwise opens its own connection and commits.
+    With `guard_consolidated`, raises ConsolidatedRegressionError instead of
+    writing over a node whose current revision is consolidated (R4).
     """
     if conn is None:
         with get_db_connection() as c:
             return _insert_node_revision(
                 c, node_id, text, toon_factor, lifecycle_state, action_potential,
                 revision_milestone, vector_blob, projections_json, epoch_provenance,
+                guard_consolidated,
             )
     return _insert_node_revision(
         conn, node_id, text, toon_factor, lifecycle_state, action_potential,
         revision_milestone, vector_blob, projections_json, epoch_provenance,
+        guard_consolidated,
     )
 
 
@@ -620,6 +639,15 @@ def rebuild_epsilon_edges(epsilon: float) -> list[dict]:
     return compute_epsilon_edges(nodes, epsilon)
 
 
+def build_edge_id(prefix: str, source: str, target: str) -> str:
+    """Injective edge id (R5): '~' and '-' are escaped inside each endpoint, so
+    the joining '-' cannot be confused with one inside a label. Identity for
+    endpoints containing neither character, keeping pre-existing ids valid."""
+    def esc(label: str) -> str:
+        return label.replace("~", "~t").replace("-", "~d")
+    return f"{prefix}-{esc(source)}-{esc(target)}"
+
+
 def _persist_epsilon_edges(conn: sqlite3.Connection, epsilon: float) -> int:
     """Inserts auto/removed edge revisions for the current ε-adjacency (RE-09).
 
@@ -627,7 +655,7 @@ def _persist_epsilon_edges(conn: sqlite3.Connection, epsilon: float) -> int:
     """
     nodes = _current_node_vectors(conn)
     edges = compute_epsilon_edges(nodes, epsilon)
-    desired = {f"auto-edge-{e['source']}-{e['target']}" for e in edges}
+    desired = {build_edge_id("auto-edge", e["source"], e["target"]) for e in edges}
 
     prev = {
         r[0]: (r[1], r[2], r[3])
@@ -640,7 +668,7 @@ def _persist_epsilon_edges(conn: sqlite3.Connection, epsilon: float) -> int:
     }
 
     for edge in edges:
-        edge_id = f"auto-edge-{edge['source']}-{edge['target']}"
+        edge_id = build_edge_id("auto-edge", edge["source"], edge["target"])
         if prev.get(edge_id) is None or prev[edge_id][2] != "auto":
             _insert_edge_revision(conn, edge_id, edge["source"], edge["target"], "auto")
 

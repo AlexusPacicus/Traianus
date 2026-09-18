@@ -388,7 +388,7 @@ def async_spectral_processor(ingestion_id: int, raw_text: str):
 async def frontend_ingestion_endpoint(
     request: Request,
     background_tasks: BackgroundTasks,
-    x_idempotency_key: str | None = Header(default=None),
+    x_idempotency_key: str = Header(..., alias="X-Idempotency-Key"),
 ):
     # Zero-Trust ingress allowlist (H2): the MIME check moved from the JSON
     # `type` field to the Content-Type header (SPEC v0.2 §3.4, contract change).
@@ -413,7 +413,12 @@ async def frontend_ingestion_endpoint(
     return {"status": "accepted", "ingestion_id": ingestion_id}
 
 @app.post("/ingesta/vector", status_code=201, dependencies=[Depends(require_token)])
-async def vector_ingestion_endpoint(body: VectorIngestBody, request: Request, response: Response):
+async def vector_ingestion_endpoint(
+    body: VectorIngestBody,
+    request: Request,
+    response: Response,
+    x_idempotency_key: str = Header(..., alias="X-Idempotency-Key"),
+):
     """Provider-agnostic vector ingestion (RH-1): accepts raw coordinate
     arrays without text conversion, text/plain headers, or language encoders.
 
@@ -537,7 +542,14 @@ async def vector_ingestion_endpoint(body: VectorIngestBody, request: Request, re
                 projections_json,
                 storage.active_epoch(),
                 conn=conn,
+                guard_consolidated=True,
             )
+    except storage.ConsolidatedRegressionError as e:
+        log.warning("vector_ingestion_rejected", phase="persist", reason="consolidated_regression")
+        raise HTTPException(
+            status_code=409,
+            detail="Node is consolidated; re-ingestion would regress its lifecycle state. Use /nodos/{id}/consolidar.",
+        ) from e
     except storage.StorageError as e:
         log.error("vector_ingestion_failed", phase="persist", reason="storage_error")
         raise HTTPException(status_code=503, detail="Ingress persistence unavailable.") from e
@@ -717,7 +729,7 @@ async def get_relations():
         ]
         auto = [
             {
-                "id": f"auto-edge-{e['source']}-{e['target']}",
+                "id": storage.build_edge_id("auto-edge", e["source"], e["target"]),
                 "source": e["source"],
                 "target": e["target"],
                 "state": "auto",
@@ -754,7 +766,7 @@ async def get_spatial_observables():
 async def forge_relation(relation: HitlRelation):
     try:
         nodes = sorted([relation.source, relation.target])
-        edge_id = f"edge-{nodes[0]}-{nodes[1]}"
+        edge_id = storage.build_edge_id("edge", nodes[0], nodes[1])
 
         with storage.get_db_connection() as conn:
             # L2 (audit): dangling edges not allowed. Each endpoint

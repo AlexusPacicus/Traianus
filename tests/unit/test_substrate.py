@@ -200,3 +200,101 @@ def test_mutate_does_not_rewrite_v1_vectors(client, auth_headers, isolate_db):
             "SELECT id, vector_blob FROM geodesic_axes WHERE epoch_provenance='PROSTHETIC_NSM_V1'"
         ).fetchall())
     assert v1_now == before
+
+
+def _forge_vector_node(client, auth_headers, label, seed):
+    rng = np.random.default_rng(seed)
+    vec = rng.standard_normal(384)
+    res = client.post(
+        "/ingesta/vector",
+        json={"vector": (vec / np.linalg.norm(vec)).tolist(), "label": label},
+        headers={**auth_headers, "X-Idempotency-Key": f"edge-fixture-{label}"},
+    )
+    assert res.status_code == 201
+    return res.json()["node_id"]
+
+
+def test_edge_id_is_injective_over_hyphenated_labels(client, auth_headers, isolate_db):
+    """R5/INV-6: edge_id(a, b) == edge_id(c, d) must imply {a, b} == {c, d}.
+
+    ('VEC_x', 'VEC_y-VEC_z') and ('VEC_x-VEC_y', 'VEC_z') both flattened to
+    'edge-VEC_x-VEC_y-VEC_z' under the '-'-joined encoding, so forging the
+    second silently became a revision of the first."""
+    ids = {
+        label: _forge_vector_node(client, auth_headers, label, seed)
+        for seed, label in enumerate(["x", "y-VEC_z", "x-VEC_y", "z"])
+    }
+    first = client.post(
+        "/relations",
+        json={"source": ids["x"], "target": ids["y-VEC_z"], "state": "hitl"},
+        headers=auth_headers,
+    )
+    second = client.post(
+        "/relations",
+        json={"source": ids["x-VEC_y"], "target": ids["z"], "state": "hitl"},
+        headers=auth_headers,
+    )
+    assert first.status_code == second.status_code == 200
+    assert first.json()["id"] != second.json()["id"]
+    assert len(storage.get_current_edges()) == 2
+
+
+def test_edge_id_keeps_plain_format_for_hyphen_free_labels(client, auth_headers, isolate_db):
+    """Regression guard: the encoding is the identity wherever the old one
+    was unambiguous, so existing edge ids stay valid."""
+    a = _forge_vector_node(client, auth_headers, "a", 10)
+    b = _forge_vector_node(client, auth_headers, "b", 11)
+    res = client.post(
+        "/relations",
+        json={"source": b, "target": a, "state": "hitl"},
+        headers=auth_headers,
+    )
+    assert res.status_code == 200
+    assert res.json()["id"] == "edge-VEC_a-VEC_b"
+
+
+def test_reingesting_consolidated_label_does_not_regress_state(client, auth_headers, isolate_db):
+    """R4/INV-5: re-ingesting a label whose node is already consolidated must
+    not append an incubating/pending revision -- that would silently demote
+    the node with content that never passed the ethical key."""
+    node_id = _forge_vector_node(client, auth_headers, "keep", 7)
+    granted = client.post(
+        f"/nodos/{node_id}/consolidar",
+        json={"text": "x", "ethical_key": True},
+        headers=auth_headers,
+    )
+    assert granted.json()["new_state"] == "consolidated"
+
+    rng = np.random.default_rng(99)
+    other = rng.standard_normal(384)
+    res = client.post(
+        "/ingesta/vector",
+        json={"vector": (other / np.linalg.norm(other)).tolist(), "label": "keep"},
+        headers={**auth_headers, "X-Idempotency-Key": "reingest-keep"},
+    )
+    assert res.status_code == 409
+    with sqlite3.connect(isolate_db) as conn:
+        rows = conn.execute(
+            "SELECT seq, lifecycle_state FROM manifold_nodes WHERE id = ? ORDER BY seq",
+            (node_id,),
+        ).fetchall()
+    assert rows[-1][1] == "consolidated"
+    assert len(rows) == 2
+
+
+def test_explicit_demotion_from_consolidated_stays_allowed(client, auth_headers, isolate_db):
+    """Regression guard: leaving consolidated remains possible through the
+    explicit /consolidar action; only the ingestion path is closed."""
+    node_id = _forge_vector_node(client, auth_headers, "demote", 7)
+    client.post(
+        f"/nodos/{node_id}/consolidar",
+        json={"text": "x", "ethical_key": True},
+        headers=auth_headers,
+    )
+    denied = client.post(
+        f"/nodos/{node_id}/consolidar",
+        json={"text": "x", "ethical_key": False},
+        headers=auth_headers,
+    )
+    assert denied.status_code == 200
+    assert denied.json()["new_state"] == "incubating"

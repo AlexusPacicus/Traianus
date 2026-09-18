@@ -6,6 +6,7 @@ text conversion, text/plain headers, or language encoders.
 """
 import json
 import math
+import uuid
 
 import numpy as np
 import pytest
@@ -37,7 +38,7 @@ class TestVectorIngestValid:
         res = client.post(
             "/ingesta/vector",
             json={"vector": vector},
-            headers=auth_headers,
+            headers={**auth_headers, "X-Idempotency-Key": str(uuid.uuid4())},
         )
         assert res.status_code == 201
         body = res.json()
@@ -55,7 +56,7 @@ class TestVectorIngestValid:
         res = client.post(
             "/ingesta/vector",
             json={"vector": vector},
-            headers=auth_headers,
+            headers={**auth_headers, "X-Idempotency-Key": str(uuid.uuid4())},
         )
         assert res.status_code == 201
 
@@ -64,7 +65,7 @@ class TestVectorIngestValid:
         res = client.post(
             "/ingesta/vector",
             json={"vector": vector, "label": "test_alpha"},
-            headers=auth_headers,
+            headers={**auth_headers, "X-Idempotency-Key": str(uuid.uuid4())},
         )
         assert res.status_code == 201
         body = res.json()
@@ -75,7 +76,7 @@ class TestVectorIngestValid:
         res = client.post(
             "/ingesta/vector",
             json={"vector": vector, "metadata": {"source": "synthetic", "dim": 384}},
-            headers=auth_headers,
+            headers={**auth_headers, "X-Idempotency-Key": str(uuid.uuid4())},
         )
         assert res.status_code == 201
 
@@ -88,7 +89,7 @@ class TestVectorIngestDimensionMismatch:
         res = client.post(
             "/ingesta/vector",
             json={"vector": vector},
-            headers=auth_headers,
+            headers={**auth_headers, "X-Idempotency-Key": str(uuid.uuid4())},
         )
         assert res.status_code == 422
 
@@ -97,7 +98,7 @@ class TestVectorIngestDimensionMismatch:
         res = client.post(
             "/ingesta/vector",
             json={"vector": vector},
-            headers=auth_headers,
+            headers={**auth_headers, "X-Idempotency-Key": str(uuid.uuid4())},
         )
         assert res.status_code == 422
 
@@ -105,7 +106,7 @@ class TestVectorIngestDimensionMismatch:
         res = client.post(
             "/ingesta/vector",
             json={"vector": []},
-            headers=auth_headers,
+            headers={**auth_headers, "X-Idempotency-Key": str(uuid.uuid4())},
         )
         assert res.status_code == 422
 
@@ -120,7 +121,7 @@ class TestVectorIngestNumericIntegrity:
         res = client.post(
             "/ingesta/vector",
             content=payload,
-            headers={**auth_headers, "Content-Type": "application/json"},
+            headers={**auth_headers, "Content-Type": "application/json", "X-Idempotency-Key": str(uuid.uuid4())},
         )
         assert res.status_code == 422
 
@@ -131,7 +132,7 @@ class TestVectorIngestNumericIntegrity:
         res = client.post(
             "/ingesta/vector",
             content=payload,
-            headers={**auth_headers, "Content-Type": "application/json"},
+            headers={**auth_headers, "Content-Type": "application/json", "X-Idempotency-Key": str(uuid.uuid4())},
         )
         assert res.status_code == 422
 
@@ -142,7 +143,7 @@ class TestVectorIngestNumericIntegrity:
         res = client.post(
             "/ingesta/vector",
             content=payload,
-            headers={**auth_headers, "Content-Type": "application/json"},
+            headers={**auth_headers, "Content-Type": "application/json", "X-Idempotency-Key": str(uuid.uuid4())},
         )
         assert res.status_code == 422
 
@@ -152,7 +153,7 @@ class TestVectorIngestNumericIntegrity:
         res = client.post(
             "/ingesta/vector",
             json={"vector": vector},
-            headers=auth_headers,
+            headers={**auth_headers, "X-Idempotency-Key": str(uuid.uuid4())},
         )
         assert res.status_code == 422
 
@@ -162,7 +163,7 @@ class TestVectorIngestNumericIntegrity:
         res = client.post(
             "/ingesta/vector",
             json={"vector": vector},
-            headers=auth_headers,
+            headers={**auth_headers, "X-Idempotency-Key": str(uuid.uuid4())},
         )
         assert res.status_code == 422
 
@@ -175,7 +176,7 @@ class TestVectorIngestZeroVector:
         res = client.post(
             "/ingesta/vector",
             json={"vector": vector},
-            headers=auth_headers,
+            headers={**auth_headers, "X-Idempotency-Key": str(uuid.uuid4())},
         )
         assert res.status_code == 422
 
@@ -188,7 +189,7 @@ class TestVectorIngestPersistence:
         res = client.post(
             "/ingesta/vector",
             json={"vector": vector},
-            headers=auth_headers,
+            headers={**auth_headers, "X-Idempotency-Key": str(uuid.uuid4())},
         )
         assert res.status_code == 201
         body = res.json()
@@ -208,14 +209,14 @@ class TestVectorIngestPersistence:
         res1 = client.post(
             "/ingesta/vector",
             json={"vector": vector, "label": "dup_test"},
-            headers=auth_headers,
+            headers={**auth_headers, "X-Idempotency-Key": str(uuid.uuid4())},
         )
         assert res1.status_code == 201
 
         res2 = client.post(
             "/ingesta/vector",
             json={"vector": vector, "label": "dup_test"},
-            headers=auth_headers,
+            headers={**auth_headers, "X-Idempotency-Key": str(uuid.uuid4())},
         )
         assert res2.status_code == 201
 
@@ -229,14 +230,14 @@ class TestVectorIngestPersistence:
         res1 = client.post(
             "/ingesta/vector",
             json={"vector": _unit_vector(384, seed=1)},
-            headers=auth_headers,
+            headers={**auth_headers, "X-Idempotency-Key": str(uuid.uuid4())},
         )
         assert res1.status_code == 201
 
         res2 = client.post(
             "/ingesta/vector",
             json={"vector": _unit_vector(384, seed=2)},
-            headers=auth_headers,
+            headers={**auth_headers, "X-Idempotency-Key": str(uuid.uuid4())},
         )
         assert res2.status_code == 201
 
@@ -251,14 +252,14 @@ class TestVectorIngestPersistence:
         res1 = client.post(
             "/ingesta/vector",
             json={"vector": vector},
-            headers=auth_headers,
+            headers={**auth_headers, "X-Idempotency-Key": str(uuid.uuid4())},
         )
         assert res1.status_code == 201
 
         res2 = client.post(
             "/ingesta/vector",
             json={"vector": vector},
-            headers=auth_headers,
+            headers={**auth_headers, "X-Idempotency-Key": str(uuid.uuid4())},
         )
         assert res2.status_code == 201
 
@@ -297,7 +298,7 @@ class TestVectorIngestSpectralGate:
         res = client.post(
             "/ingesta/vector",
             json={"vector": vector},
-            headers=auth_headers,
+            headers={**auth_headers, "X-Idempotency-Key": str(uuid.uuid4())},
         )
         assert res.status_code == 201
         body = res.json()
@@ -311,7 +312,7 @@ class TestVectorIngestSpectralGate:
         res = client.post(
             "/ingesta/vector",
             json={"vector": _unit_vector(384)},
-            headers=auth_headers,
+            headers={**auth_headers, "X-Idempotency-Key": str(uuid.uuid4())},
         )
         assert res.status_code == 201
         variance = res.json()["spectral_variance"]
@@ -324,7 +325,7 @@ class TestVectorIngestSpectralGate:
         res = client.post(
             "/ingesta/vector",
             json={"vector": vector},
-            headers=auth_headers,
+            headers={**auth_headers, "X-Idempotency-Key": str(uuid.uuid4())},
         )
         assert res.status_code == 201
         body = res.json()
@@ -340,7 +341,7 @@ class TestVectorIngestSpectralGate:
         res = client.post(
             "/ingesta/vector",
             json={"vector": vector},
-            headers=auth_headers,
+            headers={**auth_headers, "X-Idempotency-Key": str(uuid.uuid4())},
         )
         assert res.status_code == 201
         body = res.json()
