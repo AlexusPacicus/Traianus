@@ -54,8 +54,9 @@ places each note's real neighbours near it.
 - **R2 — non-interference.** Any navigation (zoom, perspective, overview) writes to the state:
   a new revision, a lifecycle change, a new edge. Checked by a test over the observation endpoints.
 - **R3 — governance.** A note reaches the map as consolidated without both keys. Checked by a test.
-- **R4 — neighbourhood.** From a chosen perspective, a note's real neighbours in the 384-d
-  substrate are not near it on screen. Measured offline (`audits/R4.md`).
+- **R4 — neighbourhood.** In a 5D perspective chosen at a note, the horizontal axis and the
+  colour channels scatter its real 384-d neighbours more than an arbitrary horizontal axis would.
+  Measured offline (`audits/R4.md`).
 - **R5 (exploratory, one user).** Navigating the map is less useful than a plain list of related
   notes. Judged by the author on day 7, labelled exploration, not result.
 
@@ -73,7 +74,7 @@ to a publication. A figure without a row here is not used to decide anything.
 | K4 | corr(tanh d_esc, y) = −0.968 on Spinoza (n = 2,221) | unbacked | no | — | ADR-026; `tools/experiments/measure_polar_render_range.py` is uncommitted and writes no artifact. Also measured on the per-node frame (K3) |
 | K5 | Raw ranges: λ 7.16% of [−1, 1], anchor component 19.07%, x–y box 1.36% of the viewport | unbacked | no | — | as K4 |
 | K6 | Each colour channel is not second-order predictable from (x, y) or from the colour channels chosen before it, in the per-epoch frame | pending | — | `audits/K6.md` | day 2 script |
-| K7 | R4: recall@15 per perspective, operator / radial / overview | pending | — | `audits/R4.md` | day 6 script |
+| K7 | R4: paired recall@15 difference in the 5D perspective, operator vs. radial | pending | — | `audits/R4.md` | day 6 script |
 
 K4 and K5 are not used for any decision until their script is committed and re-run on the
 per-epoch frame.
@@ -87,6 +88,11 @@ that leaves the written scope goes to v2.
   perspective, note entry, interaction reduced to text + relations of a selected note. Earlier
   drafts the same day (a projector-only demo; comparing several notes) were superseded before any
   work ran.
+- **2026-09-18 — R4 reformulated, before any result.** The blind review of R4 revision 1 showed
+  that in a perspective at q the vertical axis ⟨v, q̂⟩ is the real-distance order itself, so the
+  refuter could not test what it claimed. R4 now asks whether the other four dimensions (λ and
+  colour) scatter that order more than an arbitrary horizontal axis, measured in 5D with equal
+  weights, as the author specified. The overview left R4: it has no chosen note.
 
 ## Deadline
 
