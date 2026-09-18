@@ -207,3 +207,31 @@ chunks (six per part) through `/ingesta`, then the client.
 Consequences for the plan: feature 4 must show `incubating` as a state of its own; the client
 must refetch `/spatial` after ingest; zoom, click and perspective are all new client work (days
 3–5), none of it exists yet. A `DB_PATH` environment override would make isolated runs routine.
+
+## Exploration / v2: faces of a concept polytope (author's idea, 2026-09-18)
+
+Not in this PoC's scope: it arrived mid-run, and adopting it now would be a reformulation without
+the loop's gate. Recorded so it enters v2 through steps 1–2.
+
+**Idea.** The 8 geodetic axes, in general position, span a 7-simplex: all 56 triangles of three
+axes are faces. Instead of notes floating in a space, the user sees a 3D polyhedron of named
+concepts from outside, with each note placed on a face by its barycentric coordinates relative to
+that face's three axes. The 3D polyhedron is not the 7-simplex; it is a projection of it,
+parametrised by the user's choice (Ulpia's O = P_θ(S), θ chosen by the observer; the state never
+changes, ADR-024). Choosing a note brings to the front the face of its three leading concepts;
+neighbouring faces share two. The current perspective's frame (c₁, c_A, c_B) — `SemanticSimplex`
+in `traianus/geometry/simplex.py` — is already one such face seen head-on.
+
+**Conditions it must meet.**
+1. Deterministic given θ (R1): vertices placed in 3D by classical MDS of the 8 axes' Gram
+   matrix, so the layout comes from the basis, not from chance; the user chooses the face.
+2. The projection shows itself as a projection: vertices always labelled with their concepts and
+   the active face named, so an artefact of the 3D rendering is not read as corpus structure.
+3. Its loss is measured: the MDS stress of the 7-to-3 placement is reported.
+
+Open difficulties: barycentric coordinates need non-negative weights, and projections can be
+negative (any transform distorts); a note that mixes many concepts evenly belongs to no face well;
+and R5's question — does it help navigation more than a list? — applies to it too.
+
+**Cheap version, candidate for day 5 if there is margin:** in the perspective view, draw the
+triangle (c₁, c_A, c_B) with its three concepts' names at the vertices.
