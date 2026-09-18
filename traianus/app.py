@@ -378,7 +378,9 @@ def async_spectral_processor(ingestion_id: int, raw_text: str):
                 json.dumps({"error": str(e)}),
             )
         except Exception:
-            pass
+            get_logger(request_id=f"bg-{ingestion_id}").exception(
+                "ingestion_error_log_failed", ingestion_id=ingestion_id
+            )
 
 # =====================================================================
 # FRONTEND CUSTOMS OPERATIONAL ENDPOINTS

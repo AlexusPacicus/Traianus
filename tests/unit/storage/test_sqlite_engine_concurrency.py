@@ -147,3 +147,41 @@ class TestSQLiteEngineConcurrency:
 
         # Should not have committed
         assert self.engine.get_data_plane("tx_test") is None
+
+
+def _track_connections(engine, monkeypatch):
+    opened = []
+    real = engine._connect
+
+    def tracking():
+        conn = real()
+        opened.append(conn)
+        return conn
+
+    monkeypatch.setattr(engine, "_connect", tracking)
+    return opened
+
+
+def _assert_all_closed(opened):
+    import sqlite3
+
+    assert opened, "the method under test opened no connection"
+    for conn in opened:
+        with pytest.raises(sqlite3.ProgrammingError):
+            conn.execute("SELECT 1")
+
+
+def test_get_data_plane_closes_connection(tmp_path, monkeypatch):
+    """R9/INV-10: `with conn` commits but never closes the connection."""
+    engine = SQLiteEngine(str(tmp_path / "e.db"))
+    opened = _track_connections(engine, monkeypatch)
+    engine.get_data_plane("absent")
+    _assert_all_closed(opened)
+
+
+def test_get_control_plane_closes_connection(tmp_path, monkeypatch):
+    """R9/INV-10: `with conn` commits but never closes the connection."""
+    engine = SQLiteEngine(str(tmp_path / "e.db"))
+    opened = _track_connections(engine, monkeypatch)
+    engine.get_control_plane("absent")
+    _assert_all_closed(opened)

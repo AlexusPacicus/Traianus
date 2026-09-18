@@ -1488,3 +1488,34 @@
   clean; C1 GUARD PASSED (9/20).
 
 * **Status:** `Consolidated` (via the cache branch; the incremental branch is open).
+
+### seq 51 — 2026-09-18 — REMEDIATION-01 Delta5: connection and error-handling hygiene (INV-10, INV-11)
+
+* **Defects:**
+  - INV-10: `sqlite3.Connection.__exit__` commits or rolls back but never closes. Three sites used a
+    bare `with`: `validator._persist_audit` and `SQLiteEngine.get_data_plane` / `get_control_plane`
+    (`with self._connect() as conn:`). All three reproduced RED — using the connection after the block
+    succeeded instead of raising `ProgrammingError`. For `_persist_audit` this is the audit trail the
+    Zero-Trust hook itself reads, on a long-lived MCP server.
+  - INV-11: the failure handler of `async_spectral_processor` wrapped its own error-log write in
+    `except Exception: pass`. When ingestion fails *and* persisting the error fails, nothing at all
+    remained — RED confirmed with empty stdout and stderr.
+
+* **Fix:** `contextlib.closing` at the three sites. `_persist_audit` uses
+  `with closing(sqlite3.connect(p)) as conn, conn:` — the inner `conn` keeps the commit that
+  `closing` alone would silently drop. The `pass` now emits `ingestion_error_log_failed` through the
+  structured logger with the traceback. The alternative in the spec, a third sanctioned exception in
+  AGENTS §1.3, was not taken: that section is for fail-open paths that are deliberately silent, and
+  this one has no reason to be.
+
+* **A mistake of mine, kept on the record.** While running Δ1 I told the operator the spec was wrong
+  about INV-10's scope ("one site, not three") and wrote that into seq 46. It was my error: I searched
+  for the literal `sqlite3.connect`, which cannot see `with self._connect() as conn:`. The spec was
+  right. Writing the RED tests first is what exposed it — three tests, three failures — which is the
+  argument for the order in AGENTS §1.4 over trusting a grep. seq 46 is amended and points here.
+
+* **Gate:** `pytest tests/` → 1164 passed / 5 deselected; model partition 5 passed; `ruff` clean on
+  the exact CI scope; `mypy traianus/` clean (32 files); C1 GUARD PASSED (9/20). `ci.yml` needs no
+  change (§1.6): every touched or added test file is under `pytest tests/`.
+
+* **Status:** `Consolidated`.
