@@ -52,8 +52,10 @@ Engine path (what the map is drawn from), for comparison
   .astype(np.float64).tobytes() → SQLite BLOB of 384 × 8 bytes, native byte order ('<f8' on
   x86-64 and arm64) (traianus/app.py:188, :256-257). Same arithmetic class as the artefact, but
   single-text and batched encoding are not guaranteed bit-identical: a measured figure on the
-  artefact and the rendered map can differ at ≈ 1e-7. Declared gap; closing it would mean
-  ingesting the artefact's vectors into the engine, not re-encoding the texts.
+  artefact and the rendered map can differ at ≈ 1e-7. Closed by decision (POC.md, Corpus
+  loading): the engine is loaded with the artefact's vectors, one at a time, in text order,
+  through /ingesta/vector — provided that endpoint stores them without changing their bits
+  (to be verified in the day-3 contract).
 
 Random numbers
   numpy.random.Generator(PCG64(20260918)), draws in the order each record fixes. Streams are

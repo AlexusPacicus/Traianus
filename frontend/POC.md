@@ -34,6 +34,15 @@ engine's `/mutate` (a new basis axis and epoch).
 
 **Data:** the frozen Spinoza corpus (`data/spinoza/`), plus the notes written during the PoC.
 
+**Corpus loading (decision, 2026-09-18).** The engine is loaded by ingesting the frozen
+artefact's vectors one at a time, in text order, through `/ingesta/vector` — never by
+re-encoding the texts and never in bulk. Two reasons: the vectors are then bit-identical to the
+ones K6 and R4 measure (binary32 → binary64 is exact), closing the gap declared in
+`audits/contracts.md` §0; and the state is built note by note, S_{n+1} = f(S_n, v_n), so every
+edge, telemetry value and threshold forms against the notes already present — the trajectory the
+engine exists to keep. To verify on day 3, in the contract: `/ingesta/vector` must not
+re-normalise in a way that changes the stored bits.
+
 **No parallel store.** The engine already holds text (`manifold_nodes.text`), vectors
 (`data_plane`), lifecycle and edges, all append-only. RefApp-01 keeps no database of its own and
 reads everything over HTTP. Drift telemetry, if shown, is displayed only: it never freezes,
@@ -235,3 +244,22 @@ and R5's question — does it help navigation more than a list? — applies to i
 
 **Cheap version, candidate for day 5 if there is margin:** in the perspective view, draw the
 triangle (c₁, c_A, c_B) with its three concepts' names at the vertices.
+
+## Exploration: one-at-a-time vs. batched encoding (2026-09-18)
+
+**Question (author's).** Encoding notes one at a time keeps their relations whole; encoding them
+in a batch may lose or gain relations.
+
+**Refuter.** On the 2,221 Spinoza texts, the 15-nearest-neighbour set of some note differs
+between one-at-a-time and batched encoding for reasons other than near-ties (two similarities to
+the note within 1e-6 of each other). Also reported: max |G_single − G_batch| over all pairs, and
+the structure of Δ_i = v_single,i − v_batch,i (norms, a shared direction, correlation with text
+length or part).
+
+**Expected, stated before measuring:** the encoder isolates each text in a batch (attention mask,
+mask-aware pooling), so Δ is float32 rounding and the neighbour sets agree except at near-ties.
+Where the author's point does hold is the engine, not the encoder: Traianus is stateful, and
+ingesting one note at a time builds the state's trajectory (see Corpus loading).
+
+Exploration branch: not in the PoC's scope, no gate; it enters a registry only after its own
+instrument audit.
