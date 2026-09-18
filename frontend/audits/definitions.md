@@ -14,13 +14,13 @@ Basis        8 NSM geodetic axes a_1…a_8, tests/fixtures/nsm_axes_8.json (epoc
              (traianus/storage/_storage.py:114); epochs: docs/architecture/ARCHITECTURE.md §7.
 Operator     traianus/geometry/polar_projector.py, for anchor c₁ and poles c_A, c_B:
                ĉ₁ = c₁ / ‖c₁‖;  P⊥x = x − ⟨x, ĉ₁⟩ĉ₁                          (:235-237)
-               v_dipole = P⊥c_A − P⊥c_B  (collinear fallback 2δ·u⊥)          (:185-189)
+               v_dipole = P⊥c_A − P⊥c_B  (collinear fallback 2δ·u⊥)          (:184-188)
                r = P⊥(v − c₁)                                                (:279)
                λ = clip(⟨r, v_dipole⟩ / ‖v_dipole‖², −1, 1)                  (:283-284)
                d_esc = ‖r − λ·v_dipole‖                                      (:290)
              Since P⊥c₁ = 0 and v_dipole ⊥ ĉ₁ in both branches: r = P⊥v, ‖r‖² = 1 − y², and
              λ = clip(⟨v, v_dipole⟩ / ‖v_dipole‖², −1, 1).
-λ_k          λ with c₁ = â of the rank-1 axis and (c_A, c_B) = the k-th dipole's two axes, as
+λ_k          λ with c₁ = â of the rank-1 axis and (c_A, c_B) = â of the k-th dipole's two axes, as
              ranked by the record under review.
 Position     x = λ₁, y = ⟨v, ĉ₁⟩.
 
