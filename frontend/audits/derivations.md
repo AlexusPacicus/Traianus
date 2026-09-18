@@ -90,6 +90,31 @@ D12 λ is never clipped when ‖w‖ ≥ √(1 − y²), in particular whenever 
 
 Used by: K6 (D2, D4, D6, D7, D8, D11), R4 (D2, D5, D6, D9, D10).
 
+## En palabras
+
+- **D1** Restar el ancla antes de proyectar no cambia nada: la proyección ya elimina todo lo que
+  apunta en la dirección del ancla.
+- **D2** Para medir cuánto se inclina una nota hacia un polo da igual usar la nota entera o su
+  parte ortogonal al ancla, porque el dipolo no tiene componente en el ancla (tampoco el de
+  respaldo). Por eso λ se calcula con un solo producto escalar.
+- **D3** En la esfera unidad, lo que queda de una nota tras quitarle el ancla mide 1 − y².
+- **D4** Si λ no se recorta, la distancia de escape queda fijada por la posición (x, y): no aporta
+  información nueva.
+- **D5** Con todas las notas de la misma longitud, ordenar por similitud con q es lo mismo que
+  ordenar por distancia a q.
+- **D6** Cambiar de unidades o desplazar las columnas no altera el R², siempre que haya término
+  constante.
+- **D7** Los controles de calibración se construyen para que su R² sea exactamente el valor que se
+  quiere, así que cualquier desviación señala un fallo del código.
+- **D8** Un candidato que se comporte como una dirección al azar supera el valor 989 de 1.000 con
+  probabilidad 12/1.001; con cuatro candidatos, el riesgo total queda en 4,80 %.
+- **D9** Si se eligieran 15 vecinas al azar, coincidirían de media 0,203 con las 15 reales; es el
+  control de permutación.
+- **D10** Cualquier eje horizontal ortogonal a q deja a q en el centro horizontal de su propia
+  perspectiva; con el operador, exactamente en cero.
+- **D11** Si λ se recorta, la distancia de escape tiene otra fórmula.
+- **D12** Si el dipolo mide al menos 1, λ nunca se recorta para notas unitarias.
+
 Verified by the `instrument-auditor` subagent (maths only), 2026-09-18, at `e2f6d70`: D9 defect
 (count vs. fraction) and missing conditions in D1, D2, D4, D6, D7, D10; D11, D12, the D8 tie form
 and the tolerance rule added from its report.

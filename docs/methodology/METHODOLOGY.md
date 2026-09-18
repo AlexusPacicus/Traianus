@@ -61,6 +61,11 @@ outcome; any other figure is exploration, labelled as such. Phase 1 gets at most
 rounds; after the third, the record freezes and remaining items are resolved in phase 2 against
 the code.
 
+**Contract first.** Before any code, each measurement gets a contract: exact input, exact output,
+the function between them, and the data layer at bit level (formats, dtypes, byte order, digests,
+casts, random streams, where bitwise reproducibility holds and where only a tolerance does), with
+a plain-language translation. Code is reviewed against the contract.
+
 **Mathematical contract.** Every record states its input and output exactly; every shortcut it
 takes (a simplified form standing for a full one) is an equality with its conditions and proof in
 a derivations file, and each equality becomes a unit test in phase 2. A shortcut without its
