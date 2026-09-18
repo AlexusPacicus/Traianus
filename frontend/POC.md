@@ -153,6 +153,34 @@ only need the engine to return the exact midpoint view — polish, cut before fe
 filter centres its data, so it removes the neighbourhood's direction of largest variance, not the
 shared bias its spec describes; it must not be wired as is.
 
+## Audit definitions (shared by the K6 and R4 records)
+
+A reviewer reads this block and one record block, nothing else of this file.
+
+```
+Audit definitions
+
+Vectors      v ∈ S^383, L2-normalized. Corpus: the 2,221 Spinoza chunks frozen by
+             tools/experiments/tooling/freeze_spinoza_embeddings.py (commit f26186d; output
+             .data/spinoza_frozen, gitignored), float32 on disk, used as float64.
+Basis        8 NSM geodetic axes, tests/fixtures/nsm_axes_8.json (epoch PROSTHETIC_NSM_V1).
+             Stored in table geodesic_axes (traianus/storage/_storage.py:114); epochs:
+             docs/architecture/ARCHITECTURE.md §7.
+Operator     traianus/geometry/polar_projector.py, for anchor c₁ and poles c_A, c_B:
+               ĉ₁ = c₁ / ‖c₁‖;  P⊥x = x − ⟨x, ĉ₁⟩ĉ₁                          (:235-237)
+               v_dipole = P⊥c_A − P⊥c_B  (collinear fallback 2δ·u⊥)          (:173-174)
+               r = P⊥(v − c₁)                                                (:279)
+               λ = clip(⟨r, v_dipole⟩ / ‖v_dipole‖², −1, 1)                  (:283-284)
+               d_esc = ‖r − λ·v_dipole‖                                      (:290)
+λ_k          λ with c₁ = the rank-1 axis and (c_A, c_B) = the k-th dipole's two axes.
+Position     x = λ₁, y = ⟨v, ĉ₁⟩.
+
+Allowed reading   these two blocks; the files and lines cited in them.
+Not allowed       the rest of frontend/POC.md; docs/adrs/ADR-026-*; traianus/geometry/
+                  spatial_observables.py (its docstring states prior results); data/spinoza/
+                  telemetry/; docs/LEDGER.md; any manuscript.
+```
+
 ## K6 measurement: colour channels independent of position (day 2)
 
 **Question.** In a per-epoch geodetic frame, can three dimensions beyond position be shown as
