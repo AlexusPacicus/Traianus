@@ -5,57 +5,91 @@ with its conditions and proof. A record may use a shortcut only if it has an ent
 requires a passing unit test per entry, on random inputs that satisfy the conditions. Notation:
 definitions.md.
 
+**Tolerance rule for the tests.** Corpus vectors are float32 used as float64, so ‖v‖ = 1 holds
+only to ≈ 1e-7. Every equality is tested within a stated tolerance: absolute 1e-9 on inputs
+constructed exactly in float64; relative to the terms' magnitude (e.g. ‖r‖²) on corpus-derived
+inputs; D4 is never tested in the regime d_esc/‖r‖ < 1e-6, where its scalar form cancels
+(polar_projector.py:287-289).
+
 ```
 D1  r = P⊥(v − c₁) = P⊥v.
-    Conditions: none (c₁ = ‖c₁‖ĉ₁).
-    Proof: P⊥c₁ = ‖c₁‖(ĉ₁ − ⟨ĉ₁, ĉ₁⟩ĉ₁) = 0; P⊥ is linear.
+    Conditions: c₁ ≠ 0 (so ĉ₁ exists).
+    Proof: c₁ = ‖c₁‖ĉ₁ and P⊥ĉ₁ = ĉ₁ − ⟨ĉ₁, ĉ₁⟩ĉ₁ = 0; P⊥ is linear.
 
-D2  ⟨r, v_dipole⟩ = ⟨v, v_dipole⟩, hence λ (unclipped) = ⟨v, v_dipole⟩ / ‖v_dipole‖².
-    Conditions: v_dipole ⊥ ĉ₁ — holds in both branches: P⊥c_A − P⊥c_B ∈ ĉ₁⊥, and the fallback
-    2δ·u⊥ with u⊥ ⊥ ĉ₁.
+D2  ⟨r, w⟩ = ⟨v, w⟩ for w = v_dipole, hence λ (unclipped) = ⟨v, w⟩ / ‖w‖².
+    Conditions: w ⊥ ĉ₁ and ‖w‖² > 0 (prepare rejects ‖w‖² ≤ 0, polar_projector.py:241-245).
+    w ⊥ ĉ₁ holds in both branches, given ‖ĉ₁‖ = 1 (_normalize_anchor, :85) and
+    P⊥x = x − ⟨x, ĉ₁⟩ĉ₁ (_project_perp, :100): non-collinear, w = P⊥c_A − P⊥c_B ∈ ĉ₁⊥;
+    fallback, w = 2δ·u⊥ with u⊥ from _canonical_u_perp (:131): for k = argmin|ĉ₁[k]|,
+    s = ĉ₁[k] (|s| < 1), R = √(1 − s²), u⊥ = (−s/R)·ĉ₁ with component k set to R, so
+    ⟨u⊥, ĉ₁⟩ = (−s/R)(1 − s²) + R·s = 0 and ‖u⊥‖ = 1.
+    Note: in the fallback w does not depend on c_A, c_B, so λ's sign is not tied to pole order.
     Proof: ⟨P⊥v, w⟩ = ⟨v, P⊥w⟩ (P⊥ symmetric) and P⊥w = w for w ⊥ ĉ₁; then D1.
 
 D3  ‖r‖² = 1 − y², y = ⟨v, ĉ₁⟩.
-    Conditions: ‖v‖ = 1.
-    Proof: ‖P⊥v‖² = ‖v‖² − ⟨v, ĉ₁⟩² (Pythagoras on v = ⟨v, ĉ₁⟩ĉ₁ + P⊥v).
+    Conditions: ‖v‖ = 1, ‖ĉ₁‖ = 1 (corpus: ‖v‖ = 1 to ≈ 1e-7, see tolerance rule).
+    Proof: v = ⟨v, ĉ₁⟩ĉ₁ + P⊥v, orthogonal parts; Pythagoras.
 
-D4  d_esc² = 1 − y² − ‖v_dipole‖²·x², x = λ.
-    Conditions: ‖v‖ = 1; λ not clipped.
-    Proof: ‖r − λw‖² = ‖r‖² − 2λ⟨r, w⟩ + λ²‖w‖², and ⟨r, w⟩ = λ‖w‖² when λ is unclipped
-    (w = v_dipole); so d_esc² = ‖r‖² − λ²‖w‖²; then D3.
+D4  For each dipole k: d_esc,k² = 1 − y² − ‖w_k‖²·λ_k², w_k = v_dipole,k; for k = 1, λ₁ = x.
+    Conditions: ‖v‖ = 1; λ_k unclipped, i.e. |⟨v, w_k⟩| ≤ ‖w_k‖² (at equality the clip is
+    inactive).
+    Proof: ‖r − λw‖² = ‖r‖² − 2λ⟨r, w⟩ + λ²‖w‖², and ⟨r, w⟩ = λ‖w‖² when λ is unclipped (D2);
+    so d_esc² = ‖r‖² − λ²‖w‖²; then D3.
 
-D5  ‖v − q‖² = 2 − 2⟨v, q⟩: ordering notes by y = ⟨v, q̂⟩ (descending) is ordering them by
-    Euclidean distance to q (ascending).
-    Conditions: ‖v‖ = ‖q‖ = 1.
-    Proof: expand ‖v − q‖² = ‖v‖² − 2⟨v, q⟩ + ‖q‖².
+D5  ‖v − q‖² = ‖v‖² + ‖q‖² − 2‖q‖⟨v, q̂⟩: ordering notes by y = ⟨v, q̂⟩ (descending) is
+    ordering them by Euclidean distance to q (ascending).
+    Conditions: every note has the same norm (here 1) and q ≠ 0. Near-ties can swap under float32
+    norms; a top-k cut must break ties by the same rule in both orderings.
+    Proof: expand; with ‖v‖ fixed, the distance is strictly decreasing in ⟨v, q̂⟩.
 
-D6  R² of an OLS fit with intercept is unchanged by per-column affine maps of the regressors
-    (a·x + b, a ≠ 0) and of the response (a·y + b, a ≠ 0).
-    Conditions: the intercept is in the design.
-    Proof: the column space of the design, and so the fitted projection, is unchanged; SS_res
-    and SS_tot both scale by a² under the response map.
+D6  R² of an OLS fit with intercept is unchanged by invertible linear maps of the non-intercept
+    columns plus intercept shifts (in particular per-column a·x + b, a ≠ 0) and by affine maps of
+    the response (a·y + b, a ≠ 0).
+    Conditions: the intercept is in the design; the response is not constant (SS_tot > 0).
+    Proof: the design's column space, hence the fitted projection, is unchanged; since 1 is in
+    the design, resid(a·y + b·1) = a·resid(y), so SS_res and SS_tot both scale by a².
 
 D7  R²(m_ρ) = ρ for m_ρ = a·z(ĥ) + b·z(n⊥), a² / (a² + b²) = ρ.
-    Conditions: ĥ ∈ span(B); n⊥ ⊥ span(B) in-sample; B contains the constant; z(·) centres and
-    scales to unit population s.d.
-    Proof: z(ĥ) ∈ span(B) (B has the constant); n⊥ ⊥ constant ⇒ mean 0, and ⊥ z(ĥ) ⇒ zero
-    covariance; the fit of m_ρ is a·z(ĥ), so SS_reg = a²·n and SS_tot = (a² + b²)·n.
+    Conditions: ĥ ∈ span(B), not constant; n⊥ ⊥ span(B) in-sample, n⊥ ≠ 0; B contains the
+    constant; z(·) centres and scales to unit population s.d.; a² + b² > 0; R² from an OLS fit
+    of m_ρ on exactly B (or an affine re-map of it, D6).
+    Proof: z(ĥ) ∈ span(B) (B has the constant); z(n⊥) = n⊥ / sd ∈ span(B)⊥, so it has mean 0
+    and is orthogonal to z(ĥ); the fit is a·z(ĥ), the residual b·z(n⊥), so SS_res = b²·n and
+    SS_tot = (a² + b²)·n.
 
-D8  P(a value exchangeable with 1,000 null values exceeds the 989th smallest of them) = 12/1001.
-    Conditions: the 1,001 values are exchangeable with no ties.
+D8  P(a value exchangeable with 1,000 null values exceeds the 989th smallest) = 12/1001
+    ≈ 0.011988 (a cutoff at α ≈ 0.012, not 0.01).
+    Conditions: the 1,001 values are exchangeable. With ties, under randomised tie-breaking,
+    P(strictly exceeds) ≤ 12/1001, so the bound form needs no no-ties condition.
     Proof: its rank among the 1,001 is uniform on 1…1001; it exceeds the 989th null value iff its
-    rank is ≥ 990, i.e. 12 of 1,001 ranks.
+    rank is ≥ 990: 12 of 1,001 ranks.
 
-D9  Recall of a random 15-subset against a fixed 15-subset of M = 1,109 notes: mean 225 / M,
-    variance 15·(15/M)·(1 − 15/M)·(M − 15)/(M − 1).
-    Conditions: the random subset is uniform (first 15 of a uniform permutation).
-    Proof: the overlap is hypergeometric (population M, 15 successes, 15 draws).
+D9  The overlap count K between a uniform random 15-subset and a fixed 15-subset of the same
+    M = 1,109 notes (R4's recall@15 is this count, 0–15) is Hypergeometric(M, 15, 15):
+    E[K] = 225 / M ≈ 0.20289, Var[K] = 15·(15/M)·(1 − 15/M)·(M − 15)/(M − 1) ≈ 0.19762.
+    (As a fraction K/15: mean 15/M ≈ 0.013526, variance Var[K]/225 ≈ 8.783e-4.)
+    Conditions: the random subset is the first 15 of a uniform permutation of the same M notes
+    that contain the fixed subset.
+    Proof: sampling 15 without replacement from M items of which 15 are marked.
 
 D10 u_j = P_q⊥e_j / ‖P_q⊥e_j‖ is orthogonal to q, and q sits at horizontal coordinate 0 in both
-    R4 arms.
-    Conditions: ‖q‖ = 1; P_q⊥e_j ≠ 0.
-    Proof: ⟨P_q⊥e, q⟩ = ⟨e, q⟩ − ⟨e, q⟩⟨q, q⟩ = 0; for the operator, ⟨q, v_dipole⟩ = 0 by D2's
-    condition with ĉ₁ = q.
+    R4 arms (operator: ⟨q, w⟩ / ‖w‖²; random: ⟨q, u_j⟩).
+    Conditions: ‖q‖ = 1; e_j not parallel to q; for the operator, c₁ = q (or a positive multiple).
+    Proof: ⟨P_q⊥e, q⟩ = ⟨e, q⟩ − ⟨e, q⟩⟨q, q⟩ = 0. Operator: r = P⊥(q − q) = 0 exactly, so
+    λ = 0 and d_esc = 0 even in floating point (exact, unlike the route through D2).
+
+D11 With λ clipped to s = ±1: d_esc² = 1 − y² − 2s⟨v, w⟩ + ‖w‖².
+    Conditions: ‖v‖ = 1.
+    Proof: ‖r − s·w‖² = ‖r‖² − 2s⟨r, w⟩ + ‖w‖², then D2 and D3. (K6's positive control h uses the
+    clipped λ₁: D4 where unclipped, D11 where clipped.)
+
+D12 λ is never clipped when ‖w‖ ≥ √(1 − y²), in particular whenever ‖w‖ ≥ 1.
+    Conditions: ‖v‖ = 1.
+    Proof: Cauchy–Schwarz with D2: |⟨v, w⟩| = |⟨P⊥v, w⟩| ≤ √(1 − y²)·‖w‖ ≤ ‖w‖².
 ```
 
-Used by: K6 (D2, D4, D6, D7, D8), R4 (D2, D5, D6, D9, D10).
+Used by: K6 (D2, D4, D6, D7, D8, D11), R4 (D2, D5, D6, D9, D10).
+
+Verified by the `instrument-auditor` subagent (maths only), 2026-09-18, at `e2f6d70`: D9 defect
+(count vs. fraction) and missing conditions in D1, D2, D4, D6, D7, D10; D11, D12, the D8 tie form
+and the tolerance rule added from its report.
