@@ -1326,3 +1326,28 @@
   (9/20 non-degenerate).
 
 * **Status:** `Consolidated`.
+
+### seq 47 — 2026-09-18 — Research methodology incubated as a docs node
+
+* **What:** `docs/methodology/` created as the primary node for how research is done on this
+  repository — `METHODOLOGY.md` (the loop: problem → hypothesis + refuters → instrument audit +
+  attack → reformulation gate → registry), `papers/PAPERS.md` (paper-writing rules from the Polar
+  Projector retrospective, including its seven measurement errors) and
+  `instrumentation/INSTRUMENTATION.md` (harness, claims registry, verifier and CI pattern,
+  generalized from `polar-projector` @ `0b15002`). The untracked Spanish draft
+  `docs/papers/METHODOLOGY.md` is superseded by `papers/PAPERS.md`, which restores `docs/papers/`
+  to a single primary document (§6.4). Docs in English (AUDIT L3).
+
+* **One addition over the reference implementation:** an *instrument audit record* per benchmark
+  script, committed before its first result, and an `Instrument audit` column in the claims
+  registry citing that commit. Every one of the paper's seven measurement defects was a skipped
+  step 2(a), found by review only after the manuscript was written with CI green; the verifier
+  checks figures against artifacts, never what an artifact measures.
+
+* **Exit condition:** the node moves to its own repository once a second study completes the loop
+  using it; shared tooling (likely the verifier's registry checks) is extracted then, not before.
+  First study: the per-epoch render calibration of ADR-026.
+
+* **Scope:** documentation only; no code, tests or configuration touched.
+
+* **Status:** `Incubating`.
