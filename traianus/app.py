@@ -656,7 +656,7 @@ async def consolidate_sovereignty(node_id: str, body: ConsolidationBody):
             list(projections.values()), body.ethical_key, dynamic_threshold
         )
         new_state: LifecycleState = gate["state"]
-        action_pot = 1.0 if new_state == "consolidated" else float(gate["topological_key"]["variance"])
+        action_pot = float(gate["topological_key"]["variance"])
         revision_milestone_val = 1 if body.ethical_key else 0
 
         with storage.get_db_connection() as conn:

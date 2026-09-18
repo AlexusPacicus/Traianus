@@ -1410,3 +1410,48 @@
   collected by it.
 
 * **Status:** `Consolidated` except the INV-4 dedup half, which is open.
+
+### seq 49 — 2026-09-18 — REMEDIATION-01 Delta3: audit-trail fidelity (INV-7, INV-8)
+
+* **Defects:**
+  - INV-7: `consolidate_sovereignty` wrote `action_potential = 1.0` whenever the new state was
+    `consolidated`, while the two ingestion paths wrote `float(variance)`. The same revision log
+    therefore held a measured quantity in some rows and a constant in others, and AUDIT M6 ("no
+    magic number, ADR-005") was contradicted at the exact site that matters most: the consolidated
+    row. RED reproduced it directly: stored `1.0` against a measured variance of `0.00263`.
+  - INV-8: none of the 8 test names `docs/audit/AUDIT.md` cites as regression evidence existed under
+    that name. Worse than a naming drift: for four of the "Resolved" claims — H1 (`/ingesta` → 503),
+    H3 (CORS enumerated), M6 (action_potential unscaled), M7 (consolidar missing node → 404) — no test
+    asserted the behaviour under any name, and a fifth (M5) was covered only for `/nodos`, not for
+    `/telemetry` requiring a token. Three more (C1, H2, M3) were covered, under other names. The
+    project's own record of what it had verified was not checkable against the repository.
+
+* **Fix:** INV-7 is one line, `action_pot = float(gate["topological_key"]["variance"])`. For INV-8
+  the four mis-named citations were corrected to the tests that exist (C1 →
+  `test_c1_threshold_excludes_self_projection`, H2 → `test_zero_trust_ingress_allowlist`, M3 →
+  `test_constructs_offline_with_local_files_only`, M5 → `test_nodos_masks_internal_error`), and
+  `tests/meta/test_audit_citations_collectible.py` now fails whenever `AUDIT.md` cites a test that
+  does not exist, so the table cannot drift again unnoticed.
+
+* **A deliberate departure from the draft.** The spec said to flag the uncovered rows as newly-open.
+  Reading the code showed all of them were implemented (`app.py` 503, 404, `ALLOWED_ORIGINS`), only
+  unverified. Demoting a true claim to "open" would have been the accurate response to *no evidence*,
+  but the cheaper and more useful one was to produce the evidence: five characterization tests
+  (`tests/unit/test_audit_resolved_claims.py`), written under the names `AUDIT.md` already cited.
+  They pass on first run by construction, so they are regression nets, not RED-first fixes; I did not
+  claim otherwise. The M6 row now records that the background text-ingestion path still has no direct
+  assertion.
+
+* **Measured, not assumed:** the name-level check is an AST scan of `def test_*` under `tests/`, not
+  `pytest --collect-only` as drafted — a test cannot spawn a process under this repo's own
+  Zero-Trust matrix, and for the naming convention in use the two agree.
+
+* **Noticed, not touched:** `tests/helpers/endpoint_registry.py` (generic requirements G1–G4,
+  including "CORS enumerated" and "no-fake-200") is imported by no test.
+
+* **Gate:** `pytest tests/` → 1159 passed / 5 deselected; `mypy traianus/` clean (32 files);
+  `python3 tools/audit/audit_harness.py` → C1 GUARD PASSED (9/20). `.github/workflows/ci.yml`: the
+  new `tests/meta/` and `tests/unit/test_audit_resolved_claims.py` are collected by `pytest tests/`;
+  no change needed (§1.6).
+
+* **Status:** `Consolidated`.

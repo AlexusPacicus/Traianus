@@ -45,7 +45,7 @@ The following findings remain open and require additional attention:
 
 | ID | Title | Status |
 |---|---|---|
-| *None* | *All documentation findings resolved in `docs/excellence-v1.0.0`* | ✅ |
+| R1-INV4 | `/ingesta/vector` requires `X-Idempotency-Key` but does not deduplicate a repeated key: unlike `/ingesta`, it writes straight to `manifold_nodes`, which has no `idempotency_key` column. Needs a `UNIQUE` column and the rename→recreate→copy→drop migration used for `ingestion_queue` (REMEDIATION-01 INV-4, second half; LEDGER seq 48). | 🟠 Open |
 
 > **Note:** M1, M2, L1, L3, L4 were documentation-only findings. They have been resolved via documentation updates in branch `docs/excellence-v1.0.0` (see Remediation Status below). No code changes required; freeze v1.0.0 remains intact.
 
@@ -57,16 +57,16 @@ Resolution criterion: fix implemented in code **and** verified by a deterministi
 
 | ID | Status | Evidence |
 |---|---|---|
-| C1 | ✅ Resolved | `auto_calibrate_critical_threshold()` excludes self-projection; harness green; regression `test_auto_calibrate_excludes_self_projection`. |
+| C1 | ✅ Resolved | `auto_calibrate_critical_threshold()` excludes self-projection; harness green; regression `test_c1_threshold_excludes_self_projection`. |
 | H1 | ✅ Resolved | `/ingesta` fails loudly with `503`; regression `test_ingesta_returns_503_on_persistence_failure`. |
-| H2 | ✅ Resolved | `ALLOWED_INGRESS_TYPES = {"text/plain"}` allowlist; 415 otherwise; regressions `test_ingesta_endpoint_rejects_non_plain_text_payloads`. |
+| H2 | ✅ Resolved | `ALLOWED_INGRESS_TYPES = {"text/plain"}` allowlist; 415 otherwise; regressions `test_zero_trust_ingress_allowlist`. |
 | H3 | ✅ Resolved | CORS enumerated; operator token on mutating routes; regressions `test_cors_origins_are_enumerated_no_wildcard`. |
 | H4 | ✅ Resolved | `manifold_nodes` + `manifold_edges` are append-only revision logs `(id, seq)`; tests `tests/unit/test_substrate.py`. |
 | H5 | ✅ Resolved | `_compute_epsilon_edges`/`rebuild_epsilon_edges`/`persist_epsilon_edges` implemented; ε-adjacency persisted as `auto-edge-*`. |
-| M3 | ✅ Resolved | `HF_HUB_OFFLINE=1` + `local_files_only=True`; regressions `test_encoder_constructed_offline_local_files_only`. |
+| M3 | ✅ Resolved | `HF_HUB_OFFLINE=1` + `local_files_only=True`; regressions `test_constructs_offline_with_local_files_only`. |
 | M4 | ✅ Resolved | Real package `traianus/`; `pyproject.toml` with `traianus-bootstrap`; quickstart documented. |
-| M5 | ✅ Resolved | `/nodos` returns 5xx; `/telemetry` requires token; regressions `test_nodos_returns_500_on_db_error`. |
-| M6 | ✅ Resolved | `action_potential = float(variance)` without `*10.0`; regression `test_action_potential_is_variance_not_scaled`. |
+| M5 | ✅ Resolved | `/nodos` returns 5xx; `/telemetry` requires token; regressions `test_nodos_masks_internal_error`, `test_telemetry_requires_token`. |
+| M6 | ✅ Resolved | `action_potential = float(variance)` without `*10.0` at every write site; regressions `test_action_potential_is_variance_not_scaled` (vector path), `test_consolidar_action_potential_is_true_variance` (consolidation path; had been hardcoded to `1.0`, fixed in REMEDIATION-01 Δ3). The background text-ingestion path has no direct assertion. |
 | M7 | ✅ Resolved | Consolidation INSERTS revision; missing node → 404; regression `test_consolidar_missing_node_returns_404`. |
 | M8 | ✅ Resolved | Nix `flake.nix` devshell removed from v1.0.0 release freeze; reproducibility anchored in pinned `pyproject.toml` (Python 3.11) + green CI matrix. |
 | L2 | ✅ Resolved | Dangling edges rejected (404); edges append-only; WAL everywhere; tests `tests/unit/test_storage_hardening.py`. |
@@ -78,7 +78,7 @@ Resolution criterion: fix implemented in code **and** verified by a deterministi
 | L3 | ✅ Resolved (Doc) | Seq 7, 21 already fixed code; docs verified English-only |
 | L4 | ✅ Resolved (Doc) | `docs/STATUS.md` "Known Limitations" documents NSM basis as provisional scaffold |
 
-**Open items:** None — all findings resolved (code or documentation).
+**Open items:** R1-INV4 (key-based deduplication on `/ingesta/vector`); every other finding is resolved (code or documentation).
 
 ---
 

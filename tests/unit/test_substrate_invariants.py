@@ -187,3 +187,32 @@ class TestDualKeyC1Gate:
         )
         assert granted.status_code == 200
         assert granted.json()["new_state"] == "consolidated"
+
+
+def test_consolidar_action_potential_is_true_variance(client, auth_headers, isolate_db):
+    """R6/INV-7: action_potential is float(variance) at every write site, so a
+    consolidated revision must carry the measured variance, not a constant."""
+    import uuid
+
+    rng = np.random.default_rng(7)
+    vec = rng.standard_normal(384)
+    res = client.post(
+        "/ingesta/vector",
+        json={"vector": (vec / np.linalg.norm(vec)).tolist(), "label": "ap"},
+        headers={**auth_headers, "X-Idempotency-Key": str(uuid.uuid4())},
+    )
+    node_id = res.json()["node_id"]
+    granted = client.post(
+        f"/nodos/{node_id}/consolidar",
+        json={"text": "x", "ethical_key": True},
+        headers=auth_headers,
+    )
+    assert granted.json()["new_state"] == "consolidated"
+    variance = granted.json()["dual_key_status"]["topological_key"]["variance"]
+    with sqlite3.connect(isolate_db) as conn:
+        stored = conn.execute(
+            "SELECT action_potential FROM manifold_nodes WHERE id = ? ORDER BY seq DESC LIMIT 1",
+            (node_id,),
+        ).fetchone()[0]
+    assert stored == pytest.approx(float(variance), abs=1e-12)
+    assert stored != 1.0
