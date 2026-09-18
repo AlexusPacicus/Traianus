@@ -131,3 +131,60 @@ ni torch. Repo local, 8 commits, sin remote.
 - Cola del 10 intacta: verificar el hook en vivo, alcance de `.claude/skills/`
   en el gate, schema de `PreToolUse`, `window_seconds`.
 - Siguiente bloque grande según lo hablado: modularización de la PKM.
+
+---
+
+## 2026-09-18
+
+**Contexto:** tras el paper, pasar de «producir un paper» a un método reutilizable, y decidir entre
+PoC de la PKM o papers de lo ya construido. Se eligió **PoC primero**: construir genera las
+preguntas (ADR-026 salió de un bug real de render).
+
+**Se hizo:**
+- **Metodología incubada** en `docs/methodology/` (bucle 0–4, reglas de papers, instrumentación),
+  con condición de salida: se muda a su repo cuando un segundo estudio complete el bucle.
+- **Taxonomía fijada:** Traianus = orden implicado (motor), Ulpia = orden explicado (observación,
+  O = P_θ(S)), RefApp-01 = el cliente PKM. `frontend/` es RefApp-01, mal etiquetado como Ulpia.
+- **Seis documentos de NotebookLM contrastados con el código.** Buena parte ya estaba construida
+  (ADR-025, símplex, corrector parabólico, contrato de 64 bytes) pero sin cablear; las cifras de
+  titular no tenían respaldo (el Sammon real es 39,4 %, no 86,07 %).
+- **PoC RefApp-01** en `frontend/POC.md`: 7 días (18–25), mapa 5D, perspectiva por nota, entrada de
+  notas, refutadores R1–R5, registro, decisión del día 7 preregistrada.
+- **Revisión ciega del instrumento** como skill (`instrument-audit`) y, tras enmendar AGENTS §6.1,
+  como subagente de solo lectura (`instrument-auditor`). K6 y R4 **PASS en fase 1**, cinco rondas
+  cada una: encontraron una fuga real (en R4 el eje y *es* el orden verdadero), un nulo no
+  comparable, un umbral que se pasaba del 5 % y notas correlacionadas.
+- **Contratos a nivel de bit** (`frontend/audits/contracts.md`): huellas SHA-256, dtypes, orden de
+  bytes, streams PCG64, determinismo, integridad (nulos fuera; un bit cambiado debe detectarse),
+  con traducción al español.
+- **Derivaciones D1–D12 verificadas por código:** 30 tests con el `PolarProjector` real, D8 por
+  enumeración exhaustiva, D9 con fracciones exactas, un caso negativo por derivación.
+- **Prueba de humo** con SQLite aislado en scratch: la ingesta funciona; el mapa es una mancha de
+  un color; no hay zoom ni clic; consolidar deja la nota en `incubating` (falla la llave
+  topológica).
+
+**Resultado:** ~25 commits en `docs/development-log`, todos de documentación, método y tests; ninguno
+de producto. Las fichas y los contratos están listos para construir encima.
+
+**Resuelto de la cola del 11:** `compendio.md` fuera de la raíz (movido a `~/Documents/NGI/`);
+`.coverage` gitignoreado.
+
+**Sin resolver / decisión pendiente:**
+- **Ruta crítica en el motor:** la vista general usa un marco *por nodo* (no hay mapa común) y dos
+  de los tres colores repiten la posición. Hacen falta el marco por época y `/spatial?anchor=`,
+  en archivos que la sesión `traianus-2a` tiene sin commitear.
+- Hueco de bits entre artefacto (codificado en lote) y motor (una nota a la vez): cerrado por
+  decisión — cargar los vectores del artefacto de uno en uno por `/ingesta/vector` — pendiente
+  de verificar que ese endpoint no altera los bits.
+- Idea del autor, sin anotar en `POC.md`: **logs de pérdida relacional** en la carga nota a nota.
+  Formulación propuesta: cuánto del estado final depende del orden de llegada; el grafo ε y los
+  kNN finales son invariantes al orden por construcción y sirven de control.
+- Ideas en exploración, fuera de la PoC: caras de un politopo de conceptos (proyección del
+  7-símplex elegida por el usuario); lote frente a uno-en-uno.
+- **Riesgo reconocido:** el día 1 de 7 se fue entero en método.
+
+**Próximo paso (mañana, en orden):**
+1. Recap con el autor; decidir la formulación de los logs de pérdida relacional.
+2. Coordinar con `traianus-2a` el marco por época y `/spatial?anchor=`.
+3. Script de K6 con TDD: tests de integridad → tests de derivaciones → código.
+4. Paquete de revisión (ceguera por construcción), fase 2 con el subagente, ejecución.
