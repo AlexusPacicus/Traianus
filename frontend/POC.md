@@ -93,6 +93,28 @@ that leaves the written scope goes to v2.
   refuter could not test what it claimed. R4 now asks whether the other four dimensions (λ and
   colour) scatter that order more than an arbitrary horizontal axis, measured in 5D with equal
   weights, as the author specified. The overview left R4: it has no chosen note.
+- **2026-09-18 — related-notes list added (for R5).** R5 compares the map with a plain list of
+  related notes, which the client did not have: selecting a note also lists its 15 nearest notes.
+  Built with feature 5 on day 5; it is the control view R5 needs, not a new feature.
+
+## Day-7 decision (pre-registered 2026-09-18, before any result)
+
+| Outcome | Decision |
+|---|---|
+| R1–R3 tests fail | Fix the engine; mandatory, not a reason to pivot |
+| Checkpoint missed on day 4, even after the cuts | One extension of 3 days, decided on day 4 and logged in Scope changes (window to 2026-09-28); no second extension |
+| K6 admits no channel (m = 0) | In the geodetic frame colour adds nothing: the map is 2D. Pivot within Ulpia: look for another colour source (e.g. a per-epoch data-derived frame) |
+| R4 holds | λ loses the perspective's horizontal axis; the perspective stays, with another axis |
+| R5 favours the list | RefApp-01 continues list-first: related notes as the main view, the map as context. Engine and Ulpia unchanged |
+| All favourable | Continue: RefApp-01 leaves for its own repository (exit condition) and v2 is scoped |
+
+**R5 protocol.** Ten real navigation tasks ("find the notes related to X"), written and committed
+before day 5. On days 5–7, for each task the author records which view was used (map or list)
+and whether the task was completed. The majority decides; ties go to the list. Exploratory: one
+user, labelled as such.
+
+**Audit freeze.** If the phase-1 review of R4 at `c08fe92` does not return PASS, the record is
+frozen as it stands; remaining items are resolved in phase 2 against the code.
 
 ## Deadline
 
@@ -109,7 +131,7 @@ that leaves the written scope goes to v2.
 | 2 | Engine: per-epoch 5D frame — choose the three colour dimensions and measure their independence from (x, y) on Spinoza; R1–R3 tests |
 | 3 | Engine: `/spatial` on the epoch frame; `GET /spatial?anchor=<id>` — TDD, through the boundary-validator |
 | 4 | Checkpoint |
-| 5 | Client: note entry and consolidation; feature 5 (text + relations) |
+| 5 | Client: note entry and consolidation (incubating shown as its own state); feature 5 (text + relations) and the related-notes list; R5 tasks committed before starting |
 | 6 | R4 offline measurement; dimensional increase if nothing was cut |
 | 7 | Close: ledger entry, results, R5 judgement |
 
