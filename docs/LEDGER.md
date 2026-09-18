@@ -1232,3 +1232,46 @@
   §3.3 18/18 PASS.
 
 * **Status:** `Consolidated`.
+
+### seq 45 — 2026-09-11 — Zero-Trust screening moves from naked substrings to a capability matrix
+
+* **Defect (confirmed empirically, not inferred):** the forbidden-token list in
+  `traianus/security/validator.py` screened the `Implementation_Block` with the `in` operator over
+  bare substrings. A DOC proposal whose block read *"this file is kept in sync by hand"* returned
+  `ABORTED_VIOLATES_ZERO_TRUST` — `"sy(nc b)y hand"` contains the netcat token `"nc "`. The identical
+  proposal with *"kept aligned by hand"* returned `EXECUTE_SAFE`. Both decisions reproduced through
+  the boundary-validator MCP before any edit. Same weakness in `"curl"` (matches *"curly"*), `"ftp"`,
+  `"socket"`, `"telnet"`, `"wget"`.
+
+* **Why this is a security defect and not hygiene:** a gate that quarantines English prose teaches
+  the agent that rejection is a wording problem. The repair path it learns — reword until the gate
+  passes — is exactly the path a genuine violation would take. The control keeps firing while losing
+  the ability to mean anything, which is worse than a control that is merely absent.
+
+* **Fix:** `FORBIDDEN_MATRIX` — an immutable tuple of
+  `(primitive, physical_effect, compiled boundary pattern)` clauses, screened with `pattern.search()`.
+  Every primitive enumerated in §2.1 keeps a clause; matching is word-boundary anchored and
+  case-insensitive (the old list was case-sensitive, so `CURL` passed — detection is strictly
+  stronger, not merely narrower). `physical_effect` partitions the clauses into
+  `NETWORK` / `PROCESS` / `CODE_LOADING`. Netcat is no longer a bare token but a command-shaped
+  pattern: `\b(?:nc|ncat|netcat)\b\s+(?:-\w|[\w.-]+\s+\d)`, which matches `nc -e /bin/sh` and
+  `nc 10.0.0.1 4444` and no longer matches `sync by`.
+
+* **TDD (§1.4):** `tests/security/test_zero_trust_matrix.py` written first and failing —
+  5 prose blocks × `EXECUTE_SAFE`, 24 genuine primitives × `ABORTED_VIOLATES_ZERO_TRUST`. RED was
+  4/5 prose blocks quarantined. One drafted probe (*"advanced configuration"*) was discarded rather
+  than kept as decoration: it never tripped the old gate, because `"adva(nc e)d"` has no trailing
+  space. Replaced with a real case (*"in sync with CI"*).
+
+* **Coordination:** a concurrent session held `traianus/security/hook_gate.py`,
+  `tests/security/test_hook_startup_surface.py`, `opencode.jsonc` and `.github/workflows/ci.yml`
+  uncommitted during this work. Two intermediate full-suite runs showed 6 and then 5 failures in
+  those files; both cleared on re-run without intervention — they were mid-write, not regressions
+  from this change. Nothing in that set was edited here. `.github/workflows/ci.yml` therefore left
+  untouched: the new partition is already covered by the `pytest tests/` and coverage jobs (§1.6);
+  the only `tests/security` line in that file is the ADR-025 *ruff* scope list, which is that
+  session's uncommitted edit and is not a test-coverage gap.
+
+* **Gate:** `pytest tests/` → 1135 passed / 5 deselected; `mypy traianus/` clean (32 files).
+
+* **Status:** `Consolidated`.
