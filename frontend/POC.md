@@ -55,7 +55,7 @@ places each note's real neighbours near it.
   a new revision, a lifecycle change, a new edge. Checked by a test over the observation endpoints.
 - **R3 — governance.** A note reaches the map as consolidated without both keys. Checked by a test.
 - **R4 — neighbourhood.** From a chosen perspective, a note's real neighbours in the 384-d
-  substrate are not near it on screen. Measured offline (below).
+  substrate are not near it on screen. Measured offline (`audits/R4.md`).
 - **R5 (exploratory, one user).** Navigating the map is less useful than a plain list of related
   notes. Judged by the author on day 7, labelled exploration, not result.
 
@@ -72,8 +72,8 @@ to a publication. A figure without a row here is not used to decide anything.
 | K3 | The overview picks anchor and dipole per node, not per epoch | construction | n/a (read from code) | — | `spatial_observables.py:159-160` |
 | K4 | corr(tanh d_esc, y) = −0.968 on Spinoza (n = 2,221) | unbacked | no | — | ADR-026; `tools/experiments/measure_polar_render_range.py` is uncommitted and writes no artifact. Also measured on the per-node frame (K3) |
 | K5 | Raw ranges: λ 7.16% of [−1, 1], anchor component 19.07%, x–y box 1.36% of the viewport | unbacked | no | — | as K4 |
-| K6 | Each colour channel carries variance independent of (x, y) in the per-epoch frame | pending | — | record below (day 2) | day 2 script |
-| K7 | R4: recall@15 per perspective, operator / radial / overview | pending | — | record below (R4) | day 6 script |
+| K6 | Each colour channel carries variance independent of (x, y) in the per-epoch frame | pending | — | `audits/K6.md` | day 2 script |
+| K7 | R4: recall@15 per perspective, operator / radial / overview | pending | — | `audits/R4.md` | day 6 script |
 
 K4 and K5 are not used for any decision until their script is committed and re-run on the
 per-epoch frame.
@@ -153,108 +153,8 @@ only need the engine to return the exact midpoint view — polish, cut before fe
 filter centres its data, so it removes the neighbourhood's direction of largest variance, not the
 shared bias its spec describes; it must not be wired as is.
 
-## Audit definitions (shared by the K6 and R4 records)
+## Instrument audits
 
-A reviewer reads this block and one record block, nothing else of this file.
-
-```
-Audit definitions
-
-Vectors      v ∈ S^383, L2-normalized. Corpus: the 2,221 Spinoza chunks frozen by
-             tools/experiments/tooling/freeze_spinoza_embeddings.py (commit f26186d; output
-             .data/spinoza_frozen, gitignored), float32 on disk, used as float64.
-Basis        8 NSM geodetic axes, tests/fixtures/nsm_axes_8.json (epoch PROSTHETIC_NSM_V1).
-             Stored in table geodesic_axes (traianus/storage/_storage.py:114); epochs:
-             docs/architecture/ARCHITECTURE.md §7.
-Operator     traianus/geometry/polar_projector.py, for anchor c₁ and poles c_A, c_B:
-               ĉ₁ = c₁ / ‖c₁‖;  P⊥x = x − ⟨x, ĉ₁⟩ĉ₁                          (:235-237)
-               v_dipole = P⊥c_A − P⊥c_B  (collinear fallback 2δ·u⊥)          (:173-174)
-               r = P⊥(v − c₁)                                                (:279)
-               λ = clip(⟨r, v_dipole⟩ / ‖v_dipole‖², −1, 1)                  (:283-284)
-               d_esc = ‖r − λ·v_dipole‖                                      (:290)
-λ_k          λ with c₁ = the rank-1 axis and (c_A, c_B) = the k-th dipole's two axes.
-Position     x = λ₁, y = ⟨v, ĉ₁⟩.
-
-Allowed reading   these two blocks; the files and lines cited in them.
-Not allowed       the rest of frontend/POC.md; docs/adrs/ADR-026-*; traianus/geometry/
-                  spatial_observables.py (its docstring states prior results); data/spinoza/
-                  telemetry/; docs/LEDGER.md; any manuscript.
-```
-
-## K6 measurement: colour channels independent of position (day 2)
-
-**Question.** In a per-epoch geodetic frame, can three dimensions beyond position be shown as
-colour without repeating it?
-
-**Refuter.** No candidate is admissible under the rule below: in this frame colour cannot carry
-information the position lacks. That is a decision point for the author, not a cue to change the
-candidates (step 3).
-
-### Instrument audit record (must be reviewed and committed before the first result)
-
-```
-Instrument audit — K6, colour channel independence
-
-Data: the 2,221 L2-normalized Spinoza vectors from the frozen artifact (f26186d), as float64;
-  the active basis of 8 NSM geodetic axes.
-Frame (one per epoch): rank the 8 axes by mean signed projection over the 2,221 vectors.
-  Anchor = rank 1; dipole 1 = ranks 2–3 → position x = λ₁, y = ⟨v, â₁⟩;
-  dipole 2 = ranks 4–5; dipole 3 = ranks 6–7; rank 8 left over.
-Candidates, in preference order: λ₂ (dipole 2), λ₃ (dipole 3), ⟨v, â₈⟩, l = 1/(1+var) of the
-  8 projections.
-Null: ⟨v, e⟩ for 1,000 fixed-seed random unit vectors e — how much an unrelated direction
-  resembles the position in this (anisotropic) corpus.
-Positive control: h = tanh(d_esc) of dipole 1 (K2: must come out redundant).
-Column "R²": least-squares fit of the channel on (x, y, x², y², xy) over the 2,221 vectors.
-Rule: admissible iff R² ≤ the 95th percentile of the null's R²; colour = the first three
-  admissible candidates in order; fewer than three → the missing channels are constant.
-  (Replaces a fixed R² ≤ 0.5 drafted the same day, which had no derivation.)
-
-Same thing in every arm?   Every candidate, control and null direction on the same vectors, frame
-                           and regression.
-Leakage?                   The frame is fitted on the corpus it describes — by design, it is the
-                           epoch's frame; no label or ground truth is read.
-Comparable arms?           The positive control must exceed the null's 95th percentile; if it
-                           does not, the instrument cannot detect redundancy and no candidate
-                           result is used. Geodetic axes are not random: if they come out more
-                           redundant than the null, that is a result for the author (step 3), not
-                           a reason to relax the rule.
-Text matches code?         Checked at review.
-Reviewed by:               pending — `instrument-audit` skill, run by the author in a separate session.
-```
-
-## R4 measurement: operator and radial perspectives
-
-The perspective shown uses the polar operator; a radial coordinate is computed alongside and never
-rendered, and the overview is the third arm.
-
-**Instrument: offline, not live.** A committed script under `tools/experiments/` over the frozen
-Spinoza corpus, every node as the chosen perspective, all arms computed by the engine code the
-endpoints serve. Live logs would sample only the notes the user happens to click.
-
-### Instrument audit record (must be reviewed and committed before the first result)
-
-```
-Instrument audit — R4, perspectives: operator, radial, overview
-
-Column "recall@15": for chosen note q, of q's 15 nearest neighbours in the 384-d substrate (q
-  itself excluded), how many are among q's 15 nearest on the arm's 2D map, all N notes placed.
-  Operator arm: c₁ = q; poles = the two geodetic axes of the active basis with the largest signed
-  projection onto q; position (λ, ⟨v, q̂⟩), each axis z-scored over the N placed notes.
-  Radial arm: (⟨v − q, e⟩, ‖v − q‖), e a fixed seeded random unit vector, same z-scoring.
-  Overview arm: the per-epoch frame, identical for every q, same z-scoring. Added once that frame
-  exists.
-
-Same thing in every arm?   Same perspectives, neighbour sets, k and N; every map from the engine's
-                           code path, not a re-implementation.
-Leakage?                   Ground truth is the 384-d neighbourhood; no arm reads it.
-Comparable arms?           Recall only; cost is not compared. Axis scaling is fixed before running,
-                           because 2D neighbours depend on it; any other scaling is a post hoc
-                           ablation.
-Text matches code?         Checked at review.
-Reviewed by:               pending — `instrument-audit` skill, run by the author in a separate session.
-```
-
-With c₁ = q on unit vectors, ⟨v, q̂⟩ = cos θ orders notes by distance exactly as ‖v − q‖ does, so
-operator and radial share their vertical ordering and differ in the horizontal axis: λ, the
-contrast between two geodetic poles, against a random direction.
+Records live in [`audits/`](audits/), one file per measurement, so a blind review never opens this
+file: [`definitions.md`](audits/definitions.md) (shared), [`K6.md`](audits/K6.md) (colour channel
+independence, day 2), [`R4.md`](audits/R4.md) (neighbourhood recall per perspective, day 6).
