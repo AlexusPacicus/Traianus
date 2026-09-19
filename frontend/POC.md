@@ -21,8 +21,8 @@ observation of a governed Traianus state.
 
 **Features:**
 1. Overview map of the corpus in 5D: position (x, y) from the anchor and first dipole, colour
-   (l, c, h) from three further dimensions the position does not carry — the second dipole (axes
-   4–5) among them. Same idea as `project_to_5d` (`observables.py`), in the per-epoch geodetic
+   (l, c, h) from further dimensions the position does not carry, chosen by K6: λ₃ and a₈, the
+   third channel constant (K6 result, 2026-09-19; see Scope changes). Same idea as `project_to_5d` (`observables.py`), in the per-epoch geodetic
    frame instead of a global SVD.
 2. Zoom and pan.
 3. Perspective: select a note, and the map is redrawn from it.
@@ -106,6 +106,20 @@ that leaves the written scope goes to v2.
 - **2026-09-18 — related-notes list added (for R5).** R5 compares the map with a plain list of
   related notes, which the client did not have: selecting a note also lists its 15 nearest notes.
   Built with feature 5 on day 5; it is the control view R5 needs, not a new feature.
+- **2026-09-19 — colour channels from K6.** K6 (pre-registered rule, result `a95ec2a0…`) admitted
+  two channels, λ₃ and a₈; the third is constant. Feature 1 no longer names the second dipole,
+  which K6 discarded (R² 0.1243 > τ₁ 0.1224). The day-7 table did not foresee m = 2; it is not a
+  pivot (m ≥ 1), and the rule is not relaxed. Which render channel (l, c or h) stays constant is
+  pending the author.
+- **2026-09-19 — z axis reformulated (step 3 gate, after K6).** Superseded question: "the second
+  dipole's λ₂, moved from colour to z, carries variance independent of (x, y)" — K6's result
+  already refutes it for λ₂ as is. New question, the author's choice (option A): z = ⟨v, u⟩ with
+  u the second dipole's direction w₂ orthogonalised by Gram–Schmidt in 384-d against ĉ₁, w₁, w₃
+  and P⊥â_(8) — fixed by the basis, not fitted to the data. Geometric orthogonality is not
+  statistical independence on an anisotropic corpus, so it is measured, not assumed: record K8
+  (question, refuter, phase-1 review) before any script. Rejected option B: the data residual of
+  λ₂ on a quadratic of the position — corpus-fitted, and near-zero R² by construction on the data
+  it is fitted to. Still day 6 and still the first cut if the checkpoint is at risk.
 
 ## Day-7 decision (pre-registered 2026-09-18, before any result)
 
@@ -145,8 +159,10 @@ frozen as it stands; remaining items are resolved in phase 2 against the code.
 | 6 | R4 offline measurement; dimensional increase if nothing was cut |
 | 7 | Close: ledger entry, results, R5 judgement |
 
-**Dimensional increase (interaction).** When a note is anchored, the second dipole (axes 4–5)
-moves from colour to a z axis — a genuine third axis, not a rescaling of the first (ADR-026 §2.1).
+**Dimensional increase (interaction).** When a note is anchored, a z axis is added — a genuine
+third axis, not a rescaling of the first (ADR-026 §2.1). Reformulated 2026-09-19 after K6 (see
+Scope changes): z is the second dipole's direction orthogonalised in 384-d against the directions
+already in use, measured by K8 before it is used.
 It enters only if the checkpoint is met. Every colour channel, and z, must carry variance
 independent of (x, y) — the test d_esc failed (corr −0.968 with y). The compendium's "dimensional
 pulsation" (cluster count set as dimension) is not this and is not used; the engine's `/mutate` is
