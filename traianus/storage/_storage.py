@@ -122,6 +122,21 @@ CREATE TABLE IF NOT EXISTS geodesic_axes (
 )
 """
 
+SPATIAL_CALIBRATION_DDL = """
+CREATE TABLE IF NOT EXISTS spatial_calibration (
+    epoch_provenance TEXT NOT NULL,
+    seq INTEGER NOT NULL,
+    mu_x REAL NOT NULL,
+    sigma_x REAL NOT NULL,
+    mu_y REAL NOT NULL,
+    sigma_y REAL NOT NULL,
+    k_sigma REAL NOT NULL DEFAULT 3.0,
+    sample_size INTEGER NOT NULL,
+    created_at TIMESTAMP DEFAULT CURRENT_TIMESTAMP,
+    PRIMARY KEY (epoch_provenance, seq)
+)
+"""
+
 AUDIT_LOG_DDL = """
 CREATE TABLE IF NOT EXISTS audit_log (
     case_id TEXT PRIMARY KEY,
@@ -273,6 +288,7 @@ def init_relational_tables():
             """)
             conn.execute("DROP TABLE data_plane_legacy")
         conn.execute(CONTROL_PLANE_DDL)
+        conn.execute(SPATIAL_CALIBRATION_DDL)
         _init_geodesic_axes(conn)
 
 
@@ -732,3 +748,70 @@ def get_current_edges() -> list[tuple]:
               AND id LIKE 'edge-%'
             ORDER BY id
         """).fetchall()
+
+
+def persist_spatial_calibration(
+    epoch_provenance: str,
+    mu_x: float,
+    sigma_x: float,
+    mu_y: float,
+    sigma_y: float,
+    k_sigma: float,
+    sample_size: int,
+) -> int:
+    """Append one render-calibration revision for an epoch; returns its seq.
+
+    Append-only (AGENTS 4.1): a re-fit INSERTs seq+1 and the superseded
+    constants stay readable, so it is auditable when rendered positions moved
+    and against which population they were fitted.
+    """
+    with get_db_connection() as conn:
+        seq = int(
+            conn.execute(
+                "SELECT COALESCE(MAX(seq), 0) + 1 FROM spatial_calibration "
+                "WHERE epoch_provenance = ?",
+                (epoch_provenance,),
+            ).fetchone()[0]
+        )
+        conn.execute(
+            "INSERT INTO spatial_calibration (epoch_provenance, seq, mu_x, "
+            "sigma_x, mu_y, sigma_y, k_sigma, sample_size) "
+            "VALUES (?, ?, ?, ?, ?, ?, ?, ?)",
+            (
+                epoch_provenance,
+                seq,
+                float(mu_x),
+                float(sigma_x),
+                float(mu_y),
+                float(sigma_y),
+                float(k_sigma),
+                int(sample_size),
+            ),
+        )
+    return seq
+
+
+def get_active_spatial_calibration(epoch_provenance: str) -> dict | None:
+    """Latest calibration revision for an epoch, or None if never fitted.
+
+    None is an honest "not calibrated yet", not a masked failure: the caller
+    renders raw polar coordinates until a fit exists (AGENTS 1.3).
+    """
+    with get_db_connection() as conn:
+        row = conn.execute(
+            "SELECT seq, mu_x, sigma_x, mu_y, sigma_y, k_sigma, sample_size "
+            "FROM spatial_calibration WHERE epoch_provenance = ? "
+            "ORDER BY seq DESC LIMIT 1",
+            (epoch_provenance,),
+        ).fetchone()
+    if row is None:
+        return None
+    return {
+        "seq": int(row[0]),
+        "mu_x": float(row[1]),
+        "sigma_x": float(row[2]),
+        "mu_y": float(row[3]),
+        "sigma_y": float(row[4]),
+        "k_sigma": float(row[5]),
+        "sample_size": int(row[6]),
+    }

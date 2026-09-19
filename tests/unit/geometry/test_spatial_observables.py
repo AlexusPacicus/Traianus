@@ -12,7 +12,12 @@ import pytest
 
 from tests.fixtures.polar_fixtures import random_unit_vector
 from traianus.geometry.polar_projector import PolarProjector
-from traianus.geometry.spatial_observables import derive_spatial_observables
+from traianus.geometry.spatial_observables import (
+    EPOCH_PROVENANCE,
+    SpatialCalibration,
+    derive_spatial_observables,
+    fit_spatial_calibration,
+)
 
 
 def _onehot_matrix(n_axes: int = 8, dim: int = 384) -> dict:
@@ -120,3 +125,67 @@ class TestSpatialObservables:
         assert np.isclose(obs["l"], expected_l, atol=1e-12), (
             f"seed={seed}: L formula mismatch"
         )
+
+    def test_spatial_coords_discriminate_distinct_vectors(self):
+        """x, y, z must separate distinct vectors, not collapse to one point.
+
+        Regression: mean-centering the single-row (1, k) projection matrix
+        zeroes it, so the SVD returned S = 0 and every node landed on the
+        origin regardless of its vector.
+        """
+        basis = _onehot_matrix()
+        coords = {
+            (round(obs["x"], 12), round(obs["y"], 12), round(obs["z"], 12))
+            for obs in (
+                derive_spatial_observables(random_unit_vector(384, s), basis)
+                for s in range(20)
+            )
+        }
+        assert len(coords) > 1, f"all 20 vectors collapsed to {coords}"
+
+
+class TestSpatialCalibration:
+    def test_y_is_the_anchor_component_not_escape_distance(self):
+        """On S^(d-1) with a unit anchor, d_esc is analytically redundant:
+        d_esc^2 = 1 - z^2 - lambda^2 ||v_dipole||^2. The informative second
+        position channel is the anchor component itself."""
+        basis = _onehot_matrix()
+        v = random_unit_vector(384, 3)
+        obs = derive_spatial_observables(v, basis)
+        ranked = sorted(
+            basis.keys(), key=lambda k: float(np.dot(v, basis[k])), reverse=True
+        )
+        c_1 = basis[ranked[0]]
+        expected = float(np.dot(v, c_1) / np.linalg.norm(c_1))
+        assert np.isclose(obs["y"], expected, atol=1e-12)
+
+    def test_fit_expands_a_narrow_band_across_the_viewport(self):
+        rng = np.random.default_rng(7)
+        raw = [
+            (0.0125 + 0.016 * g, 0.157 + 0.045 * h)
+            for g, h in rng.standard_normal((500, 2))
+        ]
+        cal = fit_spatial_calibration(raw, EPOCH_PROVENANCE)
+        xs = [cal.apply(x, y)[0] for x, y in raw]
+        assert max(xs) - min(xs) > 1.0
+
+    def test_calibration_is_frozen_not_population_relative(self):
+        cal = SpatialCalibration(EPOCH_PROVENANCE, 0.01, 0.016, 0.15, 0.045)
+        assert cal.apply(0.03, 0.20) == cal.apply(0.03, 0.20)
+
+    def test_degenerate_sigma_does_not_emit_nan(self):
+        cal = fit_spatial_calibration([(0.5, 0.5)] * 10, EPOCH_PROVENANCE)
+        x, y = cal.apply(0.5, 0.5)
+        assert np.isfinite(x) and np.isfinite(y)
+
+    def test_apply_clips_to_the_unit_box(self):
+        cal = SpatialCalibration(EPOCH_PROVENANCE, 0.0, 0.01, 0.0, 0.01)
+        assert cal.apply(10.0, -10.0) == (1.0, -1.0)
+
+    def test_observables_accept_a_calibration(self):
+        basis = _onehot_matrix()
+        v = random_unit_vector(384, 11)
+        raw_obs = derive_spatial_observables(v, basis)
+        cal = SpatialCalibration(EPOCH_PROVENANCE, 0.0, 0.02, 0.0, 0.05)
+        cal_obs = derive_spatial_observables(v, basis, calibration=cal)
+        assert abs(cal_obs["x"]) > abs(raw_obs["x"])

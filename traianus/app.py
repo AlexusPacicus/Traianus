@@ -20,7 +20,11 @@ from traianus.geometry.observables import (
     compute_kinetic_resistance,
 )
 from traianus.geometry.polar_projector import PolarProjector
-from traianus.geometry.spatial_observables import derive_spatial_observables
+from traianus.geometry.spatial_observables import (
+    EPOCH_PROVENANCE,
+    SpatialCalibration,
+    derive_spatial_observables,
+)
 from traianus.governance.gate import evaluate_gate
 from traianus.telemetry.variance_tracker import VarianceTracker
 from traianus import storage
@@ -742,6 +746,27 @@ async def get_relations():
     except Exception as e:
         raise HTTPException(status_code=500, detail="Internal server error.") from e
 
+def _active_render_calibration() -> SpatialCalibration | None:
+    """Frozen render calibration for the active epoch, or None if never fitted.
+
+    None means "not calibrated yet" and renders raw polar coordinates — a
+    narrow but honest cloud. Fitting here per request would instead re-place
+    every node on each ingestion, which is the incremental drift the operator
+    exists to avoid (ADR-026).
+    """
+    row = storage.get_active_spatial_calibration(EPOCH_PROVENANCE)
+    if row is None:
+        return None
+    return SpatialCalibration(
+        EPOCH_PROVENANCE,
+        row["mu_x"],
+        row["sigma_x"],
+        row["mu_y"],
+        row["sigma_y"],
+        row["k_sigma"],
+    )
+
+
 @app.get("/spatial", dependencies=[Depends(require_token)])
 async def get_spatial_observables():
     """Per-node spatial observables (Ulpia Fase 0, observational).
@@ -756,8 +781,9 @@ async def get_spatial_observables():
             return {"nodes": []}
         basis = {k: v["vector"] for k, v in full_basis.items()}
         vectors = storage.get_current_node_vectors()
+        calibration = _active_render_calibration()
         nodes = [
-            {"id": node_id, **derive_spatial_observables(vector, basis)}
+            {"id": node_id, **derive_spatial_observables(vector, basis, calibration)}
             for node_id, vector in vectors.items()
         ]
         return {"nodes": sorted(nodes, key=lambda n: n["id"])}

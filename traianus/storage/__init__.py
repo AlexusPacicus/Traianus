@@ -17,6 +17,7 @@ from traianus.storage._storage import (
     INGESTION_QUEUE_DDL,
     MANIFOLD_EDGES_DDL,
     MANIFOLD_NODES_DDL,
+    SPATIAL_CALIBRATION_DDL,
     ConsolidatedRegressionError,
     StorageError,
     active_epoch,
@@ -24,6 +25,7 @@ from traianus.storage._storage import (
     compute_epsilon_edges,
     enqueue_ingest,
     get_active_epoch_axes,
+    get_active_spatial_calibration,
     get_current_dimension_db,
     get_current_edges,
     get_current_node_vectors,
@@ -42,6 +44,7 @@ from traianus.storage._storage import (
     next_node_seq,
     node_exists,
     persist_epsilon_edges,
+    persist_spatial_calibration,
     rebuild_epsilon_edges,
 )
 from traianus.storage.sqlite_engine import SQLiteEngine
@@ -59,6 +62,7 @@ __all__ = [
     "INGESTION_QUEUE_DDL",
     "MANIFOLD_EDGES_DDL",
     "MANIFOLD_NODES_DDL",
+    "SPATIAL_CALIBRATION_DDL",
     "ConsolidatedRegressionError",
     "SQLiteEngine",
     "StorageError",
@@ -67,6 +71,7 @@ __all__ = [
     "compute_epsilon_edges",
     "enqueue_ingest",
     "get_active_epoch_axes",
+    "get_active_spatial_calibration",
     "get_current_dimension_db",
     "get_current_edges",
     "get_current_node_vectors",
@@ -85,5 +90,6 @@ __all__ = [
     "next_node_seq",
     "node_exists",
     "persist_epsilon_edges",
+    "persist_spatial_calibration",
     "rebuild_epsilon_edges",
 ]

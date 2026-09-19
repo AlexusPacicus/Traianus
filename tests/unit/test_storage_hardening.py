@@ -208,6 +208,28 @@ def test_consolidar_empty_basis_returns_400(client, auth_headers, tmp_path, monk
     assert resp.status_code == 400
 
 
+def test_spatial_calibration_revisions_are_append_only(isolate_db):
+    """Calibration revisions INSERT under (epoch, seq); history is never UPDATEd."""
+    first = storage.persist_spatial_calibration(
+        "PROSTHETIC_NSM_V1", mu_x=0.01, sigma_x=0.016, mu_y=0.15,
+        sigma_y=0.045, k_sigma=3.0, sample_size=2221,
+    )
+    second = storage.persist_spatial_calibration(
+        "PROSTHETIC_NSM_V1", mu_x=0.02, sigma_x=0.020, mu_y=0.16,
+        sigma_y=0.050, k_sigma=3.0, sample_size=2400,
+    )
+    assert (first, second) == (1, 2)
+    active = storage.get_active_spatial_calibration("PROSTHETIC_NSM_V1")
+    assert active["seq"] == 2 and active["mu_x"] == 0.02
+    with sqlite3.connect(isolate_db) as conn:
+        total = conn.execute("SELECT COUNT(*) FROM spatial_calibration").fetchone()[0]
+    assert total == 2, "revisions must accumulate (AGENTS 4.1), not overwrite"
+
+
+def test_get_active_spatial_calibration_is_none_before_any_fit(isolate_db):
+    assert storage.get_active_spatial_calibration("PROSTHETIC_NSM_V1") is None
+
+
 def test_relations_does_not_recompute_full_epsilon_set_on_unchanged_nodes(
     client, auth_headers, isolate_db, monkeypatch
 ):
