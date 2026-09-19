@@ -91,7 +91,9 @@ jobs:
             tests/integration/test_polar_telemetry_integration.py \
             tests/integration/test_sqlite_engine_block.py \
             tests/integration/test_spatial_observables_endpoint.py \
-            tests/fixtures/polar_fixtures.py
+            tests/fixtures/polar_fixtures.py \
+            tests/security/test_config_perimeter.py \
+            tests/security/test_hook_startup_surface.py
       - name: Mypy (strict, whole control plane)
         run: |
           mypy traianus/
