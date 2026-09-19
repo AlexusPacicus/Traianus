@@ -253,3 +253,86 @@ producto, y con el trabajo de motor de `traianus-2a` terminado pero sin commitea
 2. R1-INV4 y verificación de que `/ingesta/vector` guarda los bits intactos.
 3. Cargar el corpus nota a nota, calibrar y ver el mapa coloreado (humo real).
 4. `GET /spatial?anchor=<id>` con TDD.
+
+### Cierre (23:57)
+
+**Contexto:** tras la entrada de las 16:44: K6 y el marco por época hechos, R3 sin comprobar y el
+producto visible sin existir.
+
+**Se hizo:**
+- **R3** (`2e5787d`): 12 tests de que una nota solo llega al mapa consolidada con las dos llaves.
+  7 confirmaron lo que ya se cumplía; 5 salieron en rojo y destaparon un defecto: `ethical_key` se
+  aceptaba como `"true"`, `"yes"`, `"on"`, `"1"` y `1` por la coerción laxa de Pydantic. Se corrigió
+  con `StrictBool` en `traianus/app.py`; esa rama queda sin fusionar.
+- **Bits de `/ingesta/vector`** (`37efacf`, `762db39`): la primera versión del test exigía guardar
+  los bits recibidos y salió roja; era una lectura errónea del contrato. K6 mide
+  `v̂ = row / sqrt(row @ row)` en binary64 y eso es lo que guarda el motor. Test y redacción de
+  `POC.md` y `contracts.md` corregidos.
+- **R1-INV4** (`a355309`, `87d541d`): `/ingesta/vector` deduplica la clave con una columna
+  `idempotency_key` anulable y un índice UNIQUE, sin reconstruir la tabla. Cierra AUDIT,
+  REMEDIATION-01 INV-4 y LEDGER seq 52.
+- **Reparto del trabajo**, por decisión del autor: el chat principal no escribe código; lo escribe
+  el subagente `engine-implementer` a partir de un contrato. AGENTS v1.8.0 a v1.9.0 (`bc6b611`,
+  `5e6249a`, `36b9011`). Herramientas nuevas: `context_pack` (`3a9997f`, sirve solo las secciones
+  pedidas y deja log de rutas), el hook `require_contract_context` (`651bdf4`, los contratos de bits
+  se cargan en código, no por mención) y `delegation_contract` (`241f58f`, delegaciones e informes
+  como JSON estricto en Pydantic). LEDGER seq 53.
+- **Hallazgo de seguridad** (`9fa11ff`): en macOS los dos hooks de ruta se esquivaban cambiando las
+  mayúsculas (`TESTS/conftest.py` y `agents.md` salían con exit 0 sin recibo), incluido el gate de
+  fronteras. Arreglado por identidad de fichero (`os.path.samefile`), solo desde `tools/hooks/`.
+- **Carga del corpus** (`0784464`): `load` y `verify` en
+  `tools/experiments/tooling/load_spinoza_corpus.py`. Contra un motor local con base aparte se
+  cargaron las 2221 notas sin fallos, `verify` confirmó que las 2221 guardan `v̂` byte a byte y el
+  ranking de ejes que calibra el motor coincide con `ranking_full` de `K6_result.json`. El cliente
+  muestra el mapa: una nube densa con colores mezclados, no la mancha de un solo color del humo del
+  día 1 (a ojo, sin métrica de solapamiento).
+- **Reglas del autor:** delegaciones en JSON estricto; `traianus/` inmutable y luego relajado a
+  «seguimos hasta acabar la PoC y modularizamos» (ediciones de motor solo si la hoja de ruta las
+  pide; `traianus/security/` sale del motor después); lo ajeno a los refutadores espera.
+- Diez ramas subidas a GitHub como copia de seguridad, `main` sin tocar (`cc401eb`).
+
+**Resultado:** 13 commits, en ramas locales encadenadas (`feat/context-pack`,
+`feat/contract-context-hook`, `feat/delegation-contract`, `feat/hooks-case-fix`,
+`feat/corpus-loader`) y tres laterales (`test/r3-two-keys-governance`,
+`test/vector-ingest-bit-integrity`, `feat/r1-inv4-vector-idempotency`); `feat/corpus-loader` aún sin
+subir. Suite: 2287 en verde, 5 deseleccionadas, comprobada al cierre. Balance: 4 de los 13 commits
+van por la ruta de la PoC (R3, bits y su redacción, cargador); el resto es gobernanza y delegación.
+En el recap verbal de hoy se dijo «3 de 17»: el conteo era erróneo. Hoja de ruta: día 2 completo;
+del día 3, marco por época y mapa a la vista; el ancla, sin empezar.
+
+**Resuelto de entradas anteriores:**
+- 2026-09-19 (16:44): R3, tests escritos (con el defecto anterior); R1-INV4, cerrado en su rama y la
+  carga no lo necesitó (el cargador no reintenta); verificación de que `/ingesta/vector` guarda los
+  bits, hecha con la corrección de lectura; cargar el corpus nota a nota, calibrar y ver el mapa.
+- 2026-09-18: el hueco de bits entre artefacto y motor, «pendiente de verificar que ese endpoint no
+  altera los bits», queda cerrado.
+
+**Sin resolver / decisión pendiente:**
+- Autor: qué hacer con las dos ramas con cambios de motor (`StrictBool`, R1-INV4), sin fusionar; y si
+  la congelación de `traianus/` se hace cumplir en código (validador de contratos más hook),
+  propuesto sin respuesta.
+- El flujo JSON estricto está probado; la definición actualizada de `engine-implementer` no se
+  recarga hasta una sesión nueva, así que cada contrato lleva por ahora los dos pasos en `decisions`.
+- Huecos declarados: `delegation_contract` no impide que `files_may_touch` liste `traianus/**`; el
+  recibo de `context_pack` prueba que se sirvió, no que se leyó; `/ingesta` sigue aceptando una
+  clave vacía.
+- `POC.md` dice a la vez «checkpoint el día 4» y «checkpoint el 2026-09-22»; con el día 1 = 18, el
+  día 4 es el 21. A decidir.
+- Las 10 tareas de R5 no están escritas; deben estar commiteadas antes del día 5.
+- De la entrada anterior, sin tocar: exploración de documentación con formato fijo, manifest del
+  paquete (`data/spinoza/telemetry`) y ficha K8.
+- Prueba intermitente `test_concurrent_reads_during_background_write` (cota de 5 ms): falla a veces
+  en ejecuciones completas, también en el commit base; sin investigar.
+- Idea aparte, diferida: dimensiones de color elegidas por el usuario y pares configuración-log.
+- Limpieza del scratchpad de la sesión, con una imagen de disco dentro: `rm` está denegado, es del
+  autor.
+- **Riesgo:** el mapa se ve, pero faltan zoom, pan y la perspectiva por nota; el hito sigue siendo el
+  2026-09-22.
+
+**Próximo paso (mañana, en orden):**
+1. Zoom y pan en la capa WebGL (hoy ignora el ratón).
+2. `GET /spatial?anchor=<id>` con TDD por el gate, vía `engine-implementer` con contrato JSON: es
+   cambio de motor, pero está en la ruta de la hoja de ruta.
+3. Escribir y commitear las 10 tareas de R5.
+4. Decidir la fecha del checkpoint y la congelación de `traianus/`.
+5. Subir `feat/corpus-loader` y decidir la integración de las ramas.
