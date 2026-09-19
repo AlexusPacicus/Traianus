@@ -323,6 +323,27 @@ of the note order. Needs its own instrument audit before any figure is used.
 
 Exploration branch: not in the PoC's scope, no gate.
 
+## Exploration: a continuous transition near a degenerate dipole (author's idea, 2026-09-19)
+
+**Problem.** The operator's collinear fallback (`polar_projector.py:118-129`, eps 1e-6) is a
+step. Just above it, λ = ⟨v, w⟩/‖w‖² with a tiny w amplifies noise without bound; just below
+it, the dipole jumps to a canonical u⊥ unrelated to the poles. K6 is unaffected (a dipole on the
+fallback is dropped or invalidates the run, and unclipped λ leaves R² unchanged, D6); the
+render is not (a near-degenerate dipole saturates the clip).
+
+**Proposal (author's choice between two readings).** Blend the dipole direction and the
+fallback direction continuously as ‖w‖ → 0, so λ keeps its meaning as a contrast between the
+poles while the dipole exists. Rejected reading: the poles' shared (bisector) direction when
+they collapse — geometrically sound but it measures alignment with what the poles share, a
+different quantity that would need its own name.
+
+**Measurable question.** Which dipoles of the corpus frames lie near degeneracy, and how much is
+λ amplified there. K6's registered run reports the fallback flag of each dipole of the
+per-epoch frame.
+
+Scope: an operator change (canonical repository `polar-projector`, with its paper); not in this
+PoC. It enters through steps 1–2 of the loop with its own instrument audit.
+
 ## Record questions (not for reviewers)
 
 Kept here, outside `frontend/audits/`, so a blind reviewer never reads them (moved 2026-09-19
