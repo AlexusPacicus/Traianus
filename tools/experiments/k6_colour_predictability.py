@@ -1,9 +1,10 @@
 """K6 — colour channel predictability.
 
-Implements frontend/audits/K6.md (instrument audit record, revision 5) against
+Implements frontend/audits/K6.md (instrument audit record, revision 6) against
 frontend/audits/contracts.md (§0 data layer, §1 K6) and frontend/audits/derivations.md.
-For each colour candidate, the centred R² of an OLS fit on B_s = (1, x, y, x², y², xy,
-c_1 … c_{s−1}) over the EVAL half is compared with the 989th smallest R² of 1,000 null
+For each colour candidate, the centred R² of an OLS fit on the standardised basis
+B_s = (1, x̃, ỹ, x̃², ỹ², x̃ỹ, c̃_1 … c̃_{s−1}) over the EVAL half is compared with the 989th
+smallest R² of 1,000 null
 directions uniform in ĉ₁⊥; candidates are selected sequentially, with a positive control and
 exact-R² calibration controls at every step.
 
@@ -19,6 +20,7 @@ for _var in ("OMP_NUM_THREADS", "OPENBLAS_NUM_THREADS", "VECLIB_MAXIMUM_THREADS"
     os.environ[_var] = "1"
 
 import hashlib  # noqa: E402
+import io  # noqa: E402
 import json  # noqa: E402
 import math  # noqa: E402
 import platform  # noqa: E402
@@ -63,23 +65,24 @@ class IntegrityError(ValueError):
 # Integrity ----------------------------------------------------------------------------------------
 
 
-def sha256_file(path: Path) -> str:
-    return hashlib.sha256(Path(path).read_bytes()).hexdigest()
-
-
-def check_digests(expected: Mapping[Path, str]) -> None:
+def check_digests(expected: Mapping[Path, str]) -> dict[Path, bytes]:
+    """Read each file once; return the bytes whose sha256 was checked, for parsing."""
+    verified = {}
     for path, digest in expected.items():
-        actual = sha256_file(path)
+        data = Path(path).read_bytes()
+        actual = hashlib.sha256(data).hexdigest()
         if actual != digest:
             raise IntegrityError(f"sha256 mismatch for {path}: expected {digest}, got {actual}")
+        verified[Path(path)] = data
+    return verified
 
 
 def load_inputs(
-    embeddings: Path, labels: Path, axes: Path
+    embeddings: bytes, labels: bytes, axes: bytes
 ) -> tuple[NDArray[np.float32], list[Any], list[str], Array]:
-    v32 = np.load(embeddings, allow_pickle=False)
-    label_list = json.loads(Path(labels).read_text(encoding="utf-8"))
-    axis_list = json.loads(Path(axes).read_text(encoding="utf-8"))
+    v32 = np.load(io.BytesIO(embeddings), allow_pickle=False)
+    label_list = json.loads(labels.decode("utf-8"))
+    axis_list = json.loads(axes.decode("utf-8"))
     axis_ids = [a["id"] for a in axis_list]
     a = np.array([a["vector"] for a in axis_list], dtype=np.float64)
     return v32, label_list, axis_ids, a
@@ -114,6 +117,9 @@ def validate_inputs(v32: NDArray[Any], labels: list[Any], axis_ids: list[str], a
         raise ValueError(f"expected {N_AXES} axes, got {len(axis_ids)} ids and shape {a.shape}")
     if a.shape[1] != D:
         raise ValueError(f"each axis must have {D} values, got {a.shape[1]}")
+    for k, axis_id in enumerate(axis_ids):
+        if axis_id in axis_ids[:k]:
+            raise ValueError(f"axis {axis_id}: duplicate id")
     for axis_id, row in zip(axis_ids, a):
         if not np.all(np.isfinite(row)):
             raise ValueError(f"axis {axis_id}: non-finite value")
@@ -173,11 +179,14 @@ def build_frame(a_hat: Array, order: Sequence[int], projector: PolarProjector) -
         fallback.append(bool(gap < projector.eps_collinear))
         frames.append(frame)
     c1_hat = frames[0].c1_hat
+    p8 = perp(a_hat[order[7]], c1_hat)
+    if float(p8 @ p8) <= 0.0:
+        raise ValueError("degenerate rank-8 axis: ||P_perp a_(8)||^2 underflowed to zero in float64")
     return {
         "c1_hat": c1_hat,
         "frames": frames,
         "fallback": fallback,
-        "p8": perp(a_hat[order[7]], c1_hat),
+        "p8": p8,
     }
 
 
@@ -209,17 +218,15 @@ def threshold(r2_values: Array) -> float:
     return float(np.sort(np.asarray(r2_values, dtype=np.float64))[TAU_INDEX])
 
 
-def _stack(x: Array, y: Array, selected: Sequence[tuple[str, Array]]) -> tuple[Array, list[str]]:
-    cols = [np.ones_like(x), x, y, x**2, y**2, x * y] + [u for _, u in selected]
-    names = ["1", "x", "y", "x^2", "y^2", "xy"]
-    names += [f"c_{j}:{name}" for j, (name, _) in enumerate(selected, start=1)]
-    return np.column_stack(cols), names
-
-
 def design_basis(
     x: Array, y: Array, selected: Sequence[tuple[str, Array]]
 ) -> tuple[Array, list[str]]:
-    return _stack(x, y, selected)
+    """B_s = (1, x̃, ỹ, x̃², ỹ², x̃ỹ, c̃_1 …): z(·) on the given rows, products after z (D6)."""
+    xt, yt = z_score(x), z_score(y)
+    cols = [np.ones_like(xt), xt, yt, xt**2, yt**2, xt * yt] + [z_score(u) for _, u in selected]
+    names = ["1", "z(x)", "z(y)", "z(x)^2", "z(y)^2", "z(x)z(y)"]
+    names += [f"z(c_{j}:{name})" for j, (name, _) in enumerate(selected, start=1)]
+    return np.column_stack(cols), names
 
 
 def ols_fit(u: Array, b: Array) -> Array:
@@ -237,6 +244,8 @@ def r_squared(u: Array, b: Array) -> tuple[float, float]:
         raise ValueError("constant response: SS_tot = 0")
     res = u - ols_fit(u, b)
     r2 = 1.0 - float(res @ res) / ss_tot
+    if not math.isfinite(r2):
+        raise ValueError(f"non-finite R²: {r2!r}")
     n, k = b.shape
     return r2, 1.0 - (1.0 - r2) * (n - 1) / (n - k)
 
@@ -272,7 +281,6 @@ def run_selection(
             steps.append({"step": s, "ran": False, "reason": "no remaining candidate", "selected": "none"})
             continue
         b, cols = design_basis(x, y, selected)
-        b_std, _ = _stack(z_score(x), z_score(y), selected)
         cond = float(np.linalg.cond(b))
         tau = threshold(np.array([r_squared(u, b)[0] for u in null_deciding]))
         tau_sigma = threshold(np.array([r_squared(u, b)[0] for u in null_sigma]))
@@ -323,7 +331,6 @@ def run_selection(
             "ran": True,
             "basis_columns": cols,
             "cond": cond,
-            "cond_standardised": float(np.linalg.cond(b_std)),
             "cond_ok": cond <= COND_MAX,
             "tau": tau,
             "tau_sigma_reference": tau_sigma,
@@ -443,8 +450,10 @@ def _plain(obj: Any) -> Any:
 def run(
     embeddings: Path, labels: Path, axes: Path, expected: Mapping[Path, str], out_path: Path
 ) -> dict[str, Any]:
-    check_digests(expected)
-    v32, label_list, axis_ids, a = load_inputs(embeddings, labels, axes)
+    raw = check_digests(expected)
+    v32, label_list, axis_ids, a = load_inputs(
+        raw[Path(embeddings)], raw[Path(labels)], raw[Path(axes)]
+    )
     validate_inputs(v32, label_list, axis_ids, a)
     v64 = v32.astype("<f8")
     v = np.array([row / np.sqrt(row @ row) for row in v64])

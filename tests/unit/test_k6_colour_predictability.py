@@ -1,6 +1,6 @@
 """Unit tests of tools/experiments/k6_colour_predictability.py.
 
-Specification: frontend/audits/K6.md (revision 5), frontend/audits/contracts.md §0 and §1,
+Specification: frontend/audits/K6.md (revision 6), frontend/audits/contracts.md §0 and §1,
 frontend/audits/derivations.md (D2, D4, D6, D7, D8, D11). Synthetic inputs only: CI has no
 .data/, and the measurement is never run on the real artefact here.
 """
@@ -8,6 +8,7 @@ frontend/audits/derivations.md (D2, D4, D6, D7, D8, D11). Synthetic inputs only:
 import hashlib
 import json
 import math
+from pathlib import Path
 
 import numpy as np
 import pytest
@@ -120,20 +121,42 @@ def test_null_directions_are_unit_and_orthogonal_to_the_anchor(rng):
 # Basis and regression ---------------------------------------------------------------------------
 
 
-def test_basis_has_exactly_the_listed_columns_in_order(rng):
-    x, y = rng.standard_normal(50), rng.standard_normal(50)
-    c1, c2 = rng.standard_normal(50), rng.standard_normal(50)
+def _z(u):
+    return (u - u.mean()) / u.std()
+
+
+HEAD = ["1", "z(x)", "z(y)", "z(x)^2", "z(y)^2", "z(x)z(y)"]
+
+
+def test_basis_has_exactly_the_listed_columns_in_order_standardised(rng):
+    x, y = 3.0 + 0.01 * rng.standard_normal(50), -2.0 + 5.0 * rng.standard_normal(50)
+    c1, c2 = rng.standard_normal(50), 1e-3 * rng.standard_normal(50)
+    xt, yt = _z(x), _z(y)
     for selected, names in (
         ([], []),
-        ([("lambda_2", c1)], ["c_1:lambda_2"]),
-        ([("lambda_2", c1), ("a_8", c2)], ["c_1:lambda_2", "c_2:a_8"]),
+        ([("lambda_2", c1)], ["z(c_1:lambda_2)"]),
+        ([("lambda_2", c1), ("a_8", c2)], ["z(c_1:lambda_2)", "z(c_2:a_8)"]),
     ):
         b, cols = k6.design_basis(x, y, selected)
-        expected = [np.ones(50), x, y, x**2, y**2, x * y] + [c for _, c in selected]
-        assert cols == ["1", "x", "y", "x^2", "y^2", "xy"] + names
+        expected = [np.ones(50), xt, yt, xt**2, yt**2, xt * yt] + [_z(c) for _, c in selected]
+        assert cols == HEAD + names
         assert b.shape == (50, 6 + len(selected))
         for j, col in enumerate(expected):
-            assert np.array_equal(b[:, j], col)
+            assert np.allclose(b[:, j], col, rtol=0.0, atol=1e-12)
+        for j in [1, 2, *range(6, b.shape[1])]:
+            assert abs(b[:, j].mean()) < 1e-12
+            assert b[:, j].std() == pytest.approx(1.0, abs=1e-12)
+
+
+def test_standardised_basis_gives_the_raw_basis_r_squared(rng):
+    # D6: standardising x, y and c_j maps span(B_s) onto the raw span; R² is unchanged.
+    n = 300
+    x, y, c = rng.uniform(-1, 1, n), rng.uniform(-1, 1, n), rng.standard_normal(n)
+    u = x - 0.5 * y**2 + 0.3 * c + rng.standard_normal(n)
+    raw = np.column_stack([np.ones(n), x, y, x**2, y**2, x * y, c])
+    assert np.linalg.cond(raw) < 1e3
+    b, _ = k6.design_basis(x, y, [("c", c)])
+    assert k6.r_squared(u, b)[0] == pytest.approx(k6.r_squared(u, raw)[0], abs=1e-12)
 
 
 def test_r_squared_is_centred_and_adjusted(rng):
@@ -155,6 +178,14 @@ def test_r_squared_refuses_a_constant_response():
     b = np.column_stack([np.ones(10), np.arange(10.0)])
     with pytest.raises(ValueError, match="constant"):
         k6.r_squared(np.full(10, 2.0), b)
+
+
+def test_r_squared_refuses_a_non_finite_result():
+    b = np.column_stack([np.ones(10), np.arange(10.0)])
+    u = np.arange(10.0) ** 2
+    u[3] = np.nan
+    with pytest.raises(ValueError, match="non-finite R"):
+        k6.r_squared(u, b)
 
 
 def test_calibration_control_hits_rho_exactly_and_detects_a_wrong_basis(rng):
@@ -241,10 +272,11 @@ def test_basis_at_each_step_is_augmented_by_the_selected_channels_in_order(rng, 
     monkeypatch.setattr(k6, "design_basis", spy)
     out = k6.run_selection(x, y, [("indep", indep), ("other", other)], nulls, sigma, h)
     assert out["selected"][0] == "indep"
-    assert calls[0][0] == ["1", "x", "y", "x^2", "y^2", "xy"]
-    assert calls[1][0] == ["1", "x", "y", "x^2", "y^2", "xy", "c_1:indep"]
-    assert np.array_equal(calls[1][1][:, 6], indep)
+    assert calls[0][0] == HEAD
+    assert calls[1][0] == [*HEAD, "z(c_1:indep)"]
+    assert np.allclose(calls[1][1][:, 6], _z(indep), rtol=0.0, atol=1e-12)
     assert out["steps"][1]["basis_columns"] == calls[1][0]
+    assert out["steps"][1]["cond"] == np.linalg.cond(calls[1][1])
 
 
 def test_candidates_nulls_and_controls_share_one_regression_function(rng, monkeypatch):
@@ -295,13 +327,33 @@ def test_unpredictable_positive_control_invalidates_the_instrument(rng):
     assert not valid and first == "positive_control" and failed[0] == "positive_control"
 
 
-def test_ill_conditioned_basis_invalidates_the_instrument(rng):
+def test_tiny_raw_scale_no_longer_fails_the_conditioning_gate(rng):
     x, y, indep, _, nulls, sigma, h = _planted(rng)
-    out = k6.run_selection(x * 1e-4, y, [("indep", indep)], nulls, sigma, h)
+    xs = 1e-3 * x
+    raw = np.column_stack([np.ones(len(x)), xs, y, xs**2, y**2, xs * y])
+    assert np.linalg.cond(raw) > k6.COND_MAX
+    out = k6.run_selection(xs, y, [("indep", indep)], nulls, sigma, h)
+    assert out["steps"][0]["cond"] < k6.COND_MAX
+    assert "cond_standardised" not in out["steps"][0]
+    valid, first, failed = k6.assess_validity([False, False, False], out)
+    assert valid and first is None and failed == []
+
+
+def test_collinear_standardised_columns_invalidate_the_instrument(rng):
+    # A two-valued x makes z(x)² an affine function of z(x): the standardised basis is singular.
+    x, y, indep, _, nulls, sigma, h = _planted(rng)
+    out = k6.run_selection(np.where(x > 0, 1.0, -1.0), y, [("indep", indep)], nulls, sigma, h)
     assert out["steps"][0]["cond"] > k6.COND_MAX
-    assert out["steps"][0]["cond_standardised"] < k6.COND_MAX
     valid, first, _ = k6.assess_validity([False, False, False], out)
     assert not valid and first == "step_1_cond"
+
+
+def test_a_nan_candidate_raises_instead_of_being_discarded(rng):
+    x, y, indep, _, nulls, sigma, h = _planted(rng)
+    bad = indep.copy()
+    bad[7] = np.nan
+    with pytest.raises(ValueError, match="non-finite R"):
+        k6.run_selection(x, y, [("bad", bad), ("indep", indep)], nulls, sigma, h)
 
 
 def test_all_candidates_failing_leaves_three_constant_channels(rng):
@@ -337,6 +389,14 @@ def test_frame_poles_follow_rank_and_fallback_is_flagged_per_dipole(rng):
     assert frame["fallback"] == [False, True, False]
     assert np.allclose(frame["p8"], k6.perp(a_hat[7], frame["c1_hat"]), atol=1e-15)
     assert k6.candidate_names(frame["fallback"]) == ["lambda_3", "a_8", "l"]
+
+
+def test_rank_8_axis_parallel_to_the_anchor_raises():
+    # P⊥â_(8) = 0 exactly: e_0 − ⟨e_0, e_0⟩e_0; mirrors polar_projector.py:241-245.
+    a_hat = np.eye(8, D)
+    a_hat[7] = a_hat[0]
+    with pytest.raises(ValueError, match="rank-8 axis"):
+        k6.build_frame(a_hat, list(range(8)), PolarProjector())
 
 
 def test_channels_are_unclipped_and_h_comes_from_the_operator(rng):
@@ -431,6 +491,42 @@ def test_run_refuses_a_mismatched_digest_before_writing(tmp_path, rng):
     assert not out.exists()
 
 
+def test_run_parses_the_bytes_it_hashed(tmp_path, rng, monkeypatch):
+    # Each input is swapped on disk right after its first read: a second read cannot pass.
+    n = 40
+    v32, a = _unit_rows_f32(rng, n), _unit_rows(rng, 8)
+    paths = _write_inputs(tmp_path, v32, _labels(n), _axes_json(a))
+    expected = _digests(*paths)
+    (tmp_path / "alt").mkdir()
+    alt_labels = [{"label": f"M{i}", "part": "P2"} for i in range(n)]
+    alt_paths = _write_inputs(tmp_path / "alt", _unit_rows_f32(rng, n), alt_labels,
+                              _axes_json(_unit_rows(rng, 8)))
+    swap = {p: q.read_bytes() for p, q in zip(paths, alt_paths)}
+    real_read = Path.read_bytes
+    reads = []
+
+    def spy(self):
+        data = real_read(self)
+        reads.append(Path(self))
+        if Path(self) in swap:
+            Path(self).write_bytes(swap[Path(self)])
+        return data
+
+    seen = {}
+
+    def fake_measure(v, a_hat, axis_ids, rng_, projector):
+        seen.update(v=v, a_hat=a_hat)
+        return {}
+
+    monkeypatch.setattr(Path, "read_bytes", spy)
+    monkeypatch.setattr(k6, "measure", fake_measure)
+    k6.run(*paths, expected, tmp_path / "out.json")
+    v64 = v32.astype(np.float64)
+    assert np.allclose(seen["v"], v64 / np.linalg.norm(v64, axis=1, keepdims=True), atol=1e-15)
+    assert np.allclose(seen["a_hat"], a / np.linalg.norm(a, axis=1, keepdims=True), atol=1e-15)
+    assert [reads.count(p) for p in paths] == [1, 1, 1]
+
+
 # Integrity: null elimination and memory layer ---------------------------------------------------
 
 
@@ -452,6 +548,9 @@ def test_validation_accepts_clean_inputs(rng):
         (lambda v, lab, ids, a: lab[0].__setitem__("label", ""), "label 0"),
         (lambda v, lab, ids, a: lab[5].__setitem__("label", "L1"), "label 5"),
         (lambda v, lab, ids, a: lab[2].__setitem__("part", None), "label 2"),
+        (lambda v, lab, ids, a: lab[1].pop("part"), "label 1"),
+        (lambda v, lab, ids, a: lab[3].__setitem__("part", ""), "label 3"),
+        (lambda v, lab, ids, a: ids.__setitem__(3, "AXIS_2"), "axis AXIS_2: duplicate"),
         (lambda v, lab, ids, a: lab.pop(), "count"),
         (lambda v, lab, ids, a: a.__setitem__((6, 3), np.nan), "AXIS_7"),
         (lambda v, lab, ids, a: a.__setitem__(1, 0.0), "AXIS_2"),
@@ -523,6 +622,47 @@ def test_memory_flip_of_the_exponent_lsb_passes_below_the_derived_magnitude(rng,
     factor = float(flipped[3, 7] / v[3, 7])
     assert abs(t) < _lsb_threshold(factor)
     k6.validate_inputs(flipped, lab, ids, a)
+
+
+@pytest.mark.parametrize("t", [0.0, 2.0**-140])
+def test_memory_flip_of_the_exponent_lsb_of_a_zero_or_subnormal_component_passes(rng, t):
+    # Exponent field 0 → 1: the component becomes a small normal (≈ 2⁻¹²⁶), far below the bound.
+    v, lab, ids, a = _valid_inputs(rng)
+    v[3] = _row_with_component(rng, t)
+    assert float(v[3, 7]) == t
+    flipped = _flip_bit_f32(v, 3, 7, 23)
+    assert 2.0**-126 <= float(flipped[3, 7]) < 2.0**-125
+    k6.validate_inputs(flipped, lab, ids, a)
+
+
+def _mantissa_bound(bit):
+    # Bit k (1 ≤ k ≤ 22) changes |v_i| by a relative r ≤ 2^(k−23); ‖v‖² by at most v_i²(2r + r²).
+    # From ‖v‖ = 1, detection needs |v_i| ≥ √((1 − (1 − tol)²) / (2r + r²)).
+    r = 2.0 ** (bit - 23)
+    return math.sqrt((1 - (1 - k6.NORM_TOL) ** 2) / (2 * r + r * r))
+
+
+def test_mantissa_bounds_are_derived():
+    assert _mantissa_bound(22) == pytest.approx(6.928e-3, rel=1e-3)
+    assert _mantissa_bound(8) < 1.0 < _mantissa_bound(7)
+
+
+@pytest.mark.parametrize("t", [0.005, -0.006])
+def test_memory_flip_of_mantissa_bit_22_passes_below_the_derived_bound(rng, t):
+    v, lab, ids, a = _valid_inputs(rng)
+    v[3] = _row_with_component(rng, t)
+    assert abs(t) < _mantissa_bound(22)
+    k6.validate_inputs(_flip_bit_f32(v, 3, 7, 22), lab, ids, a)
+
+
+@pytest.mark.parametrize("t", [0.03, -0.2])
+def test_memory_flip_of_mantissa_bit_22_is_caught_well_above_the_bound(rng, t):
+    # Bit 22 changes |v_i| by a relative r ∈ (1/4, 1/2]: ‖v‖² moves by ≥ 0.4375·t² > 6e-5.
+    v, lab, ids, a = _valid_inputs(rng)
+    v[3] = _row_with_component(rng, t)
+    k6.validate_inputs(v, lab, ids, a)
+    with pytest.raises(ValueError, match="row 3"):
+        k6.validate_inputs(_flip_bit_f32(v, 3, 7, 22), lab, ids, a)
 
 
 def test_memory_flip_of_the_sign_bit_is_a_declared_blind_spot(rng):
