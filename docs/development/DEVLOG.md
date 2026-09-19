@@ -188,3 +188,68 @@ de producto. Las fichas y los contratos están listos para construir encima.
 2. Coordinar con `traianus-2a` el marco por época y `/spatial?anchor=`.
 3. Script de K6 con TDD: tests de integridad → tests de derivaciones → código.
 4. Paquete de revisión (ceguera por construcción), fase 2 con el subagente, ejecución.
+
+---
+
+## 2026-09-19
+
+**Contexto:** día 2 de la PoC RefApp-01. Se partía de fichas K6 y R4 aprobadas en fase 1, sin
+producto, y con el trabajo de motor de `traianus-2a` terminado pero sin commitear.
+
+**Se hizo:**
+- **Trabajo de `traianus-2a` commiteado** en dos commits separados (seguridad del hook,
+  calibración del render). Al revisarlo: no resolvía el marco por nodo, solo escalaba x–y.
+  `docs/development-log` tenía un test en rojo desde ayer que dependía de ese trabajo; se trajo
+  el arreglo con cherry-pick.
+- **Pérdida relacional por orden de llegada**, registrada como exploración tras leer el código:
+  dentro de una época θ_dyn solo depende de la base y las aristas ε se recalculan al leer, así
+  que la pérdida es nula por construcción. Corregida la afirmación contraria de `POC.md`.
+- **AGENTS v1.7.0:** un segundo subagente, `instrument-implementer`, acotado (una rama, gate por
+  fichero, sin datos reales, se para en un commit). Lección del gate: la ruta va en el argumento
+  `target_file`; sin él, el hook deniega.
+- **K6, implementado con tests primero por el subagente.** Encontró un error del contrato: el bit
+  de signo nunca lo detecta la validación. Primera fase 2: CHANGES. Decisión del autor: B_s con
+  columnas estandarizadas, porque la escala de una dimensión no dice nada de ella.
+- **Ceguera por construcción.** Un intento de revisión se anuló porque el revisor leyó la
+  hipótesis al pasarse de rango; mover el texto no aislaba nada. Se construyó un paquete de
+  revisión desde un commit (`tools/audit/build_review_package.py`) y un hook que deniega toda
+  lectura fuera de él (`tools/hooks/confine_review_reads.py`). Probado en vivo: deniega
+  `POC.md`. Segunda fase 2 dentro del paquete: PASS, 0 bloqueantes.
+- **Commit antes de resultados** (pauta del autor): las dos versiones a ejecutar y la regla de
+  equivalencia se commitearon antes de correr. A (código revisado) y B (arreglos aplazados)
+  salieron idénticas byte a byte.
+- **Resultado de K6:** válido; admite λ₃ y a₈, descarta λ₂ (por 0,0019 sobre τ₁) y l; el tercer
+  canal queda constante. Decisiones del autor: L fijo, λ₃ → H, a₈ → C; eje z reformulado (paso 3)
+  como el segundo dipolo ortogonalizado en 384-d, a medir con la ficha K8.
+- **Marco por época en el motor:** `fit_epoch_frame` + `POST /spatial/calibrate` (revisión
+  append-only); `GET /spatial` responde 409 sin marco. Tests de R1 y R2 sobre `/spatial`; un test
+  exige que los canales del motor sean los de K6. Retirado el script de K4/K5, atado al marco por
+  nodo.
+- **Exploraciones anotadas:** partición de Voronoi sobre los ejes como prototipos (Gärdenfors);
+  transición continua cerca de un dipolo degenerado (opción del autor).
+
+**Resultado:** todo en ramas locales, sin push. `feat/epoch-frame` (`398dd0f`) contiene el resto:
+`feat/k6-colour-predictability` y `feat/render-calibration-hook-hardening`. Suite en verde.
+
+**Resuelto de entradas anteriores:**
+- 2026-09-18: formulación de los logs de pérdida relacional (exploración, nula por construcción);
+  coordinación con `traianus-2a` (commiteado; el marco por época lo hizo esta sesión); script de
+  K6 con TDD; paquete de revisión con ceguera por construcción, fase 2 y ejecución.
+- 2026-09-10: el hook del gate se vio actuar en vivo (denegó una edición de `AGENTS.md`).
+
+**Sin resolver / decisión pendiente:**
+- R3 (gobernanza): falta comprobar que hay tests que exigen las dos llaves.
+- Exploración pedida por el autor y no escrita aún en el repo: la documentación con formato fijo
+  que traduzca lenguaje a código, con citas de fichero y línea comprobables contra el código.
+- R1-INV4: `/ingesta/vector` no deduplica una clave repetida; bloquea la carga del corpus.
+- Manifest del paquete: `data/spinoza/telemetry` sale como no resuelta en vez de denegada (no se
+  copia; solo la clasificación).
+- Ficha K8 (eje z ortogonalizado), para los días 5–6.
+- Integrar las ramas en `docs/development-log` o en una rama de PoC, a decidir.
+- **Riesgo:** de dos días, el producto visible sigue sin existir; el hito es el 2026-09-22.
+
+**Próximo paso (mañana, en orden):**
+1. R3: comprobar o escribir los tests de las dos llaves.
+2. R1-INV4 y verificación de que `/ingesta/vector` guarda los bits intactos.
+3. Cargar el corpus nota a nota, calibrar y ver el mapa coloreado (humo real).
+4. `GET /spatial?anchor=<id>` con TDD.
