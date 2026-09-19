@@ -97,9 +97,11 @@ jobs:
             tests/security/test_hook_startup_surface.py \
             tests/security/test_review_confinement.py \
             tests/unit/test_context_pack.py \
+            tests/unit/test_delegation_contract.py \
             tools/hooks/confine_review_reads.py \
             tools/hooks/require_contract_context.py \
-            tools/audit/context_pack.py
+            tools/audit/context_pack.py \
+            tools/audit/delegation_contract.py
       - name: Mypy (strict, whole control plane)
         run: |
           mypy traianus/
