@@ -1519,3 +1519,49 @@
   change (§1.6): every touched or added test file is under `pytest tests/`.
 
 * **Status:** `Consolidated`.
+
+### seq 52 — 2026-09-19 — R1-INV4: `/ingesta/vector` deduplicates a repeated idempotency key (INV-4, second half)
+
+* **Defect:** `/ingesta/vector` required `X-Idempotency-Key` (seq 48) but ignored a repeated one: each
+  retry appended another revision to `manifold_nodes`, which had no key column. `/ingesta` already
+  deduplicated. It blocks loading the corpus note by note, where a retried request must not add a
+  revision.
+
+* **Fix:** `manifold_nodes.idempotency_key TEXT` (nullable) plus a UNIQUE index
+  (`idx_manifold_nodes_idempotency_key`, `MANIFOLD_NODES_IDEMPOTENCY_INDEX_DDL`). The migration is
+  `ALTER TABLE ADD COLUMN` then `CREATE UNIQUE INDEX IF NOT EXISTS`, after the existing rebuilds; rows
+  without a key keep NULL, which SQLite treats as pairwise distinct. A repeated key answers HTTP 200
+  `{"status": "accepted", "node_id", "seq", "duplicate": true}`, as `/ingesta` does, and writes and
+  evaluates nothing. The lookup runs after request validation and before any computation; it precedes
+  the consolidated guard, so a replay after consolidation is a duplicate, not a 409. The UNIQUE index
+  decides a race: `DuplicateIdempotencyKeyError` (not a `StorageError`, so it cannot become a 503) is
+  raised from `insert_node_revision` after re-reading the key, and is never retried; an `(id, seq)`
+  collision still retries and ends as `IntegrityError`. An empty or whitespace-only key is 422. The
+  unsafe-label 422 moved ahead of the key checks, unchanged, so the order among 422s is preserved.
+
+* **Departure from the spec text:** REMEDIATION-01 asked for the rename→recreate→copy→drop migration
+  used for `ingestion_queue`. The author chose the column plus index instead: the append-only revision
+  log is never copied. `docs/audit/AUDIT.md` and the INV-4 notes are updated to say so.
+
+* **Declared limits:**
+  - A repeated key with a different vector or label is a silent duplicate (parity with `/ingesta`).
+  - Rows written before the migration keep NULL, so a key repeated across it is not deduplicated.
+  - `/ingesta` still accepts an empty key; REMEDIATION-01 §3.1 asks both endpoints to reject it.
+    Not changed here.
+
+* **How it was built:** the first change delegated under AGENTS v1.8.0 (`engine-implementer`), with its
+  context served by `tools/audit/context_pack.py` (commit `3a9997f`) instead of whole files: about
+  33 KB of sections against about 125 KB for the eight files. Commit `a355309` on `feat/r1-inv4-vector-idempotency`, 29 new tests, each
+  confirmed red for its stated reason before the change. The main session reviewed the diff and re-ran
+  `pytest tests/`; it did not repeat `ruff`, `mypy` or the model partition, which are the
+  implementer's report.
+
+* **Gate:** `pytest tests/` → 1298 passed / 5 deselected (1269 before). Implementer: model partition
+  5 passed; `ruff` clean on the CI scope with the two new test files added to it (§1.6); `mypy traianus/`
+  clean. Not run: the C1 audit harness. Intermittent, not attributed to this change:
+  `tests/unit/storage/test_sqlite_engine_concurrency.py::test_concurrent_reads_during_background_write`
+  (a 5 ms p99 bound on `control_plane` and `data_plane` reads) failed in 2 of 10 full runs at this
+  commit, and one full run of 5 at the base commit `3a9997f` failed once on a test that was not named;
+  5 of 5 later runs at this commit passed.
+
+* **Status:** `Consolidated`.

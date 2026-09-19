@@ -38,14 +38,11 @@ The following findings were closed with a code fix verified by a deterministic t
 | M4 | Packaging misconfigured | ✅ Resolved |
 | M6 | Magic number `*10.0` contradicts ADR-005 | ✅ Resolved |
 | M8 | Nix devshell / reproducibility | ✅ Resolved | Nix `flake.nix` devshell removed from the v1.0.0 release freeze; reproducibility anchored in pinned `pyproject.toml` (Python 3.11, `requires-python = "~=3.11"`) and the green CI matrix (hermetic + model suites on `ubuntu-latest`). |
+| R1-INV4 | `/ingesta/vector` deduplicates a repeated `X-Idempotency-Key` | ✅ Resolved |
 
 ## Open Findings
 
-The following findings remain open and require additional attention:
-
-| ID | Title | Status |
-|---|---|---|
-| R1-INV4 | `/ingesta/vector` requires `X-Idempotency-Key` but does not deduplicate a repeated key: unlike `/ingesta`, it writes straight to `manifold_nodes`, which has no `idempotency_key` column. Needs a `UNIQUE` column and the rename→recreate→copy→drop migration used for `ingestion_queue` (REMEDIATION-01 INV-4, second half; LEDGER seq 48). | 🟠 Open |
+None. R1-INV4, the last one, was closed on 2026-09-19 (LEDGER seq 52). Two gaps found while closing it are declared, not open findings: `/ingesta` accepts an empty `X-Idempotency-Key` (REMEDIATION-01 §3.1 asks both endpoints to reject it), and a repeated key with a different payload is a silent duplicate on both endpoints.
 
 > **Note:** M1, M2, L1, L3, L4 were documentation-only findings. They have been resolved via documentation updates in branch `docs/excellence-v1.0.0` (see Remediation Status below). No code changes required; freeze v1.0.0 remains intact.
 
@@ -77,8 +74,9 @@ Resolution criterion: fix implemented in code **and** verified by a deterministi
 | L1 | ✅ Resolved (Doc) | `docs/STATUS.md` "Known Limitations" documents hermetic vs model suite scope |
 | L3 | ✅ Resolved (Doc) | Seq 7, 21 already fixed code; docs verified English-only |
 | L4 | ✅ Resolved (Doc) | `docs/STATUS.md` "Known Limitations" documents NSM basis as provisional scaffold |
+| R1-INV4 | ✅ Resolved | Nullable `manifold_nodes.idempotency_key` + UNIQUE index (no table rebuild); a repeated key answers 200 `duplicate: true` and writes nothing; regressions `tests/integration/test_vector_ingest_idempotency.py`, `tests/unit/test_manifold_nodes_idempotency_migration.py`. Rows written before the migration keep NULL, so a key repeated across it is not deduplicated. |
 
-**Open items:** R1-INV4 (key-based deduplication on `/ingesta/vector`); every other finding is resolved (code or documentation).
+**Open items:** none; every finding is resolved (code or documentation).
 
 ---
 

@@ -1,7 +1,7 @@
 # Full-Repo Audit Remediation (Normative Specification)
 
-**Status:** Executed 2026-09-18 (LEDGER seq 46, 48–51); one half open: INV-4's
-key-based deduplication. Pending operator approval for §7 (INDEX wiring).
+**Status:** Executed 2026-09-18 (LEDGER seq 46, 48–51) and 2026-09-19 (seq 52: INV-4's
+key-based deduplication). Pending operator approval for §7 (INDEX wiring).
 **Origin:** 8-angle full-repo code review (traianus/, tests/, tools/) + 13-candidate
 1-vote verification pass, 2026-09-13/14. 11 CONFIRMED, 2 REFUTED (discarded).
 **Companion:** each delta below closes with a `docs/LEDGER.md` `seq` entry on
@@ -167,7 +167,7 @@ Concrete, machine-checkable, tied to exact locations found during the audit:
 | INV-1 | `traianus/security/validator.py:59` | DB path resolves identically to `hook_gate.py:70` regardless of process cwd | **Resolved** (seq 46) |
 | INV-2 | `tools/hooks/require_boundary_validation.py:39` | `except json.JSONDecodeError` returns a blocking exit code | **Resolved** (seq 46) |
 | INV-3 | `traianus/app.py:395` | `/ingesta` rejects (4xx) when `X-Idempotency-Key` header is absent | **Resolved** (seq 48) |
-| INV-4 | `traianus/app.py:419` (`vector_ingestion_endpoint`) | `/ingesta/vector` enforces an idempotency-key contract | **Partial** (seq 48): header now required; key-based dedup deferred |
+| INV-4 | `traianus/app.py:419` (`vector_ingestion_endpoint`) | `/ingesta/vector` enforces an idempotency-key contract | **Resolved** (seq 48 header, seq 52 key-based dedup) |
 | INV-5 | `traianus/app.py:504` | Re-ingesting a label already `consolidated` does not silently produce `incubating` as the new current state | **Resolved** (seq 48) |
 | INV-6 | `traianus/app.py:782` | `edge_id(a,b) = edge_id(c,d)` implies `{a,b} = {c,d}` | **Resolved** (seq 48) |
 | INV-7 | `traianus/app.py:651` | `action_pot = float(gate["topological_key"]["variance"])` at every write site | **Resolved** (seq 49) |
@@ -188,7 +188,7 @@ lands (TDD, AGENTS.md §1.4), collected under `tests/security/` or
 |---|---|
 | INV-1 | `tests/security/test_hook_gate.py::test_audit_db_path_matches_validator_regardless_of_cwd` |
 | INV-2 | `tests/security/test_hook_gate.py::test_malformed_stdin_json_blocks` |
-| INV-3, INV-4 | `tests/security/test_ingesta_idempotency.py::test_ingesta_rejects_missing_idempotency_key`, `::test_ingesta_vector_enforces_idempotency_key` |
+| INV-3, INV-4 | `tests/security/test_ingesta_idempotency.py::test_ingesta_rejects_missing_idempotency_key`, `::test_ingesta_vector_enforces_idempotency_key`; `tests/integration/test_vector_ingest_idempotency.py`, `tests/unit/test_manifold_nodes_idempotency_migration.py` (seq 52) |
 | INV-5 | `tests/unit/test_substrate.py::test_reingesting_consolidated_label_does_not_regress_state` |
 | INV-6 | `tests/unit/test_substrate.py::test_edge_id_is_injective_over_hyphenated_labels` |
 | INV-7 | `tests/unit/test_substrate_invariants.py::test_consolidar_action_potential_is_true_variance` |
@@ -255,6 +255,11 @@ that gates every subsequent edit's audit trail, so it closes first.
     deduplication needs a `UNIQUE` column plus the rename→recreate→copy→drop
     migration this repo already uses for `ingestion_queue`. Deferred to its
     own delta rather than bundled here.
+    Completed in that delta (LEDGER seq 52, 2026-09-19), with one departure from
+    the wording above: no table rebuild. `manifold_nodes` gains a nullable
+    `idempotency_key` column and a UNIQUE index (NULLs stay distinct), so the
+    append-only revision log is never copied. A repeated key answers 200
+    `duplicate: true` and writes nothing; the UNIQUE index arbitrates a race.
   - INV-5: `insert_node_revision(..., guard_consolidated=True)` makes the check
     part of the `INSERT` statement, so a concurrent consolidation cannot slip
     between a read and the write; `/ingesta/vector` maps the refusal to 409.
@@ -269,7 +274,7 @@ that gates every subsequent edit's audit trail, so it closes first.
   guard PASSED (9/20). `tools/audit/audit_harness.py` and
   `tools/experiments/validation/validate_c1_semantics.py` also had to send the
   now-mandatory header (the harness failed loudly at 0/0 until fixed).
-- **Status:** `Consolidated` except the INV-4 dedup half (LEDGER seq 48).
+- **Status:** `Consolidated` (LEDGER seq 48; the INV-4 dedup half, seq 52).
 
 ### Δ3 — Audit-trail fidelity
 - **Defect:** INV-7, INV-8.
