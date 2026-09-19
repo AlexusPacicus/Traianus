@@ -34,12 +34,16 @@ Integrity: no nulls in, no silent bit flips
     file layer: any single bit flipped in any input artefact or consumed result changes its
       sha256, and the script refuses to run (test: flip bits at the header, the first and the
       last data byte, and a random position of each file; every one must be refused);
-    memory layer: a flipped sign or exponent bit in a vector component changes its scale and
-      must be rejected by null elimination (test: for sign, exponent MSB and exponent LSB of a
-      random component, validation must fail);
-    declared blind spot: a flipped low mantissa bit in memory changes one component by ≈ 1e-7,
-      inside binary32 rounding; no semantic check can see it, only the file digest can (test:
-      the flip passes validation — documenting the limit, not hiding it).
+    memory layer (amended 2026-09-19): a flipped exponent bit multiplies a component v_i by a
+      power of two, and null elimination catches it only when ‖v‖ leaves 1 ± 3e-5:
+      exponent MSB: |v_i| becomes ≥ 2, so ‖v‖ ≥ 2; always rejected (test: a random component);
+      exponent LSB: v_i doubles or halves, ‖v‖² changes by +3v_i² or −¾v_i²; rejected only
+        above |v_i| ≈ 4.5e-3 (doubling) or ≈ 8.9e-3 (halving), smaller components pass
+        (tests: components above and below the derived magnitude, both outcomes asserted);
+    declared blind spots, seen only by the file digest (tests: the flip passes validation —
+      documenting the limit, not hiding it):
+      sign bit: ‖v‖ is unchanged exactly; no norm check can see it;
+      low mantissa bit: changes one component by ≈ 1e-7, inside binary32 rounding.
 
 Conversions
   V64 = V32.astype('<f8')                       exact: every binary32 is a binary64.
@@ -85,9 +89,13 @@ Wire to the client (rendering, not measured)
 En palabras: los datos de entrada se identifican por su huella SHA-256, y ningún script corre si no
 coinciden. Después se eliminan los nulos: ningún NaN ni infinito, ninguna fila con longitud fuera
 de 1 ± 3e-5, ninguna etiqueta vacía o repetida. Y se demuestra rompiéndolo: los tests cambian un
-solo bit y exigen que se detecte. En el archivo lo detecta siempre la huella. En memoria, un bit de
-signo o de exponente cambia la escala y lo detecta la validación; un bit bajo de la mantisa es
-indistinguible del redondeo y solo lo ve la huella del archivo, y el test lo deja escrito. Pasar de float32 a float64 no cambia ningún bit del valor; renormalizar sí, y depende
+solo bit y exigen que se detecte. En el archivo lo detecta siempre la huella. En memoria (corregido el
+2026-09-19), un bit alto del exponente multiplica la componente por una potencia enorme de 2 y la
+validación lo detecta siempre; el bit bajo del exponente la duplica o la divide por dos, y solo se
+detecta si la componente pasa de ≈ 0,0045 (al duplicarse) o ≈ 0,0089 (al dividirse): por debajo,
+el cambio de longitud cabe en la tolerancia. Un bit de signo no cambia la longitud, y un bit bajo
+de la mantisa es indistinguible del redondeo: ninguna validación los ve, solo la huella del
+archivo, y los tests lo dejan escrito. Pasar de float32 a float64 no cambia ningún bit del valor; renormalizar sí, y depende
 del orden en que se suman los productos. Por eso los resultados solo son idénticos bit a bit en el
 mismo entorno (versión de numpy, BLAS, hilos, CPU); entre máquinas coinciden dentro de una
 tolerancia, y cada decisión guarda su margen al umbral para que un cambio por redondeo se vea. El
