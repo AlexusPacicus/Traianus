@@ -93,10 +93,12 @@ jobs:
             tests/integration/test_spatial_observables_endpoint.py \
             tests/fixtures/polar_fixtures.py \
             tests/security/test_config_perimeter.py \
+            tests/security/test_contract_context_hook.py \
             tests/security/test_hook_startup_surface.py \
             tests/security/test_review_confinement.py \
             tests/unit/test_context_pack.py \
             tools/hooks/confine_review_reads.py \
+            tools/hooks/require_contract_context.py \
             tools/audit/context_pack.py
       - name: Mypy (strict, whole control plane)
         run: |
