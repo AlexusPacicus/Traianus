@@ -94,6 +94,7 @@ jobs:
             tests/fixtures/polar_fixtures.py \
             tests/security/test_config_perimeter.py \
             tests/security/test_contract_context_hook.py \
+            tests/security/test_hook_case_identity.py \
             tests/security/test_hook_startup_surface.py \
             tests/security/test_review_confinement.py \
             tests/unit/test_context_pack.py \
