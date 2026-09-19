@@ -91,11 +91,13 @@ jobs:
             tests/integration/test_polar_telemetry_integration.py \
             tests/integration/test_sqlite_engine_block.py \
             tests/integration/test_spatial_observables_endpoint.py \
+            tests/integration/test_vector_ingest_idempotency.py \
             tests/fixtures/polar_fixtures.py \
             tests/security/test_config_perimeter.py \
             tests/security/test_hook_startup_surface.py \
             tests/security/test_review_confinement.py \
             tests/unit/test_context_pack.py \
+            tests/unit/test_manifold_nodes_idempotency_migration.py \
             tools/hooks/confine_review_reads.py \
             tools/audit/context_pack.py
       - name: Mypy (strict, whole control plane)

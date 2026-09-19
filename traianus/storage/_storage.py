@@ -94,9 +94,17 @@ CREATE TABLE IF NOT EXISTS manifold_nodes (
     epoch_provenance TEXT NOT NULL DEFAULT 'PROSTHETIC_NSM_V1',
     event_type TEXT CHECK (event_type IS NULL OR event_type IN ('ERROR', 'RECALIBRATION_SIGNAL')),
     sys_internal_timestamp DATETIME DEFAULT CURRENT_TIMESTAMP,
+    idempotency_key TEXT,
     PRIMARY KEY (id, seq),
     CHECK (lifecycle_state IN ('pending_approval', 'incubating', 'consolidated', 'telemetry_error'))
 )
+"""
+
+# R1-INV4: a UNIQUE index rather than a table rebuild. NULLs stay pairwise distinct, so
+# revisions written without a key (consolidation, text path, telemetry) are unaffected.
+MANIFOLD_NODES_IDEMPOTENCY_INDEX_DDL = """
+CREATE UNIQUE INDEX IF NOT EXISTS idx_manifold_nodes_idempotency_key
+    ON manifold_nodes (idempotency_key)
 """
 
 MANIFOLD_EDGES_DDL = """
@@ -263,6 +271,14 @@ def init_relational_tables():
         ]
         if event_cols and "event_type" not in event_cols:
             conn.execute("ALTER TABLE manifold_nodes ADD COLUMN event_type TEXT")
+        # R1-INV4: nullable key column + UNIQUE index, no rebuild (the revision log
+        # is never copied); existing rows keep NULL.
+        key_cols = [
+            row[1] for row in conn.execute("PRAGMA table_info(manifold_nodes)").fetchall()
+        ]
+        if "idempotency_key" not in key_cols:
+            conn.execute("ALTER TABLE manifold_nodes ADD COLUMN idempotency_key TEXT")
+        conn.execute(MANIFOLD_NODES_IDEMPOTENCY_INDEX_DDL)
         conn.execute(MANIFOLD_EDGES_DDL)
         # Schema migration for pre-H4 DBs: each existing edge becomes its
         # revision seq=1. History is preserved (append-only invariant #1).
@@ -439,6 +455,18 @@ class ConsolidatedRegressionError(StorageError):
     """An ingestion write would supersede a consolidated revision (R4)."""
 
 
+class DuplicateIdempotencyKeyError(Exception):
+    """A node revision already carries this idempotency key (R1-INV4).
+
+    An idempotent replay, not a failure, hence not a StorageError. `node_id` and
+    `seq` identify the stored revision that holds the key."""
+
+    def __init__(self, node_id: str, seq: int) -> None:
+        super().__init__(f"idempotency key already stored on {node_id} seq {seq}")
+        self.node_id = node_id
+        self.seq = seq
+
+
 def enqueue_ingest(text: str, idempotency_key: str | None) -> tuple[int, bool]:
     """Persists a raw ingestion payload; returns (ingestion_id, duplicate).
 
@@ -478,20 +506,31 @@ def mark_queue_processed(conn: sqlite3.Connection, ingestion_id: int) -> None:
 # NODE REVISION LOG
 # =====================================================================
 
+def _raise_if_key_taken(conn: sqlite3.Connection, key: str | None) -> None:
+    if key is None:
+        return
+    taken = node_by_idempotency_key(conn, key)
+    if taken is not None:
+        raise DuplicateIdempotencyKeyError(*taken)
+
+
 def _insert_node_revision(conn: sqlite3.Connection, node_id: str, text: str,
                           toon_factor: str, lifecycle_state: str, action_potential: float,
                           revision_milestone: int, vector_blob: bytes,
                           projections_json: str, epoch_provenance: str,
-                          guard_consolidated: bool = False) -> int:
+                          guard_consolidated: bool = False,
+                          idempotency_key: str | None = None) -> int:
     # guard_consolidated makes the check part of the INSERT statement itself, so
     # a concurrent consolidation cannot slip between a read and the write.
+    # A taken idempotency key is a replay, not an (id, seq) collision: the UNIQUE
+    # index is the arbiter, the key is re-read, and the insert is never retried.
     for attempt in range(3):
         seq = next_node_seq(conn, node_id)
         try:
             cur = conn.execute("""
                 INSERT INTO manifold_nodes
-                (id, seq, text, toon_factor, lifecycle_state, action_potential, revision_milestone, vector_blob, projections_json, epoch_provenance)
-                SELECT ?, ?, ?, ?, ?, ?, ?, ?, ?, ?
+                (id, seq, text, toon_factor, lifecycle_state, action_potential, revision_milestone, vector_blob, projections_json, epoch_provenance, idempotency_key)
+                SELECT ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?
                 WHERE NOT (? AND EXISTS (
                     SELECT 1 FROM manifold_nodes c
                     WHERE c.id = ? AND c.lifecycle_state = 'consolidated'
@@ -499,12 +538,14 @@ def _insert_node_revision(conn: sqlite3.Connection, node_id: str, text: str,
             """, (
                 node_id, seq, text, toon_factor, lifecycle_state, action_potential,
                 revision_milestone, vector_blob, projections_json, epoch_provenance,
-                int(guard_consolidated), node_id,
+                idempotency_key, int(guard_consolidated), node_id,
             ))
             if cur.rowcount == 0:
+                _raise_if_key_taken(conn, idempotency_key)
                 raise ConsolidatedRegressionError(node_id)
             return seq
         except sqlite3.IntegrityError:
+            _raise_if_key_taken(conn, idempotency_key)
             if attempt == 2:
                 raise
     return seq  # unreachable
@@ -515,25 +556,29 @@ def insert_node_revision(node_id: str, text: str, toon_factor: str,
                          revision_milestone: int, vector_blob: bytes,
                          projections_json: str, epoch_provenance: str,
                          conn: sqlite3.Connection | None = None,
-                         guard_consolidated: bool = False) -> int:
+                         guard_consolidated: bool = False,
+                         idempotency_key: str | None = None) -> int:
     """Inserts a new node revision (append-only, H4); returns the seq used.
 
     When `conn` is provided, operates inside that transaction (no commit —
     the caller owns it); otherwise opens its own connection and commits.
     With `guard_consolidated`, raises ConsolidatedRegressionError instead of
     writing over a node whose current revision is consolidated (R4).
+    With `idempotency_key`, the revision stores the key; if another revision
+    already carries it, nothing is written and DuplicateIdempotencyKeyError
+    names the stored one (R1-INV4).
     """
     if conn is None:
         with get_db_connection() as c:
             return _insert_node_revision(
                 c, node_id, text, toon_factor, lifecycle_state, action_potential,
                 revision_milestone, vector_blob, projections_json, epoch_provenance,
-                guard_consolidated,
+                guard_consolidated, idempotency_key,
             )
     return _insert_node_revision(
         conn, node_id, text, toon_factor, lifecycle_state, action_potential,
         revision_milestone, vector_blob, projections_json, epoch_provenance,
-        guard_consolidated,
+        guard_consolidated, idempotency_key,
     )
 
 
@@ -572,6 +617,14 @@ def node_exists(conn: sqlite3.Connection, node_id: str) -> bool:
     return conn.execute(
         "SELECT 1 FROM manifold_nodes WHERE id = ? LIMIT 1", (node_id,)
     ).fetchone() is not None
+
+
+def node_by_idempotency_key(conn: sqlite3.Connection, key: str) -> tuple[str, int] | None:
+    """(id, seq) of the revision carrying this idempotency key, or None (R1-INV4)."""
+    row = conn.execute(
+        "SELECT id, seq FROM manifold_nodes WHERE idempotency_key = ?", (key,)
+    ).fetchone()
+    return None if row is None else (str(row[0]), int(row[1]))
 
 
 def get_current_nodes() -> list[tuple]:
