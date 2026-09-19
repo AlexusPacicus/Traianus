@@ -137,6 +137,11 @@ Output   data/refapp/K6_result.json with: digests; environment; ranking_fit, ran
          when valid), failed_conditions (every failed condition, in check order: dipole-1
          fallback; then per step cond(B_s) ≤ 1e5, the positive control (step 1), each control's
          exactness and its side). valid = false ⇒ no candidate result may be used.
+         Identifiers, in that order (amended 2026-09-19): dipole_1_fallback; for each step s
+         that ran: step_s_cond, positive_control (s = 1 only), step_s_control_in_exact,
+         step_s_control_in_side, step_s_control_out_exact, step_s_control_out_side.
+         Basis column names (amended 2026-09-19): 1, z(x), z(y), z(x)^2, z(y)^2, z(x)z(y),
+         z(c_j:<name>) for the j-th selected channel.
 Function
   ranking: order k by mean_{v ∈ FIT} ⟨v, â_k⟩, descending; ties by axis id.
   frame:   ĉ₁ = â_(1); dipole j ∈ {1, 2, 3} = (â_(2j), â_(2j+1)); w_j = P⊥â_(2j) − P⊥â_(2j+1).
@@ -150,6 +155,9 @@ Function
   R²(u; B) = 1 − ‖u − B β̂‖² / ‖u − ū‖², β̂ = argmin ‖u − Bβ‖ (numpy.linalg.lstsq);
            adjusted R² = 1 − (1 − R²)(n − 1)/(n − k), n = 1,110, k = columns of B incl. 1.
   τ_s = sort(R²(n_i; B_s), i = 1…1000)[988], n_i = ⟨v, w⁰_i⟩/‖w⁰_i‖², w⁰_i = P⊥g_i/‖P⊥g_i‖.
+  Σ-weighted null (reference only, amended 2026-09-19): as n_i with g_i = X_cᵀz_i/√1110,
+           X_c = EVAL centred on its column means, z_i ~ N(0, I_1110) drawn after the deciding
+           null from the same generator; tau_sigma_reference_s = sort(R²; B_s)[988].
   selection: c_s = first remaining candidate with R²(·; B_s) ≤ τ_s; failures discarded.
 ```
 
@@ -165,7 +173,9 @@ escala de una dimensión no dice nada de ella, y el R² no cambia (corregido el 
 resultado guarda, en cada paso, qué candidatos se probaron (con su R² y su R² ajustado), cuál se
 eligió, cuáles se descartaron y cuáles no llegaron a probarse. Si falla alguna condición de
 validez, el resultado lo dice (valid = false, la primera condición fallida y la lista completa) y
-ningún consumidor puede usarlo.
+ningún consumidor puede usarlo. Los nombres de esas condiciones, su orden y los nombres de las
+columnas de la base quedan fijados en el contrato; el null ponderado por Σ, que solo se reporta y
+nunca decide, también queda definido aquí (corregido el 2026-09-19).
 
 ## 2. R4 — neighbourhood kept in a 5D perspective
 

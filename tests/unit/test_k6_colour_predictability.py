@@ -712,3 +712,50 @@ def test_run_writes_the_result_json_as_the_contract_states(tmp_path, rng):
     again = tmp_path / "again.json"
     k6.run(*paths, expected, again)
     assert again.read_bytes() == out.read_bytes()
+
+
+def _validity_selection(**fail):
+    def step(s):
+        return {
+            "step": s, "ran": True, "cond_ok": not fail.get(f"cond_{s}"),
+            "controls": {side: {"exact": not fail.get(f"{side}_exact_{s}"),
+                                "side_ok": not fail.get(f"{side}_side_{s}")}
+                         for side in ("in", "out")},
+        }
+    return {"steps": [step(1), step(2), {"step": 3, "ran": False}],
+            "positive_control": {"passes": not fail.get("positive")}}
+
+
+def test_validity_lists_every_failed_condition_in_the_record_order():
+    every = {f"{k}_{s}": True for s in (1, 2) for k in
+             ("cond", "in_exact", "in_side", "out_exact", "out_side")}
+    valid, first, failed = k6.assess_validity([True, False, False],
+                                              _validity_selection(positive=True, **every))
+    assert not valid and first == "dipole_1_fallback"
+    assert failed == [
+        "dipole_1_fallback",
+        "step_1_cond", "positive_control",
+        "step_1_control_in_exact", "step_1_control_in_side",
+        "step_1_control_out_exact", "step_1_control_out_side",
+        "step_2_cond",
+        "step_2_control_in_exact", "step_2_control_in_side",
+        "step_2_control_out_exact", "step_2_control_out_side",
+    ]
+
+
+@pytest.mark.parametrize(("flag", "expected"), [
+    ("cond_2", "step_2_cond"),
+    ("positive", "positive_control"),
+    ("in_exact_1", "step_1_control_in_exact"),
+    ("in_side_2", "step_2_control_in_side"),
+    ("out_exact_2", "step_2_control_out_exact"),
+    ("out_side_1", "step_1_control_out_side"),
+])
+def test_each_failed_condition_alone_is_reported_alone(flag, expected):
+    valid, first, failed = k6.assess_validity([False, False, False],
+                                              _validity_selection(**{flag: True}))
+    assert (valid, first, failed) == (False, expected, [expected])
+
+
+def test_all_conditions_holding_is_valid():
+    assert k6.assess_validity([False, True, True], _validity_selection()) == (True, None, [])
