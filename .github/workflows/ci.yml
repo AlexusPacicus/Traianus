@@ -95,7 +95,9 @@ jobs:
             tests/security/test_config_perimeter.py \
             tests/security/test_hook_startup_surface.py \
             tests/security/test_review_confinement.py \
-            tools/hooks/confine_review_reads.py
+            tests/unit/test_context_pack.py \
+            tools/hooks/confine_review_reads.py \
+            tools/audit/context_pack.py
       - name: Mypy (strict, whole control plane)
         run: |
           mypy traianus/
