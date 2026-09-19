@@ -296,6 +296,33 @@ on the text path, descriptive only.
 Exploration branch: not in the PoC's scope, no gate; it enters a registry only after its own
 instrument audit.
 
+## Exploration: Voronoi partition over prototypes (author's idea, 2026-09-19)
+
+**Idea.** Gärdenfors' conceptual spaces: each category is the Voronoi cell of a prototype; a
+state moving continuously gets a discrete label, and crossing a cell boundary is a state
+transition. The author's sketch draws it on a chromaticity plane (a*, b*) with four colour
+prototypes and a spiral trajectory; the sketch is illustrative, not data.
+
+**Translation to the engine.** Prototypes = the 8 geodetic axes â_k. On the unit sphere the
+Voronoi cell of â_k under cosine is {v : ⟨v, â_k⟩ ≥ ⟨v, â_j⟩ ∀ j}, i.e. the dominant attractor
+the engine already computes at ingest (`app.py`, `dominant_attractor`); spherical Voronoi cells
+are convex, Gärdenfors' criterion, by construction. The trajectory is the corpus in text order
+(the order the engine is loaded in): a transition is a change of dominant axis between
+consecutive notes.
+
+**Where the partition is computed decides whether it adds anything.**
+- In 384-d (nearest axis): information the map's position does not carry; a categorical
+  channel (hue per cell), not a continuous one. Seven of the eight axes already build the
+  per-epoch frame, so its relation to K6's selected channels must be stated.
+- On the 2-D map (nearest prototype in (x, y)): a function of position by construction,
+  exactly what K6's rule rejects. Not pursued.
+
+**Refuter (candidate, not audited).** In text order, dominant-axis transitions are not more
+frequent at the boundaries between the Ethics' five parts than under a block-permutation null
+of the note order. Needs its own instrument audit before any figure is used.
+
+Exploration branch: not in the PoC's scope, no gate.
+
 ## Record questions (not for reviewers)
 
 Kept here, outside `frontend/audits/`, so a blind reviewer never reads them (moved 2026-09-19
