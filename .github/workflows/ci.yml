@@ -93,7 +93,9 @@ jobs:
             tests/integration/test_spatial_observables_endpoint.py \
             tests/fixtures/polar_fixtures.py \
             tests/security/test_config_perimeter.py \
-            tests/security/test_hook_startup_surface.py
+            tests/security/test_hook_startup_surface.py \
+            tests/security/test_review_confinement.py \
+            tools/hooks/confine_review_reads.py
       - name: Mypy (strict, whole control plane)
         run: |
           mypy traianus/

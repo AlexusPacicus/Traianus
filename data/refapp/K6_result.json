@@ -1,0 +1,326 @@
+{
+  "clip_fractions": {
+    "lambda_2": 0.0,
+    "lambda_3": 0.0,
+    "null_deciding": 0.0,
+    "null_sigma": 0.0,
+    "x": 0.0
+  },
+  "constant_channels": 1,
+  "digests": {
+    "embeddings.npy": "eafb0e97172830f2404e96fa08d74bf6cccc0b6cbe84d47b790a476603e7d8d1",
+    "labels.json": "1d60699353d810f089730c6203ee28f9c416e3004b60781bc965cec284097f4f",
+    "nsm_axes_8.json": "b14e5d6700d1a7478a357ca26f0f38f5240f97a42daad45722d21f1c3f964e35"
+  },
+  "environment": {
+    "numpy": "2.4.1",
+    "numpy_config": {
+      "Build Dependencies": {
+        "blas": {
+          "detection method": "system",
+          "found": true,
+          "include directory": "unknown",
+          "lib directory": "unknown",
+          "name": "accelerate",
+          "openblas configuration": "unknown",
+          "pc file directory": "unknown",
+          "version": "unknown"
+        },
+        "lapack": {
+          "detection method": "system",
+          "found": true,
+          "include directory": "unknown",
+          "lib directory": "unknown",
+          "name": "accelerate",
+          "openblas configuration": "unknown",
+          "pc file directory": "unknown",
+          "version": "unknown"
+        }
+      },
+      "Compilers": {
+        "c": {
+          "commands": "cc",
+          "linker": "ld64",
+          "name": "clang",
+          "version": "15.0.0"
+        },
+        "c++": {
+          "commands": "c++",
+          "linker": "ld64",
+          "name": "clang",
+          "version": "15.0.0"
+        },
+        "cython": {
+          "commands": "cython",
+          "linker": "cython",
+          "name": "cython",
+          "version": "3.2.4"
+        }
+      },
+      "Machine Information": {
+        "build": {
+          "cpu": "aarch64",
+          "endian": "little",
+          "family": "aarch64",
+          "system": "darwin"
+        },
+        "host": {
+          "cpu": "aarch64",
+          "endian": "little",
+          "family": "aarch64",
+          "system": "darwin"
+        }
+      },
+      "Python Information": {
+        "path": "/private/var/folders/pr/_3h4tm913_l56k6hrhpm89z00000gn/T/build-env-9ze0nkjb/bin/python",
+        "version": "3.11"
+      },
+      "SIMD Extensions": {
+        "baseline": [
+          "NEON",
+          "NEON_FP16",
+          "NEON_VFPV4",
+          "ASIMD"
+        ],
+        "found": [
+          "ASIMDHP",
+          "ASIMDDP"
+        ],
+        "not found": [
+          "ASIMDFHM"
+        ]
+      }
+    },
+    "platform": "macOS-15.6-arm64-arm-64bit",
+    "python": "3.11.6",
+    "threads": {
+      "OMP_NUM_THREADS": "1",
+      "OPENBLAS_NUM_THREADS": "1",
+      "VECLIB_MAXIMUM_THREADS": "1"
+    }
+  },
+  "failed_conditions": [],
+  "fallback": {
+    "dipole_1": false,
+    "dipole_2": false,
+    "dipole_3": false
+  },
+  "first_failed_condition": null,
+  "means_fit": {
+    "AXIS_1": 0.11045900794098502,
+    "AXIS_2": 0.09274175676983235,
+    "AXIS_3": 0.1058808155667633,
+    "AXIS_4": 0.06900678371935312,
+    "AXIS_5": 0.041727554757197055,
+    "AXIS_6": 0.04948151356738828,
+    "AXIS_7": 0.06665264475904913,
+    "AXIS_8": 0.06292593436520513
+  },
+  "means_full": {
+    "AXIS_1": 0.11123799847402575,
+    "AXIS_2": 0.09310248508855018,
+    "AXIS_3": 0.10532354214461724,
+    "AXIS_4": 0.06924072946341285,
+    "AXIS_5": 0.042428680622222575,
+    "AXIS_6": 0.051944238731998264,
+    "AXIS_7": 0.06671846014426103,
+    "AXIS_8": 0.06377822040902686
+  },
+  "n_eval": 1110,
+  "n_fit": 1111,
+  "positive_control": {
+    "adj_r2": 0.9998724192795979,
+    "margin": 0.8774690041890626,
+    "passes": true,
+    "r2": 0.9998729944857314,
+    "tau_1": 0.12240399029666882
+  },
+  "ranking_fit": [
+    "AXIS_1",
+    "AXIS_3",
+    "AXIS_2",
+    "AXIS_4",
+    "AXIS_7",
+    "AXIS_8",
+    "AXIS_6",
+    "AXIS_5"
+  ],
+  "ranking_full": [
+    "AXIS_1",
+    "AXIS_3",
+    "AXIS_2",
+    "AXIS_4",
+    "AXIS_7",
+    "AXIS_8",
+    "AXIS_6",
+    "AXIS_5"
+  ],
+  "rankings_match": true,
+  "selected": [
+    "lambda_3",
+    "a_8"
+  ],
+  "steps": [
+    {
+      "basis_columns": [
+        "1",
+        "z(x)",
+        "z(y)",
+        "z(x)^2",
+        "z(y)^2",
+        "z(x)z(y)"
+      ],
+      "candidates": [
+        {
+          "adj_r2": 0.1203165183191528,
+          "margin": 0.0018786393014779135,
+          "name": "lambda_2",
+          "outcome": "discarded",
+          "r2": 0.12428262959814673
+        },
+        {
+          "adj_r2": 0.012867835513272419,
+          "margin": -0.10508560399671152,
+          "name": "lambda_3",
+          "outcome": "selected",
+          "r2": 0.0173183862999573
+        },
+        {
+          "name": "a_8",
+          "outcome": "not_reached"
+        },
+        {
+          "name": "l",
+          "outcome": "not_reached"
+        }
+      ],
+      "cond": 3.241122871630892,
+      "cond_ok": true,
+      "controls": {
+        "in": {
+          "deviation": 1.6653345369377348e-16,
+          "exact": true,
+          "expected_side": "admissible",
+          "margin": -0.06120199514833424,
+          "r2": 0.061201995148334576,
+          "rho": 0.06120199514833441,
+          "side_ok": true
+        },
+        "out": {
+          "deviation": 0.0,
+          "exact": true,
+          "expected_side": "not_admissible",
+          "margin": 0.43879800485166565,
+          "r2": 0.5612019951483345,
+          "rho": 0.5612019951483345,
+          "side_ok": true
+        }
+      },
+      "ran": true,
+      "selected": "lambda_3",
+      "step": 1,
+      "tau": 0.12240399029666882,
+      "tau_sigma_reference": 0.16484385869162776
+    },
+    {
+      "basis_columns": [
+        "1",
+        "z(x)",
+        "z(y)",
+        "z(x)^2",
+        "z(y)^2",
+        "z(x)z(y)",
+        "z(c_1:lambda_3)"
+      ],
+      "candidates": [
+        {
+          "adj_r2": 0.06544543898034394,
+          "margin": -0.09462960562027356,
+          "name": "a_8",
+          "outcome": "selected",
+          "r2": 0.07050164039253315
+        },
+        {
+          "name": "l",
+          "outcome": "not_reached"
+        }
+      ],
+      "cond": 3.2507426123225276,
+      "cond_ok": true,
+      "controls": {
+        "in": {
+          "deviation": 3.3306690738754696e-16,
+          "exact": true,
+          "expected_side": "admissible",
+          "margin": -0.08256562300640302,
+          "r2": 0.08256562300640369,
+          "rho": 0.08256562300640335,
+          "side_ok": true
+        },
+        "out": {
+          "deviation": 0.0,
+          "exact": true,
+          "expected_side": "not_admissible",
+          "margin": 0.41743437699359665,
+          "r2": 0.5825656230064034,
+          "rho": 0.5825656230064034,
+          "side_ok": true
+        }
+      },
+      "ran": true,
+      "selected": "a_8",
+      "step": 2,
+      "tau": 0.1651312460128067,
+      "tau_sigma_reference": 0.22722555064187644
+    },
+    {
+      "basis_columns": [
+        "1",
+        "z(x)",
+        "z(y)",
+        "z(x)^2",
+        "z(y)^2",
+        "z(x)z(y)",
+        "z(c_1:lambda_3)",
+        "z(c_2:a_8)"
+      ],
+      "candidates": [
+        {
+          "adj_r2": 0.2914485279726716,
+          "margin": 0.0996320619456098,
+          "name": "l",
+          "outcome": "discarded",
+          "r2": 0.2959208997528261
+        }
+      ],
+      "cond": 3.2644761408575893,
+      "cond_ok": true,
+      "controls": {
+        "in": {
+          "deviation": 1.1102230246251565e-16,
+          "exact": true,
+          "expected_side": "admissible",
+          "margin": -0.09814441890360803,
+          "r2": 0.09814441890360825,
+          "rho": 0.09814441890360814,
+          "side_ok": true
+        },
+        "out": {
+          "deviation": 0.0,
+          "exact": true,
+          "expected_side": "not_admissible",
+          "margin": 0.40185558109639186,
+          "r2": 0.5981444189036081,
+          "rho": 0.5981444189036081,
+          "side_ok": true
+        }
+      },
+      "ran": true,
+      "selected": "none",
+      "step": 3,
+      "tau": 0.1962888378072163,
+      "tau_sigma_reference": 0.29571325177131647
+    }
+  ],
+  "valid": true
+}

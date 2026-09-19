@@ -21,8 +21,8 @@ observation of a governed Traianus state.
 
 **Features:**
 1. Overview map of the corpus in 5D: position (x, y) from the anchor and first dipole, colour
-   (l, c, h) from three further dimensions the position does not carry — the second dipole (axes
-   4–5) among them. Same idea as `project_to_5d` (`observables.py`), in the per-epoch geodetic
+   (l, c, h) from further dimensions the position does not carry, chosen by K6: λ₃ and a₈, the
+   third channel constant (K6 result, 2026-09-19; see Scope changes). Same idea as `project_to_5d` (`observables.py`), in the per-epoch geodetic
    frame instead of a global SVD.
 2. Zoom and pan.
 3. Perspective: select a note, and the map is redrawn from it.
@@ -83,7 +83,7 @@ to a publication. A figure without a row here is not used to decide anything.
 | K3 | The overview picks anchor and dipole per node, not per epoch | construction | n/a (read from code) | — | `spatial_observables.py:159-160` |
 | K4 | corr(tanh d_esc, y) = −0.968 on Spinoza (n = 2,221) | unbacked | no | — | ADR-026; `tools/experiments/measure_polar_render_range.py` is uncommitted and writes no artifact. Also measured on the per-node frame (K3) |
 | K5 | Raw ranges: λ 7.16% of [−1, 1], anchor component 19.07%, x–y box 1.36% of the viewport | unbacked | no | — | as K4 |
-| K6 | Each colour channel is not second-order predictable from (x, y) or from the colour channels chosen before it, in the per-epoch frame | pending | — | `audits/K6.md` | day 2 script |
+| K6 | Each colour channel is not second-order predictable from (x, y) or from the colour channels chosen before it, in the per-epoch frame. Result: two channels admitted, λ₃ (R² 0.0173 ≤ τ₁ 0.1224) and a₈ (0.0705 ≤ τ₂ 0.1651); λ₂ discarded (0.1243 > τ₁, margin 0.0019), l discarded (0.2959 > τ₃ 0.1963); third channel constant. Frame: anchor AXIS_1; dipoles (AXIS_3, AXIS_2), (AXIS_4, AXIS_7), (AXIS_8, AXIS_6); rank 8 AXIS_5; FIT ranking = full ranking | not-in-ci | yes (record rev. 6, `5bddacd`; runs `50a2eb0`) | `audits/K6.md` (phase 1 and 2 PASS) | `data/refapp/K6_result.json`, sha256 `a95ec2a0…cac58` |
 | K7 | R4: paired recall@15 difference in the 5D perspective, operator vs. radial | pending | — | `audits/R4.md` | day 6 script |
 
 K4 and K5 are not used for any decision until their script is committed and re-run on the
@@ -106,6 +106,20 @@ that leaves the written scope goes to v2.
 - **2026-09-18 — related-notes list added (for R5).** R5 compares the map with a plain list of
   related notes, which the client did not have: selecting a note also lists its 15 nearest notes.
   Built with feature 5 on day 5; it is the control view R5 needs, not a new feature.
+- **2026-09-19 — colour channels from K6.** K6 (pre-registered rule, result `a95ec2a0…`) admitted
+  two channels, λ₃ and a₈; the third is constant. Feature 1 no longer names the second dipole,
+  which K6 discarded (R² 0.1243 > τ₁ 0.1224). The day-7 table did not foresee m = 2; it is not a
+  pivot (m ≥ 1), and the rule is not relaxed. Which render channel (l, c or h) stays constant is
+  pending the author.
+- **2026-09-19 — z axis reformulated (step 3 gate, after K6).** Superseded question: "the second
+  dipole's λ₂, moved from colour to z, carries variance independent of (x, y)" — K6's result
+  already refutes it for λ₂ as is. New question, the author's choice (option A): z = ⟨v, u⟩ with
+  u the second dipole's direction w₂ orthogonalised by Gram–Schmidt in 384-d against ĉ₁, w₁, w₃
+  and P⊥â_(8) — fixed by the basis, not fitted to the data. Geometric orthogonality is not
+  statistical independence on an anisotropic corpus, so it is measured, not assumed: record K8
+  (question, refuter, phase-1 review) before any script. Rejected option B: the data residual of
+  λ₂ on a quadratic of the position — corpus-fitted, and near-zero R² by construction on the data
+  it is fitted to. Still day 6 and still the first cut if the checkpoint is at risk.
 
 ## Day-7 decision (pre-registered 2026-09-18, before any result)
 
@@ -145,8 +159,10 @@ frozen as it stands; remaining items are resolved in phase 2 against the code.
 | 6 | R4 offline measurement; dimensional increase if nothing was cut |
 | 7 | Close: ledger entry, results, R5 judgement |
 
-**Dimensional increase (interaction).** When a note is anchored, the second dipole (axes 4–5)
-moves from colour to a z axis — a genuine third axis, not a rescaling of the first (ADR-026 §2.1).
+**Dimensional increase (interaction).** When a note is anchored, a z axis is added — a genuine
+third axis, not a rescaling of the first (ADR-026 §2.1). Reformulated 2026-09-19 after K6 (see
+Scope changes): z is the second dipole's direction orthogonalised in 384-d against the directions
+already in use, measured by K8 before it is used.
 It enters only if the checkpoint is met. Every colour channel, and z, must carry variance
 independent of (x, y) — the test d_esc failed (corr −0.968 with y). The compendium's "dimensional
 pulsation" (cluster count set as dimension) is not this and is not used; the engine's `/mutate` is
@@ -295,3 +311,72 @@ on the text path, descriptive only.
 
 Exploration branch: not in the PoC's scope, no gate; it enters a registry only after its own
 instrument audit.
+
+## Exploration: Voronoi partition over prototypes (author's idea, 2026-09-19)
+
+**Idea.** Gärdenfors' conceptual spaces: each category is the Voronoi cell of a prototype; a
+state moving continuously gets a discrete label, and crossing a cell boundary is a state
+transition. The author's sketch draws it on a chromaticity plane (a*, b*) with four colour
+prototypes and a spiral trajectory; the sketch is illustrative, not data.
+
+**Translation to the engine.** Prototypes = the 8 geodetic axes â_k. On the unit sphere the
+Voronoi cell of â_k under cosine is {v : ⟨v, â_k⟩ ≥ ⟨v, â_j⟩ ∀ j}, i.e. the dominant attractor
+the engine already computes at ingest (`app.py`, `dominant_attractor`); spherical Voronoi cells
+are convex, Gärdenfors' criterion, by construction. The trajectory is the corpus in text order
+(the order the engine is loaded in): a transition is a change of dominant axis between
+consecutive notes.
+
+**Where the partition is computed decides whether it adds anything.**
+- In 384-d (nearest axis): information the map's position does not carry; a categorical
+  channel (hue per cell), not a continuous one. Seven of the eight axes already build the
+  per-epoch frame, so its relation to K6's selected channels must be stated.
+- On the 2-D map (nearest prototype in (x, y)): a function of position by construction,
+  exactly what K6's rule rejects. Not pursued.
+
+**Refuter (candidate, not audited).** In text order, dominant-axis transitions are not more
+frequent at the boundaries between the Ethics' five parts than under a block-permutation null
+of the note order. Needs its own instrument audit before any figure is used.
+
+Exploration branch: not in the PoC's scope, no gate.
+
+## Exploration: a continuous transition near a degenerate dipole (author's idea, 2026-09-19)
+
+**Problem.** The operator's collinear fallback (`polar_projector.py:118-129`, eps 1e-6) is a
+step. Just above it, λ = ⟨v, w⟩/‖w‖² with a tiny w amplifies noise without bound; just below
+it, the dipole jumps to a canonical u⊥ unrelated to the poles. K6 is unaffected (a dipole on the
+fallback is dropped or invalidates the run, and unclipped λ leaves R² unchanged, D6); the
+render is not (a near-degenerate dipole saturates the clip).
+
+**Proposal (author's choice between two readings).** Blend the dipole direction and the
+fallback direction continuously as ‖w‖ → 0, so λ keeps its meaning as a contrast between the
+poles while the dipole exists. Rejected reading: the poles' shared (bisector) direction when
+they collapse — geometrically sound but it measures alignment with what the poles share, a
+different quantity that would need its own name.
+
+**Measurable question.** Which dipoles of the corpus frames lie near degeneracy, and how much is
+λ amplified there. K6's registered run reports the fallback flag of each dipole of the
+per-epoch frame.
+
+Scope: an operator change (canonical repository `polar-projector`, with its paper); not in this
+PoC. It enters through steps 1–2 of the loop with its own instrument audit.
+
+## Record questions (not for reviewers)
+
+Kept here, outside `frontend/audits/`, so a blind reviewer never reads them (moved 2026-09-19
+after a void phase-2 attempt on K6).
+
+**K6.**
+**Question.** In a per-epoch geodetic frame, can three dimensions beyond position be shown as
+colour without repeating the position or each other?
+
+**Refuter.** No candidate is admissible under the record's rule. That is a decision point for the
+author, not a cue to change the candidates.
+
+**R4.**
+**Question.** In a perspective chosen at note q, the vertical axis already orders every note by its
+real distance to q. Do the four other observed dimensions — the horizontal axis λ and the three
+colour channels — keep q's real neighbours together, or scatter them more than an arbitrary
+horizontal axis would?
+
+**Refuter (R4).** The operator's 5D perspective scatters q's real neighbours more than the same
+perspective with an arbitrary horizontal axis, by the rule in `audits/R4.md`.
