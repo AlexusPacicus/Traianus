@@ -21,9 +21,11 @@ from traianus.geometry.observables import (
 )
 from traianus.geometry.polar_projector import PolarProjector
 from traianus.geometry.spatial_observables import (
+    CHANNELS,
     EPOCH_PROVENANCE,
-    SpatialCalibration,
+    EpochFrame,
     derive_spatial_observables,
+    fit_epoch_frame,
 )
 from traianus.governance.gate import evaluate_gate
 from traianus.telemetry.variance_tracker import VarianceTracker
@@ -746,47 +748,84 @@ async def get_relations():
     except Exception as e:
         raise HTTPException(status_code=500, detail="Internal server error.") from e
 
-def _active_render_calibration() -> SpatialCalibration | None:
-    """Frozen render calibration for the active epoch, or None if never fitted.
+def _active_epoch_frame() -> EpochFrame | None:
+    """Frozen frame of the active epoch, or None if never fitted.
 
-    None means "not calibrated yet" and renders raw polar coordinates — a
-    narrow but honest cloud. Fitting here per request would instead re-place
-    every node on each ingestion, which is the incremental drift the operator
-    exists to avoid (ADR-026).
+    Fitting here per request would re-place every node on each ingestion, the
+    incremental drift the frame exists to avoid (ADR-026); only
+    POST /spatial/calibrate fits it.
     """
-    row = storage.get_active_spatial_calibration(EPOCH_PROVENANCE)
+    row = storage.get_active_epoch_frame(EPOCH_PROVENANCE)
     if row is None:
         return None
-    return SpatialCalibration(
-        EPOCH_PROVENANCE,
-        row["mu_x"],
-        row["sigma_x"],
-        row["mu_y"],
-        row["sigma_y"],
-        row["k_sigma"],
-    )
+    return EpochFrame(EPOCH_PROVENANCE, row["ranking"], row["mu"], row["sigma"], row["k_sigma"])
 
 
 @app.get("/spatial", dependencies=[Depends(require_token)])
 async def get_spatial_observables():
-    """Per-node spatial observables (Ulpia Fase 0, observational).
+    """Per-node spatial observables in the frozen epoch frame (Ulpia, observational).
 
     Derives {id, x, y, z, l, c, h} for each current node from its persisted
-    384D vector and the active geodetic basis. Pure read (no writes, no
-    lifecycle mutation) — mirrors /relations (ADR-023/H5).
+    384D vector, the active geodetic basis and the epoch frame. Pure read (no
+    writes, no lifecycle mutation) — mirrors /relations (ADR-023/H5). Without a
+    frame it answers 409: an overview needs one shared frame.
     """
     try:
         full_basis = get_geodetic_matrix_db()
         if not full_basis:
             return {"nodes": []}
+        frame = _active_epoch_frame()
+        if frame is None:
+            raise HTTPException(
+                status_code=409,
+                detail="No epoch frame for the active epoch: POST /spatial/calibrate first.",
+            )
         basis = {k: v["vector"] for k, v in full_basis.items()}
         vectors = storage.get_current_node_vectors()
-        calibration = _active_render_calibration()
         nodes = [
-            {"id": node_id, **derive_spatial_observables(vector, basis, calibration)}
+            {"id": node_id, **derive_spatial_observables(vector, basis, frame)}
             for node_id, vector in vectors.items()
         ]
         return {"nodes": sorted(nodes, key=lambda n: n["id"])}
+    except HTTPException:
+        raise
+    except Exception as e:
+        raise HTTPException(status_code=500, detail="Internal server error.") from e
+
+
+@app.post("/spatial/calibrate", status_code=201, dependencies=[Depends(require_token)])
+async def calibrate_spatial_frame():
+    """Fit the epoch frame on the current nodes and append it as a revision.
+
+    The one explicit write of the spatial layer (append-only, AGENTS 4.1): the
+    frame stays frozen until the next call, so nodes never move on ingestion.
+    """
+    try:
+        full_basis = get_geodetic_matrix_db()
+        if not full_basis:
+            raise HTTPException(status_code=400, detail="Geodetic basis is empty.")
+        basis = {k: v["vector"] for k, v in full_basis.items()}
+        vectors = storage.get_current_node_vectors()
+        if not vectors:
+            raise HTTPException(status_code=409, detail="No nodes to fit the epoch frame on.")
+        ids = sorted(vectors)
+        frame = fit_epoch_frame(np.vstack([vectors[i] for i in ids]), basis, EPOCH_PROVENANCE)
+        seq = storage.persist_epoch_frame(
+            EPOCH_PROVENANCE, frame.ranking, frame.mu, frame.sigma, frame.k_sigma, len(ids)
+        )
+        return {
+            "epoch_provenance": EPOCH_PROVENANCE,
+            "seq": seq,
+            "ranking": list(frame.ranking),
+            "mu": dict(zip(CHANNELS, frame.mu)),
+            "sigma": dict(zip(CHANNELS, frame.sigma)),
+            "k_sigma": frame.k_sigma,
+            "sample_size": len(ids),
+        }
+    except HTTPException:
+        raise
+    except ValueError as e:
+        raise HTTPException(status_code=422, detail=str(e)) from e
     except Exception as e:
         raise HTTPException(status_code=500, detail="Internal server error.") from e
 

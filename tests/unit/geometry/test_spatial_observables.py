@@ -1,191 +1,176 @@
-"""Spatial observable derivation (Ulpia Fase 0) — pure, observational.
+"""Spatial observables in one frame per epoch — pure, observational.
 
-Each node's current 384D vector plus the active geodetic basis yield a
-per-node spatial contract consumed by the Ulpia renderer:
-  {x, y, z, l (density), c (affective voltage λ), h (escape distance d_esc)}
-with L, C, H normalized to [0,1] (AGENTS 5-Radicals / Ulpia binary contract).
-
-All functions are pure (numpy only, no side effects, no DB access).
+The frame (axis ranking by mean projection, ties by axis id) is fitted once on the nodes
+present, frozen with the per-channel mean and sd, and shared by every node: the overview is one
+map, not each node in its own coordinates (frontend/POC.md, "the overview has no shared frame").
+Channels are the ones K6 measured and admitted (frontend/audits/K6.md, data/refapp/K6_result.json):
+  x = λ₁, y = ⟨v, ĉ₁⟩ → standardised, clipped to [-1, 1];  z = 0 (pending K8);
+  l constant (author's choice); h from λ₃ and c from a₈ → [0, 1].
 """
 import numpy as np
 import pytest
 
-from tests.fixtures.polar_fixtures import random_unit_vector
+from tools.experiments import k6_colour_predictability as k6
 from traianus.geometry.polar_projector import PolarProjector
 from traianus.geometry.spatial_observables import (
+    CHANNELS,
     EPOCH_PROVENANCE,
-    SpatialCalibration,
+    L_CONSTANT,
     derive_spatial_observables,
-    fit_spatial_calibration,
+    fit_epoch_frame,
+    rank_axes,
+    raw_channels,
 )
 
-
-def _onehot_matrix(n_axes: int = 8, dim: int = 384) -> dict:
-    """Orthonormal one-hot basis keyed by axis id (mirrors db_factory)."""
-    return {
-        f"AXIS_{i + 1}": np.eye(dim, dtype=np.float64)[i] for i in range(n_axes)
-    }
+D = 384
 
 
-class TestSpatialObservables:
-    def test_output_shape_and_dtypes(self):
-        basis = _onehot_matrix()
-        v = random_unit_vector(384, 7)
-        obs = derive_spatial_observables(v, basis)
-        for key in ("x", "y", "z", "l", "c", "h"):
-            assert key in obs
-            assert isinstance(obs[key], float)
-            assert np.isfinite(obs[key])
-
-    def test_normalized_channels_in_unit_range(self):
-        basis = _onehot_matrix()
-        for seed in range(20):
-            v = random_unit_vector(384, 1000 + seed)
-            obs = derive_spatial_observables(v, basis)
-            assert 0.0 <= obs["l"] <= 1.0
-            assert 0.0 <= obs["c"] <= 1.0
-            assert 0.0 <= obs["h"] <= 1.0
-
-    def test_croma_maps_voltage_lambda(self):
-        """C = (λ + 1)/2 where λ is the PolarProjector voltage on the top-3 axes."""
-        basis = _onehot_matrix()
-        v = random_unit_vector(384, 5)
-        obs = derive_spatial_observables(v, basis)
-        # λ ∈ [-1,1] ⇒ C ∈ [0,1]; a near-canonical vector on AXIS_1 yields λ → 0/±1.
-        assert abs(obs["c"] - 0.5) <= 0.5
-
-    def test_deterministic(self):
-        basis = _onehot_matrix()
-        v = random_unit_vector(384, 42)
-        a = derive_spatial_observables(v, basis)
-        b = derive_spatial_observables(v, basis)
-        assert a == b
-
-    def test_self_consistent_with_projection_variance(self):
-        """l (density) is monotone in the projection spectrum: a more uniform
-        projection (lower variance) yields a higher l, and conversely."""
-        basis = _onehot_matrix()
-        # A canonical one-hot vector concentrates on one axis (high variance
-        # of projections); a balanced vector spreads across axes (low variance).
-        concentrated = np.eye(384, dtype=np.float64)[0]
-        balanced = np.full(384, 1.0 / np.sqrt(384), dtype=np.float64)
-        l_concentrated = derive_spatial_observables(concentrated, basis)["l"]
-        l_balanced = derive_spatial_observables(balanced, basis)["l"]
-        assert l_balanced > l_concentrated
-
-    def test_requires_at_least_three_axes(self):
-        with pytest.raises(ValueError):
-            derive_spatial_observables(random_unit_vector(384, 1), _onehot_matrix(2))
-
-    @pytest.mark.parametrize("d", [128, 384, 768])
-    @pytest.mark.parametrize("seed", range(25))
-    def test_chromatic_channel_exact_formulae(self, d, seed):
-        """C = (λ+1)/2 and H = tanh(d_esc), locked to PolarProjector output."""
-        basis = _onehot_matrix(dim=d)
-        projector = PolarProjector()
-        axis_ids = sorted(basis.keys())
-        v = random_unit_vector(d, 2000 + seed)
-        obs = derive_spatial_observables(v, basis)
-        # Mirror derive_spatial_observables ranking: top-3 by projection
-        proj_rank = sorted(
-            axis_ids,
-            key=lambda k: float(np.dot(v, basis[k])),
-            reverse=True,
-        )
-        a1, a2, a3 = proj_rank[0], proj_rank[1], proj_rank[2]
-        _, lambda_val, d_esc = projector.project(
-            v,
-            np.asarray(basis[a1], dtype=np.float64),
-            np.asarray(basis[a2], dtype=np.float64),
-            np.asarray(basis[a3], dtype=np.float64),
-            axis_ids.index(a1),
-        )
-        expected_c = float((lambda_val + 1.0) / 2.0)
-        expected_h = float(np.tanh(d_esc))
-        assert np.isclose(obs["c"], expected_c, atol=1e-12), (
-            f"seed={seed}: C formula mismatch"
-        )
-        assert np.isclose(obs["h"], expected_h, atol=1e-12), (
-            f"seed={seed}: H formula mismatch"
-        )
-
-    @pytest.mark.parametrize("d", [128, 384, 768])
-    @pytest.mark.parametrize("seed", range(25))
-    def test_density_channel_exact_formula(self, d, seed):
-        """L = 1 / (1 + σ²) where σ² = var(projections onto geodetic basis)."""
-        basis = _onehot_matrix(dim=d)
-        axis_ids = sorted(basis.keys())
-        basis_vecs = [np.asarray(basis[k], dtype=np.float64) for k in axis_ids]
-        B = np.vstack(basis_vecs).T  # (d, k) orthonormal columns
-        v = random_unit_vector(d, 3000 + seed)
-        obs = derive_spatial_observables(v, basis)
-        projections = np.dot(v, B)  # (k,)
-        sigma_sq = float(np.var(projections))
-        expected_l = 1.0 / (1.0 + sigma_sq)
-        assert np.isclose(obs["l"], expected_l, atol=1e-12), (
-            f"seed={seed}: L formula mismatch"
-        )
-
-    def test_spatial_coords_discriminate_distinct_vectors(self):
-        """x, y, z must separate distinct vectors, not collapse to one point.
-
-        Regression: mean-centering the single-row (1, k) projection matrix
-        zeroes it, so the SVD returned S = 0 and every node landed on the
-        origin regardless of its vector.
-        """
-        basis = _onehot_matrix()
-        coords = {
-            (round(obs["x"], 12), round(obs["y"], 12), round(obs["z"], 12))
-            for obs in (
-                derive_spatial_observables(random_unit_vector(384, s), basis)
-                for s in range(20)
-            )
-        }
-        assert len(coords) > 1, f"all 20 vectors collapsed to {coords}"
+def _basis(rng, k=8, d=D):
+    return {f"AXIS_{i + 1}": rng.standard_normal(d) * (1.0 + i) for i in range(k)}
 
 
-class TestSpatialCalibration:
-    def test_y_is_the_anchor_component_not_escape_distance(self):
-        """On S^(d-1) with a unit anchor, d_esc is analytically redundant:
-        d_esc^2 = 1 - z^2 - lambda^2 ||v_dipole||^2. The informative second
-        position channel is the anchor component itself."""
-        basis = _onehot_matrix()
-        v = random_unit_vector(384, 3)
-        obs = derive_spatial_observables(v, basis)
-        ranked = sorted(
-            basis.keys(), key=lambda k: float(np.dot(v, basis[k])), reverse=True
-        )
-        c_1 = basis[ranked[0]]
-        expected = float(np.dot(v, c_1) / np.linalg.norm(c_1))
-        assert np.isclose(obs["y"], expected, atol=1e-12)
+def _unit_rows(rng, n, d=D):
+    x = rng.standard_normal((n, d))
+    return x / np.linalg.norm(x, axis=1, keepdims=True)
 
-    def test_fit_expands_a_narrow_band_across_the_viewport(self):
-        rng = np.random.default_rng(7)
-        raw = [
-            (0.0125 + 0.016 * g, 0.157 + 0.045 * h)
-            for g, h in rng.standard_normal((500, 2))
-        ]
-        cal = fit_spatial_calibration(raw, EPOCH_PROVENANCE)
-        xs = [cal.apply(x, y)[0] for x, y in raw]
+
+@pytest.fixture
+def rng():
+    return np.random.default_rng(20260919)
+
+
+def _k6_frame(vectors, basis):
+    ids = sorted(basis)
+    a = np.vstack([basis[i] for i in ids])
+    a_hat = a / np.linalg.norm(a, axis=1, keepdims=True)
+    order, _ = k6.rank_axes(vectors, a_hat, ids)
+    projector = PolarProjector()
+    return [ids[i] for i in order], k6.eval_channels(
+        vectors, a_hat, k6.build_frame(a_hat, order, projector), projector
+    )
+
+
+class TestRanking:
+    def test_ranking_matches_k6(self, rng):
+        basis, v = _basis(rng), _unit_rows(rng, 300)
+        assert list(rank_axes(v, basis)) == _k6_frame(v, basis)[0]
+
+    def test_ties_break_by_axis_id(self):
+        e = np.eye(D)
+        basis = {"AXIS_2": e[0], "AXIS_1": e[1], "AXIS_3": e[2], "AXIS_4": e[3],
+                 "AXIS_5": e[4], "AXIS_6": e[5], "AXIS_7": e[6], "AXIS_8": e[7]}
+        v = (e[0] + e[1]) / np.sqrt(2.0)
+        assert rank_axes(v[None, :], basis)[:2] == ("AXIS_1", "AXIS_2")
+
+
+class TestRawChannels:
+    def test_channels_are_the_ones_k6_measured(self, rng):
+        basis, v = _basis(rng), _unit_rows(rng, 300)
+        ranking = rank_axes(v, basis)
+        ours = raw_channels(v, basis, ranking)
+        theirs = _k6_frame(v, basis)[1]
+        for name in CHANNELS:
+            np.testing.assert_allclose(ours[name], theirs[name], rtol=1e-12, atol=1e-15)
+
+    def test_one_frame_for_every_vector(self, rng):
+        """Regression: the frame used to be chosen per node, from each vector's own top axes."""
+        basis, v = _basis(rng), _unit_rows(rng, 50)
+        ranking = rank_axes(v, basis)
+        together = raw_channels(v, basis, ranking)
+        for i in (0, 17, 49):
+            alone = raw_channels(v[i], basis, ranking)
+            for name in CHANNELS:
+                assert alone[name] == pytest.approx(float(together[name][i]), rel=1e-12, abs=1e-15)
+
+    def test_channels_are_unclipped(self):
+        """Close poles give a short dipole, so |λ₁| exceeds 1; clipping is a rendering step."""
+        e = np.eye(D)
+        basis = {f"AXIS_{i + 1}": e[i] for i in range(8)}
+        basis["AXIS_3"] = e[1] + 0.3 * e[2]
+        ranking = tuple(sorted(basis))
+        v = (e[1] - e[2]) / np.sqrt(2.0)
+        w = e[1] - basis["AXIS_3"] / np.linalg.norm(basis["AXIS_3"])
+        x = raw_channels(v, basis, ranking)["x"]
+        assert x > 1.0
+        assert x == pytest.approx(float(v @ w / (w @ w)), rel=1e-12)
+
+
+class TestFrame:
+    def test_fit_freezes_ranking_mean_and_population_sd(self, rng):
+        basis, v = _basis(rng), _unit_rows(rng, 200)
+        frame = fit_epoch_frame(v, basis, EPOCH_PROVENANCE)
+        assert frame.epoch_provenance == EPOCH_PROVENANCE
+        assert frame.ranking == rank_axes(v, basis)
+        raw = raw_channels(v, basis, frame.ranking)
+        for j, name in enumerate(CHANNELS):
+            assert frame.mu[j] == pytest.approx(float(np.mean(raw[name])), rel=1e-12)
+            assert frame.sigma[j] == pytest.approx(float(np.std(raw[name], ddof=0)), rel=1e-12)
+
+    def test_fit_refuses_an_empty_population(self, rng):
+        with pytest.raises(ValueError, match="empty"):
+            fit_epoch_frame(np.empty((0, D)), _basis(rng), EPOCH_PROVENANCE)
+
+    def test_fit_refuses_fewer_than_eight_axes(self, rng):
+        with pytest.raises(ValueError, match="8 axes"):
+            fit_epoch_frame(_unit_rows(rng, 10), _basis(rng, k=7), EPOCH_PROVENANCE)
+
+    @pytest.mark.parametrize("pair", [(1, 2), (5, 6)])
+    def test_fit_refuses_a_used_dipole_on_the_fallback(self, pair):
+        """Dipole 1 (x) and dipole 3 (λ₃) must be contrasts; the operator's fallback is not one."""
+        e = np.eye(D)
+        axes = [3.0 * e[0], 2.0 * e[1], 1.9 * e[2], 1.5 * e[3], 1.4 * e[4], 1.2 * e[5],
+                1.1 * e[6], 1.0 * e[7]]
+        axes[pair[1]] = axes[pair[0]] * 0.999
+        basis = {f"AXIS_{i + 1}": a for i, a in enumerate(axes)}
+        v = np.ones(D) / np.sqrt(D)
+        with pytest.raises(ValueError, match="fallback"):
+            fit_epoch_frame(np.vstack([v, v]), basis, EPOCH_PROVENANCE)
+
+
+class TestObservables:
+    def test_mapping_of_every_channel(self, rng):
+        basis, v = _basis(rng), _unit_rows(rng, 200)
+        frame = fit_epoch_frame(v, basis, EPOCH_PROVENANCE)
+        raw = raw_channels(v[3], basis, frame.ranking)
+        obs = derive_spatial_observables(v[3], basis, frame)
+
+        def s(name):
+            j = CHANNELS.index(name)
+            return float(np.clip((raw[name] - frame.mu[j]) / (frame.k_sigma * frame.sigma[j]), -1, 1))
+
+        assert obs["x"] == pytest.approx(s("x"))
+        assert obs["y"] == pytest.approx(s("y"))
+        assert obs["z"] == 0.0
+        assert obs["l"] == L_CONSTANT
+        assert obs["h"] == pytest.approx((s("lambda_3") + 1.0) / 2.0)
+        assert obs["c"] == pytest.approx((s("a_8") + 1.0) / 2.0)
+
+    def test_ranges_and_finiteness(self, rng):
+        basis, v = _basis(rng), _unit_rows(rng, 200)
+        frame = fit_epoch_frame(v, basis, EPOCH_PROVENANCE)
+        for row in _unit_rows(rng, 100):
+            obs = derive_spatial_observables(row, basis, frame)
+            assert all(isinstance(obs[k], float) and np.isfinite(obs[k]) for k in obs)
+            assert -1.0 <= obs["x"] <= 1.0 and -1.0 <= obs["y"] <= 1.0
+            assert 0.0 <= obs["c"] <= 1.0 and 0.0 <= obs["h"] <= 1.0
+
+    def test_frozen_frame_does_not_move_a_node_when_others_arrive(self, rng):
+        """R1: with the frame frozen, a node's observables depend on its vector alone."""
+        basis, v = _basis(rng), _unit_rows(rng, 200)
+        frame = fit_epoch_frame(v, basis, EPOCH_PROVENANCE)
+        before = derive_spatial_observables(v[0], basis, frame)
+        _ = [derive_spatial_observables(r, basis, frame) for r in _unit_rows(rng, 50)]
+        assert derive_spatial_observables(v[0], basis, frame) == before
+
+    def test_nodes_spread_over_the_viewport(self, rng):
+        basis, v = _basis(rng), _unit_rows(rng, 500)
+        frame = fit_epoch_frame(v, basis, EPOCH_PROVENANCE)
+        xs = [derive_spatial_observables(r, basis, frame)["x"] for r in v]
         assert max(xs) - min(xs) > 1.0
 
-    def test_calibration_is_frozen_not_population_relative(self):
-        cal = SpatialCalibration(EPOCH_PROVENANCE, 0.01, 0.016, 0.15, 0.045)
-        assert cal.apply(0.03, 0.20) == cal.apply(0.03, 0.20)
-
-    def test_degenerate_sigma_does_not_emit_nan(self):
-        cal = fit_spatial_calibration([(0.5, 0.5)] * 10, EPOCH_PROVENANCE)
-        x, y = cal.apply(0.5, 0.5)
-        assert np.isfinite(x) and np.isfinite(y)
-
-    def test_apply_clips_to_the_unit_box(self):
-        cal = SpatialCalibration(EPOCH_PROVENANCE, 0.0, 0.01, 0.0, 0.01)
-        assert cal.apply(10.0, -10.0) == (1.0, -1.0)
-
-    def test_observables_accept_a_calibration(self):
-        basis = _onehot_matrix()
-        v = random_unit_vector(384, 11)
-        raw_obs = derive_spatial_observables(v, basis)
-        cal = SpatialCalibration(EPOCH_PROVENANCE, 0.0, 0.02, 0.0, 0.05)
-        cal_obs = derive_spatial_observables(v, basis, calibration=cal)
-        assert abs(cal_obs["x"]) > abs(raw_obs["x"])
+    def test_degenerate_spread_maps_to_the_centre(self, rng):
+        basis = _basis(rng)
+        v = np.vstack([_unit_rows(rng, 1)] * 5)
+        frame = fit_epoch_frame(v, basis, EPOCH_PROVENANCE)
+        obs = derive_spatial_observables(v[0], basis, frame)
+        assert (obs["x"], obs["y"], obs["c"], obs["h"]) == (0.0, 0.0, 0.5, 0.5)

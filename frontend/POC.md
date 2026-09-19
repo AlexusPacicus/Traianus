@@ -80,14 +80,14 @@ to a publication. A figure without a row here is not used to decide anything.
 |---|---|---|---|---|---|
 | K1 | On the unit sphere with a unit anchor, d_esc² = 1 − y² − λ²‖v_dipole‖² | construction | n/a (algebra) | — | ADR-026 §1; `spatial_observables.py` docstring |
 | K2 | `c = (λ+1)/2` is the x coordinate rescaled; `h = tanh(d_esc)` is fixed by (λ, y) and the dipole norm | construction | n/a (read from code) | — | `derive_spatial_observables` |
-| K3 | The overview picks anchor and dipole per node, not per epoch | construction | n/a (read from code) | — | `spatial_observables.py:159-160` |
-| K4 | corr(tanh d_esc, y) = −0.968 on Spinoza (n = 2,221) | unbacked | no | — | ADR-026; `tools/experiments/measure_polar_render_range.py` is uncommitted and writes no artifact. Also measured on the per-node frame (K3) |
+| K3 | The overview picked anchor and dipole per node, not per epoch — fixed 2026-09-19: one frozen frame per epoch | construction | n/a (read from code) | — | before: `spatial_observables.py:159-160`; now `fit_epoch_frame`, `POST /spatial/calibrate` |
+| K4 | corr(tanh d_esc, y) = −0.968 on Spinoza (n = 2,221) | unbacked | no | — | ADR-026; its script measured the per-node frame (K3) and was removed with it on 2026-09-19; never re-measured |
 | K5 | Raw ranges: λ 7.16% of [−1, 1], anchor component 19.07%, x–y box 1.36% of the viewport | unbacked | no | — | as K4 |
 | K6 | Each colour channel is not second-order predictable from (x, y) or from the colour channels chosen before it, in the per-epoch frame. Result: two channels admitted, λ₃ (R² 0.0173 ≤ τ₁ 0.1224) and a₈ (0.0705 ≤ τ₂ 0.1651); λ₂ discarded (0.1243 > τ₁, margin 0.0019), l discarded (0.2959 > τ₃ 0.1963); third channel constant. Frame: anchor AXIS_1; dipoles (AXIS_3, AXIS_2), (AXIS_4, AXIS_7), (AXIS_8, AXIS_6); rank 8 AXIS_5; FIT ranking = full ranking | not-in-ci | yes (record rev. 6, `5bddacd`; runs `50a2eb0`) | `audits/K6.md` (phase 1 and 2 PASS) | `data/refapp/K6_result.json`, sha256 `a95ec2a0…cac58` |
 | K7 | R4: paired recall@15 difference in the 5D perspective, operator vs. radial | pending | — | `audits/R4.md` | day 6 script |
 
-K4 and K5 are not used for any decision until their script is committed and re-run on the
-per-epoch frame.
+K4 and K5 are not used for any decision: their script was bound to the per-node frame and was
+removed with it. In the epoch frame, K6 settles colour and the calibration settles the range.
 
 ## Scope changes
 
@@ -176,7 +176,12 @@ continues, this directory moves to its own repository with its history. Either w
 that mislabel this client as Ulpia (`package.json` `name`, `Ulpia*.tsx`, `ulpia_renderer.ts`) are
 renamed then, not during the PoC.
 
-## Open finding: the overview has no shared frame
+## Resolved finding: the overview had no shared frame (2026-09-19)
+
+Resolved on day 2: `fit_epoch_frame` ranks the axes once over the nodes present (K6's rule), the
+frame is frozen as an append-only revision by `POST /spatial/calibrate`, and `GET /spatial`
+answers 409 until it exists. Original finding kept below.
+
 
 `traianus/geometry/spatial_observables.py` (`derive_spatial_observables`) picks anchor and dipole
 **per node**: each node's dominant geodetic axis becomes its own anchor, the next two its dipole.
@@ -189,7 +194,11 @@ Proposed fix, consistent with ADR-026: one frame per epoch (anchor and dipole ch
 with the calibration). Perspectives are unaffected: every node shares the chosen note's frame.
 Owner: the engine session that holds this file's uncommitted changes. Blocking for the checkpoint.
 
-## Open finding: two of three colour channels repeat the position
+## Resolved finding: two of three colour channels repeated the position (2026-09-19)
+
+Resolved on day 2: colour now carries the channels K6 admitted, h from λ₃ and c from a₈, with l
+constant (the author's choice); the density l and d_esc left the map. Original finding kept below.
+
 
 In `derive_spatial_observables`, `c = (λ+1)/2` is the x coordinate rescaled, and `h = tanh(d_esc)`
 is determined by (λ, y) and the dipole norm — constant once the frame is per epoch. Only

@@ -25,7 +25,7 @@ from traianus.storage._storage import (
     compute_epsilon_edges,
     enqueue_ingest,
     get_active_epoch_axes,
-    get_active_spatial_calibration,
+    get_active_epoch_frame,
     get_current_dimension_db,
     get_current_edges,
     get_current_node_vectors,
@@ -43,8 +43,8 @@ from traianus.storage._storage import (
     next_edge_seq,
     next_node_seq,
     node_exists,
+    persist_epoch_frame,
     persist_epsilon_edges,
-    persist_spatial_calibration,
     rebuild_epsilon_edges,
 )
 from traianus.storage.sqlite_engine import SQLiteEngine
@@ -71,7 +71,7 @@ __all__ = [
     "compute_epsilon_edges",
     "enqueue_ingest",
     "get_active_epoch_axes",
-    "get_active_spatial_calibration",
+    "get_active_epoch_frame",
     "get_current_dimension_db",
     "get_current_edges",
     "get_current_node_vectors",
@@ -89,7 +89,7 @@ __all__ = [
     "next_edge_seq",
     "next_node_seq",
     "node_exists",
+    "persist_epoch_frame",
     "persist_epsilon_edges",
-    "persist_spatial_calibration",
     "rebuild_epsilon_edges",
 ]
