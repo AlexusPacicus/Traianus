@@ -11,7 +11,7 @@ exact-R² calibration controls at every step.
 Refuses to run unless the three input digests match; never runs on anything else.
 
 Usage:
-    python3 tools/experiments/k6_colour_predictability.py
+    python3 tools/experiments/k6_colour_predictability.py [--out PATH]
 """
 
 import os
@@ -19,19 +19,20 @@ import os
 for _var in ("OMP_NUM_THREADS", "OPENBLAS_NUM_THREADS", "VECLIB_MAXIMUM_THREADS"):
     os.environ[_var] = "1"
 
-import hashlib  # noqa: E402
-import io  # noqa: E402
-import json  # noqa: E402
-import math  # noqa: E402
-import platform  # noqa: E402
-from collections.abc import Mapping, Sequence  # noqa: E402
-from pathlib import Path  # noqa: E402
-from typing import Any  # noqa: E402
+import argparse
+import hashlib
+import io
+import json
+import math
+import platform
+from collections.abc import Mapping, Sequence
+from pathlib import Path
+from typing import Any
 
-import numpy as np  # noqa: E402
-from numpy.typing import NDArray  # noqa: E402
+import numpy as np
+from numpy.typing import NDArray
 
-from traianus.geometry.polar_projector import PolarProjector  # noqa: E402
+from traianus.geometry.polar_projector import PolarProjector
 
 REPO_ROOT = Path(__file__).resolve().parents[2]
 EMBEDDINGS = REPO_ROOT / ".data" / "spinoza_frozen" / "embeddings.npy"
@@ -83,6 +84,12 @@ def load_inputs(
     v32 = np.load(io.BytesIO(embeddings), allow_pickle=False)
     label_list = json.loads(labels.decode("utf-8"))
     axis_list = json.loads(axes.decode("utf-8"))
+    for k, axis in enumerate(axis_list):
+        if "id" not in axis:
+            raise ValueError(f"axis {k}: missing key id")
+        vector = axis.get("vector")
+        if not isinstance(vector, list) or len(vector) != D:
+            raise ValueError(f"axis {k}: key vector missing or not a list of {D} values")
     axis_ids = [a["id"] for a in axis_list]
     a = np.array([a["vector"] for a in axis_list], dtype=np.float64)
     return v32, label_list, axis_ids, a
@@ -104,7 +111,7 @@ def validate_inputs(v32: NDArray[Any], labels: list[Any], axis_ids: list[str], a
     seen: dict[str, int] = {}
     for i, item in enumerate(labels):
         if not isinstance(item, dict):
-            raise ValueError(f"label {i}: not an object")
+            raise ValueError(f"label {i}: not an object")  # noqa: TRY004
         for key in ("label", "part"):
             value = item.get(key)
             if not isinstance(value, str) or value == "":
@@ -152,7 +159,8 @@ def perp(x: Array, c1_hat: Array) -> Array:
 
 def null_directions(g: Array, c1_hat: Array) -> Array:
     p = perp(g, c1_hat)
-    return p / np.linalg.norm(p, axis=1, keepdims=True)
+    w: Array = p / np.linalg.norm(p, axis=1, keepdims=True)
+    return w
 
 
 def channels_along(v: Array, directions: Array) -> Array:
@@ -175,8 +183,9 @@ def build_frame(a_hat: Array, order: Sequence[int], projector: PolarProjector) -
     for j in range(3):
         c_a, c_b = a_hat[order[2 * j + 1]], a_hat[order[2 * j + 2]]
         frame = projector.prepare(c1, c_a, c_b)
-        gap = np.linalg.norm(perp(c_a, frame.c1_hat) - perp(c_b, frame.c1_hat))
-        fallback.append(bool(gap < projector.eps_collinear))
+        fallback.append(projector._is_collinear(
+            projector._project_perp(c_a, frame.c1_hat), projector._project_perp(c_b, frame.c1_hat)
+        ))
         frames.append(frame)
     c1_hat = frames[0].c1_hat
     p8 = perp(a_hat[order[7]], c1_hat)
@@ -251,7 +260,11 @@ def r_squared(u: Array, b: Array) -> tuple[float, float]:
 
 
 def z_score(u: Array) -> Array:
-    return (u - u.mean()) / u.std()
+    sd = u.std()
+    if np.ptp(u) == 0.0 or sd == 0.0:
+        raise ValueError("z-score of a zero spread vector: standard deviation is 0")
+    z: Array = (u - u.mean()) / sd
+    return z
 
 
 def calibration_control(h: Array, n1: Array, b: Array, rho: float) -> Array:
@@ -385,8 +398,8 @@ def measure(
     order_full, means_full = rank_axes(v, a_hat, axis_ids)
     frame = build_frame(a_hat, order_fit, projector)
     out: dict[str, Any] = {
-        "n_fit": int(len(fit)),
-        "n_eval": int(len(ev)),
+        "n_fit": len(fit),
+        "n_eval": len(ev),
         "ranking_fit": [axis_ids[k] for k in order_fit],
         "ranking_full": [axis_ids[k] for k in order_full],
         "rankings_match": order_fit == order_full,
@@ -404,21 +417,21 @@ def measure(
     null_deciding = channels_along(v_eval, null_directions(g, frame["c1_hat"]))
     x_c = v_eval - v_eval.mean(axis=0)
     null_sigma = channels_along(v_eval, null_directions(draw_sigma_null(rng, x_c, N_NULL), frame["c1_hat"]))
-    candidates = [(name, ch[name]) for name in candidate_names(frame["fallback"])]
+    candidates_named = candidate_names(frame["fallback"])
+    candidates = [(name, ch[name]) for name in candidates_named]
     selection = run_selection(ch["x"], ch["y"], candidates, null_deciding, null_sigma, ch["h"])
     valid, first, failed = assess_validity(frame["fallback"], selection)
+    arms = ["x", *(name for name in ("lambda_2", "lambda_3") if name in candidates_named)]
+    clip_fractions = {name: _clip_fraction(ch[name]) for name in arms}
+    clip_fractions.update(
+        null_deciding=_clip_fraction(null_deciding), null_sigma=_clip_fraction(null_sigma)
+    )
     out.update(selection)
     out.update(
         valid=valid,
         first_failed_condition=first,
         failed_conditions=failed,
-        clip_fractions={
-            "x": _clip_fraction(ch["x"]),
-            "lambda_2": _clip_fraction(ch["lambda_2"]),
-            "lambda_3": _clip_fraction(ch["lambda_3"]),
-            "null_deciding": _clip_fraction(null_deciding),
-            "null_sigma": _clip_fraction(null_sigma),
-        },
+        clip_fractions=clip_fractions,
     )
     return out
 
@@ -468,9 +481,12 @@ def run(
     return loaded
 
 
-def main() -> None:
-    result = run(EMBEDDINGS, LABELS, AXES, EXPECTED_DIGESTS, RESULT)
-    print(f"K6: valid={result['valid']} selected={result.get('selected')} -> {RESULT}")
+def main(argv: Sequence[str] | None = None) -> None:
+    parser = argparse.ArgumentParser(description="K6 colour channel predictability.")
+    parser.add_argument("--out", type=Path, default=RESULT, help=f"result path (default: {RESULT})")
+    out_path: Path = parser.parse_args(argv).out
+    result = run(EMBEDDINGS, LABELS, AXES, EXPECTED_DIGESTS, out_path)
+    print(f"K6: valid={result['valid']} selected={result.get('selected')} -> {out_path}")
 
 
 if __name__ == "__main__":

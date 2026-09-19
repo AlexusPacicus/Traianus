@@ -6,6 +6,7 @@ frontend/audits/derivations.md (D2, D4, D6, D7, D8, D11). Synthetic inputs only:
 """
 
 import hashlib
+import io
 import json
 import math
 from pathlib import Path
@@ -188,6 +189,23 @@ def test_r_squared_refuses_a_non_finite_result():
         k6.r_squared(u, b)
 
 
+def test_z_score_is_unchanged_on_spread_input(rng):
+    u = rng.standard_normal(50)
+    assert np.array_equal(k6.z_score(u), (u - u.mean()) / u.std())
+
+
+@pytest.mark.parametrize("value", [2.0, 0.1])
+def test_z_score_refuses_zero_spread(value):
+    with pytest.raises(ValueError, match="zero spread"):
+        k6.z_score(np.full(51, value))
+
+
+def test_a_constant_x_is_refused_by_name(rng):
+    x, y, indep, _, nulls, sigma, h = _planted(rng)
+    with pytest.raises(ValueError, match="zero spread"):
+        k6.run_selection(np.full(len(x), 0.5), y, [("indep", indep)], nulls, sigma, h)
+
+
 def test_calibration_control_hits_rho_exactly_and_detects_a_wrong_basis(rng):
     n = 300
     x, y = rng.uniform(-1, 1, n), rng.uniform(-1, 1, n)
@@ -259,7 +277,7 @@ def test_selection_admits_a_candidate_equal_to_the_threshold(rng):
 
 
 def test_basis_at_each_step_is_augmented_by_the_selected_channels_in_order(rng, monkeypatch):
-    x, y, indep, quad, nulls, sigma, h = _planted(rng)
+    x, y, indep, _quad, nulls, sigma, h = _planted(rng)
     other = rng.standard_normal(len(x))
     calls = []
     real = k6.design_basis
@@ -391,6 +409,30 @@ def test_frame_poles_follow_rank_and_fallback_is_flagged_per_dipole(rng):
     assert k6.candidate_names(frame["fallback"]) == ["lambda_3", "a_8", "l"]
 
 
+class _AlwaysCollinear(PolarProjector):
+    def _is_collinear(self, cA_perp, cB_perp):
+        return True
+
+
+def test_fallback_flag_is_the_operators_own_decision(rng):
+    a_hat = _unit_rows(rng, 8)
+    a_hat[4] = a_hat[3]
+    projector = PolarProjector()
+    frame = k6.build_frame(a_hat, list(range(8)), projector)
+    c1_hat = frame["c1_hat"]
+    fallback_dipole = 2.0 * projector.delta * projector._canonical_u_perp(c1_hat)
+    for j, flag in enumerate(frame["fallback"]):
+        c_a, c_b = a_hat[2 * j + 1], a_hat[2 * j + 2]
+        decided = projector._is_collinear(
+            projector._project_perp(c_a, c1_hat), projector._project_perp(c_b, c1_hat)
+        )
+        assert flag is decided
+        assert np.array_equal(frame["frames"][j].v_dipole, fallback_dipole) is decided
+    assert frame["fallback"] == [False, True, False]
+    forced = k6.build_frame(a_hat, list(range(8)), _AlwaysCollinear())
+    assert forced["fallback"] == [True, True, True]
+
+
 def test_rank_8_axis_parallel_to_the_anchor_raises():
     # P⊥â_(8) = 0 exactly: e_0 − ⟨e_0, e_0⟩e_0; mirrors polar_projector.py:241-245.
     a_hat = np.eye(8, D)
@@ -427,6 +469,19 @@ def test_dipole_one_on_the_fallback_stops_the_run(rng):
     assert out["fallback"]["dipole_1"] is True
     assert out["valid"] is False and out["first_failed_condition"] == "dipole_1_fallback"
     assert "steps" not in out
+
+
+def test_clip_fractions_omit_a_dipole_on_the_fallback(rng):
+    q, _ = np.linalg.qr(rng.standard_normal((D, 8)))
+    a_hat = q.T.copy()
+    a_hat[4] = a_hat[3]
+    weights = np.array([8.0, 7.0, 6.0, 5.0, 0.0, 3.0, 2.0, 1.0])
+    v = weights @ a_hat + 0.05 * rng.standard_normal((120, D))
+    v /= np.linalg.norm(v, axis=1, keepdims=True)
+    out = k6.measure(v, a_hat, _axis_ids(), k6.make_rng(), PolarProjector())
+    assert out["ranking_fit"][3:5] == ["AXIS_4", "AXIS_5"]
+    assert out["fallback"] == {"dipole_1": False, "dipole_2": True, "dipole_3": False}
+    assert set(out["clip_fractions"]) == {"x", "lambda_3", "null_deciding", "null_sigma"}
 
 
 # Integrity: file layer --------------------------------------------------------------------------
@@ -569,6 +624,24 @@ def test_null_elimination_requires_eight_axes_of_384(rng):
         k6.validate_inputs(v, lab, ids[:7], a[:7])
     with pytest.raises(ValueError, match="384"):
         k6.validate_inputs(v, lab, ids, a[:, :383])
+
+
+@pytest.mark.parametrize(
+    "corrupt, match",
+    [
+        (lambda ax: ax[2].pop("id"), "axis 2: .*id"),
+        (lambda ax: ax[5].pop("vector"), "axis 5: .*vector"),
+        (lambda ax: ax[0].__setitem__("vector", None), "axis 0: .*vector"),
+        (lambda ax: ax[3].__setitem__("vector", ax[3]["vector"][:-1]), "axis 3: .*vector"),
+    ],
+)
+def test_malformed_axes_file_names_the_axis_and_the_key(rng, corrupt, match):
+    emb = io.BytesIO()
+    np.save(emb, _unit_rows_f32(rng, 6))
+    axes = _axes_json(_unit_rows(rng, 8))
+    corrupt(axes)
+    with pytest.raises(ValueError, match=match):
+        k6.load_inputs(emb.getvalue(), json.dumps(_labels(6)).encode(), json.dumps(axes).encode())
 
 
 def test_memory_flip_of_the_exponent_msb_is_caught(rng):
@@ -759,3 +832,18 @@ def test_each_failed_condition_alone_is_reported_alone(flag, expected):
 
 def test_all_conditions_holding_is_valid():
     assert k6.assess_validity([False, True, True], _validity_selection()) == (True, None, [])
+
+
+def test_out_option_directs_the_result_and_the_default_is_unchanged(tmp_path, monkeypatch):
+    calls = []
+
+    def fake_run(embeddings, labels, axes, expected, out_path):
+        calls.append((embeddings, labels, axes, expected, out_path))
+        return {"valid": True, "selected": []}
+
+    monkeypatch.setattr(k6, "run", fake_run)
+    target = tmp_path / "elsewhere" / "K6_B.json"
+    k6.main(["--out", str(target)])
+    k6.main([])
+    assert calls[0] == (k6.EMBEDDINGS, k6.LABELS, k6.AXES, k6.EXPECTED_DIGESTS, target)
+    assert calls[1][4] == k6.RESULT == k6.REPO_ROOT / "data" / "refapp" / "K6_result.json"
