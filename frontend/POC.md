@@ -83,7 +83,7 @@ to a publication. A figure without a row here is not used to decide anything.
 | K3 | The overview picks anchor and dipole per node, not per epoch | construction | n/a (read from code) | — | `spatial_observables.py:159-160` |
 | K4 | corr(tanh d_esc, y) = −0.968 on Spinoza (n = 2,221) | unbacked | no | — | ADR-026; `tools/experiments/measure_polar_render_range.py` is uncommitted and writes no artifact. Also measured on the per-node frame (K3) |
 | K5 | Raw ranges: λ 7.16% of [−1, 1], anchor component 19.07%, x–y box 1.36% of the viewport | unbacked | no | — | as K4 |
-| K6 | Each colour channel is not second-order predictable from (x, y) or from the colour channels chosen before it, in the per-epoch frame | pending | — | `audits/K6.md` | day 2 script |
+| K6 | Each colour channel is not second-order predictable from (x, y) or from the colour channels chosen before it, in the per-epoch frame. Result: two channels admitted, λ₃ (R² 0.0173 ≤ τ₁ 0.1224) and a₈ (0.0705 ≤ τ₂ 0.1651); λ₂ discarded (0.1243 > τ₁, margin 0.0019), l discarded (0.2959 > τ₃ 0.1963); third channel constant. Frame: anchor AXIS_1; dipoles (AXIS_3, AXIS_2), (AXIS_4, AXIS_7), (AXIS_8, AXIS_6); rank 8 AXIS_5; FIT ranking = full ranking | not-in-ci | yes (record rev. 6, `5bddacd`; runs `50a2eb0`) | `audits/K6.md` (phase 1 and 2 PASS) | `data/refapp/K6_result.json`, sha256 `a95ec2a0…cac58` |
 | K7 | R4: paired recall@15 difference in the 5D perspective, operator vs. radial | pending | — | `audits/R4.md` | day 6 script |
 
 K4 and K5 are not used for any decision until their script is committed and re-run on the
