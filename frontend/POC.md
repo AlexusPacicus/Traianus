@@ -295,3 +295,24 @@ on the text path, descriptive only.
 
 Exploration branch: not in the PoC's scope, no gate; it enters a registry only after its own
 instrument audit.
+
+## Record questions (not for reviewers)
+
+Kept here, outside `frontend/audits/`, so a blind reviewer never reads them (moved 2026-09-19
+after a void phase-2 attempt on K6).
+
+**K6.**
+**Question.** In a per-epoch geodetic frame, can three dimensions beyond position be shown as
+colour without repeating the position or each other?
+
+**Refuter.** No candidate is admissible under the record's rule. That is a decision point for the
+author, not a cue to change the candidates.
+
+**R4.**
+**Question.** In a perspective chosen at note q, the vertical axis already orders every note by its
+real distance to q. Do the four other observed dimensions — the horizontal axis λ and the three
+colour channels — keep q's real neighbours together, or scatter them more than an arbitrary
+horizontal axis would?
+
+**Refuter (R4).** The operator's 5D perspective scatters q's real neighbours more than the same
+perspective with an arbitrary horizontal axis, by the rule in `audits/R4.md`.
