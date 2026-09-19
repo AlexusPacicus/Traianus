@@ -1519,3 +1519,59 @@
   change (§1.6): every touched or added test file is under `pytest tests/`.
 
 * **Status:** `Consolidated`.
+
+### seq 53 — 2026-09-19 — Contracts, context and delegations validated in code (AGENTS v1.9.0)
+
+* **Defect:** three things depended on someone remembering them. The bit-level contracts
+  (`frontend/audits/contracts.md`) were loaded only if an agent chose to read them; a delegation was a
+  prose prompt that told the subagent to read whole files; and the path gates decided by how a path was
+  spelled.
+
+* **What now runs in code** (branch chain `feat/context-pack` → `feat/contract-context-hook` →
+  `feat/delegation-contract` → `feat/hooks-case-fix`, all local, none pushed):
+  - `tools/audit/context_pack.py` (`3a9997f`): serves only the sections a JSON spec names, to stdout,
+    and logs path, selector, line range and hashes to `.data/context_pack.log`, never content. Fails
+    closed. About 33 KB of sections against 125 KB of whole files for R1-INV4.
+  - `tools/hooks/require_contract_context.py` and `contract_registry.json` (`651bdf4`): `Edit`/`Write` on
+    a registered path is denied without a fresh `served` receipt whose `file_sha256` matches the
+    contract as it is now. AGENTS 3.7 and a 6.2 bullet.
+  - `tools/audit/delegation_contract.py` (`241f58f`): a delegation is a `DelegationContract` and its
+    answer a `DelegationReport`, Pydantic strict (no extra fields, every field required, no defaults,
+    no coercion), exported in the shape of `build_response_format`. Its `context` is validated with
+    `context_pack.parse_spec`. AGENTS 6.1.
+  - AGENTS v1.8.0 and v1.8.1 (`bc6b611`, `5e6249a`): a third subagent, `engine-implementer`, for
+    `traianus/**` and `tools/**` with their tests; v1.9.0: 3.7 and the strict-JSON delegation.
+
+* **A finding, found by reviewing the hook and confirmed empirically:** on macOS (case-insensitive
+  APFS) both path gates were bypassed by a path spelled with other case. `TESTS/conftest.py`,
+  `agents.md` and `Traianus/app.py` exited 0 without a receipt through
+  `tools/hooks/require_boundary_validation.py`, the Zero-Trust gate of AGENTS 6.2. `Path.resolve()` was
+  already in use and does not change case there. Fixed in `9fa11ff`, from `tools/hooks/` only:
+  `canonical` finds the ancestor that is the same file as the root with `os.path.samefile`, and
+  rebuilds each name from the directory entry that is the same file; nothing is compared lexically.
+  `traianus/security/hook_gate.py` is untouched (`traianus/` is immutable at this point). The two hooks
+  carry identical copies of `canonical`, pinned by a test, because existing tests forbid a shared
+  import. Verified under the system Python 3.9.6: variant and exact spelling give the same exit code in
+  every pair, and a lowercased root prefix is denied. A behaviour change: a `resolve()` failure now
+  denies, and the denial prints the stored spelling that `validate_proposal` must be given.
+
+* **Declared limits:** the receipt proves `context_pack` served the sections, not that they were read
+  or that the code conforms; the log is a plain file (a line written through Bash forges a receipt);
+  Bash-issued writes are not gated; `tools/hooks/**` and the registry are not themselves gated; the
+  `validate_proposal` receipt binds a path, not the content of the edit (one implementer first passed
+  a summary as the `Implementation_Block`, so its forbidden-token scan saw no code; it then gated the
+  real text in chunks). `delegation_contract` does not stop `files_may_touch` from listing
+  `traianus/**`.
+
+* **What did not work as intended:** the strict-JSON flow was exercised only on the executing agent's
+  side. The subagent for `hooks-case-identity` got the JSON contract but ran no `context_pack` (the log
+  has only the executing agent's run) and answered in markdown, not JSON: the agent definition it
+  loaded was the one from before it was rewritten. Its work is verified independently (see Gate). To
+  re-verify in a new session, where the definition reloads.
+
+* **Gate:** `pytest tests/` → 2169 passed / 5 deselected on `feat/hooks-case-fix` (the executing agent
+  re-ran it; earlier runs on the chain met the known intermittent
+  `test_concurrent_reads_during_background_write`, a 5 ms p99 bound, which passes alone). `ruff` and
+  `mypy` are the implementers' reports. Not run: the C1 audit harness.
+
+* **Status:** `Consolidated`, except the open re-verification of the JSON flow in a new session.
