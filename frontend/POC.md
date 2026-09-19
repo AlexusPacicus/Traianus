@@ -38,10 +38,11 @@ engine's `/mutate` (a new basis axis and epoch).
 artefact's vectors one at a time, in text order, through `/ingesta/vector` — never by
 re-encoding the texts and never in bulk. Two reasons: the vectors are then bit-identical to the
 ones K6 and R4 measure (binary32 → binary64 is exact), closing the gap declared in
-`audits/contracts.md` §0; and the state is built note by note, S_{n+1} = f(S_n, v_n), so every
-edge, telemetry value and threshold forms against the notes already present — the trajectory the
-engine exists to keep. To verify on day 3, in the contract: `/ingesta/vector` must not
-re-normalise in a way that changes the stored bits.
+`audits/contracts.md` §0; and the state is built note by note, S_{n+1} = f(S_n, v_n), which keeps
+the arrival order in the revision log. Corrected 2026-09-19 against the code: within one epoch
+the threshold, lifecycle state and ε-edges do *not* form against the notes already present (see
+"Exploration: relational loss under arrival order"). To verify on day 3, in the contract:
+`/ingesta/vector` must not re-normalise in a way that changes the stored bits.
 
 **No parallel store.** The engine already holds text (`manifold_nodes.text`), vectors
 (`data_plane`), lifecycle and edges, all append-only. RefApp-01 keeps no database of its own and
@@ -260,6 +261,37 @@ length or part).
 mask-aware pooling), so Δ is float32 rounding and the neighbour sets agree except at near-ties.
 Where the author's point does hold is the engine, not the encoder: Traianus is stateful, and
 ingesting one note at a time builds the state's trajectory (see Corpus loading).
+
+Exploration branch: not in the PoC's scope, no gate; it enters a registry only after its own
+instrument audit.
+
+## Exploration: relational loss under arrival order (author's idea, 2026-09-18; registered 2026-09-19)
+
+**Question (author's).** When the corpus is loaded one note at a time, how much of the final
+state depends on the order the notes arrived in?
+
+**What the code says, before measuring (2026-09-19).** Within one epoch, almost nothing:
+- θ_dyn (`auto_calibrate_critical_threshold`, `app.py:220`) is calibrated on the geodetic basis
+  only, never on the nodes; a node's lifecycle state and `action_potential` at ingest depend on
+  its own vector and the basis alone.
+- ε-edges are not persisted at ingest: `rebuild_epsilon_edges` (`_storage.py:649`) recomputes
+  E_n on read from the current node set. The final graph and the final kNN sets are functions of
+  the set, not of the sequence.
+- The only order-dependent quantity is the EWMA drift tracker (`VarianceTracker`, Schmitt band),
+  updated only on the text path (`app.py:290`), never by `/ingesta/vector`, and held in process
+  memory; what survives is the `telemetry_error` rows of its alerts.
+- Order enters the state through the revision log itself: node ids, `seq`, timestamps.
+
+So under the PoC's loading path the relational loss is zero by construction; the ε-graph and
+kNN are the controls, not the object. The question becomes live only where state is formed
+against a population: a render calibration fitted at a point in the trajectory
+(`spatial_calibration`), an epoch change (`/mutate`), or a θ calibrated on the nodes.
+
+**Refuter.** Two loadings of the same 2,221 vectors in two orders (text order and one PCG64
+permutation) through `/ingesta/vector` into fresh databases produce a different current state
+modulo ids and `seq`: a different lifecycle state or `action_potential` for some vector, or a
+different ε-edge set. Reported alongside: the drift tracker's alert sequence under both orders
+on the text path, descriptive only.
 
 Exploration branch: not in the PoC's scope, no gate; it enters a registry only after its own
 instrument audit.
