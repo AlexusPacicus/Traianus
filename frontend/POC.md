@@ -150,6 +150,13 @@ that leaves the written scope goes to v2.
   none may come from the tool); T06–T10 are the author's own thoughts, in English because the
   encoder is English-trained. They exist as nodes only after note entry (day 5), so the five are
   entered before any run and the state is frozen from then on. Spec in `R5.md`.
+- **2026-09-20 — R5 rule 2 amended, before any run.** The map draws dots without text, so a note
+  could only be "selected" by a click, and a click re-anchors the perspective: reading a neighbour
+  would have cost the view of X. The author decided: pointing at a node in the map shows a card with
+  its id and text and changes neither the selection nor the perspective; a click still opens the
+  perspective from that node, as the checkpoint criterion says. `R5.md` rule 2 now reads "pointed at
+  or selected (map)", its Views section says so, and a limit names the asymmetry: one pointing action
+  per note on the map, none on the list.
 
 ## Day-7 decision (pre-registered 2026-09-18, before any result)
 
