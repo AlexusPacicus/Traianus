@@ -446,3 +446,69 @@ la documentación. Seis ramas nuevas subidas a GitHub con el visto bueno del aut
 3. Comprobación del hito el martes 22 y decisión de la prórroga por la tarde.
 4. Decidir el color por perspectiva antes del script de R4.
 5. Aclarar lo del modelo de HF y la lista de ruff de CI.
+
+### Cierre (17:08)
+
+**Contexto:** tras la entrada de las 15:09: hito cumplido, las tareas de R5 sin escribir y dudas sobre
+si eran 9 o 10. El traspaso de la sesión daba la fecha por el 21; era la tarde del domingo 20, día 3.
+
+**Se hizo:**
+- **Calendario corregido al abrir.** El lunes 21 queda sin trabajo asignado: el hito pasó al 22 y el
+  día 5 sigue en el 22.
+- **R5 estructurada como benchmark** (`c662c7d`, `frontend/R5.md`). Las diez tareas se ejecutan en las
+  dos vistas, en días distintos, con la primera vista alternando (impares mapa, pares lista). Cambio
+  de protocolo antes de cualquier resultado, anotado en «Scope changes». La primera propuesta del
+  chat principal (una vista fija por tarea) se sustituyó por decisión del autor: las mismas tareas
+  en ambas. Lo de 9 o 10 queda cerrado: son diez.
+- **Fuente de verdad fuera de la herramienta.** El autor no ha leído la Ética, así que ninguna
+  esperada puede salir de su memoria ni de lo que muestre una vista (sería medir el motor contra sí
+  mismo). T01–T05: frases del corpus elegidas por regla (la de posición central de cada Parte entre
+  las que citan al menos 3 proposiciones ajenas; 45 candidatas), y las esperadas son las
+  proposiciones que citan. T06–T10: notas propias del autor, en inglés porque el encoder es
+  `all-MiniLM-L6-v2` y el corpus es la traducción de Elwes. Las esperadas las propuso el chat
+  principal por búsqueda de texto, con el enunciado al lado, y el autor las conservó. Se descartó
+  una de cinco ideas (solapaba con otra y su mitad sobre tecnología no tiene equivalente en la
+  Ética).
+- **Regla de estado nueva.** Las cinco notas propias no están en el corpus, así que las cinco
+  dependen de la entrada de notas del día 5: se entran antes del primer intento y después no se
+  entra nada. Si no se pueden entrar al acabar el día 6, T06–T10 quedan anuladas.
+- **Reglas numéricas**, propuestas por el chat principal y confirmadas por el autor: tope de 3
+  minutos, margen de 10 segundos, los empates no puntúan, se exigen 2 proposiciones distintas para
+  dar una ejecución por completada; en igualdad gana la lista.
+- **Sesgo declarado en los límites.** En una perspectiva el eje vertical ya es el orden de distancia
+  real, así que en tareas de «relacionadas» el mapa como mucho iguala a la lista y los empates van a
+  la lista. «R5 favorece a la lista» significa «para recuperar relacionadas la lista basta», no «el
+  mapa no tiene valor». La fila del día 7 de `POC.md` no se tocó.
+- **Subida** de `ec1ead3` y `c662c7d` a `origin/feat/client-selection`; `main` sin tocar (`cc401eb`).
+
+**Resultado:** un commit de esta sesión (`c662c7d`), de documentación; los demás de hoy están en la
+entrada de las 15:09. Árbol limpio y todo subido. Suite sin ejecutar: solo documentación.
+
+**Resuelto de entradas anteriores:**
+- 2026-09-20: las tareas de R5, «9 o 10» y su commit antes del día 5 (`c662c7d`).
+- 2026-09-19 (cierre): «las 10 tareas de R5 no están escritas».
+
+**Sin resolver / decisión pendiente:**
+- Autor: la fila del día 7 («R5 favorece a la lista → RefApp-01 sigue list-first») dice más de lo que
+  sostiene el resultado. Se ofreció matizarla y no hay respuesta.
+- Autor: color por perspectiva antes de R4 (día 6). Además R4 debe declarar sobre qué estado mide:
+  2221 nodos, o 2226 con las cinco notas dentro.
+- Requisito para el contrato del día 5, sin escribir: el detalle del mapa y las filas de la lista
+  deben mostrar el id y el texto de cada nota; hoy el cliente solo muestra «Perspective at {ancla}».
+- R5 depende del día 5: sin entrada de notas quedan T01–T05.
+- La selección de las anclas se hizo con un filtro `awk` desechable fuera del repositorio. Las cinco
+  anclas están congeladas en `R5.md`; hacerla reproducible sería un contrato de `tools/**`.
+- Hueco menor aparcado hasta acabar los refutadores: la lista `DENIED` de
+  `tools/audit/build_review_package.py` no incluye `frontend/R5.md`. Riesgo bajo.
+- Siguen abiertos los demás de la entrada de las 15:09: prórroga el martes 22, modelo de HF, lista de
+  ruff de CI, integración de las ramas y los menores del cliente.
+
+**Próximo paso:**
+1. Contrato del día 5 (entrada de notas y consolidación con `incubating` como estado propio y nueva
+   petición de `/spatial` tras ingestar; lista de las 15 más cercanas; detalle con id y texto). Se
+   puede preparar el lunes 21; antes de lanzarlo, anotar las líneas del log de `context_pack`.
+2. Entrar las cinco notas antes del primer intento de R5; primera pasada y, al menos un día después,
+   segunda.
+3. Comprobación del hito el martes 22 y decisión de la prórroga por la tarde.
+4. Decidir el color por perspectiva y el estado de R4 antes de su script.
+5. Aclarar lo del modelo de HF y la lista de ruff.
