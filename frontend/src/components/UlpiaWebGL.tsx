@@ -1,18 +1,75 @@
 import { useEffect, useRef } from "react";
-import { fetchSpatial, type SpatialObservable } from "../api";
-import { packRestingBuffer, buildTransitionBuffer } from "../binary";
+import { fetchSpatial } from "../api";
+import { packRestingBuffer } from "../binary";
+import { BASE_SCALE, HOME, panBy, viewMatrix, wheelFactor, zoomAt, type Camera } from "../camera";
 import { UlpiaRenderer } from "../ulpia_renderer";
 
 interface UlpiaWebGLProps {
   token: string;
 }
 
+/** Orthographic-ish projection covering the [-1,1]^3 coordinate range. */
+const PROJECTION = new Float32Array([
+  BASE_SCALE, 0, 0, 0,
+  0, BASE_SCALE, 0, 0,
+  0, 0, -1, 0,
+  0, 0, 0, 1,
+]);
+
+/** Wheel zooms about the cursor, dragging pans, double-click goes home. */
+function attachNavigation(
+  canvas: HTMLCanvasElement,
+  get: () => Camera,
+  set: (camera: Camera) => void
+): () => void {
+  let drag: { x: number; y: number } | null = null;
+
+  const onWheel = (e: WheelEvent) => {
+    e.preventDefault();
+    const box = canvas.getBoundingClientRect();
+    const factor = wheelFactor(e.deltaY, e.deltaMode);
+    set(zoomAt(get(), factor, e.clientX - box.left, e.clientY - box.top, box.width, box.height));
+  };
+  const onDown = (e: PointerEvent) => {
+    if (e.button !== 0) return;
+    drag = { x: e.clientX, y: e.clientY };
+    canvas.setPointerCapture(e.pointerId);
+    canvas.style.cursor = "grabbing";
+  };
+  const onMove = (e: PointerEvent) => {
+    if (!drag) return;
+    const box = canvas.getBoundingClientRect();
+    set(panBy(get(), e.clientX - drag.x, e.clientY - drag.y, box.width, box.height));
+    drag = { x: e.clientX, y: e.clientY };
+  };
+  const onUp = () => {
+    drag = null;
+    canvas.style.cursor = "grab";
+  };
+  const onHome = () => set(HOME);
+
+  canvas.addEventListener("wheel", onWheel, { passive: false });
+  canvas.addEventListener("pointerdown", onDown);
+  canvas.addEventListener("pointermove", onMove);
+  canvas.addEventListener("pointerup", onUp);
+  canvas.addEventListener("pointercancel", onUp);
+  canvas.addEventListener("dblclick", onHome);
+  return () => {
+    canvas.removeEventListener("wheel", onWheel);
+    canvas.removeEventListener("pointerdown", onDown);
+    canvas.removeEventListener("pointermove", onMove);
+    canvas.removeEventListener("pointerup", onUp);
+    canvas.removeEventListener("pointercancel", onUp);
+    canvas.removeEventListener("dblclick", onHome);
+  };
+}
+
 /**
- * WebGL2 overlay for the Ulpia spatial canvas (Fase 3/4).
+ * WebGL2 overlay for the Ulpia spatial canvas.
  *
- * Fetches per-node spatial observables from GET /spatial, packs them into the
- * 64-byte zero-copy contract, uploads to GPU memory and animates a subtle
- * breathing transition with escape vibration.
+ * Fetches per-node spatial observables from GET /spatial, packs them into the 64-byte zero-copy
+ * contract and draws them at rest: a node never moves on screen except by the camera. Zoom and
+ * pan only change the view matrix, so navigation writes nothing to the engine (R2).
  */
 export default function UlpiaWebGL({ token }: UlpiaWebGLProps) {
   const canvasRef = useRef<HTMLCanvasElement>(null);
@@ -24,6 +81,7 @@ export default function UlpiaWebGL({ token }: UlpiaWebGLProps) {
     let renderer: UlpiaRenderer | null = null;
     let rafId = 0;
     let cancelled = false;
+    let detach = () => {};
 
     (async () => {
       try {
@@ -31,55 +89,20 @@ export default function UlpiaWebGL({ token }: UlpiaWebGLProps) {
         if (cancelled || nodes.length === 0) return;
 
         renderer = new UlpiaRenderer(canvas);
-        // Orthographic-ish projection covering the [-1,1]^3 coordinate range.
-        const projection = new Float32Array([
-          1.2, 0, 0, 0,
-          0, 1.2, 0, 0,
-          0, 0, -1, 0,
-          0, 0, 0, 1,
-        ]);
-        const view = new Float32Array([
-          1, 0, 0, 0,
-          0, 1, 0, 0,
-          0, 0, 1, 0,
-          0, 0, 0, 1,
-        ]);
-        renderer.updateCamera(projection, view);
+        renderer.uploadRestingBuffer(packRestingBuffer(nodes));
 
-        const resting = packRestingBuffer(nodes);
-        renderer.uploadRestingBuffer(resting);
-
-        // Breathing transition: arc through an orthogonal copy of the cloud.
-        const moved: SpatialObservable[] = nodes.map((n, i) => {
-          const phase = ((i % 7) - 3) * 0.05;
-          return {
-            ...n,
-            x: n.x + phase,
-            y: n.y - 0.03 * ((i % 3) + 1),
-            z: n.z * 1.0,
-          };
-        });
-        const arcSag = (i: number): [number, number, number] => {
-          const n = nodes[i];
-          return [n.x, n.y, n.z + 0.06 * (1 + (i % 3))];
+        let camera: Camera = HOME;
+        const setCamera = (next: Camera) => {
+          camera = next;
+          renderer?.updateCamera(PROJECTION, viewMatrix(camera));
         };
-        const transition = buildTransitionBuffer(nodes, moved, arcSag);
-        renderer.uploadTransitionBuffer(transition);
+        setCamera(HOME);
+        detach = attachNavigation(canvas, () => camera, setCamera);
+
         const total = nodes.length;
-
-        // Escape vibration proxy: mean h (escape distance) across the manifold.
-        const meanEscape = nodes.reduce((acc, n) => acc + n.h, 0) / nodes.length;
-        const vibration =
-          meanEscape > 0.35 ? Math.min(1.0, (meanEscape - 0.35) * 3) : 0;
-
-        const t0 = performance.now();
         const loop = () => {
           if (cancelled) return;
-          const elapsed = (performance.now() - t0) / 1000;
-          // Elastic ease-in-out: gentle 6s loop between idle and transit.
-          const sweep = (Math.sin(elapsed * 0.5) + 1) / 2; // [0,1] oscillation
-          const t = sweep * sweep * (3 - 2 * sweep); // smoothstep
-          renderer?.renderFrame(total, t, t > 0.02 && t < 0.98 ? vibration : 0);
+          renderer?.renderFrame(total);
           rafId = requestAnimationFrame(loop);
         };
         rafId = requestAnimationFrame(loop);
@@ -92,6 +115,7 @@ export default function UlpiaWebGL({ token }: UlpiaWebGLProps) {
     return () => {
       cancelled = true;
       cancelAnimationFrame(rafId);
+      detach();
     };
   }, [token]);
 
@@ -104,7 +128,8 @@ export default function UlpiaWebGL({ token }: UlpiaWebGLProps) {
         width: "100%",
         height: "100%",
         zIndex: 5,
-        pointerEvents: "none",
+        cursor: "grab",
+        touchAction: "none",
       }}
     />
   );

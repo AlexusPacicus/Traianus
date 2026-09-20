@@ -35,6 +35,7 @@ uniform mat4 u_projectionMatrix;
 uniform mat4 u_viewMatrix;
 uniform float u_interpolationTime;   // t in [0.0, 1.0]
 uniform float u_escapeVibration;     // 0..1 intensity from escape Z-score
+uniform float u_pointScale;          // device pixels per CSS pixel
 
 out vec3 v_lch;
 out float v_vibration_offset;
@@ -64,7 +65,7 @@ void main() {
     gl_Position = u_projectionMatrix * u_viewMatrix * vec4(base_pos, 1.0);
 
     // Node size scales with Luminance (density in [0,1]).
-    gl_PointSize = clamp(a_lch.x * 12.0, 4.0, 32.0);
+    gl_PointSize = clamp(a_lch.x * 12.0, 4.0, 32.0) * u_pointScale;
 
     v_lch = a_lch;
     v_vibration_offset = u_escapeVibration;
@@ -162,6 +163,7 @@ const TRANSITION_STRIDE = 9 * 4;
 const PROGRAM_POINT_SIZE = 0x8642;
 
 export class UlpiaRenderer {
+  private canvas: HTMLCanvasElement;
   private gl: WebGL2RenderingContext;
   private program: WebGLProgram | null = null;
   private restingVbo: WebGLBuffer | null = null;
@@ -190,6 +192,7 @@ export class UlpiaRenderer {
     if (!glContext) {
       throw new Error("WebGL 2.0 is not available in this browser.");
     }
+    this.canvas = canvas;
     this.gl = glContext;
     this.initializePipeline();
   }
@@ -248,14 +251,13 @@ export class UlpiaRenderer {
     gl.vertexAttribPointer(1, 3, gl.FLOAT, false, RESTING_STRIDE, 12);
     gl.enableVertexAttribArray(1);
 
-    // Transition attributes: locations 2/3/4 from the separate transition VBO.
+    // Transition attributes: locations 2/3/4 from the separate transition VBO. They stay
+    // disabled (constant zero) until a transition buffer is uploaded: drawing with them enabled
+    // over an empty buffer is GL_INVALID_OPERATION and draws nothing.
     gl.bindBuffer(gl.ARRAY_BUFFER, this.transitionVbo);
     gl.vertexAttribPointer(2, 3, gl.FLOAT, false, TRANSITION_STRIDE, 0);
-    gl.enableVertexAttribArray(2);
     gl.vertexAttribPointer(3, 3, gl.FLOAT, false, TRANSITION_STRIDE, 12);
-    gl.enableVertexAttribArray(3);
     gl.vertexAttribPointer(4, 3, gl.FLOAT, false, TRANSITION_STRIDE, 24);
-    gl.enableVertexAttribArray(4);
 
     gl.bindVertexArray(null);
     gl.bindBuffer(gl.ARRAY_BUFFER, null);
@@ -283,6 +285,9 @@ export class UlpiaRenderer {
     gl.bindBuffer(gl.ARRAY_BUFFER, this.transitionVbo);
     gl.bufferData(gl.ARRAY_BUFFER, arrayBuffer, gl.STREAM_DRAW);
     gl.bindBuffer(gl.ARRAY_BUFFER, null);
+    gl.bindVertexArray(this.vao);
+    for (const location of [2, 3, 4]) gl.enableVertexAttribArray(location);
+    gl.bindVertexArray(null);
   }
 
   /** Render one frame. */
@@ -296,6 +301,17 @@ export class UlpiaRenderer {
     const vao = this.vao;
     if (!program || !vao) return;
 
+    // The drawing buffer follows the canvas's CSS size at device resolution; left alone it
+    // stays at the 300x150 default and a zoom would only magnify pixels.
+    const pixelRatio = window.devicePixelRatio || 1;
+    const width = Math.max(1, Math.round(this.canvas.clientWidth * pixelRatio));
+    const height = Math.max(1, Math.round(this.canvas.clientHeight * pixelRatio));
+    if (this.canvas.width !== width || this.canvas.height !== height) {
+      this.canvas.width = width;
+      this.canvas.height = height;
+    }
+    gl.viewport(0, 0, width, height);
+
     gl.clearColor(0.04, 0.04, 0.05, 1.0);
     gl.clear(gl.COLOR_BUFFER_BIT | gl.DEPTH_BUFFER_BIT);
 
@@ -304,11 +320,13 @@ export class UlpiaRenderer {
     const uView = gl.getUniformLocation(program, "u_viewMatrix");
     const uTime = gl.getUniformLocation(program, "u_interpolationTime");
     const uVibe = gl.getUniformLocation(program, "u_escapeVibration");
+    const uScale = gl.getUniformLocation(program, "u_pointScale");
 
     gl.uniformMatrix4fv(uProjection, false, this.projectionMatrix);
     gl.uniformMatrix4fv(uView, false, this.viewMatrix);
     gl.uniform1f(uTime, interpolationTime);
     gl.uniform1f(uVibe, escapeVibration);
+    gl.uniform1f(uScale, pixelRatio);
 
     gl.bindVertexArray(vao);
     gl.drawArrays(gl.POINTS, 0, totalNodes);
