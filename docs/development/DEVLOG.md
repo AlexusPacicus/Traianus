@@ -336,3 +336,113 @@ del día 3, marco por época y mapa a la vista; el ancla, sin empezar.
 3. Escribir y commitear las 10 tareas de R5.
 4. Decidir la fecha del checkpoint y la congelación de `traianus/`.
 5. Subir `feat/corpus-loader` y decidir la integración de las ramas.
+
+---
+
+## 2026-09-20
+
+**Contexto:** día 3 de la PoC RefApp-01. Se partía del corpus cargado en un motor de prueba, sin
+zoom, sin pan y sin perspectiva por nota, con el hito el 22.
+
+**Se hizo:**
+- **Decisiones del autor al abrir:** `traianus/` no se congela (el motor se edita solo si la hoja de
+  ruta lo pide); `StrictBool` y R1-INV4 siguen sin fusionar hasta modularizar; hito el 22
+  (`5f6d778`); recortes en el orden de `POC.md`.
+- **La definición nueva de `engine-implementer` sí se recarga.** Con contratos sin los dos pasos en
+  `decisions`, el subagente ejecutó `context_pack` por su cuenta (una llamada, las secciones exactas
+  del contrato) y contestó un informe JSON que `report` aceptó. Una primera sonda mía tocaba un test
+  ajeno a la hoja de ruta y el autor la rechazó (AGENTS 1.1): se sustituyó por un corte real del
+  endpoint. LEDGER seq 54.
+- **Zoom y pan** (`d3acdbc`): la rueda hace zoom sobre el cursor, arrastrar desplaza, doble clic
+  vuelve. Verificado en el navegador leyendo la matriz de vista que dibujó la GPU; ninguna petición
+  al motor mientras se navega (R2). Al mirarlo: el buffer de dibujo se quedaba en 300×150 (un zoom
+  solo agrandaba píxeles) y el bucle de «respiración» movía los nodos y leía `h` como distancia de
+  escape, cuando desde el día 2 es un canal de color; se quitó. Un fallo mío que la verificación
+  destapó: dejé habilitados los atributos de transición sobre un buffer vacío y WebGL no dibujaba.
+- **Perspectiva, decisiones del autor:** cualquier nodo actual puede ser ancla; la posición se
+  recomputa en el marco del ancla a partir de sus pesos sobre los ejes; el color queda el de la
+  época. El autor dudó si recomputar también el color y se aparcó como exploración en `POC.md`
+  (`ce56847`). Medido al decidirlo: los 2221 nodos cargados están `incubating` y `/spatial` no filtra
+  por estado.
+- **Motor, tres cortes por contrato JSON al subagente:** `select_poles` (`b17bc96`),
+  `perspective_frame` y `observe` (`3fd5ec0`) y `GET /spatial?anchor=<id>` (`1762227`; 404 id
+  desconocido, 409 sin marco, 422 ante un `ValueError`, solo lectura). Error mío en el contrato del
+  corte 2: describía la colinealidad del proyector como «q y los dos ejes en un plano», y
+  `_is_collinear` comprueba que las proyecciones de los polos casi coincidan. El subagente siguió la
+  decisión correcta y lo declaró.
+- **Corrección de método.** El chat principal empezó a escribir a mano la selección de nodo del
+  cliente y el autor lo frenó. El hueco era real: `engine-implementer` cubría `traianus/**` y
+  `tools/**`, el contrato solo admitía `engine` o `tools` y el frontend no tiene runner de tests.
+  Decisión del autor: ampliar el canal. AGENTS v1.10.0; esquema con `scope: client`, gate `tsc` y
+  tests `manual`, con sus acoplamientos aplicados en código (`4d4a2f6`); LEDGER seq 54. El borrador
+  quedó en `stash@{0}`, sin usar. El zoom y pan (`d3acdbc`) es la excepción declarada: también lo
+  escribió el chat principal.
+- **Selección en el cliente** (`1d88a2a`, por el subagente): un clic sobre un nodo pide su
+  perspectiva y la dibuja, con el ancla resaltada, Escape o un botón para volver, la proporción real
+  del plano y el plano completo a zoom 1. Decisión mía, distinta de lo que había recomendado: la
+  perspectiva se escala con un único factor y sin recorte, porque el ancla tiene la mayor similitud
+  posible y recortar a unos pocos σ apilaría a sus vecinos en el borde. Las comprobaciones manuales
+  las ejecutó el chat principal en el navegador; la de errores mostró la superposición tapada por la
+  barra de ingesta en un panel estrecho y se corrigió (`ca490cb`).
+- **Observación exploratoria**, un solo ancla: en la perspectiva el color sigue a x (R² del canal h
+  sobre un cuadrático de x, y = 0,524; `POC.md`). Hipótesis sin verificar: los dos dipolos contienen
+  AXIS_6. Es un indicio a favor de recomputar el color por perspectiva.
+- **Consultas del autor:** cargó un documento del «Kernel cinético» y anunció que más adelante habrá
+  una búsqueda de otros documentos dispersos; se leyó y se aparcó (no está en el repo). Sobre
+  «descargar el modelo para no depender de la API de HF»: ya está en la caché local y el motor lo
+  carga con `local_files_only=True`; solo la precarga de CI en un runner en frío toca la red. Se
+  preguntó qué se busca exactamente y no hay respuesta.
+
+**Resultado:** 10 commits en la cadena local `feat/perspective-function` → `feat/perspective-observe`
+→ `feat/spatial-anchor` → `feat/delegation-client-scope` → `feat/client-selection`: seis los escribió
+el subagente por contrato, uno el chat principal (`d3acdbc`, excepción declarada) y tres son de
+documentación. Sin commits de otras sesiones. Los tres criterios del hito están cumplidos a día 20:
+corpus sobre el mapa coloreado, zoom, y elegir un nodo redibuja el mapa desde él. Suite en 2437
+verdes con 5 deseleccionadas, comprobada en `4d4a2f6`; los commits posteriores solo tocan el cliente y
+la documentación. Seis ramas nuevas subidas a GitHub con el visto bueno del autor; `main` sin tocar.
+
+**Resuelto de entradas anteriores:**
+- 2026-09-19 (cierre): la definición de `engine-implementer` se recarga en la sesión nueva y el
+  flujo JSON funciona sin los dos pasos en `decisions`.
+- 2026-09-19 (cierre): `POC.md` decía a la vez «día 4» y «22»: el hito es el 22.
+- 2026-09-19 (cierre): `StrictBool` y R1-INV4 sin fusionar hasta modularizar; `traianus/` no se
+  congela y no se hace cumplir en código.
+- 2026-09-19 (cierre): zoom y pan, y `GET /spatial?anchor=<id>` (próximos pasos 1 y 2), hechos. El
+  riesgo «faltan zoom, pan y la perspectiva por nota» queda cerrado.
+- 2026-09-19 (cierre): `feat/corpus-loader` ya está en el remoto.
+
+**Sin resolver / decisión pendiente:**
+- Autor: las tareas de R5, que deben estar commiteadas antes de empezar el día 5 (el 22; fichero
+  propuesto `frontend/R5.md`). Dijo «9 ahora» y no está claro si lleva 9 escritas o baja el
+  protocolo a 9; sería un cambio de alcance a registrar y con 9 no hay empates.
+- Autor: la prórroga de 3 días se decide el martes 22 por la tarde.
+- Autor: qué se busca al «descargar el modelo» (un fallo concreto, otra máquina o que CI no dependa
+  del hub).
+- Autor: promover o no el color por perspectiva antes de la primera ejecución de R4 (día 6);
+  exigiría cambiar el registro R4 y otra revisión de fase 1.
+- Autor: ampliar la lista de ruff de `ci.yml`, que no incluye `traianus/app.py` ni los tests nuevos.
+- Integración de las ramas encadenadas, incluidas las de `StrictBool` y R1-INV4: sin decidir.
+- Excepción declarada: `d3acdbc` es código del chat principal, verificado en el navegador y no por un
+  test. Los tests del cliente son `manual` y sin rojo previo (límite en LEDGER seq 54).
+- La cláusula de cliente de la definición de `engine-implementer` llega a un subagente desde la
+  sesión siguiente; hasta entonces cada contrato de cliente repite sus reglas en `decisions`.
+- Diseño del cliente: en la perspectiva el ancla fija la escala y el grueso de la nube queda pequeño
+  a zoom 1. Menores, declarados por el subagente: un doble clic sobre un nodo lanza dos peticiones;
+  el fallo de la carga inicial de la vista general solo sale por consola; el campo de ingesta
+  desborda la ventana en un panel muy estrecho.
+- De la entrada anterior, sin tocar: exploración de documentación con formato fijo, manifest del
+  paquete (`data/spinoza/telemetry`), ficha K8, prueba intermitente
+  `test_concurrent_reads_during_background_write`, `/ingesta` acepta una clave vacía y limpieza del
+  scratchpad.
+- **Riesgo:** el hito ya se cumple; quedan la entrada de notas y consolidación (día 5), la
+  interacción y la lista de relacionadas, y R4 (día 6). La función compartida que pide el registro
+  R4 existe (`observe`); falta el script.
+
+**Próximo paso (mañana, en orden):**
+1. R5: escribir y commitear las tareas antes de empezar el día 5; aclarar si son 9 o 10.
+2. Día 5, por contratos de cliente y de motor: entrada de nota y consolidación (`incubating` como
+   estado propio, volver a pedir `/spatial` tras ingestar), interacción (texto y relaciones) y la
+   lista de notas relacionadas.
+3. Comprobación del hito el martes 22 y decisión de la prórroga por la tarde.
+4. Decidir el color por perspectiva antes del script de R4.
+5. Aclarar lo del modelo de HF y la lista de ruff de CI.
