@@ -37,14 +37,14 @@ interface PerspectiveInfo {
 
 const overlayStyle = {
   position: "absolute",
-  top: 12,
+  top: 64,
   left: 12,
   zIndex: 6,
   display: "flex",
   flexDirection: "column",
   alignItems: "flex-start",
   gap: 6,
-  maxWidth: 360,
+  maxWidth: "min(360px, calc(100% - 24px))",
   padding: "8px 12px",
   background: "#1E293B",
   border: "1px solid #334155",
