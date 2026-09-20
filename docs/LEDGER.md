@@ -1574,4 +1574,48 @@
   `test_concurrent_reads_during_background_write`, a 5 ms p99 bound, which passes alone). `ruff` and
   `mypy` are the implementers' reports. Not run: the C1 audit harness.
 
-* **Status:** `Consolidated`, except the open re-verification of the JSON flow in a new session.
+* **Status:** `Consolidated`, except the open re-verification of the JSON flow in a new session
+  (done on 2026-09-20, see seq 54).
+
+### seq 54 — 2026-09-20 — The engine implementer also takes client changes (AGENTS v1.10.0)
+
+* **Defect:** the PoC needs client code (zoom, pan, node selection) and no delegation channel covered
+  it. `engine-implementer` took `traianus/**` and `tools/**`, `DelegationContract.scope` admitted only
+  `engine` and `tools`, and `frontend/` has no test runner. The executing agent filled the gap by
+  writing the client code itself: the zoom and pan (`d3acdbc`, pushed) and the start of the selection,
+  against the rule that code goes to a subagent. The author stopped it and chose to extend the channel.
+
+* **What now runs in code** (chain `feat/delegation-client-scope`, local):
+  - AGENTS 6.1 v1.10.0: the engine implementer takes one engine, tooling or client change
+    (`frontend/src/**`); a client change has no test runner, so its gate is `tsc`
+    (`npm --prefix frontend run typecheck`), its tests are `manual` checks the executing agent runs in
+    the browser, and it adds no dependency.
+  - `tools/audit/delegation_contract.py` (`4d4a2f6`): scope `client`, gate `tsc`, expectation `manual`,
+    and the couplings as validators, each reported at its field: `manual` only with `client`, and every
+    test of a client contract manual; a client contract touches only `frontend/src/`; its gates are
+    exactly `["tsc"]`; `tsc` only with `client`. The engine and tools contracts are unchanged.
+  - `.claude/agents/engine-implementer.md`: a Client scope bullet. A definition is cached per session,
+    so it reaches a subagent from the next one; until then a client contract repeats its client rules
+    in `decisions`.
+
+* **Resolved from seq 53:** the JSON flow re-verified in a new session. Four delegations of
+  2026-09-20 (`perspective-poles`, `perspective-observe`, `spatial-anchor`, `delegation-client-scope`)
+  carried no validator or `context_pack` steps in `decisions`; each ran `context_pack` once (one
+  timestamp, exactly the contract's sections) and answered a pure JSON report that `report` accepted.
+  The validator step leaves no log line, so it is inferred from the run order.
+
+* **Declared limits:** the zoom and pan (`d3acdbc`) is main-chat code. It is kept by the author's
+  decision, declared here, and was verified in the browser (wheel, drag and reset read from the drawn
+  view matrix, no request to the engine while navigating), not by a test. A `manual` test is not
+  red-first and is run by the executing agent, so the review is the only gate that runs it. Two
+  recurrences of seq 53 limits: the `spatial-anchor` implementer gated `traianus/app.py` with an
+  excerpt as the `Implementation_Block`, not the literal text, and one contract went out with a gate
+  list that differed from the validated file (the implementer ran the missing gate anyway). The scoped
+  `ruff` list of `.github/workflows/ci.yml` names neither `traianus/app.py` nor the new test files;
+  extending it is undecided.
+
+* **Gate:** `pytest tests/` → 2437 passed / 5 deselected on `feat/delegation-client-scope` (the
+  executing agent re-ran it). `ruff` and `mypy` are the implementer's reports. Not run: the C1 audit
+  harness.
+
+* **Status:** `Consolidated`.

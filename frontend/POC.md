@@ -124,6 +124,20 @@ that leaves the written scope goes to v2.
   day-7 table) and "2026-09-22" (Deadline). With day 1 = 2026-09-18, day 4 is 2026-09-21. The author
   decided: the checkpoint is **2026-09-22**, as the Deadline section says; the tables are left as
   written and read against that date. The order of the cuts is unchanged.
+- **2026-09-20 — extension decided on the checkpoint date, before any result.** The day-7 table says
+  the one-off 3-day extension is "decided on day 4". The author decided it is decided on Tuesday
+  2026-09-22, in the afternoon, after the checkpoint. The window (to 2026-09-28) and the rule of no
+  second extension are unchanged.
+- **2026-09-20 — perspective and map contents defined, before any R4 result.** The author decided:
+  any current node can be the anchor (all 2,221 loaded nodes are `incubating` and `/spatial` does not
+  filter by lifecycle state, so the map shows every current node and lifecycle shows as its own state
+  on day 5; feature 4's "appears on the map" is read against this); in a perspective at q the
+  position is recomputed in q's frame from q's weights on the axes, and colour stays the epoch
+  channels (colour per perspective is parked as an exploration below). The engine returns x and y as
+  z-scores over the other nodes, unclipped, as the R4 record specifies. The client places them with
+  one common factor and no clipping (the executing agent's choice, reported to the author: the
+  anchor's own y is the largest similarity there is, so clipping at a few standard deviations would
+  pile its nearest neighbours on the edge).
 
 ## Day-7 decision (pre-registered 2026-09-18, before any result)
 
@@ -246,6 +260,9 @@ chunks (six per part) through `/ingesta`, then the client.
 Consequences for the plan: feature 4 must show `incubating` as a state of its own; the client
 must refetch `/spatial` after ingest; zoom, click and perspective are all new client work (days
 3–5), none of it exists yet. A `DB_PATH` environment override would make isolated runs routine.
+
+Resolved on day 3 (2026-09-20): zoom, pan and click exist (`d3acdbc`, `1d88a2a`), and the client
+draws the perspective at a clicked node. Original table kept above.
 
 ## Exploration / v2: faces of a concept polytope (author's idea, 2026-09-18)
 
@@ -398,6 +415,15 @@ this exploration changes what the endpoint passes, not the function.
   be assumed.
 - The R4 record says colour is "fixed per note, independent of q". Changing it needs a new phase-1
   review before R4's first run (day 6); no R4 result exists yet.
+
+**Observation, same day (exploratory, one anchor, not a claim).** In the client, the perspective at
+`VEC_PART2_MIND_P11_DEMO_01_C04` (poles AXIS_1, AXIS_6) draws colour as a gradient along x. Computed
+in the page from the endpoint's answer over the other 2,220 nodes: the R² of colour channel h (λ₃) on
+(1, x, y, x², y², xy) is 0.524 and that of c (a₈) 0.125, with corr(h, x) = 0.652; K6's thresholds in
+the epoch frame were 0.1224 and 0.1651. A hypothesis that fits and is untested: this perspective's
+dipole uses AXIS_1 and AXIS_6, the epoch's λ₃ dipole is (AXIS_8, AXIS_6), and both contain AXIS_6.
+R4 reports this R² per q, descriptively, and will settle it. The figure has no row in Claims and
+decides nothing.
 
 **Refuter (candidate, not audited).** For a stated rule that maps q's axis ranking to colour
 channels, some channel is second-order predictable from q's (x, y) by K6's rule, applied per
