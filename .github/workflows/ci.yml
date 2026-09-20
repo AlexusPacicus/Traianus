@@ -107,6 +107,7 @@ jobs:
             tools/hooks/require_contract_context.py \
             tools/audit/context_pack.py \
             tools/audit/delegation_contract.py \
+            tools/audit/run_process.py \
             tools/experiments/tooling/load_spinoza_corpus.py
       - name: Mypy (strict, whole control plane)
         run: |
