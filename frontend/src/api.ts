@@ -80,17 +80,38 @@ export async function fetchPerspective(token: string, anchor: string): Promise<P
   return res.json();
 }
 
-export async function ingestText(text: string, token: string): Promise<string> {
+/** The engine turns an ingestion into a node asynchronously; GET /nodos is polled this often. */
+export const POLL_INTERVAL_MS = 1000;
+/** How long a node may take to be listed before the entry is reported as failed. */
+export const NODE_WAIT_MS = 60_000;
+
+/** Enters a note; a repeated `idempotencyKey` answers the first ingestion instead of a new one. */
+export async function ingestText(text: string, token: string, idempotencyKey: string): Promise<string> {
   const res = await fetch("/ingesta", {
     method: "POST",
     headers: {
       "Content-Type": "text/plain",
       "X-Traianus-Token": token,
-      "X-Idempotency-Key": crypto.randomUUID(),
+      "X-Idempotency-Key": idempotencyKey,
     },
     body: text,
   });
   if (!res.ok) throw new Error(`POST /ingesta failed: ${res.status}`);
   const data = await res.json();
-  return data.ingestion_id;
+  if (data.ingestion_id === undefined) throw new Error("POST /ingesta answered without an ingestion id");
+  return String(data.ingestion_id);
+}
+
+/** Polls GET /nodos until `nodeId` is listed and returns that listing; rejects after NODE_WAIT_MS. */
+export async function waitForNode(nodeId: string, signal?: AbortSignal): Promise<NodesNode[]> {
+  const deadline = Date.now() + NODE_WAIT_MS;
+  for (;;) {
+    signal?.throwIfAborted();
+    const nodes = await fetchNodes();
+    if (nodes.some((node) => node.id === nodeId)) return nodes;
+    if (Date.now() >= deadline) {
+      throw new Error(`${nodeId} was not listed within ${NODE_WAIT_MS / 1000} s`);
+    }
+    await new Promise((resolve) => setTimeout(resolve, POLL_INTERVAL_MS));
+  }
 }

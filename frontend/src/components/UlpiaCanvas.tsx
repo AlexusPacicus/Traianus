@@ -1,4 +1,4 @@
-import { useState, useEffect, useCallback, useMemo } from "react";
+import { useState, useEffect, useCallback, useMemo, useRef } from "react";
 import {
   ReactFlow,
   Background,
@@ -7,7 +7,15 @@ import {
   type Edge,
 } from "@xyflow/react";
 import "@xyflow/react/dist/style.css";
-import { fetchNodes, fetchRelations, ingestText, type NodesNode, type Relation } from "../api";
+import {
+  fetchNodes,
+  fetchRelations,
+  ingestText,
+  waitForNode,
+  type NodesNode,
+  type Relation,
+} from "../api";
+import { lifecycleOf } from "../lifecycle";
 import { projectTo5d } from "../projection";
 import UlpiaWebGL from "./UlpiaWebGL";
 
@@ -75,13 +83,23 @@ export default function UlpiaCanvas({ token }: UlpiaCanvasProps) {
   const [error, setError] = useState<string | null>(null);
   const [inputText, setInputText] = useState("");
   const [ingesting, setIngesting] = useState(false);
+  const [entry, setEntry] = useState<{ text: string; failed: boolean } | null>(null);
+  const [lifecycle, setLifecycle] = useState<ReadonlyMap<string, string>>(() => new Map());
+  const [mapVersion, setMapVersion] = useState(0);
+  // One idempotency key per submission: a retry of the same text reuses it.
+  const submission = useRef<{ text: string; key: string } | null>(null);
+  const mounted = useRef<AbortController | null>(null);
 
-  const loadData = useCallback(async () => {
-    try {
-      const [nodesData, relations] = await Promise.all([
-        fetchNodes(),
-        fetchRelations(token),
-      ]);
+  useEffect(() => {
+    const controller = new AbortController();
+    mounted.current = controller;
+    return () => controller.abort();
+  }, []);
+
+  const loadData = useCallback(
+    async (nodesData: NodesNode[]) => {
+      setLifecycle(lifecycleOf(nodesData));
+      const relations = await fetchRelations(token);
 
       if (nodesData.length === 0) {
         setNodes([]);
@@ -99,25 +117,41 @@ export default function UlpiaCanvas({ token }: UlpiaCanvasProps) {
       const projections = projectTo5d(matrix);
       setNodes(buildFlowNodes(nodesData, projections));
       setEdges(buildFlowEdges(relations));
-    } catch (e: unknown) {
-      setError(e instanceof Error ? e.message : "Unknown error");
-    }
-  }, [token]);
+    },
+    [token]
+  );
 
   useEffect(() => {
-    loadData();
+    fetchNodes()
+      .then(loadData)
+      .catch((e: unknown) => setError(e instanceof Error ? e.message : "Unknown error"));
   }, [loadData]);
 
   const handleIngest = useCallback(async () => {
-    if (!inputText.trim() || !token || ingesting) return;
+    const text = inputText.trim();
+    if (!text || !token || ingesting) return;
+    const current =
+      submission.current?.text === text ? submission.current : { text, key: crypto.randomUUID() };
+    submission.current = current;
     setIngesting(true);
+    setEntry({ text: "Sending...", failed: false });
+    let ingestionId: string | null = null;
     try {
-      await ingestText(inputText.trim(), token);
+      ingestionId = await ingestText(text, token, current.key);
+      setEntry({ text: `Waiting for NODE_${ingestionId}...`, failed: false });
+      const listed = await waitForNode(`NODE_${ingestionId}`, mounted.current?.signal);
+      submission.current = null;
       setInputText("");
-      await new Promise((r) => setTimeout(r, 600));
-      await loadData();
+      setEntry(null);
+      setMapVersion((v) => v + 1);
+      await loadData(listed);
     } catch (e: unknown) {
-      setError(e instanceof Error ? e.message : "Ingest failed");
+      if (mounted.current?.signal.aborted) return;
+      const reason = e instanceof Error ? e.message : "Ingest failed";
+      setEntry({
+        text: ingestionId === null ? reason : `Ingestion ${ingestionId} accepted, but ${reason}`,
+        failed: true,
+      });
     } finally {
       setIngesting(false);
     }
@@ -150,7 +184,10 @@ export default function UlpiaCanvas({ token }: UlpiaCanvasProps) {
           type="text"
           placeholder="Ingest a concept..."
           value={inputText}
-          onChange={(e) => setInputText(e.target.value)}
+          onChange={(e) => {
+            setInputText(e.target.value);
+            setEntry(null);
+          }}
           onKeyDown={(e) => e.key === "Enter" && handleIngest()}
           disabled={ingesting}
           style={{
@@ -182,6 +219,28 @@ export default function UlpiaCanvas({ token }: UlpiaCanvasProps) {
         >
           {ingesting ? "..." : "Ingest"}
         </button>
+        {entry ? (
+          <div
+            role={entry.failed ? "alert" : "status"}
+            style={{
+              position: "absolute",
+              top: "100%",
+              left: 0,
+              right: 0,
+              marginTop: 6,
+              padding: "6px 10px",
+              background: "#1E293B",
+              border: `1px solid ${entry.failed ? "#F87171" : "#334155"}`,
+              borderRadius: 6,
+              color: entry.failed ? "#F87171" : "#94A3B8",
+              fontFamily: "monospace",
+              fontSize: 12,
+              overflowWrap: "anywhere",
+            }}
+          >
+            {entry.text}
+          </div>
+        ) : null}
       </div>
       <ReactFlow
         nodes={nodes}
@@ -195,7 +254,7 @@ export default function UlpiaCanvas({ token }: UlpiaCanvasProps) {
           style={{ background: "#1E293B", borderColor: "#334155" }}
         />
       </ReactFlow>
-      {token ? <UlpiaWebGL token={token} /> : null}
+      {token ? <UlpiaWebGL token={token} lifecycle={lifecycle} version={mapVersion} /> : null}
     </div>
   );
 }

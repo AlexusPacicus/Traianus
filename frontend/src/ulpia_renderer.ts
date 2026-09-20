@@ -15,6 +15,9 @@
  * Transition buffer (separate VBO, only bound during animation):
  *   per node: a_start_pos, a_end_pos, a_mid_deviation (3 x vec3)
  *
+ * Lifecycle buffer (separate VBO, one byte per node, outside the 64 B block):
+ *   the slot of the node's lifecycle mark (see lifecycle.ts), drawn as a ring outside the body.
+ *
  * WebGL2 correctness notes (review findings):
  *   - Uses gl.PROGRAM_POINT_SIZE (WebGL2), NOT the desktop VERTEX_PROGRAM_POINT_SIZE.
  *   - Resting attributes (0,1) read the 64 B VBO; transition attributes (2,3,4)
@@ -24,12 +27,15 @@
  *     fragment shader expectations.
  */
 
+import { MARK_SLOTS, markTables } from "./lifecycle";
+
 const VERTEX_SHADER_SOURCE = `#version 300 es
 layout(location = 0) in vec3 a_position;       // Resting position (xyz from 64B block)
 layout(location = 1) in vec3 a_lch;            // Chromatic channel (L, C, H in [0,1])
 layout(location = 2) in vec3 a_start_pos;      // Parabolic start P_ini
 layout(location = 3) in vec3 a_end_pos;        // Parabolic end   P_fin
 layout(location = 4) in vec3 a_mid_deviation;  // D_mid = P_mid - (P_ini + P_fin)/2
+layout(location = 5) in float a_mark;          // Lifecycle mark slot, 0 for none
 
 uniform mat4 u_projectionMatrix;
 uniform mat4 u_viewMatrix;
@@ -37,10 +43,14 @@ uniform float u_interpolationTime;   // t in [0.0, 1.0]
 uniform float u_escapeVibration;     // 0..1 intensity from escape Z-score
 uniform float u_pointScale;          // device pixels per CSS pixel
 uniform int u_anchor;                // Index of the anchor node, -1 for none
+uniform vec4 u_markColor[${MARK_SLOTS}];   // rgba of each mark slot
+uniform float u_markRing[${MARK_SLOTS}];   // ring width of each mark slot, CSS pixels
 
 out vec3 v_lch;
 out float v_vibration_offset;
 out float v_anchor;
+out vec4 v_ring;
+out float v_body;
 
 float hash(float n) { return fract(sin(n) * 43758.5453123); }
 
@@ -67,12 +77,18 @@ void main() {
     gl_Position = u_projectionMatrix * u_viewMatrix * vec4(base_pos, 1.0);
 
     // Node size scales with Luminance (density in [0,1]); the anchor is drawn larger.
+    // The lifecycle ring lies outside that body, so the body keeps its size.
     float is_anchor = gl_VertexID == u_anchor ? 1.0 : 0.0;
-    gl_PointSize = clamp(a_lch.x * 12.0, 4.0, 32.0) * (1.0 + 1.5 * is_anchor) * u_pointScale;
+    int slot = int(a_mark + 0.5);
+    float body = clamp(a_lch.x * 12.0, 4.0, 32.0) * (1.0 + 1.5 * is_anchor);
+    float ring = 2.0 * u_markRing[slot];
+    gl_PointSize = (body + ring) * u_pointScale;
 
     v_lch = a_lch;
     v_vibration_offset = u_escapeVibration;
     v_anchor = is_anchor;
+    v_ring = u_markColor[slot];
+    v_body = body / (body + ring);
 }
 `;
 
@@ -82,6 +98,8 @@ precision highp float;
 in vec3 v_lch;
 in float v_vibration_offset;
 in float v_anchor;
+in vec4 v_ring;
+in float v_body;
 out vec4 outColor;
 
 #define PI 3.141592653589793
@@ -151,9 +169,19 @@ void main() {
         srgb = mix(srgb, vec3(1.0, 0.2, 0.2), v_vibration_offset * dist * 0.5);
     }
 
+    // Squared radius within the body: the lifecycle ring lies beyond 1.0, and the body is drawn
+    // as it is without a ring (v_body is 1.0).
+    float body_dist = dist / (v_body * v_body);
+
     // The anchor keeps its colour inside a white rim.
-    if (v_anchor > 0.5 && dist > 0.55) {
+    if (v_anchor > 0.5 && body_dist > 0.55) {
         srgb = vec3(1.0);
+    }
+
+    if (v_body < 1.0) {
+        float on_body = 1.0 - smoothstep(0.8, 1.0, body_dist);
+        srgb = mix(v_ring.rgb, srgb, on_body);
+        alpha *= mix(v_ring.a, 1.0, on_body);
     }
 
     outColor = vec4(srgb, alpha);
@@ -166,6 +194,8 @@ export const ULPIABLOCK_BYTES = 64;
 const RESTING_STRIDE = ULPIABLOCK_BYTES;
 /** Parabolic transition: 9 contiguous floats per node. */
 const TRANSITION_STRIDE = 9 * 4;
+/** Attribute location of the lifecycle buffer: one byte per node. */
+const MARK_ATTRIBUTE = 5;
 /**
  * WebGL2 PROGRAM_POINT_SIZE capability (0x8642). Not present in the TS DOM
  * lib; gl_PointSize from the shader is honored only once this is enabled.
@@ -178,6 +208,7 @@ export class UlpiaRenderer {
   private program: WebGLProgram | null = null;
   private restingVbo: WebGLBuffer | null = null;
   private transitionVbo: WebGLBuffer | null = null;
+  private markVbo: WebGLBuffer | null = null;
   private vao: WebGLVertexArrayObject | null = null;
   private anchorIndex = -1;
 
@@ -248,8 +279,14 @@ export class UlpiaRenderer {
     gl.enable(gl.BLEND);
     gl.blendFunc(gl.SRC_ALPHA, gl.ONE_MINUS_SRC_ALPHA);
 
+    const marks = markTables();
+    gl.useProgram(program);
+    gl.uniform4fv(gl.getUniformLocation(program, "u_markColor"), marks.colors);
+    gl.uniform1fv(gl.getUniformLocation(program, "u_markRing"), marks.rings);
+
     this.restingVbo = gl.createBuffer();
     this.transitionVbo = gl.createBuffer();
+    this.markVbo = gl.createBuffer();
     this.vao = gl.createVertexArray();
 
     // Configure the static attribute layout in the VAO.
@@ -270,6 +307,10 @@ export class UlpiaRenderer {
     gl.vertexAttribPointer(3, 3, gl.FLOAT, false, TRANSITION_STRIDE, 12);
     gl.vertexAttribPointer(4, 3, gl.FLOAT, false, TRANSITION_STRIDE, 24);
 
+    // Lifecycle attribute: disabled (constant zero, no mark) until a lifecycle buffer is uploaded.
+    gl.bindBuffer(gl.ARRAY_BUFFER, this.markVbo);
+    gl.vertexAttribPointer(MARK_ATTRIBUTE, 1, gl.UNSIGNED_BYTE, false, 0, 0);
+
     gl.bindVertexArray(null);
     gl.bindBuffer(gl.ARRAY_BUFFER, null);
   }
@@ -284,6 +325,21 @@ export class UlpiaRenderer {
     gl.bindBuffer(gl.ARRAY_BUFFER, this.restingVbo);
     gl.bufferData(gl.ARRAY_BUFFER, arrayBuffer, gl.STATIC_DRAW);
     gl.bindBuffer(gl.ARRAY_BUFFER, null);
+  }
+
+  /**
+   * Upload one lifecycle slot per node of the resting buffer (see lifecycle.ts). It must hold at
+   * least as many bytes as the resting buffer has nodes: a shorter one draws nothing.
+   */
+  public uploadLifecycle(marks: Uint8Array) {
+    const gl = this.gl;
+    if (!this.markVbo) return;
+    gl.bindBuffer(gl.ARRAY_BUFFER, this.markVbo);
+    gl.bufferData(gl.ARRAY_BUFFER, marks, gl.STATIC_DRAW);
+    gl.bindBuffer(gl.ARRAY_BUFFER, null);
+    gl.bindVertexArray(this.vao);
+    gl.enableVertexAttribArray(MARK_ATTRIBUTE);
+    gl.bindVertexArray(null);
   }
 
   /**

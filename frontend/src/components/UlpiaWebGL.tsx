@@ -4,11 +4,16 @@ import { packRestingBuffer } from "../binary";
 import {
   HOME, panBy, pickNearest, projectionMatrix, viewMatrix, wheelFactor, zoomAt, type Camera,
 } from "../camera";
+import { LIFECYCLE_MARKS, markCss, packLifecycle } from "../lifecycle";
 import { fitPerspective } from "../perspective";
 import { UlpiaRenderer } from "../ulpia_renderer";
 
 interface UlpiaWebGLProps {
   token: string;
+  /** Lifecycle state of every current node, by id (GET /nodos). */
+  lifecycle: ReadonlyMap<string, string>;
+  /** Raised once per note entered: the map fetches GET /spatial again and shows the new node. */
+  version: number;
 }
 
 /** A click picks the nearest node within this many CSS pixels. */
@@ -52,6 +57,14 @@ const overlayStyle = {
   color: "#F8FAFC",
   fontFamily: "monospace",
   fontSize: 13,
+} as const;
+
+const legendStyle = {
+  ...overlayStyle,
+  top: "auto",
+  bottom: 12,
+  gap: 4,
+  pointerEvents: "none",
 } as const;
 
 /** Wheel zooms about the cursor, dragging pans, a click reports its pixel, double-click goes home. */
@@ -119,12 +132,29 @@ function attachNavigation(
  * contract and draws them at rest: a node never moves on screen except by the camera. Zoom and
  * pan only change the view matrix, and a click on a node swaps the resting buffer for the
  * perspective at that node (GET /spatial?anchor=), so navigation writes nothing to the engine (R2).
+ *
+ * Each node carries its lifecycle mark, a ring outside its body, from a separate one-byte buffer.
+ * A new `version` refreshes the map on the same renderer: an overview keeps its camera, because
+ * the epoch frame keeps every node where it was; an open perspective is requested again from the
+ * same anchor, so it includes the new node, and keeps its camera too.
  */
-export default function UlpiaWebGL({ token }: UlpiaWebGLProps) {
+export default function UlpiaWebGL({ token, lifecycle, version }: UlpiaWebGLProps) {
   const canvasRef = useRef<HTMLCanvasElement>(null);
   const backRef = useRef<() => void>(() => {});
+  const refreshRef = useRef<() => void>(() => {});
+  const marksRef = useRef<() => void>(() => {});
+  const lifecycleRef = useRef(lifecycle);
   const [perspective, setPerspective] = useState<PerspectiveInfo | null>(null);
   const [error, setError] = useState<string | null>(null);
+
+  useEffect(() => {
+    lifecycleRef.current = lifecycle;
+    marksRef.current();
+  }, [lifecycle]);
+
+  useEffect(() => {
+    if (version > 0) refreshRef.current();
+  }, [version]);
 
   useEffect(() => {
     const canvas = canvasRef.current;
@@ -140,17 +170,27 @@ export default function UlpiaWebGL({ token }: UlpiaWebGLProps) {
         if (cancelled || nodes.length === 0) return;
 
         const renderer = new UlpiaRenderer(canvas);
-        const overview = packRestingBuffer(nodes);
-        const overviewLayout = layoutOf(nodes);
-        renderer.uploadRestingBuffer(overview);
+        let overview = packRestingBuffer(nodes);
+        let overviewLayout = layoutOf(nodes);
 
         let camera: Camera = HOME;
         let shown = overviewLayout;
-        let anchored = false;
+        let anchor: string | null = null;
         // Only the response to the latest request applies; going back voids the one in flight.
         let ticket = 0;
 
-        const select = async (id: string) => {
+        // The lifecycle buffer always follows the resting buffer node for node.
+        const showMarks = () =>
+          renderer.uploadLifecycle(packLifecycle(shown.ids, lifecycleRef.current));
+        const show = (layout: Layout, buffer: ArrayBuffer) => {
+          renderer.uploadRestingBuffer(buffer);
+          shown = layout;
+          showMarks();
+        };
+        show(overviewLayout, overview);
+        marksRef.current = showMarks;
+
+        const select = async (id: string, keepCamera = false) => {
           const mine = ++ticket;
           setError(null);
           try {
@@ -159,12 +199,10 @@ export default function UlpiaWebGL({ token }: UlpiaWebGLProps) {
             const fitted = fitPerspective(response.nodes);
             const index = fitted.findIndex((n) => n.id === response.anchor);
             if (index < 0) throw new Error(`Anchor ${response.anchor} is not in its perspective`);
-            const buffer = packRestingBuffer(fitted);
-            renderer.uploadRestingBuffer(buffer);
+            show(layoutOf(fitted), packRestingBuffer(fitted));
             renderer.setAnchor(index);
-            shown = layoutOf(fitted);
-            anchored = true;
-            camera = HOME;
+            anchor = response.anchor;
+            if (!keepCamera) camera = HOME;
             setPerspective({
               anchor: response.anchor,
               poles: response.poles,
@@ -180,15 +218,30 @@ export default function UlpiaWebGL({ token }: UlpiaWebGLProps) {
         const back = () => {
           ticket++;
           setError(null);
-          if (!anchored) return;
-          renderer.uploadRestingBuffer(overview);
+          if (anchor === null) return;
+          show(overviewLayout, overview);
           renderer.setAnchor(-1);
-          shown = overviewLayout;
-          anchored = false;
+          anchor = null;
           camera = HOME;
           setPerspective(null);
         };
         backRef.current = back;
+
+        const refresh = async () => {
+          const seen = ticket;
+          try {
+            const fresh = await fetchSpatial(token);
+            if (cancelled) return;
+            overview = packRestingBuffer(fresh);
+            overviewLayout = layoutOf(fresh);
+            // A perspective is requested again unless the user has moved on since the refresh began.
+            if (anchor === null) show(overviewLayout, overview);
+            else if (seen === ticket) await select(anchor, true);
+          } catch (err) {
+            if (!cancelled) setError(err instanceof Error ? err.message : String(err));
+          }
+        };
+        refreshRef.current = () => void refresh();
 
         const onClick = (px: number, py: number, width: number, height: number) => {
           const index = pickNearest(camera, shown.xs, shown.ys, px, py, width, height, PICK_RADIUS);
@@ -228,6 +281,8 @@ export default function UlpiaWebGL({ token }: UlpiaWebGLProps) {
       cancelled = true;
       cancelAnimationFrame(rafId);
       detach();
+      refreshRef.current = () => {};
+      marksRef.current = () => {};
       setPerspective(null);
       setError(null);
     };
@@ -247,6 +302,23 @@ export default function UlpiaWebGL({ token }: UlpiaWebGLProps) {
           touchAction: "none",
         }}
       />
+      <div style={legendStyle} role="group" aria-label="Lifecycle marks">
+        {LIFECYCLE_MARKS.map((mark) => (
+          <div key={mark.state} style={{ display: "flex", alignItems: "center", gap: 8 }}>
+            <span
+              style={{
+                width: 10,
+                height: 10,
+                margin: 3,
+                borderRadius: "50%",
+                background: "#64748B",
+                boxShadow: `0 0 0 ${mark.ringPx}px ${markCss(mark)}`,
+              }}
+            />
+            {mark.state}
+          </div>
+        ))}
+      </div>
       {perspective || error ? (
         <div style={overlayStyle}>
           {perspective ? (
