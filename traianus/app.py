@@ -19,6 +19,7 @@ from traianus.geometry.observables import (
     calibrate_critical_threshold,
     compute_kinetic_resistance,
 )
+from traianus.geometry.perspective import observe, perspective_frame
 from traianus.geometry.polar_projector import PolarProjector
 from traianus.geometry.spatial_observables import (
     CHANNELS,
@@ -762,26 +763,60 @@ def _active_epoch_frame() -> EpochFrame | None:
 
 
 @app.get("/spatial", dependencies=[Depends(require_token)])
-async def get_spatial_observables():
+async def get_spatial_observables(anchor: str | None = None):
     """Per-node spatial observables in the frozen epoch frame (Ulpia, observational).
 
     Derives {id, x, y, z, l, c, h} for each current node from its persisted
     384D vector, the active geodetic basis and the epoch frame. Pure read (no
     writes, no lifecycle mutation) — mirrors /relations (ADR-023/H5). Without a
     frame it answers 409: an overview needs one shared frame.
+
+    With `anchor`, a current node id, it answers the perspective at that node:
+    {anchor, poles, fallback, nodes}, x and y z-scored in the node's own frame
+    (traianus.geometry.perspective), z, l, c and h the epoch channels of the
+    overview, so a node keeps its colour across views. An id that is not a
+    current node is 404; a ValueError of the perspective functions is 422.
     """
     try:
         full_basis = get_geodetic_matrix_db()
-        if not full_basis:
+        if not full_basis and anchor is None:
             return {"nodes": []}
         frame = _active_epoch_frame()
-        if frame is None:
+        if not full_basis or frame is None:
             raise HTTPException(
                 status_code=409,
                 detail="No epoch frame for the active epoch: POST /spatial/calibrate first.",
             )
         basis = {k: v["vector"] for k, v in full_basis.items()}
         vectors = storage.get_current_node_vectors()
+        if anchor is not None:
+            if anchor not in vectors:
+                raise HTTPException(status_code=404, detail=f"Node {anchor} not found.")
+            ids = sorted(vectors)
+            matrix = np.vstack([vectors[i] for i in ids])
+            index = ids.index(anchor)
+            try:
+                perspective = perspective_frame(matrix[index], basis)
+                dipole = perspective.frame
+                coords = observe(
+                    matrix, index, horizontal=dipole.v_dipole / dipole.v_dipole_norm_sq
+                )
+            except ValueError as e:
+                raise HTTPException(status_code=422, detail=str(e)) from e
+            return {
+                "anchor": anchor,
+                "poles": list(perspective.poles),
+                "fallback": perspective.fallback,
+                "nodes": [
+                    {
+                        "id": node_id,
+                        **derive_spatial_observables(vectors[node_id], basis, frame),
+                        "x": float(coords[row, 0]),
+                        "y": float(coords[row, 1]),
+                    }
+                    for row, node_id in enumerate(ids)
+                ],
+            }
         nodes = [
             {"id": node_id, **derive_spatial_observables(vector, basis, frame)}
             for node_id, vector in vectors.items()
