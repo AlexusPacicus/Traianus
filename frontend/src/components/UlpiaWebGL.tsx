@@ -1,22 +1,30 @@
-import { useEffect, useRef, useState } from "react";
-import { fetchPerspective, fetchSpatial, type SpatialObservable } from "../api";
+import { useEffect, useRef, useState, type ReactNode } from "react";
+import { fetchPerspective, fetchSpatial, type Relation, type SpatialObservable } from "../api";
 import { packRestingBuffer } from "../binary";
 import {
   HOME, panBy, pickNearest, projectionMatrix, viewMatrix, wheelFactor, zoomAt, type Camera,
 } from "../camera";
-import { LIFECYCLE_MARKS, markCss, packLifecycle } from "../lifecycle";
+import { LIFECYCLE_MARKS, markDotStyle, packLifecycle } from "../lifecycle";
+import { nearestIds, type NoteInfo } from "../notes";
 import { fitPerspective } from "../perspective";
 import { UlpiaRenderer } from "../ulpia_renderer";
+import NoteCard, { type Pointer } from "./NoteCard";
+import NoteList from "./NoteList";
+import NotePanel from "./NotePanel";
 
 interface UlpiaWebGLProps {
   token: string;
-  /** Lifecycle state of every current node, by id (GET /nodos). */
-  lifecycle: ReadonlyMap<string, string>;
+  /** Text and lifecycle state of every current node, by id (GET /nodos). */
+  notes: ReadonlyMap<string, NoteInfo>;
+  /** Every current edge (GET /relations). */
+  relations: readonly Relation[];
   /** Raised once per note entered: the map fetches GET /spatial again and shows the new node. */
   version: number;
+  /** The entry bar: it heads the same wrapping row as the id field and the perspective overlay. */
+  children: ReactNode;
 }
 
-/** A click picks the nearest node within this many CSS pixels. */
+/** A click, and the hover card, pick the nearest node within this many CSS pixels. */
 const PICK_RADIUS = 12;
 /** A pointer that moves at most this many pixels between down and up is a click; more is a pan. */
 const CLICK_SLOP = 4;
@@ -38,63 +46,99 @@ interface PerspectiveInfo {
   anchor: string;
   poles: [string, string];
   fallback: boolean;
+  /** The nearest notes to the anchor, nearest first. */
+  nearest: string[];
 }
 
-const overlayStyle = {
-  position: "absolute",
-  top: 64,
-  left: 12,
-  zIndex: 6,
+/** The pointer is on this node; `x`, `y` and the size are those of the pointer, see `Pointer`. */
+type Hover = Pointer & { id: string };
+
+type View = "map" | "list";
+
+/** Below this window width the panel goes under the map or the list; from it, beside. */
+const WIDE_QUERY = "(min-width: 900px)";
+/** Room the header keeps at its right for App.jsx's Disconnect button (top 12, right 12, z 20). */
+const DISCONNECT_ROOM = 108;
+const RULE = "1px solid #334155";
+
+const blockStyle = { flex: "1 1 280px", minWidth: 0, maxWidth: 420 } as const;
+
+const boxStyle = {
   display: "flex",
   flexDirection: "column",
   alignItems: "flex-start",
   gap: 6,
-  maxWidth: "min(360px, calc(100% - 24px))",
   padding: "8px 12px",
   background: "#1E293B",
-  border: "1px solid #334155",
+  border: RULE,
   borderRadius: 6,
   color: "#F8FAFC",
   fontFamily: "monospace",
   fontSize: 13,
+  overflowWrap: "anywhere",
 } as const;
 
-const legendStyle = {
-  ...overlayStyle,
-  top: "auto",
-  bottom: 12,
-  gap: 4,
-  pointerEvents: "none",
+const buttonStyle = {
+  padding: "8px 16px",
+  border: "none",
+  borderRadius: 6,
+  color: "#F8FAFC",
+  fontFamily: "monospace",
+  fontSize: 13,
+  cursor: "pointer",
 } as const;
+
+function useWideScreen(): boolean {
+  const [wide, setWide] = useState(() => window.matchMedia(WIDE_QUERY).matches);
+  useEffect(() => {
+    const query = window.matchMedia(WIDE_QUERY);
+    const onChange = () => setWide(query.matches);
+    query.addEventListener("change", onChange);
+    return () => query.removeEventListener("change", onChange);
+  }, []);
+  return wide;
+}
 
 /** Wheel zooms about the cursor, dragging pans, a click reports its pixel, double-click goes home. */
 function attachNavigation(
   canvas: HTMLCanvasElement,
   get: () => Camera,
   set: (camera: Camera) => void,
-  onClick: (px: number, py: number, width: number, height: number) => void
+  onClick: (px: number, py: number, width: number, height: number) => void,
+  onHover: (at: Pointer | null) => void
 ): () => void {
   let drag: { x: number; y: number; x0: number; y0: number } | null = null;
 
   const onWheel = (e: WheelEvent) => {
     e.preventDefault();
+    onHover(null);
     const box = canvas.getBoundingClientRect();
     const factor = wheelFactor(e.deltaY, e.deltaMode);
     set(zoomAt(get(), factor, e.clientX - box.left, e.clientY - box.top, box.width, box.height));
   };
   const onDown = (e: PointerEvent) => {
     if (e.button !== 0) return;
+    onHover(null);
     drag = { x: e.clientX, y: e.clientY, x0: e.clientX, y0: e.clientY };
     canvas.setPointerCapture(e.pointerId);
     canvas.style.cursor = "grabbing";
   };
   const onMove = (e: PointerEvent) => {
-    if (!drag) return;
     const box = canvas.getBoundingClientRect();
+    if (!drag) {
+      onHover({
+        x: e.clientX - box.left,
+        y: e.clientY - box.top,
+        width: box.width,
+        height: box.height,
+      });
+      return;
+    }
     set(panBy(get(), e.clientX - drag.x, e.clientY - drag.y, box.width, box.height));
     drag.x = e.clientX;
     drag.y = e.clientY;
   };
+  const onLeave = () => onHover(null);
   const release = () => {
     drag = null;
     canvas.style.cursor = "grab";
@@ -114,6 +158,7 @@ function attachNavigation(
   canvas.addEventListener("pointermove", onMove);
   canvas.addEventListener("pointerup", onUp);
   canvas.addEventListener("pointercancel", release);
+  canvas.addEventListener("pointerleave", onLeave);
   canvas.addEventListener("dblclick", onHome);
   return () => {
     canvas.removeEventListener("wheel", onWheel);
@@ -121,6 +166,7 @@ function attachNavigation(
     canvas.removeEventListener("pointermove", onMove);
     canvas.removeEventListener("pointerup", onUp);
     canvas.removeEventListener("pointercancel", release);
+    canvas.removeEventListener("pointerleave", onLeave);
     canvas.removeEventListener("dblclick", onHome);
   };
 }
@@ -137,20 +183,33 @@ function attachNavigation(
  * A new `version` refreshes the map on the same renderer: an overview keeps its camera, because
  * the epoch frame keeps every node where it was; an open perspective is requested again from the
  * same anchor, so it includes the new node, and keeps its camera too.
+ *
+ * It also lays out the whole screen as one column, so that no piece covers another and the map
+ * gets what is left: the header (entry bar, id field, perspective overlay), the map or the list
+ * with the note panel beside or under it, and the legend. The selection is the anchor of the open
+ * perspective; pointing at a node shows a card and touches neither the selection nor the camera.
+ * The map stays mounted, hidden, while the list is shown, so its camera is kept.
  */
-export default function UlpiaWebGL({ token, lifecycle, version }: UlpiaWebGLProps) {
+export default function UlpiaWebGL({ token, notes, relations, version, children }: UlpiaWebGLProps) {
   const canvasRef = useRef<HTMLCanvasElement>(null);
   const backRef = useRef<() => void>(() => {});
+  const selectRef = useRef<(id: string) => void>(() => {});
   const refreshRef = useRef<() => void>(() => {});
   const marksRef = useRef<() => void>(() => {});
-  const lifecycleRef = useRef(lifecycle);
+  const notesRef = useRef(notes);
   const [perspective, setPerspective] = useState<PerspectiveInfo | null>(null);
   const [error, setError] = useState<string | null>(null);
+  const [view, setView] = useState<View>("map");
+  const [opened, setOpened] = useState<string | null>(null);
+  const [hover, setHover] = useState<Hover | null>(null);
+  const [idInput, setIdInput] = useState("");
+  const [idMessage, setIdMessage] = useState<string | null>(null);
+  const wide = useWideScreen();
 
   useEffect(() => {
-    lifecycleRef.current = lifecycle;
+    notesRef.current = notes;
     marksRef.current();
-  }, [lifecycle]);
+  }, [notes]);
 
   useEffect(() => {
     if (version > 0) refreshRef.current();
@@ -181,11 +240,12 @@ export default function UlpiaWebGL({ token, lifecycle, version }: UlpiaWebGLProp
 
         // The lifecycle buffer always follows the resting buffer node for node.
         const showMarks = () =>
-          renderer.uploadLifecycle(packLifecycle(shown.ids, lifecycleRef.current));
+          renderer.uploadLifecycle(packLifecycle(shown.ids, notesRef.current));
         const show = (layout: Layout, buffer: ArrayBuffer) => {
           renderer.uploadRestingBuffer(buffer);
           shown = layout;
           showMarks();
+          setHover(null);
         };
         show(overviewLayout, overview);
         marksRef.current = showMarks;
@@ -207,13 +267,16 @@ export default function UlpiaWebGL({ token, lifecycle, version }: UlpiaWebGLProp
               anchor: response.anchor,
               poles: response.poles,
               fallback: response.fallback,
+              nearest: nearestIds(response.nodes, response.anchor),
             });
+            if (!keepCamera) setOpened(null);
           } catch (err) {
             if (!cancelled && mine === ticket) {
               setError(err instanceof Error ? err.message : String(err));
             }
           }
         };
+        selectRef.current = (id) => void select(id);
 
         const back = () => {
           ticket++;
@@ -224,6 +287,8 @@ export default function UlpiaWebGL({ token, lifecycle, version }: UlpiaWebGLProp
           anchor = null;
           camera = HOME;
           setPerspective(null);
+          setOpened(null);
+          setView("map");
         };
         backRef.current = back;
 
@@ -251,10 +316,19 @@ export default function UlpiaWebGL({ token, lifecycle, version }: UlpiaWebGLProp
           if (e.key === "Escape") back();
         };
 
+        const onHover = (at: Pointer | null) => {
+          const index = at
+            ? pickNearest(camera, shown.xs, shown.ys, at.x, at.y, at.width, at.height, PICK_RADIUS)
+            : -1;
+          const next = at && index >= 0 ? { ...at, id: shown.ids[index] } : null;
+          // The card stays where it appeared for as long as the pointer stays on the same node.
+          setHover((prev) => (prev?.id === next?.id ? prev : next));
+        };
+
         const setCamera = (next: Camera) => {
           camera = next;
         };
-        const detachNavigation = attachNavigation(canvas, () => camera, setCamera, onClick);
+        const detachNavigation = attachNavigation(canvas, () => camera, setCamera, onClick, onHover);
         window.addEventListener("keydown", onKey);
         detach = () => {
           detachNavigation();
@@ -281,6 +355,7 @@ export default function UlpiaWebGL({ token, lifecycle, version }: UlpiaWebGLProp
       cancelled = true;
       cancelAnimationFrame(rafId);
       detach();
+      selectRef.current = () => {};
       refreshRef.current = () => {};
       marksRef.current = () => {};
       setPerspective(null);
@@ -288,66 +363,190 @@ export default function UlpiaWebGL({ token, lifecycle, version }: UlpiaWebGLProp
     };
   }, [token]);
 
+  const list = view === "list" && perspective !== null;
+  const panelId = perspective ? (opened ?? perspective.anchor) : null;
+
+  const submitId = () => {
+    const id = idInput.trim();
+    if (!id) return;
+    if (!notes.has(id)) {
+      setIdMessage(`Unknown id: ${id}`);
+      return;
+    }
+    setIdMessage(null);
+    selectRef.current(id);
+  };
+
+  const chooseView = (next: View) => {
+    setView(next);
+    setHover(null);
+    if (next === "map") setOpened(null);
+  };
+
   return (
-    <>
-      <canvas
-        ref={canvasRef}
+    <div
+      style={{
+        position: "absolute",
+        inset: 0,
+        zIndex: 5,
+        display: "flex",
+        flexDirection: "column",
+        background: "#0B0F19",
+      }}
+    >
+      <div
         style={{
-          position: "absolute",
-          inset: 0,
-          width: "100%",
-          height: "100%",
-          zIndex: 5,
-          cursor: "grab",
-          touchAction: "none",
+          display: "flex",
+          flexWrap: "wrap",
+          alignItems: "flex-start",
+          gap: 8,
+          flexShrink: 0,
+          padding: `12px ${DISCONNECT_ROOM}px 8px 12px`,
         }}
-      />
-      <div style={legendStyle} role="group" aria-label="Lifecycle marks">
+      >
+        <div style={blockStyle}>{children}</div>
+        <div style={{ ...blockStyle, display: "flex", flexDirection: "column", gap: 6 }}>
+          <input
+            type="text"
+            aria-label="Select note by id"
+            placeholder="Select note by id"
+            value={idInput}
+            onChange={(e) => {
+              setIdInput(e.target.value);
+              setIdMessage(null);
+            }}
+            onKeyDown={(e) => e.key === "Enter" && submitId()}
+            style={{
+              padding: "8px 14px",
+              background: "#1E293B",
+              border: RULE,
+              borderRadius: 6,
+              color: "#F8FAFC",
+              fontFamily: "monospace",
+              fontSize: 13,
+              outline: "none",
+            }}
+          />
+          {idMessage ? (
+            <div
+              role="alert"
+              style={{
+                padding: "6px 10px",
+                background: "#1E293B",
+                border: "1px solid #F87171",
+                borderRadius: 6,
+                color: "#F87171",
+                fontFamily: "monospace",
+                fontSize: 12,
+                overflowWrap: "anywhere",
+              }}
+            >
+              {idMessage}
+            </div>
+          ) : null}
+        </div>
+        {perspective || error ? (
+          <div style={{ ...blockStyle, ...boxStyle }}>
+            {perspective ? (
+              <>
+                <div>Perspective at {perspective.anchor}</div>
+                <div>
+                  {perspective.poles.join(" · ")}
+                  {perspective.fallback ? " (fallback dipole)" : ""}
+                </div>
+                <div style={{ display: "flex", flexWrap: "wrap", gap: 8 }}>
+                  <button
+                    onClick={() => backRef.current()}
+                    style={{ ...buttonStyle, background: "#6366F1" }}
+                  >
+                    Overview (Esc)
+                  </button>
+                  <div role="group" aria-label="View" style={{ display: "flex", gap: 4 }}>
+                    {(["map", "list"] as const).map((choice) => (
+                      <button
+                        key={choice}
+                        aria-pressed={view === choice}
+                        onClick={() => chooseView(choice)}
+                        style={{ ...buttonStyle, background: view === choice ? "#6366F1" : "#334155" }}
+                      >
+                        {choice === "map" ? "Map" : "List"}
+                      </button>
+                    ))}
+                  </div>
+                </div>
+              </>
+            ) : null}
+            {error ? <div style={{ color: "#F87171" }}>{error}</div> : null}
+          </div>
+        ) : null}
+      </div>
+      <div
+        style={{ flex: 1, minHeight: 0, display: "flex", flexDirection: wide ? "row" : "column" }}
+      >
+        <div style={{ position: "relative", flex: 1, minWidth: 0, minHeight: 0 }}>
+          <canvas
+            ref={canvasRef}
+            style={{
+              position: "absolute",
+              inset: 0,
+              width: "100%",
+              height: "100%",
+              cursor: "grab",
+              touchAction: "none",
+              visibility: list ? "hidden" : "visible",
+            }}
+          />
+          {hover && !list ? <NoteCard id={hover.id} note={notes.get(hover.id)} at={hover} /> : null}
+          {list ? (
+            <NoteList
+              key={perspective.anchor}
+              ids={perspective.nearest}
+              notes={notes}
+              opened={opened}
+              onOpen={setOpened}
+            />
+          ) : null}
+        </div>
+        {perspective && panelId !== null ? (
+          <div
+            key={panelId}
+            style={
+              wide
+                ? { flex: "0 0 380px", overflowY: "auto", borderLeft: RULE }
+                : { flex: "0 1 auto", maxHeight: "40vh", overflowY: "auto", borderTop: RULE }
+            }
+          >
+            <NotePanel
+              id={panelId}
+              note={notes.get(panelId)}
+              relations={relations}
+              onSelect={panelId === perspective.anchor ? null : () => selectRef.current(panelId)}
+            />
+          </div>
+        ) : null}
+      </div>
+      <div
+        role="group"
+        aria-label="Lifecycle marks"
+        style={{
+          display: "flex",
+          flexWrap: "wrap",
+          gap: "4px 16px",
+          flexShrink: 0,
+          padding: "6px 12px",
+          borderTop: RULE,
+          color: "#F8FAFC",
+          fontFamily: "monospace",
+          fontSize: 13,
+        }}
+      >
         {LIFECYCLE_MARKS.map((mark) => (
           <div key={mark.state} style={{ display: "flex", alignItems: "center", gap: 8 }}>
-            <span
-              style={{
-                width: 10,
-                height: 10,
-                margin: 3,
-                borderRadius: "50%",
-                background: "#64748B",
-                boxShadow: `0 0 0 ${mark.ringPx}px ${markCss(mark)}`,
-              }}
-            />
+            <span style={markDotStyle(mark.state)} />
             {mark.state}
           </div>
         ))}
       </div>
-      {perspective || error ? (
-        <div style={overlayStyle}>
-          {perspective ? (
-            <>
-              <div>Perspective at {perspective.anchor}</div>
-              <div>
-                {perspective.poles.join(" · ")}
-                {perspective.fallback ? " (fallback dipole)" : ""}
-              </div>
-              <button
-                onClick={() => backRef.current()}
-                style={{
-                  padding: "8px 16px",
-                  background: "#6366F1",
-                  border: "none",
-                  borderRadius: 6,
-                  color: "#F8FAFC",
-                  fontFamily: "monospace",
-                  fontSize: 13,
-                  cursor: "pointer",
-                }}
-              >
-                Overview (Esc)
-              </button>
-            </>
-          ) : null}
-          {error ? <div style={{ color: "#F87171" }}>{error}</div> : null}
-        </div>
-      ) : null}
-    </>
+    </div>
   );
 }

@@ -15,7 +15,7 @@ import {
   type NodesNode,
   type Relation,
 } from "../api";
-import { lifecycleOf } from "../lifecycle";
+import { notesOf, type NoteInfo } from "../notes";
 import { projectTo5d } from "../projection";
 import UlpiaWebGL from "./UlpiaWebGL";
 
@@ -84,7 +84,8 @@ export default function UlpiaCanvas({ token }: UlpiaCanvasProps) {
   const [inputText, setInputText] = useState("");
   const [ingesting, setIngesting] = useState(false);
   const [entry, setEntry] = useState<{ text: string; failed: boolean } | null>(null);
-  const [lifecycle, setLifecycle] = useState<ReadonlyMap<string, string>>(() => new Map());
+  const [notes, setNotes] = useState<ReadonlyMap<string, NoteInfo>>(() => new Map());
+  const [relations, setRelations] = useState<readonly Relation[]>([]);
   const [mapVersion, setMapVersion] = useState(0);
   // One idempotency key per submission: a retry of the same text reuses it.
   const submission = useRef<{ text: string; key: string } | null>(null);
@@ -98,8 +99,9 @@ export default function UlpiaCanvas({ token }: UlpiaCanvasProps) {
 
   const loadData = useCallback(
     async (nodesData: NodesNode[]) => {
-      setLifecycle(lifecycleOf(nodesData));
-      const relations = await fetchRelations(token);
+      setNotes(notesOf(nodesData));
+      const fetched = await fetchRelations(token);
+      setRelations(fetched);
 
       if (nodesData.length === 0) {
         setNodes([]);
@@ -116,7 +118,7 @@ export default function UlpiaCanvas({ token }: UlpiaCanvasProps) {
 
       const projections = projectTo5d(matrix);
       setNodes(buildFlowNodes(nodesData, projections));
-      setEdges(buildFlowEdges(relations));
+      setEdges(buildFlowEdges(fetched));
     },
     [token]
   );
@@ -142,7 +144,7 @@ export default function UlpiaCanvas({ token }: UlpiaCanvasProps) {
       const listed = await waitForNode(`NODE_${ingestionId}`, mounted.current?.signal);
       submission.current = null;
       setInputText("");
-      setEntry(null);
+      setEntry({ text: `Entered as NODE_${ingestionId}`, failed: false });
       setMapVersion((v) => v + 1);
       await loadData(listed);
     } catch (e: unknown) {
@@ -167,19 +169,9 @@ export default function UlpiaCanvas({ token }: UlpiaCanvasProps) {
     );
   }
 
-  return (
-    <div style={{ width: "100vw", height: "100vh", background: "#0B0F19", position: "relative" }}>
-      <div
-        style={{
-          position: "absolute",
-          top: 12,
-          left: "50%",
-          transform: "translateX(-50%)",
-          zIndex: 10,
-          display: "flex",
-          gap: 8,
-        }}
-      >
+  const ingestBar = (
+    <div style={{ display: "flex", flexDirection: "column", gap: 6 }}>
+      <div style={{ display: "flex", gap: 8 }}>
         <input
           type="text"
           placeholder="Ingest a concept..."
@@ -191,6 +183,8 @@ export default function UlpiaCanvas({ token }: UlpiaCanvasProps) {
           onKeyDown={(e) => e.key === "Enter" && handleIngest()}
           disabled={ingesting}
           style={{
+            flex: 1,
+            minWidth: 0,
             padding: "8px 14px",
             background: "#1E293B",
             border: "1px solid #334155",
@@ -198,7 +192,6 @@ export default function UlpiaCanvas({ token }: UlpiaCanvasProps) {
             color: "#F8FAFC",
             fontFamily: "monospace",
             fontSize: 13,
-            width: 300,
             outline: "none",
           }}
         />
@@ -219,29 +212,29 @@ export default function UlpiaCanvas({ token }: UlpiaCanvasProps) {
         >
           {ingesting ? "..." : "Ingest"}
         </button>
-        {entry ? (
-          <div
-            role={entry.failed ? "alert" : "status"}
-            style={{
-              position: "absolute",
-              top: "100%",
-              left: 0,
-              right: 0,
-              marginTop: 6,
-              padding: "6px 10px",
-              background: "#1E293B",
-              border: `1px solid ${entry.failed ? "#F87171" : "#334155"}`,
-              borderRadius: 6,
-              color: entry.failed ? "#F87171" : "#94A3B8",
-              fontFamily: "monospace",
-              fontSize: 12,
-              overflowWrap: "anywhere",
-            }}
-          >
-            {entry.text}
-          </div>
-        ) : null}
       </div>
+      {entry ? (
+        <div
+          role={entry.failed ? "alert" : "status"}
+          style={{
+            padding: "6px 10px",
+            background: "#1E293B",
+            border: `1px solid ${entry.failed ? "#F87171" : "#334155"}`,
+            borderRadius: 6,
+            color: entry.failed ? "#F87171" : "#94A3B8",
+            fontFamily: "monospace",
+            fontSize: 12,
+            overflowWrap: "anywhere",
+          }}
+        >
+          {entry.text}
+        </div>
+      ) : null}
+    </div>
+  );
+
+  return (
+    <div style={{ width: "100vw", height: "100vh", background: "#0B0F19", position: "relative" }}>
       <ReactFlow
         nodes={nodes}
         edges={edges}
@@ -254,7 +247,15 @@ export default function UlpiaCanvas({ token }: UlpiaCanvasProps) {
           style={{ background: "#1E293B", borderColor: "#334155" }}
         />
       </ReactFlow>
-      {token ? <UlpiaWebGL token={token} lifecycle={lifecycle} version={mapVersion} /> : null}
+      {token ? (
+        <UlpiaWebGL token={token} notes={notes} relations={relations} version={mapVersion}>
+          {ingestBar}
+        </UlpiaWebGL>
+      ) : (
+        <div style={{ position: "absolute", top: 12, left: 12, width: 300, zIndex: 10 }}>
+          {ingestBar}
+        </div>
+      )}
     </div>
   );
 }
