@@ -138,6 +138,18 @@ that leaves the written scope goes to v2.
   one common factor and no clipping (the executing agent's choice, reported to the author: the
   anchor's own y is the largest similarity there is, so clipping at a few standard deviations would
   pile its nearest neighbours on the edge).
+- **2026-09-20 — R5 structured as a benchmark, before any result.** The protocol said the author
+  records which view was used and whether the task was completed, and that the majority decides; it
+  did not say what the majority counts, and with a free choice it would measure preference, not
+  usefulness. The author decided: the same tasks in both views, one run per view on different days
+  with the first view alternating (odd tasks start on the map, even on the list), completion
+  against expected propositions fixed beforehand, a 3-minute cap, and a decision by tasks won per
+  view, then ties to the list. The count stays ten and the "9 or 10" question is closed: T01–T05 are
+  sentences of the corpus chosen by a rule, with the propositions they cite as the expected set
+  (the author has not read the *Ethics*, so no expected set can come from the author's memory, and
+  none may come from the tool); T06–T10 are the author's own thoughts, in English because the
+  encoder is English-trained. They exist as nodes only after note entry (day 5), so the five are
+  entered before any run and the state is frozen from then on. Spec in `R5.md`.
 
 ## Day-7 decision (pre-registered 2026-09-18, before any result)
 
@@ -151,9 +163,10 @@ that leaves the written scope goes to v2.
 | All favourable | Continue: RefApp-01 leaves for its own repository (exit condition) and v2 is scoped |
 
 **R5 protocol.** Ten real navigation tasks ("find the notes related to X"), written and committed
-before day 5. On days 5–7, for each task the author records which view was used (map or list)
-and whether the task was completed. The majority decides; ties go to the list. Exploratory: one
-user, labelled as such.
+before day 5; the structure and the decision rule are in `R5.md` (structured 2026-09-20, see Scope
+changes). On days 5–7 the author runs every task in both views, on different days, and records
+whether each run was completed and its time. Ties go to the list. Exploratory: one user, labelled as
+such.
 
 **Audit freeze.** If the phase-1 review of R4 at `c08fe92` does not return PASS, the record is
 frozen as it stands; remaining items are resolved in phase 2 against the code.
