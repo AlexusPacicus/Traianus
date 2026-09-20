@@ -36,9 +36,11 @@ uniform mat4 u_viewMatrix;
 uniform float u_interpolationTime;   // t in [0.0, 1.0]
 uniform float u_escapeVibration;     // 0..1 intensity from escape Z-score
 uniform float u_pointScale;          // device pixels per CSS pixel
+uniform int u_anchor;                // Index of the anchor node, -1 for none
 
 out vec3 v_lch;
 out float v_vibration_offset;
+out float v_anchor;
 
 float hash(float n) { return fract(sin(n) * 43758.5453123); }
 
@@ -64,11 +66,13 @@ void main() {
 
     gl_Position = u_projectionMatrix * u_viewMatrix * vec4(base_pos, 1.0);
 
-    // Node size scales with Luminance (density in [0,1]).
-    gl_PointSize = clamp(a_lch.x * 12.0, 4.0, 32.0) * u_pointScale;
+    // Node size scales with Luminance (density in [0,1]); the anchor is drawn larger.
+    float is_anchor = gl_VertexID == u_anchor ? 1.0 : 0.0;
+    gl_PointSize = clamp(a_lch.x * 12.0, 4.0, 32.0) * (1.0 + 1.5 * is_anchor) * u_pointScale;
 
     v_lch = a_lch;
     v_vibration_offset = u_escapeVibration;
+    v_anchor = is_anchor;
 }
 `;
 
@@ -77,6 +81,7 @@ precision highp float;
 
 in vec3 v_lch;
 in float v_vibration_offset;
+in float v_anchor;
 out vec4 outColor;
 
 #define PI 3.141592653589793
@@ -146,6 +151,11 @@ void main() {
         srgb = mix(srgb, vec3(1.0, 0.2, 0.2), v_vibration_offset * dist * 0.5);
     }
 
+    // The anchor keeps its colour inside a white rim.
+    if (v_anchor > 0.5 && dist > 0.55) {
+        srgb = vec3(1.0);
+    }
+
     outColor = vec4(srgb, alpha);
 }
 `;
@@ -169,6 +179,7 @@ export class UlpiaRenderer {
   private restingVbo: WebGLBuffer | null = null;
   private transitionVbo: WebGLBuffer | null = null;
   private vao: WebGLVertexArrayObject | null = null;
+  private anchorIndex = -1;
 
   private viewMatrix: Float32Array = new Float32Array([
     1, 0, 0, 0,
@@ -321,16 +332,27 @@ export class UlpiaRenderer {
     const uTime = gl.getUniformLocation(program, "u_interpolationTime");
     const uVibe = gl.getUniformLocation(program, "u_escapeVibration");
     const uScale = gl.getUniformLocation(program, "u_pointScale");
+    const uAnchor = gl.getUniformLocation(program, "u_anchor");
 
     gl.uniformMatrix4fv(uProjection, false, this.projectionMatrix);
     gl.uniformMatrix4fv(uView, false, this.viewMatrix);
     gl.uniform1f(uTime, interpolationTime);
     gl.uniform1f(uVibe, escapeVibration);
     gl.uniform1f(uScale, pixelRatio);
+    gl.uniform1i(uAnchor, this.anchorIndex);
 
     gl.bindVertexArray(vao);
     gl.drawArrays(gl.POINTS, 0, totalNodes);
+    // Drawn again so that no other node covers the anchor.
+    if (this.anchorIndex >= 0 && this.anchorIndex < totalNodes) {
+      gl.drawArrays(gl.POINTS, this.anchorIndex, 1);
+    }
     gl.bindVertexArray(null);
+  }
+
+  /** Mark node `index` of the resting buffer as the anchor; -1 for none. */
+  public setAnchor(index: number) {
+    this.anchorIndex = index;
   }
 
   public updateCamera(projection: Float32Array, view: Float32Array) {

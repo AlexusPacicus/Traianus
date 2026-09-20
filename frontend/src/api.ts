@@ -38,6 +38,12 @@ export interface SpatialResponse {
   nodes: SpatialObservable[];
 }
 
+export interface PerspectiveResponse extends SpatialResponse {
+  anchor: string;
+  poles: [string, string];
+  fallback: boolean;
+}
+
 export async function fetchNodes(): Promise<NodesNode[]> {
   const res = await fetch("/nodos");
   if (!res.ok) throw new Error(`GET /nodos failed: ${res.status}`);
@@ -64,6 +70,14 @@ export async function fetchSpatial(token: string): Promise<SpatialObservable[]> 
   if (!res.ok) throw new Error(`GET /spatial failed: ${res.status}`);
   const data: SpatialResponse = await res.json();
   return data.nodes ?? [];
+}
+
+export async function fetchPerspective(token: string, anchor: string): Promise<PerspectiveResponse> {
+  const res = await fetch(`/spatial?anchor=${encodeURIComponent(anchor)}`, {
+    headers: { "X-Traianus-Token": token },
+  });
+  if (!res.ok) throw new Error(`GET /spatial?anchor failed: ${res.status}`);
+  return res.json();
 }
 
 export async function ingestText(text: string, token: string): Promise<string> {
