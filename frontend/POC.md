@@ -120,6 +120,10 @@ that leaves the written scope goes to v2.
   (question, refuter, phase-1 review) before any script. Rejected option B: the data residual of
   λ₂ on a quadratic of the position — corpus-fitted, and near-zero R² by construction on the data
   it is fitted to. Still day 6 and still the first cut if the checkpoint is at risk.
+- **2026-09-20 — checkpoint date fixed, before any result.** This file said both "day 4" (day table,
+  day-7 table) and "2026-09-22" (Deadline). With day 1 = 2026-09-18, day 4 is 2026-09-21. The author
+  decided: the checkpoint is **2026-09-22**, as the Deadline section says; the tables are left as
+  written and read against that date. The order of the cuts is unchanged.
 
 ## Day-7 decision (pre-registered 2026-09-18, before any result)
 
