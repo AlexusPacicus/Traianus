@@ -373,6 +373,39 @@ per-epoch frame.
 Scope: an operator change (canonical repository `polar-projector`, with its paper); not in this
 PoC. It enters through steps 1–2 of the loop with its own instrument audit.
 
+## Exploration: colour recomputed in the perspective's frame (author's idea, 2026-09-20)
+
+**Idea.** In a perspective at q, every dimension beyond the anchor is recomputed from q's weights
+on the axes (q's own ranking of them, not the epoch's mean ranking), so colour lives in the same
+frame as the position. Otherwise a perspective view mixes q's frame (position) with the epoch
+frame (colour), the mismatch fixed on 2026-09-19 for the per-node frame (see "Resolved finding:
+the overview had no shared frame"). R4 already records it: K6 tested independence only against
+the epoch-anchored position, so R4 reports each colour channel's R² on q's position, descriptive.
+
+**What the PoC does meanwhile (decision, 2026-09-20).** Position is recomputed in q's frame: poles
+are the two axes with the largest ⟨q, â_k⟩ (`select_poles`), y = ⟨v, q̂⟩, z-scored over the other
+N − 1 nodes (R4 record). Colour stays the epoch channels (λ₃, a₈), fixed per note, so a note keeps
+its colour across views. The perspective function takes its colour columns from the caller, so
+this exploration changes what the endpoint passes, not the function.
+
+**Why it is not just "recompute".**
+- Which axes feed which channel. The epoch frame spends rank 1 on the anchor and builds dipoles
+  (2, 3), (4, 5), (6, 7) plus a leftover rank 8; K6 admitted λ₃ (dipole (6, 7)) and a₈ (rank 8).
+  At q the anchor is q, so the eight axes give four dipoles, (1, 2), (3, 4), (5, 6), (7, 8), and no
+  leftover: the structure does not carry over and would have to be specified.
+- K6 does not cover it. It measured the epoch frame under the corpus-mean ranking, and discarded λ₂
+  by a margin of 0.0019, so the independence of a per-perspective channel from q's position cannot
+  be assumed.
+- The R4 record says colour is "fixed per note, independent of q". Changing it needs a new phase-1
+  review before R4's first run (day 6); no R4 result exists yet.
+
+**Refuter (candidate, not audited).** For a stated rule that maps q's axis ranking to colour
+channels, some channel is second-order predictable from q's (x, y) by K6's rule, applied per
+perspective over a set of chosen q. Needs its own instrument audit before any figure is used.
+
+If it is wanted before the checkpoint, it displaces K8 (the z axis), the first cut anyway.
+Exploration branch: not in the PoC's scope, no gate.
+
 ## Record questions (not for reviewers)
 
 Kept here, outside `frontend/audits/`, so a blind reviewer never reads them (moved 2026-09-19
