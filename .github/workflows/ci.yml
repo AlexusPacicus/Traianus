@@ -96,11 +96,14 @@ jobs:
             tests/security/test_contract_context_hook.py \
             tests/security/test_hook_case_identity.py \
             tests/security/test_hook_startup_surface.py \
+            tests/security/test_python_gate.py \
+            tests/security/test_python_gate_bash_hook.py \
             tests/security/test_review_confinement.py \
             tests/unit/test_context_pack.py \
             tests/unit/test_delegation_contract.py \
             tests/unit/test_load_spinoza_corpus.py \
             tools/hooks/confine_review_reads.py \
+            tools/hooks/deny_python_escapes.py \
             tools/hooks/require_contract_context.py \
             tools/audit/context_pack.py \
             tools/audit/delegation_contract.py \
