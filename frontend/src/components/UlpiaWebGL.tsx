@@ -7,10 +7,12 @@ import {
 import { LIFECYCLE_MARKS, markDotStyle, packLifecycle } from "../lifecycle";
 import { nearestIds, type NoteInfo } from "../notes";
 import { fitPerspective } from "../perspective";
+import { record } from "../runlog";
 import { UlpiaRenderer } from "../ulpia_renderer";
 import NoteCard, { type Pointer } from "./NoteCard";
 import NoteList from "./NoteList";
 import NotePanel from "./NotePanel";
+import RunLog from "./RunLog";
 
 interface UlpiaWebGLProps {
   token: string;
@@ -192,7 +194,8 @@ function attachNavigation(
  */
 export default function UlpiaWebGL({ token, notes, relations, version, children }: UlpiaWebGLProps) {
   const canvasRef = useRef<HTMLCanvasElement>(null);
-  const backRef = useRef<() => void>(() => {});
+  const backRef = useRef<(via: "escape" | "button") => void>(() => {});
+  const pointedRef = useRef<string | null>(null);
   const selectRef = useRef<(id: string) => void>(() => {});
   const refreshRef = useRef<() => void>(() => {});
   const marksRef = useRef<() => void>(() => {});
@@ -245,6 +248,7 @@ export default function UlpiaWebGL({ token, notes, relations, version, children 
           renderer.uploadRestingBuffer(buffer);
           shown = layout;
           showMarks();
+          pointedRef.current = null;
           setHover(null);
         };
         show(overviewLayout, overview);
@@ -278,10 +282,11 @@ export default function UlpiaWebGL({ token, notes, relations, version, children 
         };
         selectRef.current = (id) => void select(id);
 
-        const back = () => {
+        const back = (via: "escape" | "button") => {
           ticket++;
           setError(null);
           if (anchor === null) return;
+          record("overview", { via });
           show(overviewLayout, overview);
           renderer.setAnchor(-1);
           anchor = null;
@@ -310,10 +315,12 @@ export default function UlpiaWebGL({ token, notes, relations, version, children 
 
         const onClick = (px: number, py: number, width: number, height: number) => {
           const index = pickNearest(camera, shown.xs, shown.ys, px, py, width, height, PICK_RADIUS);
-          if (index >= 0) void select(shown.ids[index]);
+          if (index < 0) return;
+          record("select", { id: shown.ids[index], source: "map_click" });
+          void select(shown.ids[index]);
         };
         const onKey = (e: KeyboardEvent) => {
-          if (e.key === "Escape") back();
+          if (e.key === "Escape") back("escape");
         };
 
         const onHover = (at: Pointer | null) => {
@@ -321,6 +328,8 @@ export default function UlpiaWebGL({ token, notes, relations, version, children 
             ? pickNearest(camera, shown.xs, shown.ys, at.x, at.y, at.width, at.height, PICK_RADIUS)
             : -1;
           const next = at && index >= 0 ? { ...at, id: shown.ids[index] } : null;
+          if (next && next.id !== pointedRef.current) record("point", { id: next.id });
+          pointedRef.current = next?.id ?? null;
           // The card stays where it appeared for as long as the pointer stays on the same node.
           setHover((prev) => (prev?.id === next?.id ? prev : next));
         };
@@ -376,11 +385,14 @@ export default function UlpiaWebGL({ token, notes, relations, version, children 
       return;
     }
     setIdMessage(null);
+    record("select", { id, source: "id_field" });
     selectRef.current(id);
   };
 
   const chooseView = (next: View) => {
+    if (next !== view) record("view", { to: next });
     setView(next);
+    pointedRef.current = null;
     setHover(null);
     if (next === "map") setOpened(null);
   };
@@ -458,7 +470,7 @@ export default function UlpiaWebGL({ token, notes, relations, version, children 
                 </div>
                 <div style={{ display: "flex", flexWrap: "wrap", gap: 8 }}>
                   <button
-                    onClick={() => backRef.current()}
+                    onClick={() => backRef.current("button")}
                     style={{ ...buttonStyle, background: "#6366F1" }}
                   >
                     Overview (Esc)
@@ -505,7 +517,10 @@ export default function UlpiaWebGL({ token, notes, relations, version, children 
               ids={perspective.nearest}
               notes={notes}
               opened={opened}
-              onOpen={setOpened}
+              onOpen={(id) => {
+                if (id !== opened) record("open", { id });
+                setOpened(id);
+              }}
             />
           ) : null}
         </div>
@@ -522,7 +537,14 @@ export default function UlpiaWebGL({ token, notes, relations, version, children 
               id={panelId}
               note={notes.get(panelId)}
               relations={relations}
-              onSelect={panelId === perspective.anchor ? null : () => selectRef.current(panelId)}
+              onSelect={
+                panelId === perspective.anchor
+                  ? null
+                  : () => {
+                      record("select", { id: panelId, source: "panel_button" });
+                      selectRef.current(panelId);
+                    }
+              }
             />
           </div>
         ) : null}
@@ -549,6 +571,7 @@ export default function UlpiaWebGL({ token, notes, relations, version, children 
           </div>
         ))}
       </div>
+      <RunLog view={perspective ? view : "overview"} anchor={perspective?.anchor ?? null} />
     </div>
   );
 }

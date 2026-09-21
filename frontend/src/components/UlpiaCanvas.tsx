@@ -17,6 +17,7 @@ import {
 } from "../api";
 import { notesOf, type NoteInfo } from "../notes";
 import { projectTo5d } from "../projection";
+import { record } from "../runlog";
 import UlpiaWebGL from "./UlpiaWebGL";
 
 const SCALE = 400;
@@ -132,6 +133,7 @@ export default function UlpiaCanvas({ token }: UlpiaCanvasProps) {
   const handleIngest = useCallback(async () => {
     const text = inputText.trim();
     if (!text || !token || ingesting) return;
+    record("ingest_submit", { length: text.length });
     const current =
       submission.current?.text === text ? submission.current : { text, key: crypto.randomUUID() };
     submission.current = current;

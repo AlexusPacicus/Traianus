@@ -2,6 +2,7 @@ import { useMemo, useState } from "react";
 import type { Relation } from "../api";
 import { markDotStyle } from "../lifecycle";
 import { relationsOf, type NoteInfo } from "../notes";
+import { record } from "../runlog";
 
 const buttonStyle = {
   alignSelf: "flex-start",
@@ -59,7 +60,10 @@ export default function NotePanel({
       ) : null}
       <button
         aria-pressed={showRelations}
-        onClick={() => setShowRelations((on) => !on)}
+        onClick={() => {
+          record("relations_toggle", { id, on: !showRelations });
+          setShowRelations((on) => !on);
+        }}
         style={{ ...buttonStyle, background: showRelations ? "#6366F1" : "#334155" }}
       >
         {showRelations ? "Hide relations" : "Show relations"}
