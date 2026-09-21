@@ -168,7 +168,12 @@ that leaves the written scope goes to v2.
   and the loader sends each sentence from `data/spinoza/` and verifies it (`f253b15`). The base was
   rebuilt in `.data/poc/`, calibrated once on the 2,221 corpus notes, and the five notes of T06 to T10
   were entered afterwards as `NODE_1` to `NODE_5` (2,226 nodes). The state R5 runs on, its copy and
-  its hash are in `R5.md`, State. Not declared yet: the state R4 measures on (2,221 or 2,226).
+  its hash are in `R5.md`, State. R4 does not read this base: it measures the EVAL half of the frozen
+  artefact (N = 1,110; `audits/R4.md`, Data).
+- **2026-09-21 — colour per perspective not promoted, for now, before any R4 result.** The author
+  decided to finish the PoC first, so "Exploration: colour recomputed in the perspective's frame"
+  stays an exploration. R4's record (revision 5, phase 1 PASS at `c08fe92`) keeps the K6 channels
+  fixed per note and independent of q, so nothing in it changes and no new phase 1 review is needed.
 
 ## Day-7 decision (pre-registered 2026-09-18, before any result)
 
