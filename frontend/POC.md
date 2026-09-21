@@ -157,6 +157,18 @@ that leaves the written scope goes to v2.
   perspective from that node, as the checkpoint criterion says. `R5.md` rule 2 now reads "pointed at
   or selected (map)", its Views section says so, and a limit names the asymmetry: one pointing action
   per note on the map, none on the list.
+- **2026-09-21 — relations hidden by default, before any run.** In a perspective the id of a note
+  says which proposition it belongs to, so the panel's relations were a second list of related notes
+  on the map. The author decided they are hidden behind a toggle that starts off (`b91a21c`). `R5.md`
+  Views now says neither view uses the toggle. The same commit shows a failed initial load in the
+  error line instead of only in the console.
+- **2026-09-21 — corpus reloaded with its sentences, state declared, before any run.** The engine
+  stored the label as the text of every corpus note, so the client showed labels and R5 rule 2
+  ("id and text on screen") was doubtful. `/ingesta/vector` now takes an optional `text` (`67b9205`)
+  and the loader sends each sentence from `data/spinoza/` and verifies it (`f253b15`). The base was
+  rebuilt in `.data/poc/`, calibrated once on the 2,221 corpus notes, and the five notes of T06 to T10
+  were entered afterwards as `NODE_1` to `NODE_5` (2,226 nodes). The state R5 runs on, its copy and
+  its hash are in `R5.md`, State. Not declared yet: the state R4 measures on (2,221 or 2,226).
 
 ## Day-7 decision (pre-registered 2026-09-18, before any result)
 
