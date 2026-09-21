@@ -11,6 +11,7 @@ import io
 import json
 import re
 import sqlite3
+import unicodedata
 from dataclasses import dataclass
 from pathlib import Path
 from types import SimpleNamespace
@@ -25,6 +26,7 @@ REPO_ROOT = Path(__file__).resolve().parents[2]
 TOOL = REPO_ROOT / "tools" / "experiments" / "tooling" / "load_spinoza_corpus.py"
 REGISTRY = REPO_ROOT / "tools" / "hooks" / "contract_registry.json"
 FROZEN = REPO_ROOT / ".data" / "spinoza_frozen"
+MANIFESTS = REPO_ROOT / "data" / "spinoza"
 CONTRACT = "frontend/audits/contracts.md"
 SECTION_0 = "0. Data layer, bit level (shared)"
 
@@ -69,24 +71,77 @@ def _replace(index, **fields):
     return labels
 
 
+def _keys(counts=PARTS):
+    return [entry["label"] for entry in _labels(counts)]
+
+
+def _sentence(label):
+    """Leading and trailing blanks, a doubled space, a combining accent, curly quotes, a backslash and a
+    newline: what a strip, a normalisation or a re-encoding would alter."""
+    return f"  {label}: la  sustancia, é “dice” \\ x\n"
+
+
+def _split(items, counts):
+    parts, start = [], 0
+    for count in counts[:-1]:
+        parts.append(items[start : start + count])
+        start += count
+    return [*parts, items[start:]]
+
+
+def _manifest_names(counts=PARTS):
+    return [f"part{i + 1}_manifest.json" for i in range(len(counts))]
+
+
+def _object_bytes(pairs):
+    """A JSON object written pair by pair, so that a test can repeat a key."""
+    body = ", ".join(f"{json.dumps(key)}: {json.dumps(value, ensure_ascii=False)}" for key, value in pairs)
+    return ("{" + body + "}").encode("utf-8")
+
+
+def _manifest_bytes(keys, counts=PARTS):
+    return [_object_bytes([(key, _sentence(key)) for key in part]) for part in _split(keys, counts)]
+
+
+def _pairs(part):
+    return [(key, _sentence(key)) for key in _split(_keys(), PARTS)[part]]
+
+
+def _manifests_with(part, data):
+    manifests = _manifest_bytes(_keys())
+    manifests[part] = data
+    return manifests
+
+
 @dataclass
 class Staged:
     directory: Path
+    manifests: Path
     expected: tool.Expected
     vectors: np.ndarray
     labels: list
+    sentences: list
 
 
-def _stage(directory, *, vectors=None, labels=None, npy=None, shape=(N, D), counts=PARTS):
+def _stage(
+    directory, *, vectors=None, labels=None, npy=None, shape=(N, D), counts=PARTS, keys=None, manifests=None
+):
     vectors = _unit_rows(N) if vectors is None else vectors
     labels = _labels() if labels is None else labels
     embeddings = _npy(vectors) if npy is None else npy
+    keys = _keys(counts) if keys is None else keys
+    manifests = _manifest_bytes(keys, counts) if manifests is None else manifests
     text = json.dumps(labels).encode("utf-8")
-    directory.mkdir(parents=True, exist_ok=True)
+    folder = directory / "manifests"
+    folder.mkdir(parents=True, exist_ok=True)
     (directory / "embeddings.npy").write_bytes(embeddings)
     (directory / "labels.json").write_bytes(text)
-    expected = tool.Expected(_sha(embeddings), _sha(text), shape, counts)
-    return Staged(directory, expected, vectors, labels)
+    names = _manifest_names(counts)
+    for name, data in zip(names, manifests):
+        (folder / name).write_bytes(data)
+    digests = tuple((name, _sha(data)) for name, data in zip(names, manifests))
+    expected = tool.Expected(_sha(embeddings), _sha(text), shape, counts, digests)
+    return Staged(directory, folder, expected, vectors, labels, [_sentence(key) for key in keys])
 
 
 @pytest.fixture
@@ -125,14 +180,16 @@ class Engine:
 
 def _load(staged, engine, tmp_path, capsys, *extra, url=URL):
     report = tmp_path / "report.json"
-    argv = ["load", "--url", url, "--artefacts", str(staged.directory), "--report", str(report), *extra]
+    argv = ["load", "--url", url, "--artefacts", str(staged.directory), "--manifests", str(staged.manifests)]
+    argv += ["--report", str(report), *extra]
     code = tool.main(argv, transport=engine, expected=staged.expected)
     captured = capsys.readouterr()
     return code, captured.out, captured.err, report
 
 
 def _verify(staged, db, capsys, *extra):
-    argv = ["verify", "--db", str(db), "--artefacts", str(staged.directory), *extra]
+    argv = ["verify", "--db", str(db), "--artefacts", str(staged.directory), "--manifests", str(staged.manifests)]
+    argv += list(extra)
     code = tool.main(argv, expected=staged.expected)
     captured = capsys.readouterr()
     return code, captured.out, captured.err
@@ -237,6 +294,138 @@ def test_verify_refuses_a_bad_artefact_before_opening_the_database(tmp_path, cap
     assert re.search(r"row 4\b", err)
 
 
+# Manifests: read once, checked, and refused before any request
+
+
+def _swap(keys, i, j):
+    keys = list(keys)
+    keys[i], keys[j] = keys[j], keys[i]
+    return keys
+
+
+@pytest.mark.parametrize("part", range(len(PARTS)))
+@pytest.mark.parametrize("where", ["first", "middle", "last"])
+def test_one_flipped_byte_in_a_manifest_is_refused_by_the_digest(staged, tmp_path, capsys, part, where):
+    name = _manifest_names()[part]
+    path = staged.manifests / name
+    data = bytearray(path.read_bytes())
+    data[{"first": 0, "middle": len(data) // 2, "last": -1}[where]] ^= 0x01
+    path.write_bytes(bytes(data))
+    err = _refused(staged, tmp_path, capsys)
+    assert name in err
+    assert "sha256" in err
+
+
+def test_a_missing_manifest_is_refused_naming_the_file(staged, tmp_path, capsys):
+    name = _manifest_names()[2]
+    (staged.manifests / name).unlink()
+    assert name in _refused(staged, tmp_path, capsys)
+
+
+def test_an_unreadable_manifest_is_refused_naming_the_file(staged, tmp_path, capsys):
+    name = _manifest_names()[1]
+    path = staged.manifests / name
+    path.unlink()
+    path.mkdir()
+    assert name in _refused(staged, tmp_path, capsys)
+
+
+def _with_value(pairs, value):
+    return _object_bytes([*pairs[:2], (pairs[2][0], value), *pairs[3:]])
+
+
+MANIFEST_CASES = [
+    pytest.param(lambda p: _object_bytes([*p, (p[1][0], "again")]), r"duplicate.*P1_N01", id="duplicate_key"),
+    pytest.param(lambda p: json.dumps([list(pair) for pair in p]).encode(), "not a JSON object", id="list"),
+    pytest.param(lambda p: b'"a sentence"', "not a JSON object", id="string"),
+    pytest.param(lambda p: b"null", "not a JSON object", id="null_document"),
+    pytest.param(lambda p: _with_value(p, 5), r"P1_N02.*not a string", id="number"),
+    pytest.param(lambda p: _with_value(p, None), r"P1_N02.*not a string", id="null"),
+    pytest.param(lambda p: _with_value(p, ["a"]), r"P1_N02.*not a string", id="list_value"),
+    pytest.param(lambda p: _with_value(p, {"a": "b"}), r"P1_N02.*not a string", id="object_value"),
+    pytest.param(lambda p: _with_value(p, ""), r"P1_N02.*empty", id="empty"),
+    pytest.param(lambda p: _with_value(p, "a\x00b"), r"P1_N02.*NUL", id="nul"),
+    pytest.param(lambda p: b'{"P1_N00": "\xff"}', "UTF-8", id="not_utf8"),
+    pytest.param(lambda p: b'{"P1_N00": "a"', "UTF-8", id="truncated"),
+]
+
+
+@pytest.mark.parametrize(("build", "pattern"), MANIFEST_CASES)
+def test_a_bad_manifest_is_refused_naming_the_file(tmp_path, capsys, build, pattern):
+    staged = _stage(tmp_path / "bad", manifests=_manifests_with(1, build(_pairs(1))))
+    err = _refused(staged, tmp_path, capsys)
+    assert _manifest_names()[1] in err
+    assert re.search(pattern, err)
+
+
+ORDER_CASES = [
+    pytest.param(lambda k: _swap(k, 2, 3), r"label 2\b", id="swapped_inside_one_part"),
+    pytest.param(lambda k: _swap(k, 4, 5), r"label 4\b", id="swapped_across_two_parts"),
+    pytest.param(lambda k: k[:6] + k[7:], r"label 6\b", id="one_missing"),
+    pytest.param(lambda k: k[:-1], r"index 11\b", id="last_missing"),
+    pytest.param(lambda k: [*k[:3], "EXTRA", *k[3:]], r"label 3\b", id="one_extra_inside"),
+    pytest.param(lambda k: [*k, "EXTRA"], r"index 12\b", id="one_extra_at_the_end"),
+]
+
+
+@pytest.mark.parametrize(("arrange", "pattern"), ORDER_CASES)
+def test_manifest_labels_that_differ_from_the_artefact_are_refused_naming_the_index(
+    tmp_path, capsys, arrange, pattern
+):
+    staged = _stage(tmp_path / "bad", keys=arrange(_keys()))
+    assert re.search(pattern, _refused(staged, tmp_path, capsys))
+
+
+def test_a_label_repeated_across_two_manifests_is_refused_naming_the_later_file(tmp_path, capsys):
+    keys = _keys()
+    keys[5] = keys[0]
+    err = _refused(_stage(tmp_path / "bad", keys=keys), tmp_path, capsys)
+    assert _manifest_names()[1] in err
+    assert keys[0] in err
+
+
+def _last_manifest_flipped(directory):
+    staged = _stage(directory)
+    path = staged.manifests / _manifest_names()[-1]
+    data = bytearray(path.read_bytes())
+    data[-1] ^= 0x01
+    path.write_bytes(bytes(data))
+    return staged
+
+
+LIMIT_CASES = [
+    pytest.param(_last_manifest_flipped, "sha256", id="digest"),
+    pytest.param(
+        lambda d: _stage(d, manifests=_manifests_with(2, _object_bytes([(_pairs(2)[0][0], ""), *_pairs(2)[1:]]))),
+        "empty",
+        id="empty_value",
+    ),
+    pytest.param(lambda d: _stage(d, keys=_swap(_keys(), 9, 10)), r"label 9\b", id="order"),
+]
+
+
+@pytest.mark.parametrize("command", ["load", "verify"])
+@pytest.mark.parametrize(("stage", "pattern"), LIMIT_CASES)
+def test_limit_does_not_narrow_the_manifest_checks(tmp_path, capsys, command, stage, pattern):
+    staged = stage(tmp_path / "bad")
+    if command == "load":
+        engine = Engine()
+        code, _out, err, _report = _load(staged, engine, tmp_path, capsys, "--limit", "5")
+        assert engine.calls == []
+    else:
+        code, _out, err = _verify(staged, tmp_path / "absent.db", capsys, "--limit", "5")
+    assert code == 1
+    assert re.search(pattern, err)
+
+
+def test_verify_refuses_a_bad_manifest_before_opening_the_database(tmp_path, capsys):
+    staged = _stage(tmp_path / "bad", keys=_swap(_keys(), 2, 3))
+    code, _out, err = _verify(staged, tmp_path / "absent.db", capsys)
+    assert code == 1
+    assert re.search(r"label 2\b", err)
+    assert not (tmp_path / "absent.db").exists()
+
+
 # T2: the rows go in text order, one POST each
 
 
@@ -255,6 +444,7 @@ def test_load_sends_the_rows_in_text_order_one_post_each(staged, tmp_path, capsy
         assert json.loads(body) == {
             "vector": staged.vectors[i].astype(np.float64).tolist(),
             "label": staged.labels[i]["label"],
+            "text": staged.sentences[i],
         }
         assert headers == {
             "X-Traianus-Token": TOKEN,
@@ -277,6 +467,15 @@ def test_resume_sends_no_post_for_a_label_the_engine_already_lists(staged, tmp_p
     digest = staged.expected.embeddings_sha256[:12]
     assert engine.posts[0][2]["X-Idempotency-Key"] == f"spinoza-0002-{digest}"
     assert json.loads(report.read_text(encoding="utf-8"))["skipped"] == len(present)
+
+
+def test_resume_sends_the_sentence_of_the_row_it_posts(staged, tmp_path, capsys):
+    labels = [row["label"] for row in staged.labels]
+    present = (0, 1, 5)
+    engine = Engine(existing=[f"VEC_{labels[i]}" for i in present])
+    assert _load(staged, engine, tmp_path, capsys)[0] == 0
+    sent = [(json.loads(call[3])["label"], json.loads(call[3])["text"]) for call in engine.posts]
+    assert sent == [(label, staged.sentences[i]) for i, label in enumerate(labels) if i not in present]
 
 
 def test_a_second_full_run_sends_no_post(staged, tmp_path, capsys):
@@ -465,10 +664,16 @@ def _vhat(row32):
     return row / np.sqrt(row @ row)
 
 
-def _stored(staged, replace=None):
+def _stored(staged, replace=None, texts=None):
     replace = replace or {}
+    texts = texts or {}
     return [
-        (f"VEC_{entry['label']}", 1, replace.get(i, _vhat(staged.vectors[i]).tobytes()))
+        (
+            f"VEC_{entry['label']}",
+            1,
+            replace.get(i, _vhat(staged.vectors[i]).tobytes()),
+            texts.get(i, staged.sentences[i]),
+        )
         for i, entry in enumerate(staged.labels)
     ]
 
@@ -477,9 +682,9 @@ def _database(path, rows):
     conn = sqlite3.connect(path)
     try:
         conn.execute(
-            "CREATE TABLE manifold_nodes (id TEXT, seq INTEGER, vector_blob BLOB, PRIMARY KEY (id, seq))"
+            "CREATE TABLE manifold_nodes (id TEXT, seq INTEGER, vector_blob BLOB, text TEXT, PRIMARY KEY (id, seq))"
         )
-        conn.executemany("INSERT INTO manifold_nodes VALUES (?, ?, ?)", rows)
+        conn.executemany("INSERT INTO manifold_nodes VALUES (?, ?, ?, ?)", rows)
         conn.commit()
     finally:
         conn.close()
@@ -529,9 +734,10 @@ def test_verify_fails_on_a_blob_that_is_not_v_hat(staged, tmp_path, capsys, blob
 def test_verify_reads_the_highest_seq_of_each_node(staged, tmp_path, capsys):
     ids = [f"VEC_{entry['label']}" for entry in staged.labels]
     good = [_vhat(v).tobytes() for v in staged.vectors]
-    rows = [(ids[i], 1, good[i]) for i in range(N) if i not in (2, 3)]
-    rows += [(ids[2], 2, good[2]), (ids[2], 1, _flip(good[2], 0, 52))]
-    rows += [(ids[3], 1, good[3]), (ids[3], 2, _flip(good[3], 0, 52))]
+    text = staged.sentences
+    rows = [(ids[i], 1, good[i], text[i]) for i in range(N) if i not in (2, 3)]
+    rows += [(ids[2], 2, good[2], text[2]), (ids[2], 1, _flip(good[2], 0, 52), text[2])]
+    rows += [(ids[3], 1, good[3], text[3]), (ids[3], 2, _flip(good[3], 0, 52), text[3])]
     code, _out, err = _verify(staged, _database(tmp_path / "rev.db", rows), capsys)
     assert code == 1
     assert "1 mismatched" in err
@@ -585,7 +791,7 @@ def test_a_write_through_the_read_only_uri_fails(staged, tmp_path):
     conn = sqlite3.connect(tool.readonly_uri(db), uri=True)
     try:
         with pytest.raises(sqlite3.OperationalError, match="readonly"):
-            conn.execute("INSERT INTO manifold_nodes VALUES ('x', 1, x'00')")
+            conn.execute("INSERT INTO manifold_nodes VALUES ('x', 1, x'00', 't')")
     finally:
         conn.close()
 
@@ -595,6 +801,70 @@ def test_verify_refuses_a_database_that_cannot_be_opened(staged, tmp_path, capsy
     assert code == 1
     assert "absent.db" in err
     assert not (tmp_path / "absent.db").exists()
+
+
+TEXT_CASES = [
+    pytest.param(lambda s, label: label, id="the_label"),
+    pytest.param(lambda s, label: None, id="null"),
+    pytest.param(lambda s, label: "", id="empty"),
+    pytest.param(lambda s, label: s.replace("sustancia", "sustancie"), id="one_character_changed"),
+    pytest.param(lambda s, label: s.strip(), id="stripped"),
+    pytest.param(lambda s, label: unicodedata.normalize("NFC", s), id="normalised"),
+    pytest.param(lambda s, label: s[:-1], id="truncated"),
+]
+
+
+@pytest.mark.parametrize("wrong", TEXT_CASES)
+def test_verify_fails_on_a_text_that_is_not_the_sentence(staged, tmp_path, capsys, wrong):
+    label = staged.labels[4]["label"]
+    texts = {4: wrong(staged.sentences[4], label)}
+    code, out, err = _verify(staged, _database(tmp_path / "text.db", _stored(staged, texts=texts)), capsys)
+    assert code == 1
+    assert len(out.strip().splitlines()) == 1
+    assert "0 mismatched, 0 missing" in err
+    assert "1 text mismatched" in err
+    assert label in err
+
+
+def test_a_node_with_bad_bits_and_a_bad_text_counts_once(staged, tmp_path, capsys):
+    blob = _vhat(staged.vectors[4]).tobytes()
+    rows = _stored(staged, {4: _flip(blob, 9, 0)}, {4: staged.labels[4]["label"]})
+    code, out, err = _verify(staged, _database(tmp_path / "both.db", rows), capsys)
+    assert code == 1
+    assert "11 of 12" in out
+    assert "1 mismatched, 0 missing" in err
+    assert "1 text mismatched" in err
+
+
+def test_verify_reads_the_text_of_the_highest_seq_of_each_node(staged, tmp_path, capsys):
+    ids = [f"VEC_{entry['label']}" for entry in staged.labels]
+    good = [_vhat(v).tobytes() for v in staged.vectors]
+    text = staged.sentences
+    rows = [(ids[i], 1, good[i], text[i]) for i in range(N) if i not in (2, 3)]
+    rows += [(ids[2], 2, good[2], text[2]), (ids[2], 1, good[2], "old")]
+    rows += [(ids[3], 1, good[3], text[3]), (ids[3], 2, good[3], "new")]
+    code, _out, err = _verify(staged, _database(tmp_path / "rev.db", rows), capsys)
+    assert code == 1
+    assert "1 text mismatched" in err
+    assert staged.labels[3]["label"] in err
+    assert staged.labels[2]["label"] not in err
+
+
+def test_verify_limit_checks_only_the_text_of_the_first_rows(staged, tmp_path, capsys):
+    db = _database(tmp_path / "limit.db", _stored(staged, texts={10: ""}))
+    assert _verify(staged, db, capsys, "--limit", "10")[0] == 0
+    code, _out, err = _verify(staged, db, capsys, "--limit", "11")
+    assert code == 1
+    assert "1 text mismatched" in err
+    assert staged.labels[10]["label"] in err
+
+
+def test_a_missing_node_is_not_also_a_text_mismatch(staged, tmp_path, capsys):
+    absent = f"VEC_{staged.labels[7]['label']}"
+    rows = [row for row in _stored(staged) if row[0] != absent]
+    code, _out, err = _verify(staged, _database(tmp_path / "gap.db", rows), capsys)
+    assert code == 1
+    assert "text mismatched" not in err
 
 
 # T7: end to end against the real application
@@ -612,12 +882,18 @@ def _through(client, calls):
 def test_the_engine_stores_the_bits_the_loader_and_the_contract_expect(client, isolate_db, tmp_path, capsys):
     n = 40
     labels = [{"label": f"E2E_{i:02d}", "part": "PA" if i < 25 else "PB"} for i in range(n)]
-    staged = _stage(tmp_path / "e2e", vectors=_unit_rows(n), labels=labels, shape=(n, D), counts=(25, 15))
+    keys = [entry["label"] for entry in labels]
+    staged = _stage(
+        tmp_path / "e2e", vectors=_unit_rows(n), labels=labels, shape=(n, D), counts=(25, 15), keys=keys
+    )
     report = tmp_path / "report.json"
-    argv = ["load", "--url", URL, "--artefacts", str(staged.directory), "--report", str(report)]
+    argv = ["load", "--url", URL, "--artefacts", str(staged.directory), "--manifests", str(staged.manifests)]
+    argv += ["--report", str(report)]
     calls = []
     assert tool.main(argv, transport=_through(client, calls), expected=staged.expected) == 0
     assert calls.count("POST") == n
+    nodes = {node["id"]: node["text"] for node in client.get("/nodos").json()["nodes"]}
+    assert [nodes[f"VEC_{key}"] for key in keys] == staged.sentences
     capsys.readouterr()
     code, _out, err = _verify(staged, isolate_db, capsys)
     assert (code, err) == (0, "")
@@ -646,6 +922,7 @@ def test_two_runs_send_the_same_requests_and_write_the_same_report(staged, tmp_p
     assert parsed["digests"] == {
         "embeddings.npy": staged.expected.embeddings_sha256,
         "labels.json": staged.expected.labels_sha256,
+        **dict(staged.expected.manifests),
     }
     assert set(parsed["environment"]) == {"numpy", "numpy_config", "platform"}
     assert (parsed["loaded"], parsed["skipped"], parsed["failed"]) == (N, 0, 0)
@@ -784,6 +1061,13 @@ def test_the_constants_are_those_of_the_contract():
         "1d60699353d810f089730c6203ee28f9c416e3004b60781bc965cec284097f4f",
         (2221, D),
         (409, 458, 627, 507, 220),
+        (
+            ("part1_god_manifest.json", "848c2ad98645c79820354b861532cb22e8acbf030d4d53d961b8eebc9f2696fe"),
+            ("part2_mind_manifest.json", "0aa584037d237318f8a0f343403e1a0fb9c7ce90bb9cd9096607404c7523ccdf"),
+            ("part3_affects_manifest.json", "7ef2f0aa66b383c80872bf35ab2e17b5d6bcee42b08113688b5db8d1b4ec4e06"),
+            ("part4_bondage_manifest.json", "8aa3e2d7159f1d105ad7a0f2ba95ebd23f466bdde02e10e5ac34cc0c23daf501"),
+            ("part5_power_manifest.json", "29b937dfb7fdea6e6efbd1fafc5fb7d7d604ace2d833dea75047e24babafdd70"),
+        ),
     )
 
 
@@ -794,6 +1078,30 @@ def test_the_real_artefact_matches_the_constants_and_passes_the_integrity_checks
     corpus = tool.load_corpus(FROZEN, tool.EXPECTED)
     assert corpus.vectors.shape == (2221, D)
     assert len(corpus.labels) == 2221
+
+
+def test_the_committed_manifests_match_the_constants_and_hold_2221_clean_sentences():
+    digests = tuple((name, _sha((MANIFESTS / name).read_bytes())) for name, _digest in tool.EXPECTED.manifests)
+    assert digests == tool.EXPECTED.manifests
+    sentences = tool.load_manifests(MANIFESTS, tool.EXPECTED.manifests)
+    assert len(sentences) == 2221
+    assert all(isinstance(text, str) and text and "\x00" not in text for text in sentences.values())
+    counts = tuple(len(json.loads((MANIFESTS / name).read_bytes())) for name, _digest in tool.EXPECTED.manifests)
+    assert counts == (409, 458, 627, 507, 220)
+
+
+@pytest.mark.skipif(
+    not FROZEN.is_dir(), reason=".data/spinoza_frozen is absent (git-ignored; CI has no artefacts)"
+)
+def test_the_committed_manifests_agree_with_the_frozen_labels():
+    corpus = tool.load_corpus(FROZEN, tool.EXPECTED)
+    sentences = tool.load_manifests(MANIFESTS, tool.EXPECTED.manifests)
+    assert tool.align_sentences(sentences, corpus.labels) == list(sentences.values())
+
+
+@pytest.mark.parametrize("argv", [["load", "--url", URL], ["verify", "--db", "x.db"]])
+def test_the_manifests_directory_defaults_to_the_tracked_spinoza_data(argv):
+    assert tool._parser().parse_args(argv).manifests == tool.DEFAULT_MANIFESTS == MANIFESTS
 
 
 # X1: the default transport, through an injected connection factory
@@ -851,6 +1159,19 @@ def test_each_artefact_is_read_once(staged, monkeypatch):
     monkeypatch.setattr(Path, "read_bytes", counting)
     tool.load_corpus(staged.directory, staged.expected)
     assert sorted(reads) == ["embeddings.npy", "labels.json"]
+
+
+def test_each_manifest_is_read_once(staged, monkeypatch):
+    reads = []
+    real_read = Path.read_bytes
+
+    def counting(self):
+        reads.append(self.name)
+        return real_read(self)
+
+    monkeypatch.setattr(Path, "read_bytes", counting)
+    tool.load_manifests(staged.manifests, staged.expected.manifests)
+    assert reads == _manifest_names()
 
 
 def test_a_missing_artefact_is_refused_naming_the_file(staged, tmp_path, capsys):

@@ -3,13 +3,16 @@
 `load` ingests the artefact's vectors in text order through POST /ingesta/vector, one request per
 note, never in bulk and never by re-encoding texts (frontend/POC.md, Corpus loading). The engine does
 not deduplicate a repeated idempotency key, so a request is never retried: any failure stops the run,
-and a later run resumes by skipping the labels GET /nodos already lists.
+and a later run resumes by skipping the labels GET /nodos already lists. Each note goes with its
+sentence, from the data/spinoza manifests, as the node text.
 
 `verify` opens a database read-only and compares, byte for byte, the current revision of each node
-with v-hat = row / sqrt(row @ row) in binary64, the vector the K6 measurement uses.
+with v-hat = row / sqrt(row @ row) in binary64, the vector the K6 measurement uses, and its text with
+that sentence.
 
-Both commands follow frontend/audits/contracts.md section 0: each artefact is read once, its sha256 is
-checked on those bytes, the same bytes are parsed, and the null elimination runs before anything else.
+Both commands follow frontend/audits/contracts.md section 0: each artefact and each manifest is read
+once, its sha256 is checked on those bytes, the same bytes are parsed, and the null elimination runs
+before anything else; the manifests' labels must be those of labels.json, in the same order.
 
 Usage:
     TRAIANUS_TOKEN=... python3 tools/experiments/tooling/load_spinoza_corpus.py load --url http://127.0.0.1:8000
@@ -44,6 +47,7 @@ from numpy.typing import NDArray
 REPO_ROOT = Path(__file__).resolve().parents[3]
 DATA_DIR = REPO_ROOT / ".data"
 DEFAULT_ARTEFACTS = DATA_DIR / "spinoza_frozen"
+DEFAULT_MANIFESTS = REPO_ROOT / "data" / "spinoza"
 DEFAULT_REPORT = DATA_DIR / "spinoza_load_report.json"
 TOKEN_ENV = "TRAIANUS_TOKEN"
 NORM_TOL = 3e-5
@@ -61,6 +65,7 @@ class Expected:
     labels_sha256: str
     shape: tuple[int, int]
     part_counts: tuple[int, ...]
+    manifests: tuple[tuple[str, str], ...]
 
 
 EXPECTED = Expected(
@@ -68,6 +73,13 @@ EXPECTED = Expected(
     "1d60699353d810f089730c6203ee28f9c416e3004b60781bc965cec284097f4f",
     (2221, 384),
     (409, 458, 627, 507, 220),
+    (
+        ("part1_god_manifest.json", "848c2ad98645c79820354b861532cb22e8acbf030d4d53d961b8eebc9f2696fe"),
+        ("part2_mind_manifest.json", "0aa584037d237318f8a0f343403e1a0fb9c7ce90bb9cd9096607404c7523ccdf"),
+        ("part3_affects_manifest.json", "7ef2f0aa66b383c80872bf35ab2e17b5d6bcee42b08113688b5db8d1b4ec4e06"),
+        ("part4_bondage_manifest.json", "8aa3e2d7159f1d105ad7a0f2ba95ebd23f466bdde02e10e5ac34cc0c23daf501"),
+        ("part5_power_manifest.json", "29b937dfb7fdea6e6efbd1fafc5fb7d7d604ace2d833dea75047e24babafdd70"),
+    ),
 )
 
 
@@ -88,10 +100,13 @@ class Outcome:
 
 @dataclass(frozen=True)
 class Verdict:
+    held: int
     mismatched: int
     missing: int
+    text_mismatched: int
     first_mismatch: str | None
     first_missing: str | None
+    first_text_mismatch: str | None
 
 
 class Refused(Exception):
@@ -173,6 +188,57 @@ def load_corpus(directory: Path, expected: Expected) -> Corpus:
     vectors = _check_embeddings(embeddings, expected.shape)
     names = _check_labels(labels, expected.shape[0], expected.part_counts)
     return Corpus(vectors, names, expected.embeddings_sha256, expected.labels_sha256)
+
+
+def _check_manifest(name: str, data: bytes) -> dict[str, str]:
+    def unique(pairs: list[tuple[str, Any]]) -> dict[str, Any]:
+        seen: dict[str, Any] = {}
+        for key, value in pairs:
+            if key in seen:
+                raise Refused(f"{name}: duplicate key {key!r}")
+            seen[key] = value
+        return seen
+
+    try:
+        entries = json.loads(data.decode("utf-8"), object_pairs_hook=unique)
+    except ValueError as exc:
+        raise Refused(f"{name}: not UTF-8 JSON: {exc}") from exc
+    if not isinstance(entries, dict):
+        raise Refused(f"{name}: not a JSON object")
+    for i, (label, sentence) in enumerate(entries.items()):
+        if not isinstance(sentence, str):
+            raise Refused(f"{name}: entry {i} {label!r}: sentence is not a string")
+        if not sentence:
+            raise Refused(f"{name}: entry {i} {label!r}: sentence is empty")
+        if "\x00" in sentence:
+            raise Refused(f"{name}: entry {i} {label!r}: sentence contains a NUL character")
+    return entries
+
+
+def load_manifests(directory: Path, manifests: tuple[tuple[str, str], ...]) -> dict[str, str]:
+    """Each manifest read once, hashed and parsed from the same bytes; the labels of all, in part order."""
+    sentences: dict[str, str] = {}
+    for name, digest in manifests:
+        for label, sentence in _check_manifest(name, _read(Path(directory), name, digest)).items():
+            if label in sentences:
+                raise Refused(f"{name}: label {label!r} is also in an earlier manifest")
+            sentences[label] = sentence
+    return sentences
+
+
+def align_sentences(sentences: Mapping[str, str], labels: Sequence[str]) -> list[str]:
+    keys = list(sentences)
+    for i, (key, label) in enumerate(zip(keys, labels)):
+        if key != label:
+            raise Refused(f"manifests: label {i} is {key!r}, labels.json has {label!r}")
+    if len(keys) != len(labels):
+        first = min(len(keys), len(labels))
+        raise Refused(f"manifests: {len(keys)} labels, labels.json has {len(labels)}; first difference at index {first}")
+    return list(sentences.values())
+
+
+def _sentences(manifests: Path, corpus: Corpus, expected: Expected) -> list[str]:
+    return align_sentences(load_manifests(manifests, expected.manifests), corpus.labels)
 
 
 def v_hat(row: NDArray[np.float32]) -> NDArray[np.float64]:
@@ -267,7 +333,7 @@ def _failure(index: int | None, label: str | None, reason: str, token: str) -> d
     return {"index": index, "label": label, "reason": reason.replace(token, "***")}
 
 
-def run_load(corpus: Corpus, transport: Transport, token: str, limit: int) -> Outcome:
+def run_load(corpus: Corpus, sentences: Sequence[str], transport: Transport, token: str, limit: int) -> Outcome:
     """Never retries: the first failure ends the run, recorded in the outcome."""
     outcome = Outcome()
     try:
@@ -283,7 +349,7 @@ def run_load(corpus: Corpus, transport: Transport, token: str, limit: int) -> Ou
             continue
         key = f"spinoza-{index:04d}-{corpus.embeddings_sha256[:12]}"
         vector = corpus.vectors[index].astype(np.float64).tolist()
-        body = json.dumps({"vector": vector, "label": label}, allow_nan=False).encode("utf-8")
+        body = json.dumps({"vector": vector, "label": label, "text": sentences[index]}, allow_nan=False).encode("utf-8")
         try:
             _post_row(transport, token, key, node_id, body)
         except Refused as exc:
@@ -304,11 +370,14 @@ def _environment() -> dict[str, str]:
     }
 
 
-def write_report(path: Path, corpus: Corpus, outcome: Outcome, limit: int) -> None:
+def write_report(
+    path: Path, corpus: Corpus, manifests: tuple[tuple[str, str], ...], outcome: Outcome, limit: int
+) -> None:
     report = {
         "digests": {
             "embeddings.npy": corpus.embeddings_sha256,
             "labels.json": corpus.labels_sha256,
+            **dict(manifests),
         },
         "environment": _environment(),
         "limit": limit,
@@ -333,30 +402,37 @@ def readonly_uri(db: Path) -> str:
     return f"{Path(db).resolve().as_uri()}?mode=ro"
 
 
-def run_verify(db: Path, corpus: Corpus, limit: int) -> Verdict:
-    """The current revision (highest seq) of each of the first `limit` nodes against v-hat."""
-    mismatched = missing = 0
-    first_mismatch = first_missing = None
+def run_verify(db: Path, corpus: Corpus, sentences: Sequence[str], limit: int) -> Verdict:
+    """The current revision (highest seq) of each of the first `limit` nodes: bits against v-hat, text against its sentence."""
+    held = mismatched = missing = text_mismatched = 0
+    first_mismatch = first_missing = first_text_mismatch = None
     try:
         conn = sqlite3.connect(readonly_uri(db), uri=True)
         try:
             for index in range(limit):
                 label = corpus.labels[index]
                 row = conn.execute(
-                    "SELECT vector_blob FROM manifold_nodes WHERE id = ? ORDER BY seq DESC LIMIT 1",
+                    "SELECT vector_blob, text FROM manifold_nodes WHERE id = ? ORDER BY seq DESC LIMIT 1",
                     (f"VEC_{label}",),
                 ).fetchone()
                 if row is None:
                     missing += 1
                     first_missing = first_missing or label
-                elif row[0] != v_hat(corpus.vectors[index]).tobytes():
+                    continue
+                bits = row[0] == v_hat(corpus.vectors[index]).tobytes()
+                text = row[1] == sentences[index]
+                if not bits:
                     mismatched += 1
                     first_mismatch = first_mismatch or label
+                if not text:
+                    text_mismatched += 1
+                    first_text_mismatch = first_text_mismatch or label
+                held += bits and text
         finally:
             conn.close()
     except sqlite3.Error as exc:
         raise Refused(f"cannot read {db} read-only: {exc}") from exc
-    return Verdict(mismatched, missing, first_mismatch, first_missing)
+    return Verdict(held, mismatched, missing, text_mismatched, first_mismatch, first_missing, first_text_mismatch)
 
 
 # Command line -------------------------------------------------------------------------------------
@@ -378,6 +454,7 @@ def _parser() -> argparse.ArgumentParser:
     for name, help_text in (("load", "ingest the vectors one at a time"), ("verify", "compare stored bits")):
         command = commands.add_parser(name, help=help_text)
         command.add_argument("--artefacts", type=Path, default=DEFAULT_ARTEFACTS)
+        command.add_argument("--manifests", type=Path, default=DEFAULT_MANIFESTS)
         command.add_argument("--limit", type=_positive_int, default=None, help="first N rows only")
         if name == "load":
             command.add_argument("--url", required=True, help="http://127.0.0.1[:port] or localhost")
@@ -409,9 +486,10 @@ def _run_load(args: argparse.Namespace, transport: Transport | None, expected: E
         raise Refused(f"{TOKEN_ENV} is not set")
     report = check_report_path(args.report)
     corpus = load_corpus(args.artefacts, expected)
+    sentences = _sentences(args.manifests, corpus, expected)
     limit = _limit(args.limit, corpus)
-    outcome = run_load(corpus, transport or make_transport(host, port), token, limit)
-    write_report(report, corpus, outcome, limit)
+    outcome = run_load(corpus, sentences, transport or make_transport(host, port), token, limit)
+    write_report(report, corpus, expected.manifests, outcome, limit)
     failed = int(outcome.failure is not None)
     print(f"load: loaded {len(outcome.loaded)}, skipped {outcome.skipped}, failed {failed} of {limit} rows -> {report}")
     if outcome.failure is not None:
@@ -422,17 +500,22 @@ def _run_load(args: argparse.Namespace, transport: Transport | None, expected: E
 
 def _run_verify(args: argparse.Namespace, expected: Expected) -> int:
     corpus = load_corpus(args.artefacts, expected)
+    sentences = _sentences(args.manifests, corpus, expected)
     limit = _limit(args.limit, corpus)
-    verdict = run_verify(args.db, corpus, limit)
-    holding = limit - verdict.mismatched - verdict.missing
-    print(f"verify: {holding} of {limit} labels hold v-hat bit for bit")
-    if holding == limit:
+    verdict = run_verify(args.db, corpus, sentences, limit)
+    print(f"verify: {verdict.held} of {limit} labels hold v-hat bit for bit and their sentence")
+    if verdict.held == limit:
         return 0
     print(
         f"verify: {verdict.mismatched} mismatched, {verdict.missing} missing; "
         f"first mismatch {verdict.first_mismatch}; first missing {verdict.first_missing}",
         file=sys.stderr,
     )
+    if verdict.text_mismatched:
+        print(
+            f"verify: {verdict.text_mismatched} text mismatched; first text mismatch {verdict.first_text_mismatch}",
+            file=sys.stderr,
+        )
     return 1
 
 
