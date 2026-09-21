@@ -512,3 +512,110 @@ entrada de las 15:09. Árbol limpio y todo subido. Suite sin ejecutar: solo docu
 3. Comprobación del hito el martes 22 y decisión de la prórroga por la tarde.
 4. Decidir el color por perspectiva y el estado de R4 antes de su script.
 5. Aclarar lo del modelo de HF y la lista de ruff.
+
+---
+
+## 2026-09-21
+
+**Contexto:** día 4 de la PoC RefApp-01, sin trabajo asignado en `POC.md` y con el hito el 22. Se
+partía del corpus cargado con la etiqueta como texto, las relaciones siempre visibles en el panel y
+R4 sin script. Esta sesión trabajó sobre la cadena que termina en `d80c44b`; el cierre de las 09:48
+del día 21 (otra sesión, `8f814f9`) está en `feat/python-gate` y no en esta cadena.
+
+**Se hizo:**
+- **Orden de trabajo:** solo ejecuta un agente a la vez y hay un árbol, así que el motor fue antes que
+  la retirada del hook de Bash del chat de la puerta (el autor y ese chat decidieron quitarlo; su
+  contrato de retirada está validado y sin lanzar). Al abrir se subieron tres ramas locales.
+- **Motor: `text` opcional en `/ingesta/vector`** (`67b9205`, subagente): se guarda como texto del
+  nodo, con tope de 20.000 caracteres y sin NUL. Declarado por el subagente: el 422 sale de Pydantic,
+  con el cuerpo estándar de FastAPI, sin línea de log y repitiendo el texto que lo causa. Suite 2451,
+  ejecutada por mí.
+- **Cargador con texto** (`f253b15`): envía la frase de `data/spinoza/*_manifest.json` con sus sha256
+  fijados, rechaza un manifest que discrepe del artefacto y `verify` comprueba el texto. Suite 2505.
+  Fallo mío: el contexto del contrato pesaba 40334 bytes contra el tope de 40000 de `context_pack`;
+  no sirvió nada y ninguna herramienta lo avisa antes de lanzar. El subagente quitó la cláusula 6.1.
+- **Base de R5 en `.data/poc/`,** fuera del scratchpad porque R5 dura días: 2221 de 2221 con bits y
+  frase exactos, el ranking de calibración igual al `ranking_full` de K6 y 3195 aristas, las mismas
+  que la telemetría v4. Cinco notas entradas por el cliente en orden, T06 a T10 como `NODE_1` a
+  `NODE_5`, `pending_approval`: 2226 nodos. El motor añadió cuatro filas `RECAL_2` a `RECAL_5`
+  (registro de señales de recalibración, no son nodos). Copia con `sqlite3 .backup`, sha256
+  `435a4c6f…`. `preview_start` no arrancó el motor (`getcwd`); corrió en una pestaña de terminal.
+- **Las cinco notas no tienen aristas:** `rebuild_epsilon_edges` es una función pura de los vectores
+  (L2 ≤ 0,8) sin filtro por estado, y el 36% del corpus (809 de 2221) tampoco tiene ninguna. La causa
+  es geométrica y no está medida.
+- **Cliente: relaciones tras un interruptor y error de carga visible** (`b91a21c`), con T1–T7 manuales
+  contra el corpus real; regla nueva en `R5.md` (ninguna vista usa el interruptor). Nuevo
+  `frontend/MANUAL_TESTS.md`: una prueba manual no dejaba registro (LEDGER seq 54).
+- **Decisiones del autor:** el color por perspectiva no se promueve, primero acabar la PoC; el registro
+  automático de R5 después de R4; las cinco notas esa misma noche; sha256 de los manifests fijados.
+- **R4** (`42ab352` a `0a67c9a`), implementado por el subagente con tests primero. Revisión ciega de
+  fase 2 nº 1: CHANGES (1 bloqueante, integridad en memoria sin prueba en los tests de R4; 13 no
+  bloqueantes). Se pasó el registro a revisión 6 (texto alineado con el código) y se añadieron 33
+  casos de test (`154b575`). Revisión nº 2: PASS, 0 bloqueantes y 9 no bloqueantes sin aplicar, para
+  que el script fuese el revisado. El revisor vio por casualidad `constant_channels: 1` en el
+  resultado de K6; declarado en el registro. El plan de ejecución se commiteó antes (`4b4175c`).
+- **Resultado de R4** (`data/refapp/R4_result.json`, dos ejecuciones idénticas byte a byte, sha256
+  `a8473f32…`, unos 3 min cada una): válido (control «solo y» 1110 de 1110, permutación 0,2018) y
+  **R4 se cumple** en las seis longitudes de bloque; cota superior del intervalo entre −0,0188 y
+  −0,0059, la más ajustada en L = 50. Diferencia media −0,069 vecinas de 15 (retención 0,811 frente a
+  0,816). El color cuesta unas 1,2 vecinas a los dos brazos (2D 0,891, 4D 0,811). Por la tabla del día
+  7, λ pierde el eje horizontal; cuál lo sustituye no se ha decidido. Fila K7 y «R4 outcome» en
+  `POC.md`.
+- **Predicción** en `R5.md` antes de cualquier ejecución: T06 a T10 se completan menos que T01 a T05
+  en las dos vistas (`d1d4372`).
+- **Registro automático de R5** (`0384015`): eventos con hora, marcas Start y Stop por tarea y
+  descarga en JSON; pasivo, sin reloj ni peticiones. Siete pruebas manuales pasan (`MANUAL_TESTS.md`);
+  `R5.md` explica el uso. Al empezar, el navegador ya guardaba 16 eventos `point` de las primeras
+  exploraciones del autor; ahora tiene 52 con mis marcas de prueba.
+- **Fallos míos:** el contexto del cargador (arriba); un clic fuera de campo tras redimensionar, que
+  obligó a comprobar que no había entrado texto en la ingesta (no entró); al probar que las cinco
+  notas servían de ancla imprimí sus tres vecinas más cercanas (declarado en `R5.md`); tres veces dejé
+  el directorio de trabajo en un subdirectorio y los hooks fallaron por su ruta relativa.
+
+**Resultado:** 15 commits de esta sesión, en la cadena `feat/vector-ingest-text` →
+`feat/corpus-text-loader` → `feat/client-relations-toggle` → `feat/r4-perspective-recall` →
+`feat/r5-run-log`, todos subidos a `origin`; `main` sin tocar (`cc401eb`). La base de R5 está
+congelada y documentada, el registro de ejecuciones existe y R4 está medido. Suite: 2621 verdes, 1
+omitida y 5 deseleccionadas, en el último commit de Python (`154b575`); lo posterior es cliente y
+documentación. Motor y cliente están parados desde que se cerró la app; la base sigue en `2230|2230`.
+
+**Resuelto de entradas anteriores:**
+- 2026-09-20 (cierre 09:48 del día 21, en `feat/python-gate`): el contrato del motor y el del cargador,
+  la recarga del corpus con su estado declarado, el contrato C con su regla en `R5.md`, el color por
+  perspectiva antes de R4 (no se promueve) y el script de R4 (hecho y ejecutado), entrar las cinco
+  notas antes de la primera pasada, el estado que mide R4 (la mitad EVAL del artefacto, ni 2221 ni
+  2226) y subir lo que estaba en local.
+- 2026-09-20 (17:08): «R4 sin script y pocos días de ventana».
+
+**Sin resolver / decisión pendiente:**
+- Autor: característica 4 (consolidar desde el cliente): recortar y declarar, o construirla sobre una
+  copia de la base, porque consolidar escribe y rompería la base congelada. Recomendación: recortar.
+- Autor: qué eje sustituye a λ. Exige decisión, registro nuevo y otra medición, y la ventana acaba el
+  25. El brazo de referencia con pesos de covarianza del corpus conserva 0,150 vecinas más que el
+  operador: candidato sin medir.
+- Autor: prórroga el martes 22 por la tarde, fila del día 7 de R5 («list-first»), modelo de HF, lista
+  de ruff de CI.
+- Chat de la puerta: retirada del hook de Bash sin lanzar, AGENTS 2.5 y 6.2, LEDGER seq 55 y el cableado
+  de `SessionStart` (del autor). `.claude/settings.local.json` sigue sin seguimiento y con la sonda.
+- Integración de la cadena: la entrada de las 09:48 del día 21 no está en ella, y el motor toca las
+  mismas zonas de `app.py` y `_storage.py` que la rama R1-INV4 sin fusionar: conflicto esperado.
+- R4, no aplicado a propósito: test de canales sin recortar (comprobado leyendo K6: `eval_channels`
+  devuelve proyecciones en bruto), redacción de `contracts.md` (y = G[q, j]; §0 no nombra las claves
+  de `environment`) y otros seis no bloqueantes, todos en el historial de `R4.md`.
+- Hueco declarado: `delegation_contract` no detecta un contexto por encima del tope de `context_pack`.
+- Falta un script commiteado que calcule completado y tiempos de R5 desde el JSON del registro.
+- Sin tocar de entradas anteriores: K8 (eje z), exploración de documentación con formato fijo, manifest
+  del paquete (`data/spinoza/telemetry`), `/ingesta` acepta una clave vacía, prueba intermitente
+  `test_concurrent_reads_during_background_write`, limpieza del scratchpad y la sección «Exploration»
+  de los ejes elegidos por el usuario.
+- **Riesgo:** la ventana acaba el 25 y la segunda pasada de R5 debe ir en un día posterior a la primera.
+
+**Próximo paso (martes 22, en orden):**
+1. Arrancar el motor en `.data/poc` con log con hora y el cliente; comprobar que la base es
+   `2230|2230`; el autor teclea el token.
+2. Vaciar el registro del navegador y ensayo del autor (10 minutos, en una nota que no sea de T01 a
+   T10).
+3. Comprobación del hito con la base real y decisión de la prórroga por la tarde.
+4. Primera pasada de R5, con la vista inicial alternando, descargando el JSON a `.data/poc/logs/`.
+5. Decidir la característica 4 y el eje que sustituye a λ; dar hueco al chat de la puerta.
+6. Un script commiteado que calcule el completado y los tiempos desde el registro.
