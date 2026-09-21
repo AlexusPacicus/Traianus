@@ -84,7 +84,7 @@ to a publication. A figure without a row here is not used to decide anything.
 | K4 | corr(tanh d_esc, y) = −0.968 on Spinoza (n = 2,221) | unbacked | no | — | ADR-026; its script measured the per-node frame (K3) and was removed with it on 2026-09-19; never re-measured |
 | K5 | Raw ranges: λ 7.16% of [−1, 1], anchor component 19.07%, x–y box 1.36% of the viewport | unbacked | no | — | as K4 |
 | K6 | Each colour channel is not second-order predictable from (x, y) or from the colour channels chosen before it, in the per-epoch frame. Result: two channels admitted, λ₃ (R² 0.0173 ≤ τ₁ 0.1224) and a₈ (0.0705 ≤ τ₂ 0.1651); λ₂ discarded (0.1243 > τ₁, margin 0.0019), l discarded (0.2959 > τ₃ 0.1963); third channel constant. Frame: anchor AXIS_1; dipoles (AXIS_3, AXIS_2), (AXIS_4, AXIS_7), (AXIS_8, AXIS_6); rank 8 AXIS_5; FIT ranking = full ranking | not-in-ci | yes (record rev. 6, `5bddacd`; runs `50a2eb0`) | `audits/K6.md` (phase 1 and 2 PASS) | `data/refapp/K6_result.json`, sha256 `a95ec2a0…cac58` |
-| K7 | R4: paired recall@15 difference in the 5D perspective, operator vs. radial | pending | — | `audits/R4.md` | day 6 script |
+| K7 | R4: in the perspective at a note (x, y, λ₃, a₈: 4 coordinates, not 5), the operator's horizontal axis keeps fewer of the note's 15 nearest 384-d neighbours than an arbitrary horizontal axis orthogonal to q. Mean difference −0.069 of 15 (retention 0.811 against 0.816); the 95% block-bootstrap upper bound is below 0 at every L in {1, 2, 5, 10, 20, 50}, tightest −0.0059 at L = 50. Valid: y-only control 1,110/1,110, permutation control 0.2018 in [0.149, 0.257]. R4 holds. Colour costs both arms about 1.2 of 15 neighbours (2D 0.891 to 4D 0.811 for the operator) | not-in-ci | yes (record rev. 6, `0c0f1b5`; run plan `4b4175c`; two runs byte-identical) | `audits/R4.md` (phase 1 PASS, phase 2 PASS in review 2) | `data/refapp/R4_result.json`, sha256 `a8473f32…599a7d` |
 
 K4 and K5 are not used for any decision: their script was bound to the per-node frame and was
 removed with it. In the epoch frame, K6 settles colour and the calibration settles the range.
@@ -185,6 +185,15 @@ that leaves the written scope goes to v2.
 | R4 holds | λ loses the perspective's horizontal axis; the perspective stays, with another axis |
 | R5 favours the list | RefApp-01 continues list-first: related notes as the main view, the map as context. Engine and Ulpia unchanged |
 | All favourable | Continue: RefApp-01 leaves for its own repository (exit condition) and v2 is scoped |
+
+**R4 outcome (2026-09-21).** R4 holds (K7), so by this table λ loses the perspective's horizontal
+axis and the perspective stays, with another axis. Which axis is not chosen. Reported, not deciding:
+a random horizontal axis weighted by the corpus's own covariance keeps 0.150 more of the 15
+neighbours than the operator's axis (0.081 more than the uniform random axis), so an axis aligned
+with the corpus's variance is a candidate, untested. The effect is small (0.46 points of retention)
+and the two colour channels cost more (about 8 points), so the change alters little of what the map
+keeps. Choosing and measuring the replacement needs the author and a new record; the window ends
+2026-09-25.
 
 **R5 protocol.** Ten real navigation tasks ("find the notes related to X"), written and committed
 before day 5; the structure and the decision rule are in `R5.md` (structured 2026-09-20, see Scope
