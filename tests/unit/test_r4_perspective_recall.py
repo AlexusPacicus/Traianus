@@ -8,6 +8,7 @@ and the measurement is never run on the real artefact here.
 import hashlib
 import json
 import os
+import platform
 from pathlib import Path
 
 import numpy as np
@@ -16,6 +17,8 @@ import pytest
 from tools.experiments import k6_colour_predictability as k6
 from tools.experiments import r4_perspective_recall as r4
 from traianus.geometry.perspective import observe as real_observe
+from traianus.geometry.perspective import perspective_frame
+from traianus.geometry.polar_projector import PolarProjector
 
 D = 384
 GRID = (1, 2, 5, 10, 20, 50)
@@ -571,6 +574,81 @@ def test_fallback_is_counted_per_q_and_the_frame_is_kept(rng, monkeypatch):
     assert len(calls) == 64 and out['fallback_count'] == 32
 
 
+def _e(index, scale=1.0):
+    out = np.zeros(D)
+    out[index] = scale
+    return out
+
+
+def _tied_pair():
+    # 3 e_0 + 4 e_k has the unit vector 0.6 e_0 + 0.8 e_k: <e_0, a> is the same binary64 value for both.
+    return _e(0, 3.0) + _e(1, 4.0), _e(0, 3.0) + _e(2, 4.0)
+
+
+@pytest.mark.parametrize(('ids', 'sign'), [(('AXIS_1', 'AXIS_2'), 1.0), (('AXIS_2', 'AXIS_1'), -1.0)])
+def test_tied_poles_are_ordered_by_axis_id_not_by_insertion_order(ids, sign):
+    # q = e_0; the tied pair (0.6) sits above six axes at 0. c_A is the smaller id, so the dipole is
+    # P_perp c_A - P_perp c_B = +-0.8 (e_1 - e_2) and h = dipole / 1.28.
+    tied = _tied_pair()
+    basis = {ids[0]: tied[0], ids[1]: tied[1], **{f'AXIS_{k}': _e(k) for k in range(3, 9)}}
+    want = sign * 0.625 * (_e(1) - _e(2))
+    for ordered in (basis, dict(reversed(basis.items()))):
+        h, fallback = r4.operator_horizontal(_e(0), ordered)
+        assert fallback is False
+        assert np.allclose(h, want, rtol=0, atol=1e-12)
+
+
+@pytest.mark.parametrize(('ids', 'kept'), [(('AXIS_3', 'AXIS_4'), 1), (('AXIS_4', 'AXIS_3'), 2)])
+def test_a_tie_for_the_second_pole_goes_to_the_smaller_axis_id(ids, kept):
+    # c_A = e_0 (<q, a> = 1, P_perp c_A = 0); the tied pair (0.6) competes for c_B and the smaller id
+    # wins, so h = -0.8 e_k / 0.64 with e_k the direction of the winner.
+    tied = _tied_pair()
+    rest = {'AXIS_2': _e(3), 'AXIS_5': _e(4), 'AXIS_6': _e(5), 'AXIS_7': _e(6), 'AXIS_8': _e(7)}
+    basis = {'AXIS_1': _e(0), ids[0]: tied[0], ids[1]: tied[1], **rest}
+    for ordered in (basis, dict(reversed(basis.items()))):
+        h, fallback = r4.operator_horizontal(_e(0), ordered)
+        assert fallback is False
+        assert np.allclose(h, -1.25 * _e(kept), rtol=0, atol=1e-12)
+
+
+def _collinear_poles_scene(rng, q, n=64, c=0.1):
+    # Poles +c q_hat + s w and -c q_hat + s w (w unit, orthogonal to q_hat): <q, a> = +-c, above six
+    # axes at -0.6, and both poles have the same projection orthogonal to q: the collinear case.
+    v = _unit_rows(rng, n)
+
+    def orthogonal_unit():
+        u = rng.standard_normal(D)
+        u -= (u @ v[q]) * v[q]
+        return u / np.linalg.norm(u)
+
+    w, s = orthogonal_unit(), np.sqrt(1.0 - c * c)
+    poles = [c * v[q] + s * w, -c * v[q] + s * w]
+    others = [-0.6 * v[q] + 0.8 * orthogonal_unit() for _ in range(6)]
+    return v, np.array(poles + others), _axis_ids()
+
+
+def test_the_operator_arm_keeps_the_fallback_dipole_and_counts_only_the_collinear_q(rng, spies):
+    q = 5
+    v, a_hat, ids = _collinear_poles_scene(rng, q)
+    basis = dict(zip(ids, a_hat))
+    frame = perspective_frame(v[q], basis)
+    assert frame.fallback is True and frame.poles == ('AXIS_1', 'AXIS_2')
+    assert [perspective_frame(row, basis).fallback for row in v].count(True) == 1
+    c1 = v[q] / np.linalg.norm(v[q])
+    k = int(np.argmin(np.abs(c1)))
+    u = -c1[k] * c1
+    u[k] += 1.0
+    want = u / np.linalg.norm(u) / (2 * PolarProjector().delta)
+    h, fallback = r4.operator_horizontal(v[q], basis)
+    assert fallback is True and np.allclose(h, want, rtol=0, atol=1e-12)
+    assert _measure(v, a_hat, ids)['fallback_count'] == 1
+    calls = [c for c in spies['observe'] if c[1] == q and c[2] is not None]
+    assert np.allclose(calls[0][2], want, rtol=0, atol=1e-12)
+    raw = v @ want
+    others = np.delete(raw, q)
+    assert np.allclose(calls[0][4][:, 0], (raw - others.mean()) / others.std(), rtol=0, atol=1e-9)
+
+
 # Draw order -------------------------------------------------------------------------------------
 
 
@@ -680,6 +758,23 @@ def test_colour_columns_are_k6s_channels_from_the_ranking_read_from_its_result(r
     assert np.allclose(colours, expected, rtol=0, atol=1e-9)
 
 
+def test_lambda_2_column_is_the_second_dipole_of_k6s_ranking(rng, spies):
+    v, a_hat, ids = _scene(rng)
+    ranking = ['AXIS_3', 'AXIS_7', 'AXIS_1', 'AXIS_6', 'AXIS_2', 'AXIS_8', 'AXIS_4', 'AXIS_5']
+    _measure(v, a_hat, ids, _prior(['lambda_2'], ranking))
+    colours = next(c[3] for c in spies['observe'] if c[3] is not None)
+    by_id = dict(zip(ids, a_hat))
+    ordered = np.array([by_id[i] for i in ranking])
+    c1 = ordered[0]
+
+    def perp(x):
+        return x - (x @ c1) * c1
+
+    w2 = perp(ordered[3]) - perp(ordered[4])
+    assert colours.shape == (len(v), 1)
+    assert np.allclose(colours[:, 0], v @ w2 / (w2 @ w2), rtol=0, atol=1e-9)
+
+
 def test_reported_r2_is_the_mean_over_q_of_the_operator_perspective_r2(rng, monkeypatch):
     real = r4.perspective_r2
     got = []
@@ -762,11 +857,14 @@ def test_measure_reports_every_figure_the_contract_lists(rng, wide_band):
 # End to end on synthetic files ------------------------------------------------------------------
 
 
-def _write_run_inputs(tmp_path, rng, n=128, selected=('lambda_3', 'a_8'), **over):
+def _write_run_inputs(tmp_path, rng, n=128, selected=('lambda_3', 'a_8'), corrupt=None, **over):
     emb, lab, ax = tmp_path / 'embeddings.npy', tmp_path / 'labels.json', tmp_path / 'axes.json'
-    np.save(emb, _unit_rows_f32(rng, n))
-    lab.write_text(json.dumps(_labels(n)), encoding='utf-8')
-    ax.write_text(json.dumps(_axes_json(_unit_rows(rng, 8))), encoding='utf-8')
+    v32, labels, axes = _unit_rows_f32(rng, n), _labels(n), _axes_json(_unit_rows(rng, 8))
+    if corrupt is not None:
+        corrupt(v32, labels, axes)
+    np.save(emb, v32)
+    lab.write_text(json.dumps(labels), encoding='utf-8')
+    ax.write_text(json.dumps(axes), encoding='utf-8')
     body = {
         'valid': True, 'ranking_fit': _axis_ids(), 'selected': list(selected),
         'digests': {p.name: hashlib.sha256(p.read_bytes()).hexdigest() for p in (emb, lab, ax)},
@@ -844,6 +942,170 @@ def test_run_refuses_an_invalid_k6_result_and_one_computed_on_other_data(
     assert not out.exists() and fake_measure == {}
 
 
+# Memory-layer integrity through run() (contracts.md section 0, Integrity) ---------------------------
+
+
+def _row_with_component(rng, t, col):
+    row = rng.standard_normal(D)
+    row[col] = 0.0
+    row *= np.sqrt(1.0 - t * t) / np.linalg.norm(row)
+    row[col] = t
+    return row.astype(np.float32)
+
+
+def _scaled_row(row, factor):
+    return lambda v, lab, ax: v.__setitem__(row, v[row] * np.float32(factor))
+
+
+# Each corruption keeps the digests matching (they are computed after it): only the null
+# elimination of section 0 can refuse it. The norm tolerance is 3e-5 (bracketed by 1.5e-5 below).
+CORRUPTIONS = [
+    pytest.param(lambda v, lab, ax: v.__setitem__((2, 5), np.nan), 'row 2: non-finite', id='nan'),
+    pytest.param(lambda v, lab, ax: v.__setitem__((3, 0), np.inf), 'row 3: non-finite', id='+inf'),
+    pytest.param(lambda v, lab, ax: v.__setitem__((4, 7), -np.inf), 'row 4: non-finite', id='-inf'),
+    pytest.param(_scaled_row(6, 1 + 5e-5), 'row 6: norm', id='norm-above'),
+    pytest.param(_scaled_row(6, 1 - 5e-5), 'row 6: norm', id='norm-below'),
+    pytest.param(lambda v, lab, ax: v.__setitem__(1, 0.0), 'row 1: norm', id='zero-row'),
+    pytest.param(
+        lambda v, lab, ax: lab[4].__setitem__('label', None), 'label 4: label', id='null-label'
+    ),
+    pytest.param(
+        lambda v, lab, ax: lab[0].__setitem__('label', ''), 'label 0: label', id='empty-label'
+    ),
+    pytest.param(
+        lambda v, lab, ax: lab[5].__setitem__('label', 'L1'), 'label 5: duplicate', id='duplicate-label'
+    ),
+    pytest.param(
+        lambda v, lab, ax: lab[2].__setitem__('part', None), 'label 2: part', id='null-part'
+    ),
+    pytest.param(lambda v, lab, ax: lab[1].pop('part'), 'label 1: part', id='missing-part'),
+    pytest.param(lambda v, lab, ax: lab[3].__setitem__('part', ''), 'label 3: part', id='empty-part'),
+    pytest.param(lambda v, lab, ax: lab.pop(), 'label count', id='label-count'),
+    pytest.param(
+        lambda v, lab, ax: ax[6]['vector'].__setitem__(3, float('nan')), 'AXIS_7: non-finite',
+        id='axis-nan',
+    ),
+    pytest.param(
+        lambda v, lab, ax: ax[2]['vector'].__setitem__(9, float('inf')), 'AXIS_3: non-finite',
+        id='axis-inf',
+    ),
+    pytest.param(
+        lambda v, lab, ax: ax[1].__setitem__('vector', [0.0] * D), 'AXIS_2: zero norm',
+        id='axis-zero',
+    ),
+    pytest.param(
+        lambda v, lab, ax: ax[3].__setitem__('id', 'AXIS_2'), 'AXIS_2: duplicate id',
+        id='axis-duplicate-id',
+    ),
+    pytest.param(lambda v, lab, ax: ax.pop(), 'expected 8 axes', id='seven-axes'),
+]
+
+
+@pytest.mark.parametrize(('corrupt', 'match'), CORRUPTIONS)
+def test_run_refuses_content_that_matches_its_digests_but_fails_null_elimination(
+    tmp_path, rng, fake_measure, corrupt, match
+):
+    paths, expected = _write_run_inputs(tmp_path, rng, corrupt=corrupt)
+    k6.check_digests(expected)
+    out = tmp_path / 'out' / 'R4_result.json'
+    with pytest.raises(ValueError, match=match) as refused:
+        r4.run(*paths, expected, out)
+    assert not isinstance(refused.value, k6.IntegrityError)
+    assert not out.parent.exists() and fake_measure == {}
+
+
+def test_main_refuses_a_nan_row_with_matching_digests_and_writes_nothing(
+    tmp_path, rng, monkeypatch, fake_measure
+):
+    paths, expected = _write_run_inputs(
+        tmp_path, rng, corrupt=lambda v, lab, ax: v.__setitem__((2, 5), np.nan)
+    )
+    for name, path in zip(('EMBEDDINGS', 'LABELS', 'AXES', 'K6_RESULT'), paths):
+        monkeypatch.setattr(r4, name, path)
+    monkeypatch.setattr(r4, 'EXPECTED_DIGESTS', expected)
+    out = tmp_path / 'out' / 'R4_result.json'
+    with pytest.raises(ValueError, match='row 2: non-finite'):
+        r4.main(['--out', str(out)])
+    assert not out.parent.exists() and fake_measure == {}
+
+
+@pytest.mark.parametrize('factor', [1 + 1.5e-5, 1 - 1.5e-5])
+def test_run_accepts_a_row_norm_inside_the_tolerance(tmp_path, rng, fake_measure, factor):
+    paths, expected = _write_run_inputs(tmp_path, rng, corrupt=_scaled_row(6, factor))
+    r4.run(*paths, expected, tmp_path / 'out.json')
+    assert fake_measure['v'].shape == (64, D)
+
+
+@pytest.fixture
+def flip_in_memory(monkeypatch):
+    # One bit of the parsed embeddings, after the digest check and before validation.
+    def arm(row, col, bit):
+        real = k6.load_inputs
+
+        def load(*raw):
+            v32, *rest = real(*raw)
+            v32 = v32.copy()
+            v32.view(np.uint32)[row, col] ^= np.uint32(1 << bit)
+            return (v32, *rest)
+
+        monkeypatch.setattr(k6, 'load_inputs', load)
+
+    return arm
+
+
+@pytest.mark.parametrize(('bit', 't'), [(30, None), (23, 0.2), (23, -0.03)])
+def test_run_refuses_an_exponent_bit_flip_in_memory_after_the_digest_check(
+    tmp_path, rng, fake_measure, flip_in_memory, bit, t
+):
+    # Exponent MSB: |v_i| >= 2, always refused. Exponent LSB on a component above ~9e-3 doubles or
+    # halves it, moving ||v|| beyond 3e-5 (K6's tests derive both thresholds).
+    col = int(rng.integers(0, D)) if t is None else 7
+    corrupt = None if t is None else (lambda v, lab, ax: v.__setitem__(3, _row_with_component(rng, t, col)))
+    paths, expected = _write_run_inputs(tmp_path, rng, corrupt=corrupt)
+    r4.run(*paths, expected, tmp_path / 'intact.json')
+    assert fake_measure
+    fake_measure.clear()
+    out = tmp_path / 'out' / 'R4_result.json'
+    flip_in_memory(3, col, bit)
+    with pytest.raises(ValueError, match='row 3: ') as refused:
+        r4.run(*paths, expected, out)
+    assert not isinstance(refused.value, k6.IntegrityError)
+    assert not out.parent.exists() and fake_measure == {}
+
+
+@pytest.mark.parametrize(
+    ('bit', 'file_byte', 'file_bit', 'moved'),
+    [
+        (31, 3, 7, lambda after, before: after == pytest.approx(-before, abs=1e-15)),
+        (0, 0, 0, lambda after, before: 0.0 < abs(after - before) < 1e-7),
+    ],
+    ids=['sign', 'mantissa-lsb'],
+)
+def test_blind_spot_flips_pass_validation_in_memory_and_fail_the_digest_in_the_file(
+    tmp_path, rng, fake_measure, flip_in_memory, bit, file_byte, file_bit, moved
+):
+    # Declared blind spots (section 0): a sign flip keeps ||v|| exactly and mantissa bit 0 moves a
+    # component by ~1e-7, inside binary32 rounding. No norm check sees either; only the digest does.
+    paths, expected = _write_run_inputs(tmp_path, rng)
+    r4.run(*paths, expected, tmp_path / 'intact.json')
+    before = fake_measure['v']
+    row, col = 3, int(rng.integers(0, D))
+    flip_in_memory(row, col, bit)
+    r4.run(*paths, expected, tmp_path / 'flipped.json')
+    after = fake_measure['v']
+    assert np.array_equal(np.delete(after, 1, axis=0), np.delete(before, 1, axis=0))
+    assert moved(after[1, col], before[1, col])
+    intact = np.load(paths[0])
+    data_start = 10 + int.from_bytes(paths[0].read_bytes()[8:10], 'little')
+    _flip_file_bit(paths[0], data_start + 4 * (row * D + col) + file_byte, file_bit)
+    xor = intact.view(np.uint32) ^ np.load(paths[0]).view(np.uint32)
+    assert np.count_nonzero(xor) == 1 and int(xor[row, col]) == 1 << bit
+    refused = tmp_path / 'refused.json'
+    with pytest.raises(k6.IntegrityError, match='embeddings.npy'):
+        r4.run(*paths, expected, refused)
+    assert not refused.exists()
+
+
 def test_run_hands_measure_the_eval_rows_renormalised_and_a_fresh_stream(
     tmp_path, rng, fake_measure
 ):
@@ -895,6 +1157,24 @@ def test_run_writes_the_result_json_as_the_contract_states(tmp_path, rng, monkey
     again = tmp_path / 'again.json'
     r4.run(*paths, expected, again)
     assert again.read_bytes() == out.read_bytes()
+
+
+def test_run_records_the_environment_of_contracts_section_0_and_fills_it(tmp_path, rng, fake_measure):
+    # Section 0 (Determinism): np.show_config(), platform.platform() and the digests in the result,
+    # the three thread variables set to 1. The code adds the python and numpy versions.
+    paths, expected = _write_run_inputs(tmp_path, rng)
+    result = r4.run(*paths, expected, tmp_path / 'out.json')
+    env = result['environment']
+    assert set(env) == {'platform', 'python', 'numpy', 'numpy_config', 'threads'}
+    assert env['platform'] == platform.platform() and env['python'] == platform.python_version()
+    assert env['numpy'] == np.__version__
+    assert env['numpy_config'] and env['numpy_config'] == json.loads(
+        json.dumps(np.show_config(mode='dicts'))
+    )
+    assert env['threads'] == dict.fromkeys(
+        ('OMP_NUM_THREADS', 'OPENBLAS_NUM_THREADS', 'VECLIB_MAXIMUM_THREADS'), '1'
+    )
+    assert result['digests'] == {p.name: d for p, d in expected.items()}
 
 
 def test_main_directs_the_result_and_exits_nonzero_on_an_invalid_run(tmp_path, monkeypatch):
