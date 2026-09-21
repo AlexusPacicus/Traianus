@@ -346,8 +346,10 @@ export default function UlpiaWebGL({ token, notes, relations, version, children 
         };
         rafId = requestAnimationFrame(loop);
       } catch (err) {
-        // Silence only when opted out; surface renderer init failures loudly.
-        if (!cancelled) console.error("[UlpiaWebGL]", err);
+        if (!cancelled) {
+          console.error("[UlpiaWebGL]", err);
+          setError(err instanceof Error ? err.message : String(err));
+        }
       }
     })();
 

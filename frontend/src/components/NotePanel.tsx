@@ -1,4 +1,4 @@
-import { useMemo } from "react";
+import { useMemo, useState } from "react";
 import type { Relation } from "../api";
 import { markDotStyle } from "../lifecycle";
 import { relationsOf, type NoteInfo } from "../notes";
@@ -16,8 +16,9 @@ const buttonStyle = {
 } as const;
 
 /**
- * One note in full: id, lifecycle state, text and its edges from GET /relations, each as the other
- * end and the edge state. `onSelect`, when given, offers to make this note the selection.
+ * One note in full: id, lifecycle state and text. Its edges from GET /relations, each as the other
+ * end and the edge state, stay hidden until the toggle is pressed; the toggle starts off for every
+ * mounted panel. `onSelect`, when given, offers to make this note the selection.
  */
 export default function NotePanel({
   id,
@@ -30,6 +31,7 @@ export default function NotePanel({
   relations: readonly Relation[];
   onSelect: (() => void) | null;
 }) {
+  const [showRelations, setShowRelations] = useState(false);
   const { total, shown } = useMemo(() => relationsOf(id, relations), [id, relations]);
   return (
     <section
@@ -55,16 +57,27 @@ export default function NotePanel({
           Select this note
         </button>
       ) : null}
-      <div style={{ color: "#94A3B8" }}>
-        {total === 0
-          ? "No relations"
-          : `Relations: ${total}${total > shown.length ? ` (first ${shown.length})` : ""}`}
-      </div>
-      {shown.map((r) => (
-        <div key={r.id} style={{ overflowWrap: "anywhere" }}>
-          {r.other} · {r.state}
-        </div>
-      ))}
+      <button
+        aria-pressed={showRelations}
+        onClick={() => setShowRelations((on) => !on)}
+        style={{ ...buttonStyle, background: showRelations ? "#6366F1" : "#334155" }}
+      >
+        {showRelations ? "Hide relations" : "Show relations"}
+      </button>
+      {showRelations ? (
+        <>
+          <div style={{ color: "#94A3B8" }}>
+            {total === 0
+              ? "No relations"
+              : `Relations: ${total}${total > shown.length ? ` (first ${shown.length})` : ""}`}
+          </div>
+          {shown.map((r) => (
+            <div key={r.id} style={{ overflowWrap: "anywhere" }}>
+              {r.other} · {r.state}
+            </div>
+          ))}
+        </>
+      ) : null}
     </section>
   );
 }
