@@ -8,7 +8,7 @@ import json
 from typing import List, Literal
 from fastapi import FastAPI, BackgroundTasks, HTTPException, Header, Depends, Request, Response
 from fastapi.middleware.cors import CORSMiddleware
-from pydantic import BaseModel, Field
+from pydantic import BaseModel, Field, field_validator
 from traianus.representation.sentence_transformer import (
     MODEL_ID,
     MODEL_REVISION,
@@ -134,6 +134,8 @@ ALLOWED_INGRESS_TYPES = {"text/plain"}
 # becomes part of persistent node ids and, downstream, edge ids.
 _SAFE_LABEL_RE = re.compile(r"^[A-Za-z0-9_-]{1,64}$")
 
+MAX_NODE_TEXT_CHARS = 20000
+
 
 # =====================================================================
 # LOCAL OPERATOR TOKEN (audit H3): routes that mutate state (or expose
@@ -181,7 +183,19 @@ class HitlRelation(BaseModel):
 class VectorIngestBody(BaseModel):
     vector: list[float] = Field(..., description="Raw coordinate vector v ∈ R^d.")
     label: str | None = Field(default=None, description="Optional identifier or tag.")
+    text: str | None = Field(
+        default=None,
+        max_length=MAX_NODE_TEXT_CHARS,
+        description="Optional node text, stored as given and never embedded; defaults to the label.",
+    )
     metadata: dict = Field(default_factory=dict, description="Optional metadata dictionary.")
+
+    @field_validator("text")
+    @classmethod
+    def _reject_null_byte(cls, value: str | None) -> str | None:
+        if value is not None and "\x00" in value:
+            raise ValueError("text must not contain null bytes.")
+        return value
 
 # =====================================================================
 # VECTOR UTILITIES
@@ -542,7 +556,7 @@ async def vector_ingestion_endpoint(
         with storage.get_db_connection() as conn:
             seq = storage.insert_node_revision(
                 node_id,
-                body.label or "",
+                body.text or body.label or "",
                 toon_symbol,
                 lifecycle_state,
                 action_potential,
