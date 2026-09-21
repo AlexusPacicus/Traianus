@@ -174,6 +174,11 @@ that leaves the written scope goes to v2.
   decided to finish the PoC first, so "Exploration: colour recomputed in the perspective's frame"
   stays an exploration. R4's record (revision 5, phase 1 PASS at `c08fe92`) keeps the K6 channels
   fixed per note and independent of q, so nothing in it changes and no new phase 1 review is needed.
+- **2026-09-21 — R5 run log added, before any run.** The engine's request log cannot see pointing at
+  a node on the map, which is one way a note is reached, nor the clock. The client now keeps a passive
+  log of the author's actions in a run (`0384015`; `R5.md`, Run log; tests in `MANUAL_TESTS.md`). It
+  adds no request and no clock and changes nothing the views show. It changes no rule of R5: the times
+  of the Runs table stay hand-taken and the log is a cross-check.
 
 ## Day-7 decision (pre-registered 2026-09-18, before any result)
 
