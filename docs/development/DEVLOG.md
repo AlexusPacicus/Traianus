@@ -619,3 +619,82 @@ documentación. Motor y cliente están parados desde que se cerró la app; la ba
 4. Primera pasada de R5, con la vista inicial alternando, descargando el JSON a `.data/poc/logs/`.
 5. Decidir la característica 4 y el eje que sustituye a λ; dar hueco al chat de la puerta.
 6. Un script commiteado que calcule el completado y los tiempos desde el registro.
+
+---
+
+## 2026-09-22
+
+**Contexto:** día 5 de la PoC RefApp-01. La sesión empezó poniéndose al día con la bitácora de los
+cuatro días anteriores y la memoria de la noche del 21. El autor trajo dos especificaciones de
+calibración cromática escritas en otro chat, y toda la sesión se fue en ese hilo; ninguna tarea del
+próximo paso del día 21 se tocó.
+
+**Se hizo:**
+- **Dos propuestas externas contrastadas contra el repo y descartadas.** La primera («Especificación
+  del Cambio Cromático») y la segunda («Informe Técnico... Calibración Cromática») afirmaban K8 ya
+  aplicado (es ficha pendiente, `z = 0.0` hasta que exista), nombraban una base `pkm_substrate.db`
+  inexistente (es `traianus.db`), reintroducían `H` como «distancia/ángulo de escape» —el fallo que
+  se quitó el día 3 porque `h` es canal de color desde el día 2— y la segunda llamaba «Capa Ulpia» al
+  cliente, el error de etiqueta ya corregido el día 1 (Ulpia es la capa de proyección, sin código;
+  el cliente es RefApp-01). Inventaba además un acrónimo («ORQ») y usaba «Tomo 0» (real, pero
+  investigación futura) como si fuera un estándar de seguridad. El autor confirmó que venían de otro
+  chat con contexto distinto y las descartó.
+- **Cambio de color de cliente, por contrato a `engine-implementer`** (rama `feat/client-oklch-color`,
+  motor sin tocar): el shader pasó de CIE LCh a OKLCH manteniendo L, C y H exactamente como los define
+  K6 (`800bb02`). La primera versión escalaba el croma por una constante fija `* 0.37`, decisión mía
+  sin medir.
+- **El autor rechazó el `0.37` como magic number** («NO QUIERO MAGIC NUMBERS»), tras notar que se
+  había dejado llevar por el hilo de las especificaciones externas. Guardado en memoria
+  (`no-magic-numbers`).
+- **Sustituido por el croma máximo real del gamut sRGB**, calculado por píxel para cada `(L, hue)`:
+  porté a GLSL el algoritmo publicado de Ottosson para intersección con el gamut
+  (`compute_max_saturation`, `find_cusp`, `find_gamut_intersection`), verificando antes las fórmulas
+  exactas contra la fuente (`bottosson.github.io/posts/gamutclipping/`) en vez de reproducirlas de
+  memoria (`a49a54f`). Fallo mío en el proceso: lancé el segundo contrato con un placeholder en vez
+  del JSON real y lo corregí por mensaje al subagente antes de que actuara sobre él.
+- **Verificación propia del port**, no solo la del subagente: revisión línea a línea del diff contra
+  la fuente, y contraste numérico — compilé el GLSL tal cual se shippeó en un contexto WebGL aislado
+  y lo comparé contra un port en JS escrito de forma independiente, en 98 puntos `(hue, L)`; diferencia
+  máxima 3,4×10⁻⁷, sin NaN. Pruebas visuales en el cliente real contra la base congelada de R5: mapa y
+  perspectiva correctos, sin errores de consola. El subagente autodenunció un desliz suyo sin efecto
+  (un heredoc `python3 -` vacío, contra AGENTS 2.5).
+- **Dos peticiones de reabrir el motor, declinadas.** Hacer L un eje independiente vía densidad kNN:
+  razoné que un radio basado en `d_esc` heredaría la redundancia con la posición que ya documenta
+  ADR-026 (`corr(tanh d_esc, z) = -0.968`) y probablemente fallaría el mismo umbral que descartó `l`
+  en K6; kNN con k fijo evita el agujero de densidad del 36% del corpus sin arista a ε=0.8, pero sigue
+  siendo un candidato sin probar que necesitaría su propia ficha con revisión ciega, no una decisión
+  de diseño directa. Se aparca. Comprobado también si ε=0.8 es un magic number: no de la misma
+  categoría que el `0.37` — el LEDGER documenta que la alternativa medida (epsilon de Otsu,
+  `epsilon_knee_audit.py`) se probó en la línea de auditoría de puentes y se rechazó explícitamente
+  por saturar el grafo en esa geometría; el valor fijo tiene historial de no degenerar en varios
+  tamaños de corpus.
+- **Decidido no escribir ADR** para el cambio de color: es client-only, reversible, y ya lleva su
+  porqué en el comentario de cabecera del shader; la bitácora es el nivel correcto.
+- Motor arrancado en `.data/poc` para las pruebas (el autor tecleó el token); sigue vivo al cerrar.
+
+**Resultado:** dos commits en `feat/client-oklch-color` (`800bb02`, `a49a54f`) sobre la punta del día
+21 (`a9a4c35`), subidos a `origin`; `main` sin tocar. Ningún commit de motor ni de tooling. Ninguna
+tarea de R5 avanzó hoy.
+
+**Sin resolver / decisión pendiente:**
+- **Riesgo:** la ventana informal acaba el 25 y hoy no avanzó nada del plan del día 21 — se fue
+  entero en un hilo lateral, justificado pero no planeado.
+- Sin tocar, de la entrada del 21: vaciar el registro del navegador y hacer un ensayo; primera pasada
+  de R5; característica 4 (consolidar desde el cliente); qué eje sustituye a λ; prórroga del 22; fila
+  del día 7 «list-first»; modelo de HF; lista de ruff de CI; script commiteado de completado/tiempos
+  de R5; K8; documentación con formato fijo; manifest del paquete; `/ingesta` acepta clave vacía;
+  prueba intermitente `test_concurrent_reads_during_background_write`; limpieza del scratchpad;
+  sección «Exploration» de ejes elegidos por el usuario.
+- El chat «de la puerta» (otra sesión) sigue con la retirada del hook de Bash sin lanzar; sin
+  actividad suya hoy.
+- La cadena de ramas sin integrar creció con dos commits más (`feat/client-oklch-color`); su
+  integración sigue sin decidirse.
+- Si más adelante se quiere reabrir L como eje independiente: necesitaría una ficha de instrumento
+  propia (tipo K8), con revisión ciega, antes de implementarse — no es una decisión de diseño directa.
+
+**Próximo paso:**
+1. Vaciar el registro del navegador y hacer un ensayo (10 minutos) fuera de T01–T10.
+2. Primera pasada de R5.
+3. Decidir la característica 4 y el eje que sustituye a λ.
+4. Decidir el destino de la cadena de ramas acumulada, incluida la de hoy.
+5. Un script commiteado que calcule el completado y los tiempos de R5 desde el registro.
