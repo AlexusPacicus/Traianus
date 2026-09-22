@@ -24,7 +24,7 @@
  *     stay unbound-to-zero when u_interpolationTime is idle, so the resting
  *     position is used.
  *   - Channels are normalized [0,1] consistently with the exporter and the
- *     fragment shader expectations.
+ *     vertex shader expectations.
  */
 
 import { MARK_SLOTS, markTables } from "./lifecycle";
@@ -46,61 +46,11 @@ uniform int u_anchor;                // Index of the anchor node, -1 for none
 uniform vec4 u_markColor[${MARK_SLOTS}];   // rgba of each mark slot
 uniform float u_markRing[${MARK_SLOTS}];   // ring width of each mark slot, CSS pixels
 
-out vec3 v_lch;
+out vec3 v_rgb;
 out float v_vibration_offset;
 out float v_anchor;
 out vec4 v_ring;
 out float v_body;
-
-float hash(float n) { return fract(sin(n) * 43758.5453123); }
-
-void main() {
-    vec3 base_pos = a_position;
-
-    // 3-Point Parabolic Corrector: P(t) = (1-t)*P_ini + t*P_fin + 4t(1-t)*D_mid.
-    // ONLY active for a strictly-open transition; at t=0 or t=1 the resting
-    // position is used so the resting/transition buffers never mix.
-    if (u_interpolationTime > 0.0 && u_interpolationTime < 1.0) {
-        float t = u_interpolationTime;
-        vec3 linear_path = (1.0 - t) * a_start_pos + t * a_end_pos;
-        vec3 parabolic_correction = 4.0 * t * (1.0 - t) * a_mid_deviation;
-        base_pos = linear_path + parabolic_correction;
-    }
-
-    // Escape vibration: pseudo-random jitter proportional to the semantic
-    // escape Z-score (visual feedback before the Schmitt Trigger recalibrates).
-    if (u_escapeVibration > 0.0) {
-        float noise = hash(dot(base_pos, vec3(12.9898, 78.233, 45.164)));
-        base_pos.xy += (noise - 0.5) * u_escapeVibration * 0.05;
-    }
-
-    gl_Position = u_projectionMatrix * u_viewMatrix * vec4(base_pos, 1.0);
-
-    // Node size scales with Luminance (density in [0,1]); the anchor is drawn larger.
-    // The lifecycle ring lies outside that body, so the body keeps its size.
-    float is_anchor = gl_VertexID == u_anchor ? 1.0 : 0.0;
-    int slot = int(a_mark + 0.5);
-    float body = clamp(a_lch.x * 12.0, 4.0, 32.0) * (1.0 + 1.5 * is_anchor);
-    float ring = 2.0 * u_markRing[slot];
-    gl_PointSize = (body + ring) * u_pointScale;
-
-    v_lch = a_lch;
-    v_vibration_offset = u_escapeVibration;
-    v_anchor = is_anchor;
-    v_ring = u_markColor[slot];
-    v_body = body / (body + ring);
-}
-`;
-
-const FRAGMENT_SHADER_SOURCE = `#version 300 es
-precision highp float;
-
-in vec3 v_lch;
-in float v_vibration_offset;
-in float v_anchor;
-in vec4 v_ring;
-in float v_body;
-out vec4 outColor;
 
 #define PI 3.141592653589793
 
@@ -267,7 +217,7 @@ float find_gamut_intersection(float a, float b, float L1, float C1, float L0) {
 
 // 1. OKLCH -> OKLab (channels normalized [0,1]; L used as-is, C taken as the
 //    fraction lch.y of C_max: the chroma at which the sRGB gamut ends for this
-//    pixel's own lightness and hue. Since the search line has C1 = 1.0 and
+//    vertex's own lightness and hue. Since the search line has C1 = 1.0 and
 //    L1 == L0 == L, the returned t is that maximum chroma directly. References:
 //    https://bottosson.github.io/posts/oklab/ and
 //    https://bottosson.github.io/posts/gamutclipping/).
@@ -312,6 +262,61 @@ vec3 linear_srgb_to_srgb(vec3 rgb_linear) {
     return clamp(vec3(srgb_gamma(rgb_linear.x), srgb_gamma(rgb_linear.y), srgb_gamma(rgb_linear.z)), 0.0, 1.0);
 }
 
+float hash(float n) { return fract(sin(n) * 43758.5453123); }
+
+void main() {
+    vec3 base_pos = a_position;
+
+    // 3-Point Parabolic Corrector: P(t) = (1-t)*P_ini + t*P_fin + 4t(1-t)*D_mid.
+    // ONLY active for a strictly-open transition; at t=0 or t=1 the resting
+    // position is used so the resting/transition buffers never mix.
+    if (u_interpolationTime > 0.0 && u_interpolationTime < 1.0) {
+        float t = u_interpolationTime;
+        vec3 linear_path = (1.0 - t) * a_start_pos + t * a_end_pos;
+        vec3 parabolic_correction = 4.0 * t * (1.0 - t) * a_mid_deviation;
+        base_pos = linear_path + parabolic_correction;
+    }
+
+    // Escape vibration: pseudo-random jitter proportional to the semantic
+    // escape Z-score (visual feedback before the Schmitt Trigger recalibrates).
+    if (u_escapeVibration > 0.0) {
+        float noise = hash(dot(base_pos, vec3(12.9898, 78.233, 45.164)));
+        base_pos.xy += (noise - 0.5) * u_escapeVibration * 0.05;
+    }
+
+    gl_Position = u_projectionMatrix * u_viewMatrix * vec4(base_pos, 1.0);
+
+    // Node size scales with Luminance (density in [0,1]); the anchor is drawn larger.
+    // The lifecycle ring lies outside that body, so the body keeps its size.
+    float is_anchor = gl_VertexID == u_anchor ? 1.0 : 0.0;
+    int slot = int(a_mark + 0.5);
+    float body = clamp(a_lch.x * 12.0, 4.0, 32.0) * (1.0 + 1.5 * is_anchor);
+    float ring = 2.0 * u_markRing[slot];
+    gl_PointSize = (body + ring) * u_pointScale;
+
+    // GPU-side OKLCH -> sRGB, computed once per vertex: the result depends only
+    // on a_lch, which is constant across every fragment of this point sprite.
+    vec3 oklab = oklch_to_oklab(a_lch);
+    vec3 linear_srgb = oklab_to_linear_srgb(oklab);
+    v_rgb = linear_srgb_to_srgb(linear_srgb);
+
+    v_vibration_offset = u_escapeVibration;
+    v_anchor = is_anchor;
+    v_ring = u_markColor[slot];
+    v_body = body / (body + ring);
+}
+`;
+
+const FRAGMENT_SHADER_SOURCE = `#version 300 es
+precision highp float;
+
+in vec3 v_rgb;
+in float v_vibration_offset;
+in float v_anchor;
+in vec4 v_ring;
+in float v_body;
+out vec4 outColor;
+
 void main() {
     // Perfectly circular point with hardware antialiasing.
     vec2 circ_coord = 2.0 * gl_PointCoord - 1.0;
@@ -321,9 +326,7 @@ void main() {
     }
     float alpha = smoothstep(1.0, 0.8, dist);
 
-    vec3 oklab = oklch_to_oklab(v_lch);
-    vec3 linear_srgb = oklab_to_linear_srgb(oklab);
-    vec3 srgb = linear_srgb_to_srgb(linear_srgb);
+    vec3 srgb = v_rgb;
 
     // Subtle warning tint on the rim while escaping.
     if (v_vibration_offset > 0.0) {
