@@ -698,3 +698,61 @@ tarea de R5 avanzó hoy.
 3. Decidir la característica 4 y el eje que sustituye a λ.
 4. Decidir el destino de la cadena de ramas acumulada, incluida la de hoy.
 5. Un script commiteado que calcule el completado y los tiempos de R5 desde el registro.
+
+### Cierre (22:52)
+
+**Contexto:** tras la entrada de esta tarde (color OKLCH cerrado): recapitulación de la bitácora y
+decisión de acometer la primera pasada de R5 hoy mismo.
+
+**Se hizo:**
+- **Latencia real del cliente, verificada como regresión propia de hoy.** El cálculo del gamut OKLCH
+  (`compute_max_saturation`/`find_cusp`/`find_gamut_intersection`) corría en el fragment shader,
+  recalculado por cada píxel cubierto en vez de una vez por nota. Movido al vertex shader por contrato
+  a `engine-implementer` (`cd2047b`), salida visual idéntica (mismas funciones, solo cambia qué etapa
+  las ejecuta), `tsc` verde. Revisado el diff y el color en el cliente real: sin negros ni NaN.
+- **La latencia siguió notándose tras el arreglo.** Diagnóstico: máquina de 8 GB con ~62 MB libres y
+  ~2,87 GB comprimidos por el sistema — no es el motor (`uvicorn`, 5,6 MB) ni el cliente, es la propia
+  app de Claude (varios procesos renderer, uno solo hasta 519 MB) más el resto de apps abiertas.
+  Cerrado mi panel de navegador y archivada una sesión antigua sin relación ("Polar Projector research
+  paper", inactiva desde el 10-09); ganancia modesta, sin más margen sin cerrar apps que el autor usa.
+- **La ventana del 25 vuelve a ser vinculante**, tras una sesión que derivó dos veces en ideas de
+  features (Partes por color/dimensión, vistas por dimensión, autocompletado del campo de id) — las
+  tres aparcadas en la pila de fichas futuras. Ya era la fecha formal de `POC.md` («Deadline»); solo se
+  revierte el «indicativo» de la noche del 21 (memoria del agente actualizada).
+- **El tiempo de R5 pasa a calcularse del registro**, no a mano (`ccc5763`, antes de cualquier
+  corrida): `run_stop.ms − run_start.ms`, más preciso y sin coste añadido; la regla 1 y el margen de
+  10 s de la regla 8 no cambian.
+- **Ensayo y primera corrida real de T01** (mapa y lista), con tropiezos de protocolo: dos intentos
+  anulados por cambiar de vista a mitad de corrida (regla 4); un malentendido de la regla 3 (dos notas
+  de la misma proposición no son dos proposiciones distintas), corregido al repetir; aclarado que la
+  lista no exige clic para contar como alcanzada (muestra las 15 con texto a la vez, es el propio
+  diseño de esa vista). El registro descargado (copiado a `.data/poc/logs/`, fuera del árbol) reveló
+  más de lo que el relato verbal había contado: un tercer intento de mapa también completó pero corrió
+  367 s con un hueco de 129 s sin eventos antes de Stop (solapado con esta conversación) — se usó en su
+  lugar el intento más limpio (149 s). T01 mapa queda registrado: completado, 149 s (`7c03638`). T01
+  lista: se leyeron las 15 (1:5 y 1:6 presentes) pero nunca dentro de un ciclo Start/Stop — sin tiempo
+  válido, pendiente de repetir.
+
+**Resultado:** tres commits sobre la punta de la tarde (`ccc5763`, `cd2047b`, `7c03638`), más esta
+entrada, en `feat/client-oklch-color`; nada subido a `origin` todavía, `main` sin tocar. Un dato real
+de R5 registrado (T01 mapa); T01 lista y las nueve tareas restantes, pendientes.
+
+**Resuelto de entradas anteriores:**
+- 2026-09-21 (noche): «la ventana del PoC es indicativa» — revertido hoy, vuelve a ser vinculante el
+  25.
+
+**Sin resolver / decisión pendiente:**
+- T01 lista: repetir con un Start/Stop limpio.
+- T02 a T10: sin empezar.
+- La cadena de ramas sin integrar sigue sin decidirse, con dos commits más de hoy.
+- Ideas aparcadas hoy: Partes por color/dimensión, vistas por dimensión, autocompletado del campo de
+  id, auto-ajuste del bounding box del mapa — todas después del 25.
+- El chat «de la puerta» no dio señales hoy.
+- **Riesgo:** solo queda mañana como día real antes del 25 (despedida de soltero el 24); la segunda
+  pasada de R5 no cabe ya antes de esa fecha salvo que se decida otra cosa.
+
+**Próximo paso (mañana, único día real antes del 25):**
+1. T01 lista, con Start/Stop limpio.
+2. T02 a T10, alternando vista, un Start/Stop por tarea y vista.
+3. Descargar el registro al final de la pasada, a `.data/poc/logs/`.
+4. Tabla del día 7 con lo que haya, aunque falte la segunda pasada.
