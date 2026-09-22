@@ -3,7 +3,7 @@
  * Project: Traianus — Spatial Control Plane
  *
  * Zero-Copy binary resting buffer (64 B/node) + separate transition VBO for
- * the 3-Point Parabolic Corrector. GPU-side CIE LCh -> sRGB conversion.
+ * the 3-Point Parabolic Corrector. GPU-side OKLCH -> sRGB conversion.
  *
  * Binary contract (matches traianus/geometry/zero_copy.py):
  *   offset  0-11  x, y, z            (3 x float32)
@@ -104,32 +104,31 @@ out vec4 outColor;
 
 #define PI 3.141592653589793
 
-// 1. CIE LCh -> CIE Lab (channels normalized [0,1]).
-vec3 lch_to_lab(vec3 lch) {
-    float L = lch.x * 100.0;
-    float C = lch.y * 100.0;
+// 1. OKLCH -> OKLab (channels normalized [0,1]; L used as-is, C scaled to a
+//    fixed client-only calibration constant that stays within the sRGB gamut
+//    across most hues at mid lightness).
+vec3 oklch_to_oklab(vec3 lch) {
+    float L = lch.x;
+    float C = lch.y * 0.37;
     float h_rad = lch.z * 2.0 * PI;
     return vec3(L, C * cos(h_rad), C * sin(h_rad));
 }
 
-float lab_f_inverse(float t) {
-    float delta = 6.0 / 29.0;
-    if (t > delta) {
-        return t * t * t;
-    } else {
-        return 3.0 * delta * delta * (t - 4.0 / 29.0);
-    }
-}
+// 2. OKLab -> linear sRGB (Bjoern Ottosson reference constants:
+//    https://bottosson.github.io/posts/oklab/, "Converting from OKLab to sRGB").
+vec3 oklab_to_linear_srgb(vec3 lab) {
+    float l_ = lab.x + 0.3963377774 * lab.y + 0.2158037573 * lab.z;
+    float m_ = lab.x - 0.1055613458 * lab.y - 0.0638541728 * lab.z;
+    float s_ = lab.x - 0.0894841775 * lab.y - 1.2914855480 * lab.z;
 
-// 2. CIE Lab -> CIE XYZ (D65 standard illuminant).
-vec3 lab_to_xyz(vec3 lab) {
-    float y_val = (lab.x + 16.0) / 116.0;
-    float x_val = y_val + (lab.y / 500.0);
-    float z_val = y_val - (lab.z / 200.0);
+    float l = l_ * l_ * l_;
+    float m = m_ * m_ * m_;
+    float s = s_ * s_ * s_;
+
     return vec3(
-        0.950489 * lab_f_inverse(x_val),
-        1.000000 * lab_f_inverse(y_val),
-        1.088840 * lab_f_inverse(z_val)
+        +4.0767416621 * l - 3.3077115913 * m + 0.2309699292 * s,
+        -1.2684380046 * l + 2.6097574011 * m - 0.3413193965 * s,
+        -0.0041960863 * l - 0.7034186147 * m + 1.7076147010 * s
     );
 }
 
@@ -141,13 +140,8 @@ float srgb_gamma(float c) {
     }
 }
 
-// 3. CIE XYZ -> sRGB (standard matrix + gamma, clamped).
-vec3 xyz_to_srgb(vec3 xyz) {
-    vec3 rgb_linear = vec3(
-        xyz.x *  3.2406 + xyz.y * -1.5372 + xyz.z * -0.4986,
-        xyz.x * -0.9689 + xyz.y *  1.8758 + xyz.z *  0.0415,
-        xyz.x *  0.0557 + xyz.y * -0.2040 + xyz.z *  1.0570
-    );
+// 3. linear sRGB -> sRGB (gamma encoding, clamped).
+vec3 linear_srgb_to_srgb(vec3 rgb_linear) {
     return clamp(vec3(srgb_gamma(rgb_linear.x), srgb_gamma(rgb_linear.y), srgb_gamma(rgb_linear.z)), 0.0, 1.0);
 }
 
@@ -160,9 +154,9 @@ void main() {
     }
     float alpha = smoothstep(1.0, 0.8, dist);
 
-    vec3 lab = lch_to_lab(v_lch);
-    vec3 xyz = lab_to_xyz(lab);
-    vec3 srgb = xyz_to_srgb(xyz);
+    vec3 oklab = oklch_to_oklab(v_lch);
+    vec3 linear_srgb = oklab_to_linear_srgb(oklab);
+    vec3 srgb = linear_srgb_to_srgb(linear_srgb);
 
     // Subtle warning tint on the rim while escaping.
     if (v_vibration_offset > 0.0) {
