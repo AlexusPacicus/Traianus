@@ -1860,3 +1860,33 @@
   across the three commits (`AGENTS.md` ×2, `tests/unit/test_delegation_contract.py` ×2).
 
 * **Status:** `Consolidated`.
+
+### seq 60 — 2026-09-23 — `traianus/geometry/simplex.py` removed: superseded by `VarianceTracker`, never wired
+
+* **Context:** `POC.md`'s "Built but not wired" section named three modules with no caller:
+  `SemanticSimplex`, `ParabolicCorrector`, `SVDAnisotropyFilter`. Checked against the code, not the
+  docstring: `SemanticSimplex` (Z-score control-cell classification, its own `RECALIBRATION_SIGNAL`
+  constant) is not a feature awaiting a caller — the recalibration-signal mechanism that actually
+  runs in production is a different design entirely, `traianus/telemetry/variance_tracker.py`'s
+  `VarianceTracker` (EWMA variance + Schmitt-trigger hysteresis, ADR-025 §2.2), consumed by
+  `traianus/app.py` via `storage.EVENT_RECALIBRATION_SIGNAL` and exercised by
+  `tests/integration/test_polar_ingesta_wiring.py`. `simplex.py`'s own `RECALIBRATION_SIGNAL` is a
+  same-named but disconnected symbol; confirmed no file outside `simplex.py` and its own test ever
+  imported it. `ParabolicCorrector` and `SVDAnisotropyFilter` were left untouched — the first is a
+  deliberately cut feature (the client reimplements the same math independently), the second has a
+  real spec/implementation mismatch the author has not resolved (which fix, not whether).
+
+* **Δ executed:** `traianus/geometry/simplex.py` and `tests/unit/geometry/test_simplex.py` deleted;
+  `traianus/geometry/__init__.py`'s import, `__all__` entries and module docstring updated to match.
+  One new regression test (`tests/unit/geometry/test_geometry_surface.py`) pins that
+  `SemanticSimplex`/`RECALIBRATION_SIGNAL` are gone from `traianus.geometry`'s public surface.
+
+* **How it was built:** delegated to `engine-implementer` (`scope: engine`, `attribution: null`) on
+  `chore/remove-superseded-simplex`, commit `18b8ca7`.
+
+* **Gate:** `pytest tests/` → 2632 passed / 1 skipped / 5 deselected (down from 2643: net effect of
+  removing simplex.py's 185-line test file, offset by the new 13-line regression test). `ruff` clean
+  on the CI-scoped surface; `mypy traianus/` clean, 32 source files (was 33). Three `EXECUTE_SAFE`
+  receipts.
+
+* **Status:** `Consolidated`.
