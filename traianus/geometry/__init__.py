@@ -2,9 +2,9 @@
 
 Deterministic, side-effect-free geometry over S^{d-1}: kinematic resistance,
 orthogonal distance, discrimination ratio, dimensional relief, ε-adjacency,
-threshold calibration, semantic simplex control, parabolic reconstruction,
-and SVD anisotropy filtering. No SQLite / FastAPI / governance dependencies
-— the dual-key decision gate lives in ``traianus.governance.gate``.
+threshold calibration, parabolic reconstruction, and SVD anisotropy filtering.
+No SQLite / FastAPI / governance dependencies — the dual-key decision gate
+lives in ``traianus.governance.gate``.
 """
 
 from traianus.geometry.observables import (
@@ -20,16 +20,13 @@ from traianus.geometry.observables import (
 )
 from traianus.geometry.parabolic import ParabolicCorrector
 from traianus.geometry.polar_projector import PolarProjector
-from traianus.geometry.simplex import RECALIBRATION_SIGNAL, SemanticSimplex
 from traianus.geometry.svd_filter import SVDAnisotropyFilter
 from traianus.geometry.zero_copy import ZeroCopyExporter, note_id_from_label
 
 __all__ = [
-    "RECALIBRATION_SIGNAL",
     "ParabolicCorrector",
     "PolarProjector",
     "SVDAnisotropyFilter",
-    "SemanticSimplex",
     "ZeroCopyExporter",
     "calibrate_critical_threshold",
     "compute_epsilon_edges",
