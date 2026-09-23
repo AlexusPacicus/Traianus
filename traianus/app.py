@@ -8,7 +8,7 @@ import json
 from typing import List, Literal
 from fastapi import FastAPI, BackgroundTasks, HTTPException, Header, Depends, Request, Response
 from fastapi.middleware.cors import CORSMiddleware
-from pydantic import BaseModel, Field, field_validator
+from pydantic import BaseModel, Field, field_validator, StrictBool
 from traianus.representation.sentence_transformer import (
     MODEL_ID,
     MODEL_REVISION,
@@ -173,7 +173,7 @@ class RefinedEntity(BaseModel):
 
 class ConsolidationBody(BaseModel):
     text: str = Field(..., description="Structured entity payload content in plain text.")
-    ethical_key: bool = Field(..., description="Explicit Ethical Key (HITL) human operator confirmation. Required; omitted or false keeps the node out of consolidation (ADR-022).")
+    ethical_key: StrictBool = Field(..., description="Explicit Ethical Key (HITL) human operator confirmation. Required and a JSON boolean, never coerced; omitted or false keeps the node out of consolidation (ADR-022).")
 
 class HitlRelation(BaseModel):
     source: str
