@@ -206,6 +206,17 @@ changes). On days 5–7 the author runs every task in both views, on different d
 whether each run was completed and its time. Ties go to the list. Exploratory: one user, labelled as
 such.
 
+**R5 outcome (2026-09-23).** All 20 runs done (`R5.md`, Runs), both views of every task, same day —
+the day-separation clause above was relaxed mid-session: the author judged the actual bias control to
+be the first-view alternation between tasks, not a day gap within one task (T04's same-day pair was
+kept and tied by rule 8 rather than voided). By rule 8: **map wins 3 tasks (T03, T05, T10), list wins
+2 (T01, T06), 5 tie** (T02, T07, T08, T09 — neither view completed; T04 — both completed within 10s
+of each other). Map has more wins, so **R5 favours the map**, the opposite of what the Day-7 table
+above anticipates — that table has a row only for "R5 favours the list", none for the map winning
+outright, so no decision follows automatically here; it needs the author. The 2026-09-21 prediction
+(T06–T10 completes a smaller proportion than T01–T05, in each view) held in both: list 20% vs 40%,
+map 40% vs 80%.
+
 **Audit freeze.** If the phase-1 review of R4 at `c08fe92` does not return PASS, the record is
 frozen as it stands; remaining items are resolved in phase 2 against the code.
 
