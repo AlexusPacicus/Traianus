@@ -24,7 +24,7 @@ Operator     traianus/geometry/polar_projector.py, for anchor c₁ and poles c_A
              ranked by the record under review.
 Position     x = λ₁, y = ⟨v, ĉ₁⟩.
 
-Allowed reading   this file; frontend/audits/derivations.md; frontend/audits/contracts.md; the
+Allowed reading   this file; derivations.md; contracts.md; the
                   record file under review; the files and lines cited in them.
 Not allowed       frontend/POC.md; any other record's review history; docs/adrs/ADR-026-*;
                   traianus/geometry/spatial_observables.py (its docstring states prior results);
