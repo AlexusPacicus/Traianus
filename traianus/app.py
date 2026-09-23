@@ -426,6 +426,8 @@ async def frontend_ingestion_endpoint(
         text = raw_bytes.decode("utf-8", errors="strict")
     except UnicodeDecodeError as e:
         raise HTTPException(status_code=400, detail="Invalid UTF-8 payload.") from e
+    if not x_idempotency_key.strip():
+        raise HTTPException(status_code=422, detail="X-Idempotency-Key must not be empty.")
     try:
         ingestion_id, duplicate = storage.enqueue_ingest(text, x_idempotency_key)
     except storage.StorageError as e:
