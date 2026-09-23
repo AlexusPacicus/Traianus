@@ -435,6 +435,15 @@ async def frontend_ingestion_endpoint(
     background_tasks.add_task(async_spectral_processor, ingestion_id, text)
     return {"status": "accepted", "ingestion_id": ingestion_id}
 
+def _vector_duplicate_response(response: Response, request_id: str, log, node_id: str, seq: int) -> dict[str, object]:
+    """Idempotent replay of /ingesta/vector (R1-INV4): HTTP 200 with the stored
+    identity and `duplicate: True`, as /ingesta answers a repeated key."""
+    log.info("vector_ingestion_duplicate", node_id=node_id, seq=seq)
+    response.status_code = 200
+    response.headers["X-Request-ID"] = request_id
+    return {"status": "accepted", "node_id": node_id, "seq": seq, "duplicate": True}
+
+
 @app.post("/ingesta/vector", status_code=201, dependencies=[Depends(require_token)])
 async def vector_ingestion_endpoint(
     body: VectorIngestBody,
@@ -446,7 +455,8 @@ async def vector_ingestion_endpoint(
     arrays without text conversion, text/plain headers, or language encoders.
 
     Validates dimension, numeric integrity, and non-zero norm; L2-normalizes
-    before projection; persists as append-only node revision.
+    before projection; persists as append-only node revision. A repeated
+    X-Idempotency-Key is answered 200 `duplicate: true` and writes nothing (R1-INV4).
 
     Emits structured logs (JSON) with request_id for observability.
     Propagates X-Request-ID for distributed tracing correlation."""
@@ -509,6 +519,26 @@ async def vector_ingestion_endpoint(
         log.warning("vector_ingestion_rejected", phase="validation", reason="zero_vector")
         raise HTTPException(status_code=422, detail="Zero-vector (norm == 0) rejected.")
 
+    if body.label and not _SAFE_LABEL_RE.fullmatch(body.label):
+        log.warning("vector_ingestion_rejected", phase="validation", reason="unsafe_label")
+        raise HTTPException(
+            status_code=422,
+            detail=(
+                "Label must match [A-Za-z0-9_-]{1,64} "
+                "(node-id namespace protection)."
+            ),
+        )
+
+    # R1-INV4: P(k) = (k != empty) and at most one row carries k. This lookup is an
+    # optimisation; the UNIQUE index decides a race (see the insert below).
+    if not x_idempotency_key.strip():
+        log.warning("vector_ingestion_rejected", phase="validation", reason="empty_idempotency_key")
+        raise HTTPException(status_code=422, detail="X-Idempotency-Key must not be empty.")
+    with storage.get_db_connection() as conn:
+        stored = storage.node_by_idempotency_key(conn, x_idempotency_key)
+    if stored is not None:
+        return _vector_duplicate_response(response, request_id, log, *stored)
+
     norm_idea_vector = arr / norm
 
     t_proj_start = now_seconds()
@@ -536,16 +566,6 @@ async def vector_ingestion_endpoint(
         for axis_id, value in projections.items()
     })
 
-    if body.label and not _SAFE_LABEL_RE.fullmatch(body.label):
-        log.warning("vector_ingestion_rejected", phase="validation", reason="unsafe_label")
-        raise HTTPException(
-            status_code=422,
-            detail=(
-                "Label must match [A-Za-z0-9_-]{1,64} "
-                "(node-id namespace protection)."
-            ),
-        )
-
     if body.label:
         node_id = f"VEC_{body.label}"
     else:
@@ -566,7 +586,10 @@ async def vector_ingestion_endpoint(
                 storage.active_epoch(),
                 conn=conn,
                 guard_consolidated=True,
+                idempotency_key=x_idempotency_key,
             )
+    except storage.DuplicateIdempotencyKeyError as e:
+        return _vector_duplicate_response(response, request_id, log, e.node_id, e.seq)
     except storage.ConsolidatedRegressionError as e:
         log.warning("vector_ingestion_rejected", phase="persist", reason="consolidated_regression")
         raise HTTPException(
