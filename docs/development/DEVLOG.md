@@ -864,3 +864,116 @@ ruff y mypy verdes tras la integración.
 **Próximo paso:**
 1. Decidir si se sube `feat/client-oklch-color` a `origin` y se abre el camino a `main`.
 2. Autor: decidir el resultado de R5 y cerrar el día 7 (ledger, resultados) según `POC.md`.
+
+### Cierre (14:08)
+
+**Contexto:** tras la entrada de las 13:59 (ramas de la PoC integradas, recap hecho): decidir el
+resultado de R5 y subir la rama.
+
+**Se hizo:**
+- **Decisión de R5, del autor:** no gana el mapa en exclusiva — ninguna vista sustituye a la otra; el
+  mapa queda como vista por defecto (contexto general), la lista a una interacción. El Day-7 table no
+  tenía fila para el resultado real; registrado como párrafo propio en `POC.md` (`316633e`). Sin
+  cambio de motor ni de Ulpia.
+- **`feat/client-oklch-color` subida a `origin`** en dos pushes: los 27 commits acumulados desde el
+  22 (color OKLCH, R5 completo, integración de R3/R1-INV4/bits) y después el commit de la decisión de
+  R5.
+- **Limpieza de ramas.** Clasificadas las 34 ramas locales por ascendencia real contra
+  `feat/client-oklch-color` (`git merge-base --is-ancestor`, no de memoria); confirmado con el autor
+  el alcance exacto antes de borrar nada. 30 eran checkpoints de sesión ya contenidos en la rama
+  actual — borradas, local y remoto (25 tenían copia en `origin`). Las 5 que sí divergen de verdad
+  (`feat/python-gate` y las cuatro de exploración pre-PoC: `defer/pivot-14d`, `feat/parser-14d`,
+  `docs/threat-model-and-academic-grounding`, `research/ulpia-3d-membrane`) quedaron intactas, tal
+  como la propia bitácora las había marcado para limpieza aparte, no de hoy.
+
+**Resultado:** un commit nuevo (`316633e`) sobre `feat/client-oklch-color`, subido a `origin`. Árbol
+de ramas locales reducido de 34 a 9 (`main`, `ngi`, `ulpia`, `feat/client-oklch-color` y las cinco
+divergentes). `main` sin tocar, sin merge. Suite no ejecutada esta sesión (ningún cambio de motor ni
+de cliente).
+
+**Resuelto de entradas anteriores:**
+- 2026-09-23 (13:59): subir `feat/client-oklch-color` a `origin` — hecho.
+- 2026-09-23 (13:59): «R5 favours the map» sin fila en la tabla del día 7 — resuelto por decisión del
+  autor (ninguna vista gana en exclusiva).
+- 2026-09-23 (13:59): limpieza de ramas — las 30 de checkpoint quedaron borradas; las cuatro de
+  exploración pre-PoC y `feat/python-gate` siguen aparte, sin tocar, como estaba previsto.
+
+**Sin resolver / decisión pendiente:**
+- Autor: camino a `main` — sin decidir todavía («no sé aún lo que hacer ahora... nada de merge a
+  main aún»).
+- `feat/python-gate` sin integrar, ajeno a esta sesión.
+- Limpieza de las cuatro ramas de exploración pre-PoC, aparte.
+- `.claude/settings.local.json` sigue sin seguimiento (de la sesión del python-gate, no de esta).
+- Sin tocar de entradas anteriores: K8 (eje z), documentación con formato fijo, manifest del paquete,
+  `/ingesta` acepta clave vacía, prueba intermitente `test_concurrent_reads_during_background_write`,
+  limpieza del scratchpad.
+
+**Próximo paso:**
+1. Autor: decidir el camino a `main` (cuándo y cómo integrar `feat/client-oklch-color`).
+2. Cerrar formalmente el día 7 en el ledger, si procede, con la decisión de R5 ya registrada.
+
+### Cierre (17:56)
+
+**Contexto:** tras el cierre de las 14:08, el autor pidió modularizar — la condición de salida del
+Day-7 table de `POC.md` para un resultado favorable: RefApp-01 sale a su propio repositorio.
+
+**Se hizo:**
+- **Plan explícito, aprobado por el autor** (modo plan): extraer primero, acotar v2 después ya en el
+  repo nuevo; licencia AGPL-3.0-or-later; sin `AGENTS.md`/hooks/subagentes en el repo nuevo por
+  ahora; repo `refapp-01`, privado, cuenta `AlexusPacicus`.
+- **Hallazgo que cambió el corte ingenuo:** `frontend/audits/` (`contracts.md`, `K6.md`, `R4.md`,
+  `definitions.md`, `derivations.md`) es contenido del motor, no del cliente —
+  `tools/hooks/contract_registry.json` (AGENTS §3.7) exige secciones suyas antes de editar
+  `traianus/geometry/**` y el tooling K6/R4/corpus-loader; moverlo entero con `frontend/` habría
+  dejado el hook apuntando a un contrato inexistente y bloqueado esas ediciones para siempre
+  (falla cerrado por diseño).
+- **Etapa 1 — reubicación,** delegada a `engine-implementer` por contrato JSON: los cinco ficheros a
+  `docs/methodology/instrument-audit/`, ~34 referencias actualizadas (motor, tooling, diez tests,
+  agentes, skills). Dos huecos declarados por el informe, cerrados por mí: `AGENTS.md` §3.7 (vía
+  `validate_proposal`, caso `d5192688`, `EXECUTE_SAFE`) y dos citas internas cruzadas entre los
+  ficheros movidos (ruta no gobernada, sin gate). `pytest tests/` verde (2669) antes y después de
+  fusionar. LEDGER seq 55 (`d20f932`, `e3e09f9`, `569d9b7`, fusionados en `220819d`).
+- **Etapa 2 — extracción del cliente:** clon `--no-local` de Traianus (el primer intento, con
+  hardlinks, lo rechazó `git-filter-repo`) en `/Users/test/Documents/NGI/refapp-01`;
+  `git-filter-repo` con `--path-rename frontend/:` preserva 57 de los ~75 commits que tocaban
+  `frontend/` (el resto solo tocaba `audits/` u otras rutas, vacíos tras el filtro). Scaffolding:
+  `LICENSE` (AGPL-3.0-or-later), `README.md`, `.gitignore`, CI (`typecheck` + `build`);
+  `package.json`/`-lock.json` renombrados de `"ulpia"` a `"refapp-01"`; las nueve citas de `POC.md`
+  a `audits/...` reescritas como enlaces absolutos a Traianus, fijados al commit de la reubicación.
+  `npm ci && npm run typecheck && npm run build` verdes.
+- **Etapa 3 — publicación:** repo `refapp-01` creado en GitHub (privado), subido como `main`,
+  verificado contra un clon limpio independiente.
+- **Etapa 4 — retirada de Traianus:** `frontend/` borrado con `git rm -r` (el `rm` de shell sigue
+  denegado por política; para el clon local fallido de la etapa 2, un `mv` fuera del camino sí se
+  permitió), el job `test-frontend` fuera de `ci.yml`, `README.md` con puntero al repo nuevo.
+  `pytest tests/` verde (2669), sin cambio. LEDGER seq 56 (`3a28af3`, `38f72c4`).
+
+**Resultado:** seis commits nuevos en `feat/client-oklch-color`, todos subidos a `origin`; `main` sin
+tocar. `refapp-01` publicado y verificado
+([github.com/AlexusPacicus/refapp-01](https://github.com/AlexusPacicus/refapp-01)).
+
+**Resuelto de entradas anteriores:**
+- Condición de salida del Day-7 table (RefApp-01 sale a su propio repositorio) — cumplida.
+- 2026-09-19: el hueco de que `frontend/audits/contracts.md` gobierna ediciones del motor sin estar
+  declarado como tal — cerrado al reubicarlo a `docs/methodology/`.
+
+**Sin resolver / decisión pendiente:**
+- Autor: camino de `feat/client-oklch-color` a `main` — sigue sin decidir.
+- `AGENTS.md` §6.1 (`scope: client`): cláusula ya inalcanzable (no queda `frontend/src/**`), dejada
+  declarada, no resuelta — fichero gobernado, decisión aparte.
+- v2 (comparar notas, anclar e interactuar, `/mutate`): se acota en `refapp-01`, cuando el autor
+  quiera.
+- Restos sin trackear en disco: `frontend/node_modules/`, `frontend/dist/`, `frontend/.DS_Store`
+  (ignorados por git, inofensivos) y un clon fallido en
+  `/Users/test/Documents/NGI/refapp-01-stale-hardlinked-clone`; `rm` denegado por política, el autor
+  los borra si quiere.
+- `feat/python-gate` y las cuatro ramas de exploración pre-PoC: sin tocar, aparte, como estaba
+  decidido.
+- Sin tocar de entradas anteriores: K8 (eje z), documentación con formato fijo, manifest del
+  paquete, `/ingesta` acepta clave vacía, prueba intermitente
+  `test_concurrent_reads_during_background_write`, limpieza del scratchpad.
+
+**Próximo paso:**
+1. Autor: decidir el camino a `main`.
+2. v2 en `refapp-01`, cuando el autor quiera.
+3. Limpieza manual de los restos en disco que `rm` no me deja tocar.
