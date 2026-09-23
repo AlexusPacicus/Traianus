@@ -218,6 +218,12 @@ outright, so no decision follows automatically here; it needs the author. The 20
 (T06–T10 completes a smaller proportion than T01–T05, in each view) held in both: list 20% vs 40%,
 map 40% vs 80%.
 
+**R5 decision (2026-09-23, author).** Neither view replaces the other: RefApp-01 keeps both, map and
+list, available side by side (as today, behind the toggle from 2026-09-21). The map is the default,
+first-shown view — it gives general context before a task narrows into either view — the list stays
+one interaction away. No row of the table above fits this outcome exactly; this paragraph is the
+decision of record. No engine or Ulpia change follows from it.
+
 **Audit freeze.** If the phase-1 review of R4 at `c08fe92` does not return PASS, the record is
 frozen as it stands; remaining items are resolved in phase 2 against the code.
 
