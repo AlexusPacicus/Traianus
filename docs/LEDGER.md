@@ -1815,3 +1815,48 @@
   invocations, a pre-existing gap unrelated to this change). Two `EXECUTE_SAFE` receipts.
 
 * **Status:** `Consolidated`.
+
+### seq 59 — 2026-09-23 — `scope: client` retired from the delegation contract; a delegation's attribution is now optional
+
+* **Context:** RefApp-01 left for its own repository this session (seq 56); `frontend/src/**` no
+  longer exists anywhere in this tree. `AGENTS.md` §6.1, `.claude/agents/engine-implementer.md` and
+  `tools/audit/delegation_contract.py`'s `DelegationContract` still described and enforced a
+  `scope: client` delegation — a `"client"` `scope` Literal value, a `"tsc"` `Gate`, a `"manual"`
+  `ContractTest.expectation`, and three `field_validator`s whose only purpose was enforcing
+  client-scope coupling rules. None of it was reachable any more: `scope: client` could never again
+  be given a valid `files_may_touch`.
+
+* **Δ executed:** `scope` narrowed to `Literal["engine", "tools"]`; `Gate` loses `"tsc"`;
+  `ContractTest.expectation` narrows to `Literal["red", "guard"]`; the three client-only validators
+  (`_manual_tests_are_the_client_tests`, `_a_client_touches_only_the_frontend_source`,
+  `_tsc_is_the_client_gate`) removed. `AGENTS.md` §6.1 and `engine-implementer.md` no longer mention
+  `frontend/src/**`, `scope: client`, or describe a client-scope delegation category. The client-scope
+  test surface in `tests/unit/test_delegation_contract.py` (~115 lines: fixtures, helpers, seven
+  tests) removed; its doc-sync test inverted to assert the *absence* of client-scope language rather
+  than its presence, keeping the file's own convention (code/doc sync tested, not just asserted)
+  alive for the removal itself.
+
+* **Also this session, ahead of Δ3 and on the same branch:** a `DelegationContract`'s `attribution`
+  field is no longer mandatory — it is `str | None`, still a required key (strict-JSON: no field has
+  a default) but its value may be `null`, in which case the subagent's commit carries no
+  `Co-Authored-By` trailer at all. Prompted by the author's standing preference (no Claude/Anthropic
+  attribution in commits or PRs, any project); done first because Δ3's own contract needed to be
+  launched without one. `engine-implementer.md` and `instrument-implementer.md` updated to match.
+
+* **How it was built:** two commits on `chore/retire-client-scope`, both delegated to
+  `engine-implementer` in sequence (AGENTS §6.1: one agent at a time) — the attribution change
+  first (`2155a71`), then the client-scope retirement (`877bf20`, `scope: tools`, `attribution:
+  null` — the first delegation this repository has run without one). The implementer's own report
+  caught a real inconsistency in the second contract's instructions: `AGENTS.md`'s bullet was told
+  to drop only the `frontend/src/**` mention and the client-scope sentence, leaving "or client
+  change" in the category list — narrower than behaviour B2's stated intent. It followed the
+  literal, more specific instruction and flagged the gap rather than resolving it silently; the
+  executing agent closed it in a third, direct commit (`11d7ab0`, governed edit via
+  `validate_proposal`, case `8af110f6`).
+
+* **Gate:** `pytest tests/` → 2643 passed / 1 skipped / 5 deselected (down from 2672: net effect of
+  removing ~115 lines of now-unreachable client-scope test surface). `ruff` clean on the CI scope;
+  `mypy traianus/` clean (unaffected — no `traianus/` file touched). Four `EXECUTE_SAFE` receipts
+  across the three commits (`AGENTS.md` ×2, `tests/unit/test_delegation_contract.py` ×2).
+
+* **Status:** `Consolidated`.
