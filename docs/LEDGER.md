@@ -1665,3 +1665,55 @@
   harness.
 
 * **Status:** `Consolidated`.
+
+### seq 55 — 2026-09-23 — `frontend/audits/` relocated to `docs/methodology/instrument-audit/`, ahead of the client's exit
+
+* **Context:** RefApp-01 (`frontend/`) is about to leave Traianus for its own repository — it talks
+  to the engine only over HTTP, so nothing in it imports `traianus/`. But `frontend/audits/`
+  (`contracts.md`, `K6.md`, `R4.md`, `definitions.md`, `derivations.md`) is engine-governance
+  content, not client content: `tools/hooks/contract_registry.json` (AGENTS §3.7) requires sections
+  of it before an edit to `traianus/app.py`, `traianus/geometry/**`, `traianus/storage/**`,
+  `traianus/representation/**` or the K6/R4/corpus-loader tooling is allowed. Moving `frontend/`
+  wholesale would have left the registry pointing at a contract file that no longer exists, and
+  `require_contract_context.py` fails closed on an unreadable contract file (AGENTS §6.2) — every
+  future edit to those paths would have been denied permanently.
+
+* **Δ executed:** the five files moved (`git mv`, history preserved) to
+  `docs/methodology/instrument-audit/`, sibling to `docs/methodology/instrumentation/` and
+  `docs/methodology/papers/`, same flat layout. Every citing file updated: the four rules in
+  `contract_registry.json`; `traianus/geometry/perspective.py` and `spatial_observables.py`;
+  `tools/experiments/k6_colour_predictability.py`, `r4_perspective_recall.py`,
+  `tooling/load_spinoza_corpus.py`; `tools/audit/build_review_package.py`; ten test files; the three
+  `.claude/agents/*.md` definitions; both `instrument-audit` skill copies
+  (`.claude/skills/`, `.opencode/skills/`); `AGENTS.md` §3.7 (done separately by the executing
+  agent — see below). Order enforced by the contract: `context_pack` served against the
+  pre-relocation path first, every citing edit followed while those receipts were still valid, and
+  only then the `git mv` plus the registry edit, so `require_contract_context.py` never saw an
+  inconsistent (registry, file) pair mid-flight.
+
+* **Delegated, reviewed, then closed by the executing agent:** built as a `DelegationContract`
+  (`scope: engine`), run by `engine-implementer` on `chore/relocate-instrument-audit-records`
+  (`d20f932`). Two new tests in `tests/security/test_contract_context_hook.py`: one asserting the
+  registry's four `path` fields (red before the registry edit, green after), one asserting the five
+  files exist at the new location and not the old one (red before the `git mv`, green after); the
+  existing hook-gate suite kept passing unmodified as a regression guard. `AGENTS.md`,
+  `docs/LEDGER.md` and `docs/development/DEVLOG.md` were out of the contract's `files_may_touch` by
+  design (AGENTS §6.1: log records stay with the executing agent). After review, the executing
+  agent closed two gaps the report declared in `not_done`: `AGENTS.md` §3.7 (through
+  `validate_proposal`, case `d5192688`, `EXECUTE_SAFE`) and two internal cross-citations inside the
+  relocated files themselves (`definitions.md`, `R4.md` cited each other with the old
+  `frontend/audits/` prefix even after moving into the same directory; ungoverned path, no gate
+  needed). `frontend/POC.md`'s own citations of `audits/` are left as they are — that file is moving
+  to the new client repository next, where they will be rewritten to absolute links.
+
+* **Declared, not fixed:** the two hook test suites (`test_contract_context_hook.py`,
+  `test_review_confinement.py`) still use `"frontend/audits/..."` as synthetic placeholder paths in
+  fixtures unrelated to the real content — left as-is, they exercise generic hook logic, not this
+  contract.
+
+* **Gate:** `pytest tests/` → 2669 passed / 1 skipped / 5 deselected (implementer's run and the
+  executing agent's independent re-run after the two follow-up fixes, both green). `ruff` clean on
+  the CI scope; `mypy traianus/` clean; 13 `EXECUTE_SAFE` receipts from `validate_proposal` for the
+  implementer's governed-path edits, plus one more (`d5192688`) for `AGENTS.md`.
+
+* **Status:** `Consolidated`.
