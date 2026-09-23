@@ -818,3 +818,49 @@ ninguno de motor ni cliente. 17 commits sin subir a `origin` en total (incluidos
    decisión.
 2. Cerrar el día 7 formalmente (ledger, resultados) según la hoja de ruta de `POC.md`.
 3. Decidir la integración de la cadena de ramas y si se sube algo a `origin`.
+
+### Cierre (13:59)
+
+**Contexto:** tras la entrada de esta mañana (R5 completo, mapa gana): recap de la PoC entera contra
+el estado real del repo, y decisión de empezar la integración de la larga cadena de ramas sin
+fusionar.
+
+**Se hizo:**
+- **Recap de la PoC** contra el repo, no memoria: hito cumplido el día 20; R1/R2 con tests presentes
+  sin recorrer hoy; R3 con su fix de gobernanza confirmado ausente de la rama de trabajo
+  (`ethical_key` era `bool` normal, no `StrictBool`); R4/K7 se cumple, auditado; R5 completo (entrada
+  de esta mañana).
+- **Mapeadas las ~37 ramas locales** contra `HEAD` y `main`: casi toda la cadena larga de sesiones
+  anteriores resulta ser una sola línea (antepasada de `HEAD`, un solo merge a `main` la trae entera).
+  Solo 8 ramas divergen de verdad, y de esas solo tres son de la PoC: el fix de R3 (`StrictBool`),
+  R1-INV4 (deduplicación de `/ingesta/vector`, hallazgo 🟠 Open en `AUDIT.md`) y un test de
+  integridad de bits — las tres del día 2 (19-09), nunca fusionadas hasta hoy.
+- **Las tres, fusionadas:** R3 (`90a1879`, conflicto trivial de una línea de import), R1-INV4
+  (`c8e1ba3`, conflicto en `ci.yml` y `LEDGER.md` — reordenado el `LEDGER.md` para que el seq 52
+  quede antes del 53, contenido de motor limpio), test de bits (`4b228a4`, sin conflicto). `AUDIT.md`
+  ya marca R1-INV4 ✅ Resolved.
+- **Verificado tras cada merge:** `pytest tests/` en verde (2633 → 2662 tras R3 → 2667 tras R1-INV4 y
+  el test de bits), `ruff` limpio en el alcance exacto de `ci.yml`, `mypy traianus/` limpio (33
+  ficheros).
+- Dejadas fuera, a propósito: `feat/python-gate` (rama de otra sesión, ajena a la PoC) y cuatro ramas
+  de exploración previas a la PoC (`defer/pivot-14d`, `feat/parser-14d`,
+  `docs/threat-model-and-academic-grounding`, `research/ulpia-3d-membrane`) — candidatas a limpieza
+  aparte, no a integración.
+
+**Resultado:** tres commits de merge sobre `feat/client-oklch-color`, nada subido a `origin`. Suite,
+ruff y mypy verdes tras la integración.
+
+**Resuelto de entradas anteriores:**
+- 2026-09-23 (mañana): de «integración de la cadena de ramas», las tres piezas reales (R3, R1-INV4,
+  test de bits) quedan integradas; el resto de la cadena ya era una sola línea, sin trabajo que hacer
+  ahí.
+
+**Sin resolver / decisión pendiente:**
+- Autor: subir `feat/client-oklch-color` a `origin` y plantear el camino a `main`.
+- Autor: el resultado «R5 favours the map» sigue sin fila en la tabla del día 7.
+- `feat/python-gate` sin integrar, ajeno a esta sesión.
+- Limpieza de las cuatro ramas viejas de exploración, aparte.
+
+**Próximo paso:**
+1. Decidir si se sube `feat/client-oklch-color` a `origin` y se abre el camino a `main`.
+2. Autor: decidir el resultado de R5 y cerrar el día 7 (ledger, resultados) según `POC.md`.
