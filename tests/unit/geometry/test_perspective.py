@@ -1,6 +1,6 @@
 """select_poles: the two axes with the largest projection on the vector q.
 
-Poles of the perspective at q (frontend/audits/R4.md, "Perspective at q"): the two axes a_k with
+Poles of the perspective at q (docs/methodology/instrument-audit/R4.md, "Perspective at q"): the two axes a_k with
 the largest <q, a_k>, ties by axis id ascending (str order), c_A the larger. The projection is
 taken on the normalised axis in float64, q as given; the result is the pair of axis ids.
 """

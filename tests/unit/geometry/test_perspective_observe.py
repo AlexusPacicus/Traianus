@@ -1,4 +1,4 @@
-"""observe: the coordinates of every vector in the perspective at q (frontend/audits/R4.md, "Observed space").
+"""observe: the coordinates of every vector in the perspective at q (docs/methodology/instrument-audit/R4.md, "Observed space").
 
 Columns [x?, y, colours...]: x = <v, horizontal> if a horizontal is given, y = <v, q_hat> with q the
 vector at anchor_index, then the colours as given. Each column is z-scored with the mean and the

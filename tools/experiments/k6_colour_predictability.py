@@ -1,7 +1,8 @@
 """K6 — colour channel predictability.
 
-Implements frontend/audits/K6.md (instrument audit record, revision 6) against
-frontend/audits/contracts.md (§0 data layer, §1 K6) and frontend/audits/derivations.md.
+Implements docs/methodology/instrument-audit/K6.md (instrument audit record, revision 6) against
+docs/methodology/instrument-audit/contracts.md (§0 data layer, §1 K6) and
+docs/methodology/instrument-audit/derivations.md.
 For each colour candidate, the centred R² of an OLS fit on the standardised basis
 B_s = (1, x̃, ỹ, x̃², ỹ², x̃ỹ, c̃_1 … c̃_{s−1}) over the EVAL half is compared with the 989th
 smallest R² of 1,000 null

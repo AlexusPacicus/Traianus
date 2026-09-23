@@ -10,7 +10,7 @@ sentence, from the data/spinoza manifests, as the node text.
 with v-hat = row / sqrt(row @ row) in binary64, the vector the K6 measurement uses, and its text with
 that sentence.
 
-Both commands follow frontend/audits/contracts.md section 0: each artefact and each manifest is read
+Both commands follow docs/methodology/instrument-audit/contracts.md section 0: each artefact and each manifest is read
 once, its sha256 is checked on those bytes, the same bytes are parsed, and the null elimination runs
 before anything else; the manifests' labels must be those of labels.json, in the same order.
 

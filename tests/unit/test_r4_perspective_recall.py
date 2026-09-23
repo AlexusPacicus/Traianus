@@ -1,7 +1,7 @@
 """Unit tests of tools/experiments/r4_perspective_recall.py.
 
-Specification: frontend/audits/R4.md (revision 5), frontend/audits/contracts.md section 0 and 2,
-frontend/audits/derivations.md (D2, D5, D6, D9, D10). Synthetic inputs only: CI has no .data/,
+Specification: docs/methodology/instrument-audit/R4.md (revision 5), docs/methodology/instrument-audit/contracts.md section 0 and 2,
+docs/methodology/instrument-audit/derivations.md (D2, D5, D6, D9, D10). Synthetic inputs only: CI has no .data/,
 and the measurement is never run on the real artefact here.
 """
 

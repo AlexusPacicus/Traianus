@@ -1,6 +1,6 @@
 """Unit tests of tools/experiments/tooling/load_spinoza_corpus.py.
 
-Specification: frontend/audits/contracts.md §0 (digests on the parsed bytes, null elimination, v-hat)
+Specification: docs/methodology/instrument-audit/contracts.md §0 (digests on the parsed bytes, null elimination, v-hat)
 and the corpus-loading decision of frontend/POC.md. Synthetic artefacts and an injected transport
 only: CI has no .data/, and no test opens a connection. One guard reads the real artefact when present.
 """
@@ -27,7 +27,7 @@ TOOL = REPO_ROOT / "tools" / "experiments" / "tooling" / "load_spinoza_corpus.py
 REGISTRY = REPO_ROOT / "tools" / "hooks" / "contract_registry.json"
 FROZEN = REPO_ROOT / ".data" / "spinoza_frozen"
 MANIFESTS = REPO_ROOT / "data" / "spinoza"
-CONTRACT = "frontend/audits/contracts.md"
+CONTRACT = "docs/methodology/instrument-audit/contracts.md"
 SECTION_0 = "0. Data layer, bit level (shared)"
 
 D = 384
