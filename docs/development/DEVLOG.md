@@ -756,3 +756,65 @@ de R5 registrado (T01 mapa); T01 lista y las nueve tareas restantes, pendientes.
 2. T02 a T10, alternando vista, un Start/Stop por tarea y vista.
 3. Descargar el registro al final de la pasada, a `.data/poc/logs/`.
 4. Tabla del día 7 con lo que haya, aunque falte la segunda pasada.
+
+---
+
+## 2026-09-23
+
+**Contexto:** día 6 de la PoC RefApp-01, único día real antes del 25 (despedida de soltero el 24). Se
+partía de T01 mapa registrado, T01 lista sin ciclo Start/Stop válido, y T02–T10 sin empezar.
+
+**Se hizo:**
+- Motor arrancado en `.data/poc`: `preview_start` volvió a fallar por `getcwd` (mismo fallo del día
+  3); levantado en pestaña de terminal.
+- **T01 lista repetida limpia** (63 s): 1:5 y 1:6 en el top-15, completada. T02 lista: ninguna
+  esperada en el top-15 (verificado replicando `nearestIds` de `frontend/src/notes.ts` contra
+  `/spatial`, no de memoria) — no completada.
+- **T03 mapa:** un primer Start/Stop fue un clic accidental, descartado; repetido (124 s), alcanzó
+  las 3 esperadas.
+- **Corrección de protocolo, del autor:** el control de sesgo real de R5 es la alternancia de qué
+  vista va primero entre tareas (T01 mapa, T02 lista...), no un día de separación dentro de una
+  misma tarea — la regla 4 tal como está escrita solo pedía el día. Permitió correr las dos vistas de
+  cada tarea el mismo día y terminar R5 en una sesión.
+- **T04 a T10, y los huecos de T02 (mapa) y T03 (lista),** corridas en ambas vistas, cada resultado
+  verificado contra el motor (top-15 real por `/spatial` para lista, eventos `point`/`select` del log
+  de R5 para mapa) en vez de fiarse del relato del autor.
+- **Malentendido detectado y corregido en T07 mapa:** el autor creyó haber alcanzado 2:14 y 5:39
+  además de 2:39; el log no tenía ningún evento de alcance para esas dos ids — probable cita dentro
+  del texto de otra nota, confundida con la nota misma (regla 2: la proposición se lee del id, no del
+  texto). Repetido (137 s, 103 eventos): confirmado que solo 2:39 es alcanzable en esa vista.
+- **R5 completo: 20 corridas** (10 tareas × 2 vistas). Por regla 8: mapa gana 3 tareas (T03, T05,
+  T10), lista gana 2 (T01, T06), 5 empates (T02, T04, T07, T08, T09) — **gana el mapa**, lo contrario
+  de lo que anticipaba la tabla del día 7 de `POC.md` (solo tenía fila para «R5 favours the list»).
+  Añadida una sección «R5 outcome» a `POC.md` con el resultado y la predicción del 21-09 (T06–T10
+  completa menos proporción que T01–T05), que se cumplió en las dos vistas.
+- Varias veces, a petición del autor, se contrastó si una nota alcanzada tenía relación conceptual
+  real con el ancla más allá del conjunto esperado — sí la tenía en varios casos (T02, T07), lo que
+  sugiere que el conjunto esperado de T06–T10 (propuesto por el chat, no por cita explícita como
+  T01–T05) puede ser estrecho; no se tocó, está congelado.
+
+**Resultado:** 16 commits de esta sesión en `feat/client-oklch-color`, todos de `R5.md`/`POC.md`;
+ninguno de motor ni cliente. 17 commits sin subir a `origin` en total (incluidos los 5 de la tarde del
+22). Suite no ejecutada: solo documentación.
+
+**Resuelto de entradas anteriores:**
+- 2026-09-22 (cierre): T01 lista con Start/Stop limpio; T02 a T10; tabla del día 7 — las tres,
+  hechas.
+
+**Sin resolver / decisión pendiente:**
+- Autor: qué hacer con el resultado «R5 favours the map» — no tiene fila en la tabla de decisión del
+  día 7; RefApp-01 sigue sin decidir si es list-first, map-first o sin cambio.
+- Integración de la larga cadena de ramas sin fusionar sigue sin decidirse, ahora con los commits de
+  hoy encima.
+- Ideas aparcadas el 22 (Partes por color/dimensión, vistas por dimensión, autocompletado, auto-ajuste
+  del bounding box) siguen esperando.
+- El chat «de la puerta» no dio señales hoy.
+- Sin tocar de entradas anteriores: K8 (eje z), documentación con formato fijo, manifest del paquete,
+  `/ingesta` acepta clave vacía, prueba intermitente `test_concurrent_reads_during_background_write`,
+  limpieza del scratchpad.
+
+**Próximo paso:**
+1. Autor: decidir qué hacer con el resultado de R5 (mapa gana), dado que no está en la tabla de
+   decisión.
+2. Cerrar el día 7 formalmente (ledger, resultados) según la hoja de ruta de `POC.md`.
+3. Decidir la integración de la cadena de ramas y si se sube algo a `origin`.
