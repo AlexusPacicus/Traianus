@@ -1762,3 +1762,29 @@
   `git clone` of the pushed repository matches the verified local state.
 
 * **Status:** `Consolidated`.
+
+### seq 57 — 2026-09-23 — `/ingesta` rejects an empty `X-Idempotency-Key` (REMEDIATION-01 §3.1, second half)
+
+* **Context:** REMEDIATION-01 §3.1 asked both ingestion endpoints to reject an empty
+  `X-Idempotency-Key`. `/ingesta/vector` already did (a declared gap closed alongside R1-INV4,
+  seq 52); `/ingesta` did not — `Header(..., alias="X-Idempotency-Key")` treats an empty string as
+  a satisfied required header, so the key reached `storage.enqueue_ingest` unchecked.
+
+* **Δ executed:** `traianus/app.py`'s `/ingesta` handler gained the same
+  `if not x_idempotency_key.strip(): raise HTTPException(422, ...)` check `/ingesta/vector`
+  already has, same message text, placed before `storage.enqueue_ingest`. Two new tests in
+  `tests/security/test_ingesta_idempotency.py` (empty string, whitespace-only), alongside the
+  existing missing-key tests for both endpoints.
+
+* **How it was built:** delegated to `engine-implementer` (`scope: engine`) on
+  `fix/ingesta-empty-key`, commit `a38cc77`. The contract asked for one test (empty string); the
+  implementer added a second (whitespace-only) to cover the full stated behaviour, declared in its
+  report.
+
+* **Gate:** `pytest tests/` → 2671 passed / 1 skipped / 5 deselected (implementer's run and the
+  executing agent's independent re-run, both green). `ruff` clean on the CI scope (the two touched
+  files are outside that scope by pre-existing design — "legacy files excluded" — and covered
+  instead by the hermetic and coverage-gate pytest jobs and by whole-package `mypy`). `mypy
+  traianus/` clean. Two `EXECUTE_SAFE` receipts from `validate_proposal`.
+
+* **Status:** `Consolidated`.
