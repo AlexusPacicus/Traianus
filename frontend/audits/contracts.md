@@ -70,8 +70,9 @@ Engine path (what the map is drawn from), for comparison
   single-text and batched encoding are not guaranteed bit-identical: a measured figure on the
   artefact and the rendered map can differ at ≈ 1e-7. Closed by decision (POC.md, Corpus
   loading): the engine is loaded with the artefact's vectors, one at a time, in text order,
-  through /ingesta/vector — provided that endpoint stores them without changing their bits
-  (to be verified in the day-3 contract).
+  through /ingesta/vector, which stores v̂ (Conversions above, computed as K6 does) byte for
+  byte, not the received row widened (verified 2026-09-19, tests/integration/
+  test_vector_ingest_bit_integrity.py).
 
 Random numbers
   numpy.random.Generator(PCG64(20260918)), draws in the order each record fixes. Streams are
@@ -118,7 +119,9 @@ del orden en que se suman los productos. Por eso los resultados solo son idénti
 mismo entorno (versión de numpy, BLAS, hilos, CPU); entre máquinas coinciden dentro de una
 tolerancia, y cada decisión guarda su margen al umbral para que un cambio por redondeo se vea. El
 mapa que dibuja el motor sale de vectores codificados de uno en uno; las mediciones, del artefacto
-codificado en lote: pueden diferir en torno a 1e-7, y está declarado. En la pantalla las
+codificado en lote: pueden diferir en torno a 1e-7, y está declarado. Al cargar el artefacto por
+/ingesta/vector, el motor guarda byte a byte el mismo v̂ que mide K6, no la fila recibida
+(verificado el 2026-09-19). En la pantalla las
 coordenadas viajan como float32, con un error relativo de hasta 6e-8.
 
 ## 1. K6 — colour channel predictability

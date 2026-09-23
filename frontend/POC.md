@@ -37,12 +37,13 @@ engine's `/mutate` (a new basis axis and epoch).
 **Corpus loading (decision, 2026-09-18).** The engine is loaded by ingesting the frozen
 artefact's vectors one at a time, in text order, through `/ingesta/vector` — never by
 re-encoding the texts and never in bulk. Two reasons: the vectors are then bit-identical to the
-ones K6 and R4 measure (binary32 → binary64 is exact), closing the gap declared in
-`audits/contracts.md` §0; and the state is built note by note, S_{n+1} = f(S_n, v_n), which keeps
+ones K6 and R4 measure (v̂ = row / √(row·row) in binary64 over the exactly widened binary32
+row), closing the gap declared in `audits/contracts.md` §0; and the state is built note by note, S_{n+1} = f(S_n, v_n), which keeps
 the arrival order in the revision log. Corrected 2026-09-19 against the code: within one epoch
 the threshold, lifecycle state and ε-edges do *not* form against the notes already present (see
-"Exploration: relational loss under arrival order"). To verify on day 3, in the contract:
-`/ingesta/vector` must not re-normalise in a way that changes the stored bits.
+"Exploration: relational loss under arrival order"). Verified 2026-09-19
+(`tests/integration/test_vector_ingest_bit_integrity.py`): `/ingesta/vector` stores v̂ byte for
+byte, computed as K6 does — not the received row widened, which differs from v̂.
 
 **No parallel store.** The engine already holds text (`manifold_nodes.text`), vectors
 (`data_plane`), lifecycle and edges, all append-only. RefApp-01 keeps no database of its own and
