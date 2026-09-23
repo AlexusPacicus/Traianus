@@ -1717,3 +1717,48 @@
   implementer's governed-path edits, plus one more (`d5192688`) for `AGENTS.md`.
 
 * **Status:** `Consolidated`.
+
+### seq 56 — 2026-09-23 — RefApp-01 leaves Traianus for its own repository
+
+* **Context:** the Day-7 decision table of the PoC record (`frontend/POC.md`) ties a favourable
+  result to an exit condition: "RefApp-01 leaves for its own repository ... and v2 is scoped". R1–R5
+  closed this session (R5's own decision, by the author: neither view replaces the other, the map
+  is the default). RefApp-01 never imported `traianus/` — it talks to the engine only over HTTP
+  (`POC.md`'s own opening line) — so, once `frontend/audits/` moved out ahead of time (seq 55), the
+  rest of `frontend/` had nothing left coupling it to this repository.
+
+* **Δ executed:** `frontend/{src,POC.md,R5.md,MANUAL_TESTS.md,package.json,package-lock.json,
+  tsconfig.json,vite.config.js,index.html}` extracted with `git-filter-repo` on a fresh clone
+  (`--no-local`, `--path-rename frontend/:`), preserving history: 57 of the ~75 commits that ever
+  touched `frontend/` survive the path filter (the rest only touched `frontend/audits/` or other
+  paths and filtered to empty). Pushed as `main` to a new private repository,
+  [`AlexusPacicus/refapp-01`](https://github.com/AlexusPacicus/refapp-01) — verified against a
+  fresh, independent clone of that URL. `frontend/` then removed from this tree (`git rm -r`),
+  `.github/workflows/ci.yml`'s `test-frontend` job dropped, `README.md`'s tree and a pointer to the
+  new repository updated.
+
+* **Scaffolded in the new repository, not from a contract (repo-level infrastructure, outside
+  `engine-implementer`'s scope):** `LICENSE` (AGPL-3.0-or-later, matching this repository, author's
+  decision this session), `README.md`, `.gitignore` (`node_modules/`, `dist/`, `.vite/`,
+  `.DS_Store`), a CI workflow (`npm ci && npm run typecheck && npm run build`, adapted from the
+  dropped `test-frontend` job). `package.json`/`package-lock.json` renamed from the inherited
+  `"ulpia"` to `"refapp-01"`. `POC.md`'s nine citations of `audits/...` rewritten to absolute links
+  pinned at this repository's relocation commit (`220819d9`) instead of the relative paths that no
+  longer resolve outside it; two paragraphs describing the blind-review confinement mechanism
+  (which stays here, not in the client) reworded so they do not imply `audits/` still lives with the
+  client. By the author's decision this session: no `AGENTS.md`/hooks/subagent apparatus in the new
+  repository for now.
+
+* **Declared, not done:** `frontend/node_modules/`, `frontend/dist/` and `frontend/.DS_Store` were
+  never git-tracked (gitignored) and so survive on disk under the now-untracked `frontend/`
+  directory; not removed (no `rm` authority). `v2` scoping (comparing several notes, anchoring one
+  and interacting with others, the engine's `/mutate`) is deferred to the new repository, by the
+  author's decision. `AGENTS.md`'s `scope: client` delegation clause (§6.1) is now unreachable
+  (nothing under `frontend/src/**` exists to touch) but is left as a declared, not a resolved, gap —
+  a governed-file decision for its own session, not folded into this one.
+
+* **Gate:** in Traianus, `pytest tests/` → 2669 passed / 1 skipped / 5 deselected, unchanged by the
+  removal. In `refapp-01`: `npm ci`, `npm run typecheck`, `npm run build` all green; a fresh
+  `git clone` of the pushed repository matches the verified local state.
+
+* **Status:** `Consolidated`.
