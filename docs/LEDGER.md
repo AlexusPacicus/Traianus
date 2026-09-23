@@ -1788,3 +1788,30 @@
   traianus/` clean. Two `EXECUTE_SAFE` receipts from `validate_proposal`.
 
 * **Status:** `Consolidated`.
+
+### seq 58 — 2026-09-23 — `build_review_package.py`: a `DENIED` directory cited without its trailing slash is denied, not unresolved
+
+* **Context:** the review-package manifest classified a citation of `data/spinoza/telemetry`
+  (bare, no trailing slash — how prose names a directory) as `unresolved` instead of `denied`.
+  `DENIED` carries three directory entries with a trailing slash (`data/spinoza/telemetry/`,
+  `docs/development/`, `.data/`); `_is_denied` compared with `path.startswith(entry)` only, which
+  the bare directory name never satisfies. `select_files` then tried to read it as a file, got
+  `None`, and filed it as unresolved. Declared, not a confinement break either way — an unresolved
+  path is never read into the package, same as a denied one — but a manifest that misreports its
+  own classification is a real defect, carried open since day 2 of the RefApp-01 PoC.
+
+* **Δ executed:** `_is_denied` now also matches `path == entry.rstrip("/")` for every `DENIED`
+  entry, not only `data/spinoza/telemetry/`. The contract that specified this fix wrongly claimed
+  only one `DENIED` entry ended in a slash; the implementer caught the error against the real code
+  and generalized the fix to all three rather than special-casing telemetry, which the contract's
+  own stated behaviour (B1) already implied. One new regression test in
+  `tests/unit/test_review_package.py`.
+
+* **How it was built:** delegated to `engine-implementer` (`scope: tools`) on
+  `fix/manifest-denied-trailing-slash`, commit `a76d802`.
+
+* **Gate:** `pytest tests/` → 2672 passed / 1 skipped / 5 deselected. `ruff`/`mypy` on the two
+  touched files (pinned CI versions, run directly — neither file is in `ci.yml`'s scoped
+  invocations, a pre-existing gap unrelated to this change). Two `EXECUTE_SAFE` receipts.
+
+* **Status:** `Consolidated`.
