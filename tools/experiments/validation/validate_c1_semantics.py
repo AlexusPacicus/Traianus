@@ -134,9 +134,9 @@ def run():
         accepted = sum(
             client.post(
                 "/ingesta", content=t.encode("utf-8"),
-                headers={**headers, "Content-Type": "text/plain"},
+                headers={**headers, "Content-Type": "text/plain", "X-Idempotency-Key": f"c1-semantics-{i}"},
             ).status_code == 200
-            for t in CORPUS
+            for i, t in enumerate(CORPUS)
         )
         nodes = client.get("/nodos", headers=headers).json().get("nodes", [])
         consolidated = sum(

@@ -5,6 +5,7 @@ request ID propagation, and concurrency conflict detection.
 import json
 import logging
 import concurrent.futures
+import uuid
 
 import numpy as np
 import pytest
@@ -28,7 +29,7 @@ class TestRequestIdPropagation:
         res = client.post(
             "/ingesta/vector",
             json={"vector": _unit_vector()},
-            headers=auth_headers,
+            headers={**auth_headers, "X-Idempotency-Key": str(uuid.uuid4())},
         )
         assert res.status_code == 201
         assert "x-request-id" in res.headers
@@ -39,7 +40,7 @@ class TestRequestIdPropagation:
         res = client.post(
             "/ingesta/vector",
             json={"vector": _unit_vector()},
-            headers={**auth_headers, "X-Request-ID": client_id},
+            headers={**auth_headers, "X-Request-ID": client_id, "X-Idempotency-Key": str(uuid.uuid4())},
         )
         assert res.status_code == 201
         assert res.headers["x-request-id"] == client_id
@@ -56,7 +57,7 @@ class TestStructuredLogging:
         res = client.post(
             "/ingesta/vector",
             json={"vector": _unit_vector()},
-            headers=auth_headers,
+            headers={**auth_headers, "X-Idempotency-Key": str(uuid.uuid4())},
         )
         assert res.status_code == 201
         captured = capsys.readouterr()
@@ -76,7 +77,7 @@ class TestConcurrencyNoDuplicates:
             return client.post(
                 "/ingesta/vector",
                 json={"vector": vector, "label": "concurrent_test"},
-                headers=auth_headers,
+                headers={**auth_headers, "X-Idempotency-Key": str(uuid.uuid4())},
             )
 
         with concurrent.futures.ThreadPoolExecutor(max_workers=4) as pool:

@@ -8,7 +8,7 @@ import json
 from typing import List, Literal
 from fastapi import FastAPI, BackgroundTasks, HTTPException, Header, Depends, Request, Response
 from fastapi.middleware.cors import CORSMiddleware
-from pydantic import BaseModel, Field
+from pydantic import BaseModel, Field, field_validator, StrictBool
 from traianus.representation.sentence_transformer import (
     MODEL_ID,
     MODEL_REVISION,
@@ -19,7 +19,15 @@ from traianus.geometry.observables import (
     calibrate_critical_threshold,
     compute_kinetic_resistance,
 )
+from traianus.geometry.perspective import observe, perspective_frame
 from traianus.geometry.polar_projector import PolarProjector
+from traianus.geometry.spatial_observables import (
+    CHANNELS,
+    EPOCH_PROVENANCE,
+    EpochFrame,
+    derive_spatial_observables,
+    fit_epoch_frame,
+)
 from traianus.governance.gate import evaluate_gate
 from traianus.telemetry.variance_tracker import VarianceTracker
 from traianus import storage
@@ -126,6 +134,8 @@ ALLOWED_INGRESS_TYPES = {"text/plain"}
 # becomes part of persistent node ids and, downstream, edge ids.
 _SAFE_LABEL_RE = re.compile(r"^[A-Za-z0-9_-]{1,64}$")
 
+MAX_NODE_TEXT_CHARS = 20000
+
 
 # =====================================================================
 # LOCAL OPERATOR TOKEN (audit H3): routes that mutate state (or expose
@@ -163,7 +173,7 @@ class RefinedEntity(BaseModel):
 
 class ConsolidationBody(BaseModel):
     text: str = Field(..., description="Structured entity payload content in plain text.")
-    ethical_key: bool = Field(..., description="Explicit Ethical Key (HITL) human operator confirmation. Required; omitted or false keeps the node out of consolidation (ADR-022).")
+    ethical_key: StrictBool = Field(..., description="Explicit Ethical Key (HITL) human operator confirmation. Required and a JSON boolean, never coerced; omitted or false keeps the node out of consolidation (ADR-022).")
 
 class HitlRelation(BaseModel):
     source: str
@@ -173,7 +183,19 @@ class HitlRelation(BaseModel):
 class VectorIngestBody(BaseModel):
     vector: list[float] = Field(..., description="Raw coordinate vector v ∈ R^d.")
     label: str | None = Field(default=None, description="Optional identifier or tag.")
+    text: str | None = Field(
+        default=None,
+        max_length=MAX_NODE_TEXT_CHARS,
+        description="Optional node text, stored as given and never embedded; defaults to the label.",
+    )
     metadata: dict = Field(default_factory=dict, description="Optional metadata dictionary.")
+
+    @field_validator("text")
+    @classmethod
+    def _reject_null_byte(cls, value: str | None) -> str | None:
+        if value is not None and "\x00" in value:
+            raise ValueError("text must not contain null bytes.")
+        return value
 
 # =====================================================================
 # VECTOR UTILITIES
@@ -377,7 +399,9 @@ def async_spectral_processor(ingestion_id: int, raw_text: str):
                 json.dumps({"error": str(e)}),
             )
         except Exception:
-            pass
+            get_logger(request_id=f"bg-{ingestion_id}").exception(
+                "ingestion_error_log_failed", ingestion_id=ingestion_id
+            )
 
 # =====================================================================
 # FRONTEND CUSTOMS OPERATIONAL ENDPOINTS
@@ -387,7 +411,7 @@ def async_spectral_processor(ingestion_id: int, raw_text: str):
 async def frontend_ingestion_endpoint(
     request: Request,
     background_tasks: BackgroundTasks,
-    x_idempotency_key: str | None = Header(default=None),
+    x_idempotency_key: str = Header(..., alias="X-Idempotency-Key"),
 ):
     # Zero-Trust ingress allowlist (H2): the MIME check moved from the JSON
     # `type` field to the Content-Type header (SPEC v0.2 §3.4, contract change).
@@ -411,13 +435,28 @@ async def frontend_ingestion_endpoint(
     background_tasks.add_task(async_spectral_processor, ingestion_id, text)
     return {"status": "accepted", "ingestion_id": ingestion_id}
 
+def _vector_duplicate_response(response: Response, request_id: str, log, node_id: str, seq: int) -> dict[str, object]:
+    """Idempotent replay of /ingesta/vector (R1-INV4): HTTP 200 with the stored
+    identity and `duplicate: True`, as /ingesta answers a repeated key."""
+    log.info("vector_ingestion_duplicate", node_id=node_id, seq=seq)
+    response.status_code = 200
+    response.headers["X-Request-ID"] = request_id
+    return {"status": "accepted", "node_id": node_id, "seq": seq, "duplicate": True}
+
+
 @app.post("/ingesta/vector", status_code=201, dependencies=[Depends(require_token)])
-async def vector_ingestion_endpoint(body: VectorIngestBody, request: Request, response: Response):
+async def vector_ingestion_endpoint(
+    body: VectorIngestBody,
+    request: Request,
+    response: Response,
+    x_idempotency_key: str = Header(..., alias="X-Idempotency-Key"),
+):
     """Provider-agnostic vector ingestion (RH-1): accepts raw coordinate
     arrays without text conversion, text/plain headers, or language encoders.
 
     Validates dimension, numeric integrity, and non-zero norm; L2-normalizes
-    before projection; persists as append-only node revision.
+    before projection; persists as append-only node revision. A repeated
+    X-Idempotency-Key is answered 200 `duplicate: true` and writes nothing (R1-INV4).
 
     Emits structured logs (JSON) with request_id for observability.
     Propagates X-Request-ID for distributed tracing correlation."""
@@ -480,6 +519,26 @@ async def vector_ingestion_endpoint(body: VectorIngestBody, request: Request, re
         log.warning("vector_ingestion_rejected", phase="validation", reason="zero_vector")
         raise HTTPException(status_code=422, detail="Zero-vector (norm == 0) rejected.")
 
+    if body.label and not _SAFE_LABEL_RE.fullmatch(body.label):
+        log.warning("vector_ingestion_rejected", phase="validation", reason="unsafe_label")
+        raise HTTPException(
+            status_code=422,
+            detail=(
+                "Label must match [A-Za-z0-9_-]{1,64} "
+                "(node-id namespace protection)."
+            ),
+        )
+
+    # R1-INV4: P(k) = (k != empty) and at most one row carries k. This lookup is an
+    # optimisation; the UNIQUE index decides a race (see the insert below).
+    if not x_idempotency_key.strip():
+        log.warning("vector_ingestion_rejected", phase="validation", reason="empty_idempotency_key")
+        raise HTTPException(status_code=422, detail="X-Idempotency-Key must not be empty.")
+    with storage.get_db_connection() as conn:
+        stored = storage.node_by_idempotency_key(conn, x_idempotency_key)
+    if stored is not None:
+        return _vector_duplicate_response(response, request_id, log, *stored)
+
     norm_idea_vector = arr / norm
 
     t_proj_start = now_seconds()
@@ -507,16 +566,6 @@ async def vector_ingestion_endpoint(body: VectorIngestBody, request: Request, re
         for axis_id, value in projections.items()
     })
 
-    if body.label and not _SAFE_LABEL_RE.fullmatch(body.label):
-        log.warning("vector_ingestion_rejected", phase="validation", reason="unsafe_label")
-        raise HTTPException(
-            status_code=422,
-            detail=(
-                "Label must match [A-Za-z0-9_-]{1,64} "
-                "(node-id namespace protection)."
-            ),
-        )
-
     if body.label:
         node_id = f"VEC_{body.label}"
     else:
@@ -527,7 +576,7 @@ async def vector_ingestion_endpoint(body: VectorIngestBody, request: Request, re
         with storage.get_db_connection() as conn:
             seq = storage.insert_node_revision(
                 node_id,
-                body.label or "",
+                body.text or body.label or "",
                 toon_symbol,
                 lifecycle_state,
                 action_potential,
@@ -536,7 +585,17 @@ async def vector_ingestion_endpoint(body: VectorIngestBody, request: Request, re
                 projections_json,
                 storage.active_epoch(),
                 conn=conn,
+                guard_consolidated=True,
+                idempotency_key=x_idempotency_key,
             )
+    except storage.DuplicateIdempotencyKeyError as e:
+        return _vector_duplicate_response(response, request_id, log, e.node_id, e.seq)
+    except storage.ConsolidatedRegressionError as e:
+        log.warning("vector_ingestion_rejected", phase="persist", reason="consolidated_regression")
+        raise HTTPException(
+            status_code=409,
+            detail="Node is consolidated; re-ingestion would regress its lifecycle state. Use /nodos/{id}/consolidar.",
+        ) from e
     except storage.StorageError as e:
         log.error("vector_ingestion_failed", phase="persist", reason="storage_error")
         raise HTTPException(status_code=503, detail="Ingress persistence unavailable.") from e
@@ -643,7 +702,7 @@ async def consolidate_sovereignty(node_id: str, body: ConsolidationBody):
             list(projections.values()), body.ethical_key, dynamic_threshold
         )
         new_state: LifecycleState = gate["state"]
-        action_pot = 1.0 if new_state == "consolidated" else float(gate["topological_key"]["variance"])
+        action_pot = float(gate["topological_key"]["variance"])
         revision_milestone_val = 1 if body.ethical_key else 0
 
         with storage.get_db_connection() as conn:
@@ -716,7 +775,7 @@ async def get_relations():
         ]
         auto = [
             {
-                "id": f"auto-edge-{e['source']}-{e['target']}",
+                "id": storage.build_edge_id("auto-edge", e["source"], e["target"]),
                 "source": e["source"],
                 "target": e["target"],
                 "state": "auto",
@@ -727,11 +786,126 @@ async def get_relations():
     except Exception as e:
         raise HTTPException(status_code=500, detail="Internal server error.") from e
 
+def _active_epoch_frame() -> EpochFrame | None:
+    """Frozen frame of the active epoch, or None if never fitted.
+
+    Fitting here per request would re-place every node on each ingestion, the
+    incremental drift the frame exists to avoid (ADR-026); only
+    POST /spatial/calibrate fits it.
+    """
+    row = storage.get_active_epoch_frame(EPOCH_PROVENANCE)
+    if row is None:
+        return None
+    return EpochFrame(EPOCH_PROVENANCE, row["ranking"], row["mu"], row["sigma"], row["k_sigma"])
+
+
+@app.get("/spatial", dependencies=[Depends(require_token)])
+async def get_spatial_observables(anchor: str | None = None):
+    """Per-node spatial observables in the frozen epoch frame (Ulpia, observational).
+
+    Derives {id, x, y, z, l, c, h} for each current node from its persisted
+    384D vector, the active geodetic basis and the epoch frame. Pure read (no
+    writes, no lifecycle mutation) — mirrors /relations (ADR-023/H5). Without a
+    frame it answers 409: an overview needs one shared frame.
+
+    With `anchor`, a current node id, it answers the perspective at that node:
+    {anchor, poles, fallback, nodes}, x and y z-scored in the node's own frame
+    (traianus.geometry.perspective), z, l, c and h the epoch channels of the
+    overview, so a node keeps its colour across views. An id that is not a
+    current node is 404; a ValueError of the perspective functions is 422.
+    """
+    try:
+        full_basis = get_geodetic_matrix_db()
+        if not full_basis and anchor is None:
+            return {"nodes": []}
+        frame = _active_epoch_frame()
+        if not full_basis or frame is None:
+            raise HTTPException(
+                status_code=409,
+                detail="No epoch frame for the active epoch: POST /spatial/calibrate first.",
+            )
+        basis = {k: v["vector"] for k, v in full_basis.items()}
+        vectors = storage.get_current_node_vectors()
+        if anchor is not None:
+            if anchor not in vectors:
+                raise HTTPException(status_code=404, detail=f"Node {anchor} not found.")
+            ids = sorted(vectors)
+            matrix = np.vstack([vectors[i] for i in ids])
+            index = ids.index(anchor)
+            try:
+                perspective = perspective_frame(matrix[index], basis)
+                dipole = perspective.frame
+                coords = observe(
+                    matrix, index, horizontal=dipole.v_dipole / dipole.v_dipole_norm_sq
+                )
+            except ValueError as e:
+                raise HTTPException(status_code=422, detail=str(e)) from e
+            return {
+                "anchor": anchor,
+                "poles": list(perspective.poles),
+                "fallback": perspective.fallback,
+                "nodes": [
+                    {
+                        "id": node_id,
+                        **derive_spatial_observables(vectors[node_id], basis, frame),
+                        "x": float(coords[row, 0]),
+                        "y": float(coords[row, 1]),
+                    }
+                    for row, node_id in enumerate(ids)
+                ],
+            }
+        nodes = [
+            {"id": node_id, **derive_spatial_observables(vector, basis, frame)}
+            for node_id, vector in vectors.items()
+        ]
+        return {"nodes": sorted(nodes, key=lambda n: n["id"])}
+    except HTTPException:
+        raise
+    except Exception as e:
+        raise HTTPException(status_code=500, detail="Internal server error.") from e
+
+
+@app.post("/spatial/calibrate", status_code=201, dependencies=[Depends(require_token)])
+async def calibrate_spatial_frame():
+    """Fit the epoch frame on the current nodes and append it as a revision.
+
+    The one explicit write of the spatial layer (append-only, AGENTS 4.1): the
+    frame stays frozen until the next call, so nodes never move on ingestion.
+    """
+    try:
+        full_basis = get_geodetic_matrix_db()
+        if not full_basis:
+            raise HTTPException(status_code=400, detail="Geodetic basis is empty.")
+        basis = {k: v["vector"] for k, v in full_basis.items()}
+        vectors = storage.get_current_node_vectors()
+        if not vectors:
+            raise HTTPException(status_code=409, detail="No nodes to fit the epoch frame on.")
+        ids = sorted(vectors)
+        frame = fit_epoch_frame(np.vstack([vectors[i] for i in ids]), basis, EPOCH_PROVENANCE)
+        seq = storage.persist_epoch_frame(
+            EPOCH_PROVENANCE, frame.ranking, frame.mu, frame.sigma, frame.k_sigma, len(ids)
+        )
+        return {
+            "epoch_provenance": EPOCH_PROVENANCE,
+            "seq": seq,
+            "ranking": list(frame.ranking),
+            "mu": dict(zip(CHANNELS, frame.mu)),
+            "sigma": dict(zip(CHANNELS, frame.sigma)),
+            "k_sigma": frame.k_sigma,
+            "sample_size": len(ids),
+        }
+    except HTTPException:
+        raise
+    except ValueError as e:
+        raise HTTPException(status_code=422, detail=str(e)) from e
+    except Exception as e:
+        raise HTTPException(status_code=500, detail="Internal server error.") from e
+
 @app.post("/relations", dependencies=[Depends(require_token)])
 async def forge_relation(relation: HitlRelation):
     try:
         nodes = sorted([relation.source, relation.target])
-        edge_id = f"edge-{nodes[0]}-{nodes[1]}"
+        edge_id = storage.build_edge_id("edge", nodes[0], nodes[1])
 
         with storage.get_db_connection() as conn:
             # L2 (audit): dangling edges not allowed. Each endpoint

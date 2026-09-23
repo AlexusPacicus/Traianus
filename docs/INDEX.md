@@ -32,6 +32,7 @@ graph TD
     ROOT --> EAS[specifications/EAS-01_LOGOGRAPHIC_PHYSICS.md]
     ROOT --> AUD[audit/AUDIT.md]
     ROOT --> ROAD[roadmap/NEXT_RESEARCH.md]
+    ROOT --> METH[methodology/METHODOLOGY.md]
     ROOT --> REM[audit/remediation/]
     ROOT --> STA[STATUS.md]
     
@@ -47,6 +48,7 @@ graph TD
 * **[specifications/EAS-01_LOGOGRAPHIC_PHYSICS.md](./specifications/EAS-01_LOGOGRAPHIC_PHYSICS.md):** Normative specification of the spectral dispersion experiment, NCD coupling, and Representation-Governance Coupling Problem report.
 * **[audit/AUDIT.md](./audit/AUDIT.md):** Technical audit report with remediation status.
 * **[roadmap/NEXT_RESEARCH.md](./roadmap/NEXT_RESEARCH.md):** Research backlog — Ulpia Spatial Observation Framework, projection/observation theory, nuclear invariants, and future research directions.
+* **[methodology/METHODOLOGY.md](./methodology/METHODOLOGY.md):** Research loop every study runs (problem → hypothesis + refuters → instrument audit + attack → reformulation gate → registry), with paper-writing rules and the evidence pipeline (harness, claims registry, verifier) as sub-nodes. Incubated here; moves to its own repository after a second study completes the loop.
 * **[STATUS.md](./STATUS.md):** Formal classification (Implemented / Experimental / Research) + Known Limitations.
 
 ---

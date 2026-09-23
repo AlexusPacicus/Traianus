@@ -7,6 +7,8 @@ THEORETICAL_FRAMEWORK.md H1 and the production plan.
 H1 hypothesis: "El aumento de densidad de puntos dentro de d dimensiones
 fixes incrementally increase the vorticity ω and the dismorphism
 cinético K_cin."""
+import uuid
+
 import numpy as np
 import pytest
 
@@ -90,7 +92,7 @@ class TestH1PressureIntegration:
             res = client.post(
                 "/ingesta/vector",
                 json={"vector": vector, "label": label},
-                headers=auth_headers,
+                headers={**auth_headers, "X-Idempotency-Key": str(uuid.uuid4())},
             )
             assert res.status_code == 201, f"Ingestion {i} failed: {res.text}"
             body = res.json()
@@ -123,7 +125,7 @@ class TestH1PressureIntegration:
             res = client.post(
                 "/ingesta/vector",
                 json={"vector": vector, "label": label},
-                headers=auth_headers,
+                headers={**auth_headers, "X-Idempotency-Key": str(uuid.uuid4())},
             )
             assert res.status_code == 201, f"Ingestion {i} failed: {res.text}"
             body = res.json()

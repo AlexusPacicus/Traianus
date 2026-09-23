@@ -35,6 +35,7 @@ import os
 import sqlite3
 import sys
 import tempfile
+import uuid
 from collections import Counter, defaultdict
 from pathlib import Path
 
@@ -164,11 +165,11 @@ def run_governance_scenario(provider, corpus, workdir: Path,
         with TestClient(main_module.app) as client:
             out["probe_415"] = client.post(
                 "/ingesta", content=b"{}",
-                headers={**auth, "Content-Type": "application/json"},
+                headers={**auth, "Content-Type": "application/json", "X-Idempotency-Key": str(uuid.uuid4())},
             ).status_code
             out["probe_null"] = client.post(
                 "/ingesta", content=b"a\x00b",
-                headers={**auth, "Content-Type": "text/plain"},
+                headers={**auth, "Content-Type": "text/plain", "X-Idempotency-Key": str(uuid.uuid4())},
             ).status_code
 
             category_by_node = {}
@@ -176,7 +177,7 @@ def run_governance_scenario(provider, corpus, workdir: Path,
             for label, paragraph in corpus:
                 res = client.post(
                     "/ingesta", content=paragraph.encode("utf-8"),
-                    headers={**auth, "Content-Type": "text/plain"},
+                    headers={**auth, "Content-Type": "text/plain", "X-Idempotency-Key": str(uuid.uuid4())},
                 )
                 if res.status_code == 200:
                     accepted += 1
@@ -282,11 +283,14 @@ def run_rejection_scenario(workdir: Path, token: str = DEFAULT_TOKEN) -> dict:
     vec = (vec / np.linalg.norm(vec)).tolist()
 
     with TestClient(main_module.app) as client:
-        res = client.post("/ingesta/vector", json={"vector": vec}, headers=auth)
+        res = client.post(
+            "/ingesta/vector", json={"vector": vec},
+            headers={**auth, "X-Idempotency-Key": str(uuid.uuid4())},
+        )
         out["vector_422"] = res.status_code
         text = client.post(
             "/ingesta", content="512d note".encode("utf-8"),
-            headers={**auth, "Content-Type": "text/plain"},
+            headers={**auth, "Content-Type": "text/plain", "X-Idempotency-Key": str(uuid.uuid4())},
         )
         out["text_accepted"] = text.status_code
 

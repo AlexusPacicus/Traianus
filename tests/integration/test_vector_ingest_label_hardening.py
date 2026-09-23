@@ -5,6 +5,8 @@ downstream, into edge ids (`edge-<src>-<tgt>`). Unbounded/unsafe labels
 allow path-like, whitespace, unicode or oversized identifiers into the
 manifold namespace. Contract: `[A-Za-z0-9_-]{1,64}`, else 422.
 """
+import uuid
+
 import numpy as np
 import pytest
 
@@ -26,7 +28,7 @@ def test_unsafe_label_rejected_422(client, auth_headers, bad_label):
     res = client.post(
         "/ingesta/vector",
         json={"vector": _unit_vector(), "label": bad_label},
-        headers=auth_headers,
+        headers={**auth_headers, "X-Idempotency-Key": str(uuid.uuid4())},
     )
     assert res.status_code == 422
 
@@ -35,7 +37,7 @@ def test_safe_label_accepted_verbatim(client, auth_headers):
     res = client.post(
         "/ingesta/vector",
         json={"vector": _unit_vector(), "label": "ok-LABEL_9"},
-        headers=auth_headers,
+        headers={**auth_headers, "X-Idempotency-Key": str(uuid.uuid4())},
     )
     assert res.status_code == 201
     assert res.json()["node_id"] == "VEC_ok-LABEL_9"
@@ -45,6 +47,6 @@ def test_max_length_label_accepted(client, auth_headers):
     res = client.post(
         "/ingesta/vector",
         json={"vector": _unit_vector(), "label": "a" * 64},
-        headers=auth_headers,
+        headers={**auth_headers, "X-Idempotency-Key": str(uuid.uuid4())},
     )
     assert res.status_code == 201

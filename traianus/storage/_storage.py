@@ -16,8 +16,9 @@ Design invariants (SPEC-REFACTOR-v0.2 / audit H4):
   the garbage collector.
 """
 
+import json
 import sqlite3
-from collections.abc import Iterator
+from collections.abc import Iterator, Sequence
 from contextlib import contextmanager
 
 import numpy as np
@@ -93,9 +94,17 @@ CREATE TABLE IF NOT EXISTS manifold_nodes (
     epoch_provenance TEXT NOT NULL DEFAULT 'PROSTHETIC_NSM_V1',
     event_type TEXT CHECK (event_type IS NULL OR event_type IN ('ERROR', 'RECALIBRATION_SIGNAL')),
     sys_internal_timestamp DATETIME DEFAULT CURRENT_TIMESTAMP,
+    idempotency_key TEXT,
     PRIMARY KEY (id, seq),
     CHECK (lifecycle_state IN ('pending_approval', 'incubating', 'consolidated', 'telemetry_error'))
 )
+"""
+
+# R1-INV4: a UNIQUE index rather than a table rebuild. NULLs stay pairwise distinct, so
+# revisions written without a key (consolidation, text path, telemetry) are unaffected.
+MANIFOLD_NODES_IDEMPOTENCY_INDEX_DDL = """
+CREATE UNIQUE INDEX IF NOT EXISTS idx_manifold_nodes_idempotency_key
+    ON manifold_nodes (idempotency_key)
 """
 
 MANIFOLD_EDGES_DDL = """
@@ -119,6 +128,26 @@ CREATE TABLE IF NOT EXISTS geodesic_axes (
     epoch_provenance TEXT NOT NULL DEFAULT 'PROSTHETIC_NSM_V1',
     created_at TIMESTAMP DEFAULT CURRENT_TIMESTAMP,
     PRIMARY KEY (id, epoch_provenance)
+)
+"""
+
+SPATIAL_CALIBRATION_DDL = """
+CREATE TABLE IF NOT EXISTS spatial_calibration (
+    epoch_provenance TEXT NOT NULL,
+    seq INTEGER NOT NULL,
+    axis_ranking TEXT NOT NULL,
+    mu_x REAL NOT NULL,
+    sigma_x REAL NOT NULL,
+    mu_y REAL NOT NULL,
+    sigma_y REAL NOT NULL,
+    mu_lambda_3 REAL NOT NULL,
+    sigma_lambda_3 REAL NOT NULL,
+    mu_a_8 REAL NOT NULL,
+    sigma_a_8 REAL NOT NULL,
+    k_sigma REAL NOT NULL DEFAULT 3.0,
+    sample_size INTEGER NOT NULL,
+    created_at TIMESTAMP DEFAULT CURRENT_TIMESTAMP,
+    PRIMARY KEY (epoch_provenance, seq)
 )
 """
 
@@ -242,6 +271,14 @@ def init_relational_tables():
         ]
         if event_cols and "event_type" not in event_cols:
             conn.execute("ALTER TABLE manifold_nodes ADD COLUMN event_type TEXT")
+        # R1-INV4: nullable key column + UNIQUE index, no rebuild (the revision log
+        # is never copied); existing rows keep NULL.
+        key_cols = [
+            row[1] for row in conn.execute("PRAGMA table_info(manifold_nodes)").fetchall()
+        ]
+        if "idempotency_key" not in key_cols:
+            conn.execute("ALTER TABLE manifold_nodes ADD COLUMN idempotency_key TEXT")
+        conn.execute(MANIFOLD_NODES_IDEMPOTENCY_INDEX_DDL)
         conn.execute(MANIFOLD_EDGES_DDL)
         # Schema migration for pre-H4 DBs: each existing edge becomes its
         # revision seq=1. History is preserved (append-only invariant #1).
@@ -273,6 +310,7 @@ def init_relational_tables():
             """)
             conn.execute("DROP TABLE data_plane_legacy")
         conn.execute(CONTROL_PLANE_DDL)
+        conn.execute(SPATIAL_CALIBRATION_DDL)
         _init_geodesic_axes(conn)
 
 
@@ -413,6 +451,22 @@ class StorageError(Exception):
     """Raised by persistence functions on unrecoverable storage failures."""
 
 
+class ConsolidatedRegressionError(StorageError):
+    """An ingestion write would supersede a consolidated revision (R4)."""
+
+
+class DuplicateIdempotencyKeyError(Exception):
+    """A node revision already carries this idempotency key (R1-INV4).
+
+    An idempotent replay, not a failure, hence not a StorageError. `node_id` and
+    `seq` identify the stored revision that holds the key."""
+
+    def __init__(self, node_id: str, seq: int) -> None:
+        super().__init__(f"idempotency key already stored on {node_id} seq {seq}")
+        self.node_id = node_id
+        self.seq = seq
+
+
 def enqueue_ingest(text: str, idempotency_key: str | None) -> tuple[int, bool]:
     """Persists a raw ingestion payload; returns (ingestion_id, duplicate).
 
@@ -452,23 +506,46 @@ def mark_queue_processed(conn: sqlite3.Connection, ingestion_id: int) -> None:
 # NODE REVISION LOG
 # =====================================================================
 
+def _raise_if_key_taken(conn: sqlite3.Connection, key: str | None) -> None:
+    if key is None:
+        return
+    taken = node_by_idempotency_key(conn, key)
+    if taken is not None:
+        raise DuplicateIdempotencyKeyError(*taken)
+
+
 def _insert_node_revision(conn: sqlite3.Connection, node_id: str, text: str,
                           toon_factor: str, lifecycle_state: str, action_potential: float,
                           revision_milestone: int, vector_blob: bytes,
-                          projections_json: str, epoch_provenance: str) -> int:
+                          projections_json: str, epoch_provenance: str,
+                          guard_consolidated: bool = False,
+                          idempotency_key: str | None = None) -> int:
+    # guard_consolidated makes the check part of the INSERT statement itself, so
+    # a concurrent consolidation cannot slip between a read and the write.
+    # A taken idempotency key is a replay, not an (id, seq) collision: the UNIQUE
+    # index is the arbiter, the key is re-read, and the insert is never retried.
     for attempt in range(3):
         seq = next_node_seq(conn, node_id)
         try:
-            conn.execute("""
+            cur = conn.execute("""
                 INSERT INTO manifold_nodes
-                (id, seq, text, toon_factor, lifecycle_state, action_potential, revision_milestone, vector_blob, projections_json, epoch_provenance)
-                VALUES (?, ?, ?, ?, ?, ?, ?, ?, ?, ?)
+                (id, seq, text, toon_factor, lifecycle_state, action_potential, revision_milestone, vector_blob, projections_json, epoch_provenance, idempotency_key)
+                SELECT ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?
+                WHERE NOT (? AND EXISTS (
+                    SELECT 1 FROM manifold_nodes c
+                    WHERE c.id = ? AND c.lifecycle_state = 'consolidated'
+                      AND c.seq = (SELECT MAX(seq) FROM manifold_nodes WHERE id = c.id)))
             """, (
                 node_id, seq, text, toon_factor, lifecycle_state, action_potential,
                 revision_milestone, vector_blob, projections_json, epoch_provenance,
+                idempotency_key, int(guard_consolidated), node_id,
             ))
+            if cur.rowcount == 0:
+                _raise_if_key_taken(conn, idempotency_key)
+                raise ConsolidatedRegressionError(node_id)
             return seq
         except sqlite3.IntegrityError:
+            _raise_if_key_taken(conn, idempotency_key)
             if attempt == 2:
                 raise
     return seq  # unreachable
@@ -478,21 +555,30 @@ def insert_node_revision(node_id: str, text: str, toon_factor: str,
                          lifecycle_state: str, action_potential: float,
                          revision_milestone: int, vector_blob: bytes,
                          projections_json: str, epoch_provenance: str,
-                         conn: sqlite3.Connection | None = None) -> int:
+                         conn: sqlite3.Connection | None = None,
+                         guard_consolidated: bool = False,
+                         idempotency_key: str | None = None) -> int:
     """Inserts a new node revision (append-only, H4); returns the seq used.
 
     When `conn` is provided, operates inside that transaction (no commit —
     the caller owns it); otherwise opens its own connection and commits.
+    With `guard_consolidated`, raises ConsolidatedRegressionError instead of
+    writing over a node whose current revision is consolidated (R4).
+    With `idempotency_key`, the revision stores the key; if another revision
+    already carries it, nothing is written and DuplicateIdempotencyKeyError
+    names the stored one (R1-INV4).
     """
     if conn is None:
         with get_db_connection() as c:
             return _insert_node_revision(
                 c, node_id, text, toon_factor, lifecycle_state, action_potential,
                 revision_milestone, vector_blob, projections_json, epoch_provenance,
+                guard_consolidated, idempotency_key,
             )
     return _insert_node_revision(
         conn, node_id, text, toon_factor, lifecycle_state, action_potential,
         revision_milestone, vector_blob, projections_json, epoch_provenance,
+        guard_consolidated, idempotency_key,
     )
 
 
@@ -531,6 +617,14 @@ def node_exists(conn: sqlite3.Connection, node_id: str) -> bool:
     return conn.execute(
         "SELECT 1 FROM manifold_nodes WHERE id = ? LIMIT 1", (node_id,)
     ).fetchone() is not None
+
+
+def node_by_idempotency_key(conn: sqlite3.Connection, key: str) -> tuple[str, int] | None:
+    """(id, seq) of the revision carrying this idempotency key, or None (R1-INV4)."""
+    row = conn.execute(
+        "SELECT id, seq FROM manifold_nodes WHERE idempotency_key = ?", (key,)
+    ).fetchone()
+    return None if row is None else (str(row[0]), int(row[1]))
 
 
 def get_current_nodes() -> list[tuple]:
@@ -598,16 +692,52 @@ def _current_node_vectors(conn: sqlite3.Connection) -> dict[str, np.ndarray]:
     return {nid: np.frombuffer(blob, dtype=np.float64) for nid, blob in rows}
 
 
+def get_current_node_vectors() -> dict[str, np.ndarray]:
+    """Current-state node vectors (MAX(seq) per id), telemetry_error excluded.
+
+    Public observable reader for spatial derivation (Ulpia Fase 0 / GET
+    /spatial). Recomputed on read; never mutates persisted state.
+    """
+    with get_db_connection() as conn:
+        return _current_node_vectors(conn)
+
+
+_EDGE_CACHE: tuple[tuple[str, float, int], list[dict]] | None = None
+
+
 def rebuild_epsilon_edges(epsilon: float) -> list[dict]:
     """Deterministic E_n (ADR-023/H5, RE-08): (v_i, v_j) ∈ E_n iff ||v_i − v_j||₂ ≤ epsilon.
 
     Reads current states (MAX(seq)) from manifold_nodes (telemetry_error
     excluded), projects L2 vectors, and returns ε-adjacent edges. Does not
     mutate DB: E_n reconstruction is a pure function over persisted state.
+
+    The O(n²) result is cached (R8) under (db path, epsilon, MAX(rowid) of
+    manifold_nodes). The log is append-only (AGENTS §4.1), so MAX(rowid) is a
+    strictly increasing version: any appended revision invalidates the entry,
+    an unchanged log costs one O(1) query per read, and another process
+    writing to the same file is detected because the version is read from the
+    database on every call, not held in memory.
     """
+    global _EDGE_CACHE
     with get_db_connection() as conn:
+        version = conn.execute("SELECT COALESCE(MAX(rowid), 0) FROM manifold_nodes").fetchone()[0]
+        key = (_active_db_path(), epsilon, int(version))
+        if _EDGE_CACHE is not None and _EDGE_CACHE[0] == key:
+            return list(_EDGE_CACHE[1])
         nodes = _current_node_vectors(conn)
-    return compute_epsilon_edges(nodes, epsilon)
+    edges = compute_epsilon_edges(nodes, epsilon)
+    _EDGE_CACHE = (key, edges)
+    return list(edges)
+
+
+def build_edge_id(prefix: str, source: str, target: str) -> str:
+    """Injective edge id (R5): '~' and '-' are escaped inside each endpoint, so
+    the joining '-' cannot be confused with one inside a label. Identity for
+    endpoints containing neither character, keeping pre-existing ids valid."""
+    def esc(label: str) -> str:
+        return label.replace("~", "~t").replace("-", "~d")
+    return f"{prefix}-{esc(source)}-{esc(target)}"
 
 
 def _persist_epsilon_edges(conn: sqlite3.Connection, epsilon: float) -> int:
@@ -617,7 +747,7 @@ def _persist_epsilon_edges(conn: sqlite3.Connection, epsilon: float) -> int:
     """
     nodes = _current_node_vectors(conn)
     edges = compute_epsilon_edges(nodes, epsilon)
-    desired = {f"auto-edge-{e['source']}-{e['target']}" for e in edges}
+    desired = {build_edge_id("auto-edge", e["source"], e["target"]) for e in edges}
 
     prev = {
         r[0]: (r[1], r[2], r[3])
@@ -630,7 +760,7 @@ def _persist_epsilon_edges(conn: sqlite3.Connection, epsilon: float) -> int:
     }
 
     for edge in edges:
-        edge_id = f"auto-edge-{edge['source']}-{edge['target']}"
+        edge_id = build_edge_id("auto-edge", edge["source"], edge["target"])
         if prev.get(edge_id) is None or prev[edge_id][2] != "auto":
             _insert_edge_revision(conn, edge_id, edge["source"], edge["target"], "auto")
 
@@ -677,3 +807,75 @@ def get_current_edges() -> list[tuple]:
               AND id LIKE 'edge-%'
             ORDER BY id
         """).fetchall()
+
+
+_FRAME_COLUMNS = (
+    "mu_x", "mu_y", "mu_lambda_3", "mu_a_8",
+    "sigma_x", "sigma_y", "sigma_lambda_3", "sigma_a_8",
+)
+
+
+def persist_epoch_frame(
+    epoch_provenance: str,
+    ranking: Sequence[str],
+    mu: Sequence[float],
+    sigma: Sequence[float],
+    k_sigma: float,
+    sample_size: int,
+) -> int:
+    """Append one epoch-frame revision; returns its seq.
+
+    `mu` and `sigma` follow the channel order (x, y, lambda_3, a_8). Append-only
+    (AGENTS 4.1): a re-fit INSERTs seq+1 and the superseded frame stays readable,
+    so it is auditable when rendered positions moved and on which population.
+    """
+    if len(mu) != 4 or len(sigma) != 4:
+        raise ValueError("an epoch frame carries mean and sd for exactly 4 channels")
+    with get_db_connection() as conn:
+        seq = int(
+            conn.execute(
+                "SELECT COALESCE(MAX(seq), 0) + 1 FROM spatial_calibration "
+                "WHERE epoch_provenance = ?",
+                (epoch_provenance,),
+            ).fetchone()[0]
+        )
+        conn.execute(
+            "INSERT INTO spatial_calibration (epoch_provenance, seq, axis_ranking, "
+            f"{', '.join(_FRAME_COLUMNS)}, k_sigma, sample_size) "
+            "VALUES (?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?)",
+            (
+                epoch_provenance,
+                seq,
+                json.dumps(list(ranking)),
+                *(float(m) for m in mu),
+                *(float(s) for s in sigma),
+                float(k_sigma),
+                int(sample_size),
+            ),
+        )
+    return seq
+
+
+def get_active_epoch_frame(epoch_provenance: str) -> dict | None:
+    """Latest epoch-frame revision, or None if never fitted.
+
+    None is an honest "not fitted yet", not a masked failure: the caller refuses
+    to draw an overview without a shared frame (AGENTS 1.3).
+    """
+    with get_db_connection() as conn:
+        row = conn.execute(
+            f"SELECT seq, axis_ranking, {', '.join(_FRAME_COLUMNS)}, k_sigma, sample_size "
+            "FROM spatial_calibration WHERE epoch_provenance = ? "
+            "ORDER BY seq DESC LIMIT 1",
+            (epoch_provenance,),
+        ).fetchone()
+    if row is None:
+        return None
+    return {
+        "seq": int(row[0]),
+        "ranking": tuple(json.loads(row[1])),
+        "mu": tuple(float(v) for v in row[2:6]),
+        "sigma": tuple(float(v) for v in row[6:10]),
+        "k_sigma": float(row[10]),
+        "sample_size": int(row[11]),
+    }

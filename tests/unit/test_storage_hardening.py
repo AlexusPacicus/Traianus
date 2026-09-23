@@ -206,3 +206,69 @@ def test_consolidar_empty_basis_returns_400(client, auth_headers, tmp_path, monk
         headers=auth_headers,
     )
     assert resp.status_code == 400
+
+
+_RANKING = ("AXIS_1", "AXIS_3", "AXIS_2", "AXIS_4", "AXIS_7", "AXIS_8", "AXIS_6", "AXIS_5")
+
+
+def test_epoch_frame_revisions_are_append_only(isolate_db):
+    """Frame revisions INSERT under (epoch, seq); history is never UPDATEd."""
+    first = storage.persist_epoch_frame(
+        "PROSTHETIC_NSM_V1", _RANKING, mu=(0.01, 0.15, 0.002, -0.03),
+        sigma=(0.016, 0.045, 0.011, 0.02), k_sigma=3.0, sample_size=2221,
+    )
+    second = storage.persist_epoch_frame(
+        "PROSTHETIC_NSM_V1", tuple(reversed(_RANKING)), mu=(0.02, 0.16, 0.003, -0.04),
+        sigma=(0.020, 0.050, 0.012, 0.021), k_sigma=3.0, sample_size=2400,
+    )
+    assert (first, second) == (1, 2)
+    active = storage.get_active_epoch_frame("PROSTHETIC_NSM_V1")
+    assert active == {
+        "seq": 2, "ranking": tuple(reversed(_RANKING)), "mu": (0.02, 0.16, 0.003, -0.04),
+        "sigma": (0.020, 0.050, 0.012, 0.021), "k_sigma": 3.0, "sample_size": 2400,
+    }
+    with sqlite3.connect(isolate_db) as conn:
+        total = conn.execute("SELECT COUNT(*) FROM spatial_calibration").fetchone()[0]
+    assert total == 2, "revisions must accumulate (AGENTS 4.1), not overwrite"
+
+
+def test_get_active_epoch_frame_is_none_before_any_fit(isolate_db):
+    assert storage.get_active_epoch_frame("PROSTHETIC_NSM_V1") is None
+
+
+def test_relations_does_not_recompute_full_epsilon_set_on_unchanged_nodes(
+    client, auth_headers, isolate_db, monkeypatch
+):
+    """R8/INV-9: GET /relations serves a cached E_n while the node log is
+    unchanged and recomputes only after a node revision is appended."""
+    import numpy as np
+
+    import traianus.storage._storage as impl
+
+    real = impl.compute_epsilon_edges
+    calls = []
+
+    def counting(nodes, epsilon):
+        calls.append(len(nodes))
+        return real(nodes, epsilon)
+
+    monkeypatch.setattr(impl, "compute_epsilon_edges", counting)
+
+    def ingest(label, seed):
+        vec = np.random.default_rng(seed).standard_normal(384)
+        res = client.post(
+            "/ingesta/vector",
+            json={"vector": (vec / np.linalg.norm(vec)).tolist(), "label": label},
+            headers={**auth_headers, "X-Idempotency-Key": f"rel-{label}"},
+        )
+        assert res.status_code == 201
+
+    ingest("a", 1)
+    ingest("b", 2)
+    for _ in range(3):
+        assert client.get("/relations", headers=auth_headers).status_code == 200
+    assert len(calls) == 1, f"E_n recomputed {len(calls)} times over 3 reads of an unchanged log"
+
+    ingest("c", 3)
+    assert client.get("/relations", headers=auth_headers).status_code == 200
+    assert len(calls) == 2

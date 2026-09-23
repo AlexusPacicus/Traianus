@@ -7,7 +7,7 @@ connection so callers can join a wider atomic transaction.
 """
 
 import sqlite3
-from contextlib import contextmanager
+from contextlib import closing, contextmanager
 
 import numpy as np
 from numpy.typing import NDArray
@@ -138,7 +138,7 @@ class SQLiteEngine:
         Returns:
             Tuple (vector, dimension) or None if not found.
         """
-        with self._connect() as conn:
+        with closing(self._connect()) as conn:
             row = conn.execute(
                 "SELECT vector_blob, dimension FROM data_plane WHERE node_id = ? "
                 "ORDER BY seq DESC LIMIT 1",
@@ -185,7 +185,7 @@ class SQLiteEngine:
         Returns:
             Tuple (centroid_id, version) or None if not found.
         """
-        with self._connect() as conn:
+        with closing(self._connect()) as conn:
             row = conn.execute(
                 "SELECT centroid_id, version FROM control_plane WHERE node_id = ?",
                 (node_id,)

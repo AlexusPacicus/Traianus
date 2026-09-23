@@ -115,9 +115,13 @@ Traianus/
 │   ├── security/            # Boundary & permission audits
 │   └── unit/                # Core substrate invariant tests
 ├── tools/                   # Audits, MCP servers, ε-bridge auditor & experiments
-├── frontend/                # Ulpia client layer (sources-only policy)
 └── docs/                    # Architectural specs, audits & status ledger
 ```
+
+The PKM client (RefApp-01, formerly `frontend/`) left for its own repository on 2026-09-23 — see
+[refapp-01](https://github.com/AlexusPacicus/refapp-01). It talks to this engine over HTTP only.
+The instrument-audit records it cites (`contracts.md`, `K6.md`, `R4.md`) stayed here, at
+`docs/methodology/instrument-audit/`, since they are engine-governance content.
 
 ---
 
