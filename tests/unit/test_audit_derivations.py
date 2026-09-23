@@ -1,4 +1,4 @@
-"""Code verification of frontend/audits/derivations.md (D1-D12).
+"""Code verification of docs/methodology/instrument-audit/derivations.md (D1-D12).
 
 Each derivation is checked by computation, not by reading: algebraic identities numerically in
 float64 at d = 384 on seeded random inputs that satisfy the stated conditions, through the real

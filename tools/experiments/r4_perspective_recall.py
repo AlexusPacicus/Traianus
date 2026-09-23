@@ -1,7 +1,8 @@
 """R4 — neighbourhood kept in a 5D perspective.
 
-Implements frontend/audits/R4.md (instrument audit record, revision 5) against
-frontend/audits/contracts.md (§0 data layer, §2 R4) and frontend/audits/derivations.md. For each
+Implements docs/methodology/instrument-audit/R4.md (instrument audit record, revision 5) against
+docs/methodology/instrument-audit/contracts.md (§0 data layer, §2 R4) and
+docs/methodology/instrument-audit/derivations.md. For each
 note q of K6's EVAL half, the 15 nearest notes in 384-d are compared with the 15 nearest in the
 observed space of the perspective at q (traianus/geometry/perspective.py): the operator's
 horizontal axis against a bank of random axes orthogonal to q, by block bootstrap over q and over

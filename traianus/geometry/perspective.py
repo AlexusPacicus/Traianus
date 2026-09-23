@@ -1,11 +1,11 @@
 """Perspective at a vector q: the poles are the two axes with the largest projection on q.
 
-The perspective at q (frontend/audits/R4.md, "Perspective at q") is drawn in a frame built from
+The perspective at q (docs/methodology/instrument-audit/R4.md, "Perspective at q") is drawn in a frame built from
 q and two poles, the axes a_k with the largest <q, a_k>, ties by axis id ascending, c_A the
 larger. Pure NumPy, no storage, no state (AGENTS 4.3).
 
 perspective_frame builds the frame at q from those poles; observe gives the z-scored coordinates of
-every vector in it (frontend/audits/R4.md, "Observed space").
+every vector in it (docs/methodology/instrument-audit/R4.md, "Observed space").
 """
 
 from __future__ import annotations

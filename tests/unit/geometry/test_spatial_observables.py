@@ -3,7 +3,7 @@
 The frame (axis ranking by mean projection, ties by axis id) is fitted once on the nodes
 present, frozen with the per-channel mean and sd, and shared by every node: the overview is one
 map, not each node in its own coordinates (frontend/POC.md, "the overview has no shared frame").
-Channels are the ones K6 measured and admitted (frontend/audits/K6.md, data/refapp/K6_result.json):
+Channels are the ones K6 measured and admitted (docs/methodology/instrument-audit/K6.md, data/refapp/K6_result.json):
   x = λ₁, y = ⟨v, ĉ₁⟩ → standardised, clipped to [-1, 1];  z = 0 (pending K8);
   l constant (author's choice); h from λ₃ and c from a₈ → [0, 1].
 """

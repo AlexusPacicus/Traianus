@@ -6,7 +6,7 @@ ranks (2, 3) and (6, 7) the dipoles used, rank 8 the leftover axis; poles are al
 normalised â. Every node is measured in that one frame, so the overview is a single map, and a
 node never moves until an explicit, logged re-fit.
 
-Raw channels, unclipped (the ones K6 measured, frontend/audits/contracts.md §1):
+Raw channels, unclipped (the ones K6 measured, docs/methodology/instrument-audit/contracts.md §1):
     x = λ₁ = ⟨v, w₁⟩/‖w₁‖²,  y = ⟨v, ĉ₁⟩,  λ₃ = ⟨v, w₃⟩/‖w₃‖²,  a₈ = ⟨v, P⊥â_(8)⟩/‖P⊥â_(8)‖²
 with w_j the PolarProjector dipole. K6 admitted λ₃ and a₈ as colour (data/refapp/K6_result.json);
 λ₂ and the projection-variance density were second-order predictable from the position, and

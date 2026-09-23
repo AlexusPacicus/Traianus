@@ -1,7 +1,7 @@
 """Unit tests of tools/experiments/k6_colour_predictability.py.
 
-Specification: frontend/audits/K6.md (revision 6), frontend/audits/contracts.md §0 and §1,
-frontend/audits/derivations.md (D2, D4, D6, D7, D8, D11). Synthetic inputs only: CI has no
+Specification: docs/methodology/instrument-audit/K6.md (revision 6), docs/methodology/instrument-audit/contracts.md §0 and §1,
+docs/methodology/instrument-audit/derivations.md (D2, D4, D6, D7, D8, D11). Synthetic inputs only: CI has no
 .data/, and the measurement is never run on the real artefact here.
 """
 

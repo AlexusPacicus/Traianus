@@ -1,4 +1,4 @@
-"""perspective_frame: the frame of the perspective at q (frontend/audits/R4.md, "Perspective at q").
+"""perspective_frame: the frame of the perspective at q (docs/methodology/instrument-audit/R4.md, "Perspective at q").
 
 Poles from select_poles, unit axes as the poles' vectors, q as the anchor, PolarProjector.prepare
 with its default parameters. Expected values are rebuilt here from the definitions.
