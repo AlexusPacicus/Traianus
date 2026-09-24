@@ -50,6 +50,7 @@ graph TD
 * **[roadmap/NEXT_RESEARCH.md](./roadmap/NEXT_RESEARCH.md):** Research backlog — Ulpia Spatial Observation Framework, projection/observation theory, nuclear invariants, and future research directions.
 * **[methodology/METHODOLOGY.md](./methodology/METHODOLOGY.md):** Research loop every study runs (problem → hypothesis + refuters → instrument audit + attack → reformulation gate → registry), with paper-writing rules and the evidence pipeline (harness, claims registry, verifier) as sub-nodes. Incubated here; moves to its own repository after a second study completes the loop.
 * **[STATUS.md](./STATUS.md):** Formal classification (Implemented / Experimental / Research) + Known Limitations.
+* **[traceability/TRACEABILITY.md](./traceability/TRACEABILITY.md):** The engine's invariants in words, each pinned to an exact code anchor and the test that enforces it; fixed format, checked by `tools/audit/check_doc_citations.py`.
 
 ---
 
