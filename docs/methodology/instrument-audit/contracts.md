@@ -68,11 +68,12 @@ Conversions
   â_k = a_k / np.sqrt(a_k @ a_k), binary64.
 
 Engine path (what the map is drawn from), for comparison
-  provider output binary32 (one text at a time) → ‖·‖ and division in binary32 →
-  .astype(np.float64).tobytes() → SQLite BLOB of 384 × 8 bytes, native byte order ('<f8' on
-  x86-64 and arm64) (traianus/app.py:188, :256-257). Same arithmetic class as the artefact, but
-  single-text and batched encoding are not guaranteed bit-identical: a measured figure on the
-  artefact and the rendered map can differ at ≈ 1e-7. Closed by decision (POC.md, Corpus
+  provider output binary32 (one text at a time) → ‖·‖ and division in binary32
+  (traianus/app.py:272-273) → .astype(np.float64).tobytes() (:204-205) → SQLite BLOB of 384 × 8
+  bytes, native byte order ('<f8' on x86-64 and arm64). Not the artefact's arithmetic, which
+  normalises in binary64 and then rounds to binary32 (Artefacts above; corrected 2026-09-24, with
+  the line citations), and single-text and batched encoding are not guaranteed bit-identical
+  either: a measured figure on the artefact and the rendered map can differ at ≈ 1e-7. Closed by decision (POC.md, Corpus
   loading): the engine is loaded with the artefact's vectors, one at a time, in text order,
   through /ingesta/vector, which stores v̂ (Conversions above, computed as K6 does) byte for
   byte, not the received row widened (verified 2026-09-19, tests/integration/
