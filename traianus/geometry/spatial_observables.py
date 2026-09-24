@@ -108,6 +108,38 @@ def raw_channels(
     }
 
 
+_U = np.finfo(np.float64).eps / 2  # unit roundoff
+
+
+def _gamma(n: int) -> float:
+    """Higham, *Accuracy and Stability of Numerical Algorithms* (2nd ed.), §3.1: the relative
+    bound on n chained roundings, e.g. an n-term dot product."""
+    nu = n * _U
+    return nu / (1.0 - nu)
+
+
+def _effective_axes(
+    basis: dict[str, np.ndarray], ranking: tuple[str, ...]
+) -> dict[str, NDArray[np.float64]]:
+    """The direction each channel of raw_channels is a dot product with (division folded in)."""
+    c1_hat, d1, d3, p8 = _geometry(basis, ranking)
+    return {
+        "x": d1.v_dipole / d1.v_dipole_norm_sq,
+        "y": c1_hat,
+        "lambda_3": d3.v_dipole / d3.v_dipole_norm_sq,
+        "a_8": p8 / (p8 @ p8),
+    }
+
+
+def _rounding_floor(name: str, axis: NDArray[np.float64], d: int, max_row_norm: float) -> float:
+    """A channel's population sd cannot be measured below this (γ_d, Higham §3.1): by
+    Cauchy-Schwarz the rounding error of one row's dot product is at most γ_d * ||row|| * ||axis||;
+    x, lambda_3, a_8 divide by a squared norm after the dot product, one further rounding, so γ_d
+    is taken over d + 1 terms for them; y is the undivided dot product with c1_hat, over d."""
+    n = d if name == "y" else d + 1
+    return _gamma(n) * max_row_norm * float(np.linalg.norm(axis))
+
+
 def fit_epoch_frame(
     vectors: np.ndarray,
     basis: dict[str, np.ndarray],
@@ -120,11 +152,18 @@ def fit_epoch_frame(
         raise ValueError("cannot fit an epoch frame on an empty population")
     ranking = rank_axes(v, basis)[:N_RANKED]
     raw = raw_channels(v, basis, ranking)
+    axes = _effective_axes(basis, ranking)
+    d, max_row_norm = v.shape[1], float(np.max(np.linalg.norm(v, axis=1)))
+    sigma = tuple(
+        0.0 if (std := float(np.std(raw[name]))) <= _rounding_floor(name, axes[name], d, max_row_norm)
+        else std
+        for name in CHANNELS
+    )
     return EpochFrame(
         epoch_provenance,
         ranking,
         tuple(float(np.mean(raw[name])) for name in CHANNELS),
-        tuple(float(np.std(raw[name])) for name in CHANNELS),
+        sigma,
         float(k_sigma),
     )
 

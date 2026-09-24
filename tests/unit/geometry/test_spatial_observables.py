@@ -127,6 +127,41 @@ class TestFrame:
             fit_epoch_frame(np.vstack([v, v]), basis, EPOCH_PROVENANCE)
 
 
+class TestRoundingFloor:
+    """A channel's population sd below the rounding bound of its own dot products is zero
+    (regression: Linux CI, tests/unit/geometry/test_spatial_observables.py, 2026-09-23)."""
+
+    def test_rows_differing_only_in_the_last_bits_are_zeroed(self, rng):
+        basis = _basis(rng)
+        base = _unit_rows(rng, 1)[0]
+        v = np.tile(base, (5, 1))
+        for i, idx in enumerate((0, 7, 100, 200, 383)):
+            v[i, idx] = np.nextafter(v[i, idx], 1.0)
+        frame = fit_epoch_frame(v, basis, EPOCH_PROVENANCE)
+        assert frame.sigma == (0.0, 0.0, 0.0, 0.0)
+        for row in v:
+            obs = derive_spatial_observables(row, basis, frame)
+            assert (obs["x"], obs["y"], obs["c"], obs["h"]) == (0.0, 0.0, 0.5, 0.5)
+
+    def test_a_genuine_small_spread_is_not_zeroed(self, rng):
+        basis = _basis(rng)
+        base = _unit_rows(rng, 1)[0]
+        direction = _unit_rows(rng, 1)[0]
+        v = np.vstack([base + i * 1e-9 * direction for i in range(5)])
+        frame = fit_epoch_frame(v, basis, EPOCH_PROVENANCE)
+        raw = raw_channels(v, basis, frame.ranking)
+        for j, name in enumerate(CHANNELS):
+            assert frame.sigma[j] > 0.0
+            assert frame.sigma[j] == pytest.approx(float(np.std(raw[name])), rel=1e-9)
+
+    def test_non_degenerate_sigma_is_bit_identical_to_population_std(self, rng):
+        basis, v = _basis(rng), _unit_rows(rng, 200)
+        frame = fit_epoch_frame(v, basis, EPOCH_PROVENANCE)
+        raw = raw_channels(v, basis, frame.ranking)
+        for j, name in enumerate(CHANNELS):
+            assert frame.sigma[j] == float(np.std(raw[name]))
+
+
 class TestObservables:
     def test_mapping_of_every_channel(self, rng):
         basis, v = _basis(rng), _unit_rows(rng, 200)
