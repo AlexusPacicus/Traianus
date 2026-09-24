@@ -1299,3 +1299,80 @@ de la sesión del python-gate.
 **Próximo paso:**
 1. Autor: elegir entre K8 y la v2 en `refapp-01`.
 2. Retirar o actualizar las dos referencias desfasadas a `simplex.py`.
+
+### Cierre (23:53)
+
+**Contexto:** sesión nueva sobre `feat/python-gate-integration` para verificar y cerrar la puerta
+de Python; después, K8 y un estudio nuevo del zoom. Trabajo de otra sesión en este tramo, no
+descrito aquí: la nota de estado de `simplex_control_spec` (`de1505a`, seq 65) y la integración
+previa de la puerta (`1b059dd`).
+
+**Se hizo:**
+- **Puerta de Python cerrada.** Verificada en sesión nueva (`python3` resuelve al shim, R1 deniega
+  rutas, los scripts commiteados corren). Cableado de `settings.json` commiteado (`54c7f8c`),
+  AGENTS v1.11.0 (`24dac44`), test de cableado (`037b411`). El cableado rompió un test que fija
+  `settings.json` y lo arregló un segundo contrato (`d30c676`). `.gitignore` (`cdef5f7`), LEDGER seq
+  66, fusión en `main` y push (`dcc6f72`).
+- **CI de `main` en rojo desde el 23-09, sin que nadie lo viera.** `test_degenerate_spread_maps_to_the_centre`
+  fallaba solo en Linux: el BLAS redondea distinto y una σ de ~1e-17 no contaba como cero.
+  Arreglado en el motor con una cota de redondeo derivada (`b78a857`), LEDGER seq 67; CI verde en
+  `4247093`, subido.
+- **Tres textos de otro chat, contrastados con el repo y descartados:** un «K8» que reabría d_esc y
+  la luminancia (rechazados por K6), una máquina de estados de cámara que el cliente no tiene y un
+  esquema de Fisher que mezcla dos Fisher distintos. Lo aprovechable, aparcado en `refapp-01`.
+- **K8, como estaba registrado.** Ficha con fase 1 PASS en la segunda ronda, D13–D16, tabla de
+  decisión preregistrada, contrato §3, script y tests (`0c54aea`). Fase 2: CHANGES, porque
+  `u_from_w2` era una identidad. D16 mostró que el residuo de z es el de λ₂ a escala, y K6 ya había
+  descartado λ₂. **Congelado por el autor antes de ejecutarlo** (`5b50d94`): z pasa a ser la
+  profundidad de un zoom continuo.
+- **Estudio del zoom, abierto en `refapp-01/ZOOM.md`.** Postulado del autor: el tiempo es la
+  métrica de la fricción de la continuidad de la entidad geométrica; su forma operativa ya existe
+  en el motor (K_cin). Con el autor se fijaron las definiciones (8 coordenadas de ejes, tensor de
+  tensión, Voronoi centroidal por niveles, un brazo de dos puntos y otro de tres, tres estados
+  juzgados) y se aceptó el paso 1 (Z1 vecindades, Z2 latencia).
+- **Ficha Z, cuatro revisiones y cuatro rondas ciegas.** Hallazgos:
+  - Inicio y final son idénticos en los dos brazos, así que Z1 se decide solo en el estado medio.
+  - τ es plano a lo largo de la cuerda.
+  - Restringir el punto medio al plano simétrico excluía los arcos torcidos. El autor propuso la
+    alternativa: m donde se tocan dos hiperesferas de τ de igual radio (rev. 3, D20–D21).
+- **Regla nueva de metodología, del autor** (`e54261c`): las rondas de fase 1 cuentan por diseño, y
+  un bloqueante nunca pasa a fase 2. Motivo: la ronda 3 dejó bloqueantes sobre un brazo rediseñado.
+- **`contracts.md` §0 corregido:** el artefacto se normalizó en binary64 (`b3be386`), y la ruta del
+  motor normaliza en binary32, con las citas de línea al día (`2749945`, `9307b04`).
+
+**Resultado:**
+- **`main` en `4247093`, subido:** puerta de Python y arreglo de CI.
+- **K8 congelado** en la rama local `feat/k8-z-axis`, sin fusionar.
+- **La ficha Z en revisión 4, fase 1 abierta** (ronda 4: CHANGES, 2 bloqueantes en la búsqueda).
+  Vive, junto con la regla nueva y las correcciones de §0, en la rama local `feat/zoom-record`,
+  donde va esta entrada.
+- **Los commits de `refapp-01`** (`ZOOM.md`, K8 en `POC.md`) son locales, sin subir.
+
+**Resuelto de entradas anteriores:**
+- 2026-09-24 (14:14): «elegir entre K8 y la v2»: se eligió K8, que después quedó congelado y
+  sustituido por el estudio del zoom.
+- 2026-09-24 (14:14): las referencias desfasadas a `simplex.py` las cerró otra sesión (seq 65).
+- `feat/python-gate`: integrada y en `main`. La rama local sigue existiendo, ya fusionada.
+
+**Sin resolver / decisión pendiente:**
+- **Autor, para la revisión 5 de Z:**
+  - Cambiar la búsqueda SQP, que ha tenido bloqueantes en tres rondas, por una factible por
+    construcción: m ajustado por bisección a lo largo de la cuerda y búsqueda sin restricción en 7
+    dimensiones.
+  - Si κ se corrige por azar: su nivel de azar es 225/(|M|−1) y varía si los brazos caen en celdas
+    distintas.
+- **Llevar a `main`** la regla de metodología y las correcciones de §0, que hoy solo están en
+  `feat/zoom-record`.
+- **Huecos encontrados:**
+  - El empaquetador de revisiones mete resultados previos (`data/refapp/*_result.json`).
+  - El revisor ciego ve el índice de memoria, que enuncia resultados de otras fichas.
+  - El implementador de K8 ejecutó con `pytest` un test sin commitear (zona gris de AGENTS 2.5).
+  - Ruff en CI no cubre el script de K6 ni `test_audit_derivations.py`.
+  - `definitions.md` cita `_storage.py:114` para `geodesic_axes`, que se crea en `:123`.
+
+**Próximo paso:**
+1. **Autor:** decidir la búsqueda por bisección y la corrección por azar. Después, revisión 5 de Z
+   con ronda nueva.
+2. **Con fase 1 en PASS:** `contracts.md` §4, regla en el registro, `instrument-implementer` y
+   fase 2.
+3. **Fusionar en `main`** la regla de metodología y las correcciones de `contracts.md` §0.
