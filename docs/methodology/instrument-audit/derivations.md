@@ -89,7 +89,8 @@ D12 λ is never clipped when ‖w‖ ≥ √(1 − y²), in particular whenever 
 
 D13 P(a value exchangeable with N null values strictly exceeds the j-th smallest of them)
     ≤ (N + 1 − j) / (N + 1). For N = 1,000, j = 951: 50/1001 ≈ 0.049950 ≤ 0.05 (D8 is j = 989).
-    Conditions: the N + 1 values are exchangeable; with ties, randomised tie-breaking (as D8).
+    Conditions: 1 ≤ j ≤ N; the N + 1 values are exchangeable; with ties, randomised tie-breaking
+    (as D8).
     Proof: its rank among the N + 1 is uniform on 1…N + 1; it strictly exceeds the j-th smallest
     null value only if its rank is ≥ j + 1: N + 1 − j of N + 1 ranks.
 
@@ -99,21 +100,36 @@ D14 For s_1…s_m linearly independent, S = span{s_1…s_m} and Q ∈ ℝ^{d×m}
     Conditions: rank[s_1 … s_m] = m.
     Proof: Gram–Schmidt of the s_i, in any order, yields orthonormal q_1…q_m spanning S;
     subtracting ⟨w, q_i⟩q_i for every i gives w − Q'Q'ᵀw. For two orthonormal bases of S,
-    Q' = QR with R orthogonal, so Q'Q'ᵀ = QRRᵀQᵀ = QQᵀ: the orthogonal projector onto S is unique.
-    In floating point the equality holds to rounding; a second pass (w' − QQᵀw') removes the
-    component the first pass leaves.
+    Q' = QO with O ∈ ℝ^{m×m} orthogonal, so Q'Q'ᵀ = QOOᵀQᵀ = QQᵀ: the orthogonal projector onto S
+    is unique.
+    Floating point: one pass leaves an in-S component of the order of ε‖w‖; a second pass
+    (w' − QQᵀw') reduces it to rounding of ‖P_S⊥w‖ only when ‖P_S⊥w‖ / ‖w‖ is well above ε
+    ("twice is enough"); K8's survival check supplies that condition.
 
 D15 For g ~ N(0, I_d) and S a subspace of dimension m < d: P_S⊥g / ‖P_S⊥g‖ is uniform on the
     unit sphere of S⊥.
     Conditions: P_S⊥g ≠ 0 (probability 1 for m < d).
-    Proof: with R ∈ ℝ^{d×(d−m)} an orthonormal basis of S⊥, P_S⊥g = R(Rᵀg) and Rᵀg ~ N(0, I_{d−m})
-    (orthonormal columns preserve the standard normal); a standard normal divided by its norm is
-    uniform on the sphere (rotation invariance), and R maps that sphere isometrically onto the
-    unit sphere of S⊥. (K6's null is the case S = span{ĉ₁}.)
+    Proof: with E ∈ ℝ^{d×(d−m)} an orthonormal basis of S⊥, P_S⊥g = E(Eᵀg), ‖P_S⊥g‖ = ‖Eᵀg‖ and
+    Eᵀg ~ N(0, I_{d−m}) (orthonormal columns preserve the standard normal); a standard normal
+    divided by its norm is uniform on the sphere (rotation invariance), and E maps that sphere
+    isometrically onto the unit sphere of S⊥. (K6's null is the case S = span{ĉ₁}.) The
+    equalities P_S⊥g = E(Eᵀg) and ‖P_S⊥g‖ = ‖Eᵀg‖ are what a unit test checks.
+
+D16 With B = (1, z(x), z(y), …, z(λ₃), z(a₈), …) over the rows and S = span{ĉ₁, w₁, w₃, p₈}: for
+    every w ∈ ℝ^d, resid(⟨v, w⟩; B) = resid(⟨v, P_S⊥w⟩; B). In particular, for z = ⟨v, u⟩ with
+    u = P_S⊥w₂ / ‖P_S⊥w₂‖ and λ₂ = ⟨v, w₂⟩ / ‖w₂‖²: resid(z; B) = (‖w₂‖² / ‖P_S⊥w₂‖)·resid(λ₂; B).
+    Conditions: x = ⟨v, w₁⟩/‖w₁‖² and λ₃ = ⟨v, w₃⟩/‖w₃‖² unclipped (D2); y = ⟨v, ĉ₁⟩;
+    a₈ = ⟨v, p₈⟩/‖p₈‖²; B contains the constant and z(·) of x, y, λ₃, a₈ (so x, y, λ₃, a₈ themselves
+    lie in span(B), D6); resid(·; B) is the residual of the OLS fit on B.
+    Proof: P_S w = α₀ĉ₁ + α₁w₁ + α₃w₃ + α₈p₈ for some α, so over the rows
+    ⟨v, P_S w⟩ = α₀y + α₁‖w₁‖²x + α₃‖w₃‖²λ₃ + α₈‖p₈‖²a₈ ∈ span(B). The OLS residual is linear in
+    the response and zero on span(B); ⟨v, w⟩ = ⟨v, P_S w⟩ + ⟨v, P_S⊥w⟩. For z: ⟨v, P_S⊥w₂⟩ =
+    ‖P_S⊥w₂‖·z and ⟨v, w₂⟩ = ‖w₂‖²λ₂. Consequence: orthogonalising w₂ against S changes SS_tot
+    of the channel, not its residual up to scale.
 ```
 
 Used by: K6 (D2, D4, D6, D7, D8, D11), R4 (D2, D5, D6, D9, D10), K8 (D2, D4, D6, D7, D11, D13,
-D14, D15).
+D14, D15, D16).
 
 ## En palabras
 
@@ -140,11 +156,14 @@ D14, D15).
 - **D11** Si λ se recorta, la distancia de escape tiene otra fórmula.
 - **D12** Si el dipolo mide al menos 1, λ nunca se recorta para notas unitarias.
 - **D13** Con un solo candidato, superar el valor 951 de 1.000 direcciones al azar ocurre por
-  azar con probabilidad 50/1.001, por debajo del 5 %.
+  azar como mucho con probabilidad 50/1.001, por debajo del 5 %.
 - **D14** Quitarle a una dirección lo que tiene en común con otras cuatro da el mismo resultado
   sea cual sea el orden en que se quiten, siempre que esas cuatro sean independientes.
 - **D15** Una dirección gaussiana al azar, con esas cuatro componentes quitadas y normalizada,
   apunta a cualquier lado del espacio que queda con la misma probabilidad.
+- **D16** Lo que una dirección tiene en común con las cuatro ya mostradas lo explica siempre la
+  base del ajuste; por eso ortogonalizar el segundo dipolo no cambia lo que queda sin explicar de
+  λ₂, solo su variación total.
 
 Verified by the `instrument-auditor` subagent (maths only), 2026-09-18, at `e2f6d70`: D9 defect
 (count vs. fraction) and missing conditions in D1, D2, D4, D6, D7, D10; D11, D12, the D8 tie form
