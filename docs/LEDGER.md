@@ -2050,3 +2050,24 @@
   Merged as `90b01b3`.
 
 * **Status:** `Consolidated`.
+
+### seq 65 — 2026-09-24 — `simplex_control_spec.md` carries a status note; RefApp-01's "Built but not wired" updated
+
+* **Context:** two documents still described `simplex.py` after seq 60 removed it. Reading
+  `docs/specifications/simplex_control_spec.md` whole showed more than that: §3 says the ingestion
+  pipeline and the Polar Projector use the SVD filter (nothing calls it), and §4 promises WAL
+  latencies under 0.1 ms (the measured read bound is p99 10 ms, seq 61). §2, the parabolic
+  corrector, is still a valid spec of an existing module, so the file is annotated, not retired.
+
+* **Δ executed:** a status block under the title, section by section: §1 never wired and removed
+  (seq 60; the recalibration signal is `VarianceTracker`); §2 exists, no engine caller; §3 no
+  caller, and what the filter does now (seq 62, 63); §4 not run as described, bound 10 ms. Each
+  claim re-checked against the code before the commit (the two modules are only re-exported by
+  `traianus/geometry/__init__.py`). Body unchanged. In `refapp-01`, the "Built but not wired"
+  section of `POC.md` no longer lists `simplex.py` as present and states that the SVD
+  filter's spec mismatch is closed (`39f9ff4` there).
+
+* **Gate:** `validate_proposal` `EXECUTE_SAFE` (case `9f09db06`) for the governed spec. Docs only;
+  suite not run.
+
+* **Status:** `Consolidated`.
