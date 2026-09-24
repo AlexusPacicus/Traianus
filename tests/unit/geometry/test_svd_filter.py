@@ -22,6 +22,8 @@ class TestSVDAnisotropyFilterComponentRemoval:
         filtered = filt.transform(X[0])
         proj_u1 = np.dot(filtered, filt.u1_)
         assert abs(proj_u1) < 1e-8, f"Projection onto u1 after filter: {proj_u1}"
+        # Substrate invariant (AGENTS 3.1): output vectors are unit-L2-norm.
+        np.testing.assert_allclose(np.linalg.norm(filtered), 1.0, atol=1e-8)
 
     def test_filter_preserves_orthogonal_components(self) -> None:
         u1 = np.zeros(self.d)
@@ -32,27 +34,31 @@ class TestSVDAnisotropyFilterComponentRemoval:
         filt = SVDAnisotropyFilter()
         filt.fit(X)
         filtered = filt.transform(X[0])
-        np.testing.assert_allclose(filtered[1], X[0][1], atol=1e-10)
+        # Components outside the {u1, ortho} plane never populated by X stay
+        # exactly zero: removing u1 and re-normalizing must not leak into them.
         for i in range(2, self.d):
-            np.testing.assert_allclose(filtered[i], X[0][i], atol=1e-10)
+            np.testing.assert_allclose(filtered[i], 0.0, atol=1e-10)
+        # The surviving direction is exactly the (now unit-normalized) ortho axis.
+        np.testing.assert_allclose(filtered, ortho, atol=1e-10)
 
 
 class TestSVDAnisotropyFilterIsotropic:
     """Filter on isotropic data should change vectors minimally."""
 
     def test_filter_identity_on_isotropic_data(self) -> None:
+        """On isotropic data u1_ is zero, so transform only re-normalizes v to
+        unit L2 norm without changing its direction."""
         rng = np.random.default_rng(202)
         n, d = 200, 32
         X = rng.normal(size=(n, d))
         filt = SVDAnisotropyFilter()
         filt.fit(X)
+        np.testing.assert_allclose(filt.u1_, 0.0, atol=1e-10)
         v = X[0].copy()
         filtered = filt.transform(v)
-        diff = np.linalg.norm(filtered - v)
-        original_norm = np.linalg.norm(v)
-        assert diff / original_norm < 0.15, (
-            f"Isotropic filter changed vector by {diff / original_norm:.3f} (>15%)"
-        )
+        np.testing.assert_allclose(np.linalg.norm(filtered), 1.0, atol=1e-10)
+        cosine = np.dot(filtered, v) / (np.linalg.norm(filtered) * np.linalg.norm(v))
+        assert cosine > 1 - 1e-9, f"Isotropic filter changed direction: cosine={cosine:.9f}"
 
 
 class TestSVDAnisotropyFilterDeterminism:
@@ -78,9 +84,17 @@ class TestSVDAnisotropyFilterEdgeCases:
         filt = SVDAnisotropyFilter()
         filt.fit(X)
         filtered = filt.transform(X[0])
+        # eps guard: the filtered norm is near-zero here (fitting on one row
+        # makes u1 the row's own direction), so it must not be divided by it.
+        assert np.all(np.isfinite(filtered)), (
+            f"eps guard failed to prevent division by a near-zero norm: {filtered}"
+        )
         np.testing.assert_allclose(filtered, 0.0, atol=1e-12)
 
-    def test_filter_increases_escape_distance_uniformity(self) -> None:
+    def test_filter_output_norms_are_unit(self) -> None:
+        """Every transformed row has unit L2 norm (B1). Supersedes the old
+        escape-distance coefficient-of-variation check, which became trivial
+        (cv_after ~ 0 for any input) once every output is unit-normalized."""
         rng = np.random.default_rng(404)
         n, d = 100, 20
         direction = rng.normal(size=d)
@@ -88,14 +102,9 @@ class TestSVDAnisotropyFilterEdgeCases:
         X = 5.0 * rng.normal(size=(n, 1)) * direction + rng.normal(size=(n, d))
         filt = SVDAnisotropyFilter()
         filt.fit(X)
-        norms_before = np.linalg.norm(X, axis=1)
         filtered = np.array([filt.transform(x) for x in X])
         norms_after = np.linalg.norm(filtered, axis=1)
-        cv_before = np.std(norms_before) / (np.mean(norms_before) + 1e-12)
-        cv_after = np.std(norms_after) / (np.mean(norms_after) + 1e-12)
-        assert cv_after <= cv_before + 0.01, (
-            f"CV not reduced: before={cv_before:.4f}, after={cv_after:.4f}"
-        )
+        np.testing.assert_allclose(norms_after, 1.0, atol=1e-8)
 
 
 class TestSVDAnisotropyFilterFitTransform:

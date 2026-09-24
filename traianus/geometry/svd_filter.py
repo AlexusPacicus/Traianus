@@ -1,8 +1,9 @@
-"""SVD Anisotropy Filter: subtract dominant singular component.
+"""SVD Anisotropy Filter: local anisotropy reduction via orthogonal projection.
 
-Removes the first left singular vector (u1) from each input vector to
-produce an isotropic tangent space suitable for polar projection.
-Pure NumPy, no side effects.
+Projects each input vector onto the null space of the first right singular
+vector (u1), removing the dominant component of the embedding cone. Output
+vectors are re-normalized to unit L2 norm (Traianus substrate invariant,
+AGENTS 3.1). Pure NumPy, no side effects.
 """
 
 from __future__ import annotations
@@ -12,7 +13,11 @@ from numpy.typing import NDArray
 
 
 class SVDAnisotropyFilter:
-    """Subtracts the dominant principal component (u1) from vectors.
+    """Projects vectors onto the null space of the dominant component (u1).
+
+    Local anisotropy reduction via orthogonal projection onto the null space
+    of the first right singular vector (u1), removing the dominant component
+    of the embedding cone. Output is re-normalized to unit L2 norm.
 
     Parameters
     ----------
@@ -54,14 +59,27 @@ class SVDAnisotropyFilter:
         return self
 
     def transform(self, v: NDArray[np.float64]) -> NDArray[np.float64]:
-        """Subtract u1-projection from v: v_filtered = v - (u1 . v) u1."""
+        """Subtract u1-projection from v, then re-normalize to unit L2 norm.
+
+        v_filtered = v - (u1 . v) u1, divided by its own L2 norm unless that
+        norm is at or below self.eps (the single-vector edge case: fitting on
+        one row makes u1 that row's own direction, so subtracting it leaves a
+        near-zero vector), in which case it is returned unmodified.
+        """
         v_arr = np.asarray(v, dtype=np.float64)
         proj = np.dot(self.u1_, v_arr)
-        return v_arr - proj * self.u1_
+        filtered = v_arr - proj * self.u1_
+        norm = np.linalg.norm(filtered)
+        if norm > self.eps:
+            return filtered / norm
+        return filtered
 
     def fit_transform(self, X: NDArray[np.float64]) -> NDArray[np.float64]:
-        """Fit u1 and transform all rows of X."""
+        """Fit u1 and transform all rows of X (same guarded re-normalization as transform())."""
         self.fit(X)
         X_arr = np.asarray(X, dtype=np.float64)
         projections = X_arr @ self.u1_  # (n,)
-        return X_arr - np.outer(projections, self.u1_)
+        filtered = X_arr - np.outer(projections, self.u1_)
+        norms = np.linalg.norm(filtered, axis=1, keepdims=True)
+        safe_norms = np.where(norms > self.eps, norms, 1.0)
+        return np.where(norms > self.eps, filtered / safe_norms, filtered)
