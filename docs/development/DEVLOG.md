@@ -1175,3 +1175,49 @@ refinamiento posterior a la conversación con el autor, no una reapertura de un 
 
 **Próximo paso:**
 1. Documentación de formato fijo — retomar con el autor qué entregable concreto quiere.
+
+### Cierre (14:14)
+
+**Contexto:** recap de la bitácora a petición del autor; lo siguiente en la cola era la
+«documentación con formato fijo» (pendiente desde el 19-09), sin entregable definido.
+
+**Se hizo:**
+- **Borrador y decisiones del autor:** las citas `fichero:línea` que ya había en `docs/` nunca se
+  comprobaban y se habían desviado (`app.py:379` de REMEDIATION-01 apunta hoy a un `)`,
+  `validator.py:59` a `try:`). De ahí el formato: cita anclada en texto literal, como exige AGENTS
+  5.3, con la línea derivada del ancla. El autor aceptó las cuatro recomendaciones: alcance en los
+  invariantes clave, `--fix` para líneas desfasadas, `docs/traceability/`, y REMEDIATION-01 sin
+  tocar como registro fechado.
+- **`TRACEABILITY.md`** (`a57146c`), escrito y comprobado a mano antes de que existiera el checker:
+  14 fichas, 20 citas de código, 29 de tests. Cuatro afirmaciones sin test que las fije, declaradas
+  como huecos en vez de fichas (bind a `127.0.0.1`, sin `UPDATE`/`DELETE` como test, ε sin cambiar
+  estados, potencial de acción en la ingesta de texto).
+- **Checker** (`b1da739`), delegado a `engine-implementer` con contrato JSON validado: ancla única
+  en la línea citada, tests existentes vía `ast`, estructura fija, `--fix`. Revisado en vivo sobre
+  una copia con una línea desfasada y un ancla rota: ambos detectados, `--fix` solo tocó el número.
+  Límite menor anotado: un encabezado mal escrito se reporta como campo duplicado, no como tal.
+- **Dos ideas del autor, aparcadas** tras contrastarlas con el repo: un protocolo de entrada binario
+  de 64 bytes (como entrada invierte el flujo de datos; el bloque de 64 bytes ya existe como
+  salida, `ZeroCopyExporter`, sin cablear) y lenguajes de especificación formal (Hypothesis para
+  afirmaciones «∀» de las fichas, TLA+ más adelante).
+
+**Resultado:** fusionado a `main` (`90b01b3`), LEDGER seq 64 (`e81b0aa`), subido a `origin`; rama
+borrada. Suite: 2652 verdes (18 nuevos). Solo queda sin seguimiento `.claude/settings.local.json`,
+de la sesión del python-gate.
+
+**Resuelto de entradas anteriores:**
+- 2026-09-24 (svd_filter, segunda vuelta): «documentación con formato fijo» — entregada.
+- 2026-09-19: la exploración de documentación que traduzca lenguaje a código con citas
+  comprobables — hecha.
+
+**Sin resolver / decisión pendiente:**
+- Autor: si los cuatro huecos declarados de `TRACEABILITY.md` merecen tests (serían el punto de
+  entrada natural de la idea de Hypothesis, que necesita aprobar la dependencia).
+- `refapp-01/POC.md` («Built but not wired») y `docs/specifications/simplex_control_spec.md` siguen
+  citando `simplex.py`, retirado en la seq 60 — documentación desfasada, fuera de este alcance.
+- Lo de siempre: K8, v2 en `refapp-01`, restos en disco, `feat/python-gate` y las cuatro ramas de
+  exploración pre-PoC.
+
+**Próximo paso:**
+1. Autor: elegir entre K8 y la v2 en `refapp-01`.
+2. Retirar o actualizar las dos referencias desfasadas a `simplex.py`.
