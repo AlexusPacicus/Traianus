@@ -1022,7 +1022,7 @@ def _registry_rules():
 def test_the_registry_has_the_corpus_loader_rule_and_the_others_are_unchanged():
     registry, rules = _registry_rules()
     assert registry["window_seconds"] == 14400
-    assert set(rules) == {"engine-vector-path", "k6", "r4", "corpus-loader"}
+    assert set(rules) == {"engine-vector-path", "k6", "r4", "corpus-loader", "k8"}
     assert rules["corpus-loader"] == _rule("corpus-loader", [LOADER, THIS_TEST], ("heading", SECTION_0))
     assert rules["engine-vector-path"] == _rule(
         "engine-vector-path",
@@ -1040,6 +1040,12 @@ def test_the_registry_has_the_corpus_loader_rule_and_the_others_are_unchanged():
         ["tools/experiments/r4_*.py", "tests/unit/test_r4_*.py"],
         ("heading", SECTION_0),
         ("heading", "2. R4 — neighbourhood kept in a 5D perspective"),
+    )
+    assert rules["k8"] == _rule(
+        "k8",
+        ["tools/experiments/k8_*.py", "tests/unit/test_k8_*.py"],
+        ("heading", SECTION_0),
+        ("heading", "3. K8 — predictability of the orthogonalised second dipole"),
     )
 
 
