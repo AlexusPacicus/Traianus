@@ -2008,3 +2008,45 @@
   file, two new). `ruff`/`mypy` clean on the CI scope. Two `EXECUTE_SAFE` receipts.
 
 * **Status:** `Consolidated`.
+
+### seq 64 — 2026-09-24 — `TRACEABILITY.md`: engine invariants pinned to code anchors and tests, checked by `check_doc_citations`
+
+* **Context:** the author asked for documentation that translates language to code with
+  checkable file and line citations (open since 2026-09-19). The `path:line` citations already in
+  `docs/` were never checked and had drifted: in REMEDIATION-01, `traianus/app.py:379` now points
+  at a lone `)` and `traianus/security/validator.py:59` at `try:`. A line number alone rots with
+  every edit above it.
+
+* **Decisions (the author's):** scope is the key invariants of AUDIT.md and AGENTS §2.3–2.4,
+  §3.3–3.5, §4.1–4.3; each code citation carries an exact quoted anchor, as AGENTS 5.3 demands of
+  `Topological_Grounding`, so the anchor is normative and the line derived from it; a stale line
+  fails CI and `--fix` rewrites it; the document lives at `docs/traceability/TRACEABILITY.md`;
+  the citations in REMEDIATION-01 stay as a dated record, unchecked.
+
+* **Δ executed:** `docs/traceability/TRACEABILITY.md` (`a57146c`), written and checked by hand
+  against the code before the checker existed: 14 entries, 20 code citations, 29 test citations,
+  each entry with its words ("En palabras", Spanish), anchors, tests and source clause. Two
+  invariants could not be anchored where first expected, because the same line occurs twice
+  (the empty-key check on both ingest endpoints; the epoch default in two DDLs); other unique
+  lines were cited and the epoch entry says why. Four claims no test pins today are declared as
+  gaps, not given entries: the `127.0.0.1` bind (AGENTS 2.2), no `UPDATE`/`DELETE` as a test
+  rather than a script (4.1), ε-adjacency never changing a lifecycle state (4.3), and the text
+  path's action potential (AUDIT M6). `tools/audit/check_doc_citations.py` (`b1da739`), stdlib
+  only: every anchor must occur exactly once and start on the cited line, every cited test must
+  exist per `ast` (module-level function or `Class::method`), the structure is fixed, a document
+  with no entries fails. Its real-repository test makes CI red when an edit moves or removes a
+  cited anchor.
+
+* **How it was built:** the document by the executing agent; the checker delegated to
+  `engine-implementer` (`scope: tools`, `attribution: null`) on `feat/doc-citation-checker` from a
+  validated `DelegationContract`; `context_pack` served the contract's 14 sections once; the
+  report passed `delegation_contract.py report`. Reviewed live on a copy of the document: a stale
+  line and a broken anchor were both reported, `--fix` rewrote only the number and kept the other
+  error, every other byte unchanged. Known limit, non-blocking: a malformed heading is not
+  reported as such; its fields fold into the previous entry and surface as a duplicated field.
+
+* **Gate:** `pytest tests/` → 2652 passed / 1 skipped / 5 deselected (18 new). `ruff` clean on the
+  CI scope, which now includes the script and its test. One `EXECUTE_SAFE` receipt (the test file).
+  Merged as `90b01b3`.
+
+* **Status:** `Consolidated`.
