@@ -2071,3 +2071,52 @@
   suite not run.
 
 * **Status:** `Consolidated`.
+
+### seq 66 — 2026-09-24 — Python gate: AGENTS 2.5 enforced in code at the interpreter
+
+* **Context:** AGENTS 2.5 forbids inline Python, but the perimeter denied only the texts
+  `python3 -c *` and `python3 -m *`; every other Bash call was "ask", which does not stop a
+  subagent. On 2026-09-20 `engine-implementer` ran a `python3 -` heredoc in both client contracts
+  and nothing stopped it. The author's decision: intercept at the binary, where argv is already
+  split, instead of listing shell texts.
+
+* **Δ executed:** `tools/bin/python3` (with `python`, `python3.11` as links), POSIX sh: runs only
+  `--version` or a script recorded in `HEAD` under `tools/` or `traianus/`, denies everything else
+  with exit 126 and scrubs `PYTHON*`; `tools/hooks/session_python_gate.sh` puts `tools/bin` first on
+  the PATH through `$CLAUDE_ENV_FILE`; `tools/hooks/deny_python_escapes.py`, a PreToolUse Bash hook
+  that denies the ways around the shim (interpreter by path, uncovered names, `pyenv exec`, `PATH`
+  reassignment, `env -i`/`-u PATH`, `command -p`) (`d747e03`, `31ab270`, integrated as `1b059dd`).
+  Wiring in `.claude/settings.json` written by the author (`54c7f8c`). AGENTS v1.11.0 (`24dac44`):
+  2.5 names the shim, 6.2 gains the gate bullet with its declared limits and the test partition.
+  Wiring test `tests/security/test_python_gate_wiring.py` (`037b411`): both hooks asserted as parsed
+  structure, with mutations the checks must reject and variants they must accept.
+  `.claude/settings.local.json` git-ignored (`cdef5f7`).
+
+* **Verified in a new session on the integration branch:** `command -v python3` →
+  `tools/bin/python3`; `python3 - </dev/null` → exit 126 "python gate:"; `/usr/bin/python3 -V` →
+  denied by R1; `python3 tools/audit/check_doc_citations.py` → OK. `python3 -c 1` never reached the
+  shim: the perimeter's deny rule stops it first, so the shim's denial was shown with `-`.
+
+* **What did not work:** the wiring commit broke
+  `test_contract_context_hook.py::test_registration_changes_nothing_else_in_settings`, a pin on
+  `settings.json` that the earlier green run (2853, before the wiring) could not see. The first
+  subagent reported it as pre-existing at its base commit, which was true but hid the cause. The
+  pin now expects the Bash group and pins the hook event keys (`d30c676`), so a new event also
+  fails it.
+
+* **How it was built:** the shim and hooks by `engine-implementer` (2026-09-20); the wiring test and
+  the pin update by `engine-implementer` from two validated `DelegationContract`s (`scope: tools`,
+  `attribution: null`); `context_pack` served each contract's sections once (12, then 3); both
+  reports JSON. The executing agent reviewed each diff and re-ran the suite.
+
+* **Declared limits:** the shim binds a committed script's identity, not its content; the Bash hook
+  is a text-level heuristic (`eval`, command substitution, login shells, deep quoting pass it); a
+  heredoc body written to a file that shlex cannot tokenize is denied, so such files go through
+  Write; OpenCode has no equivalent gate; `python3 -m pytest` and `-m uvicorn` no longer work: use
+  `pytest` and `uvicorn`.
+
+* **Gate:** `pytest tests/` → 2869 passed / 1 skipped / 5 deselected. `ruff` clean on the CI scope,
+  which now includes the wiring test. `EXECUTE_SAFE` receipts for AGENTS.md (cases `ef9fbe18`,
+  `7e2eaebf`, `23b93b47`) and for each governed test file.
+
+* **Status:** `Consolidated`.
