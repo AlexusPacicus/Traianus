@@ -119,8 +119,10 @@ D16 With B = (1, z(x), z(y), …, z(λ₃), z(a₈), …) over the rows and S = 
     every w ∈ ℝ^d, resid(⟨v, w⟩; B) = resid(⟨v, P_S⊥w⟩; B). In particular, for z = ⟨v, u⟩ with
     u = P_S⊥w₂ / ‖P_S⊥w₂‖ and λ₂ = ⟨v, w₂⟩ / ‖w₂‖²: resid(z; B) = (‖w₂‖² / ‖P_S⊥w₂‖)·resid(λ₂; B).
     Conditions: x = ⟨v, w₁⟩/‖w₁‖² and λ₃ = ⟨v, w₃⟩/‖w₃‖² unclipped (D2); y = ⟨v, ĉ₁⟩;
-    a₈ = ⟨v, p₈⟩/‖p₈‖²; B contains the constant and z(·) of x, y, λ₃, a₈ (so x, y, λ₃, a₈ themselves
-    lie in span(B), D6); resid(·; B) is the residual of the OLS fit on B.
+    p₈ = P⊥â_(8) ≠ 0 (â_(8) the rank-8 axis) and a₈ = ⟨v, p₈⟩/‖p₈‖²; x, y, λ₃, a₈ not constant on
+    the rows (so z(·) is defined); B contains the constant and z(·) of x, y, λ₃, a₈ (so x, y, λ₃,
+    a₈ themselves lie in span(B), D6); resid(·; B) is the residual of the OLS fit on B. For the
+    "in particular" form also ‖w₂‖ > 0 and P_S⊥w₂ ≠ 0.
     Proof: P_S w = α₀ĉ₁ + α₁w₁ + α₃w₃ + α₈p₈ for some α, so over the rows
     ⟨v, P_S w⟩ = α₀y + α₁‖w₁‖²x + α₃‖w₃‖²λ₃ + α₈‖p₈‖²a₈ ∈ span(B). The OLS residual is linear in
     the response and zero on span(B); ⟨v, w⟩ = ⟨v, P_S w⟩ + ⟨v, P_S⊥w⟩. For z: ⟨v, P_S⊥w₂⟩ =
@@ -167,4 +169,6 @@ D14, D15, D16).
 
 Verified by the `instrument-auditor` subagent (maths only), 2026-09-18, at `e2f6d70`: D9 defect
 (count vs. fraction) and missing conditions in D1, D2, D4, D6, D7, D10; D11, D12, the D8 tie form
-and the tolerance rule added from its report.
+and the tolerance rule added from its report. D13–D15 verified by the `instrument-auditor`
+subagent in K8's phase-1 review, 2026-09-24, at `6cdd5e5`, and amended at `fc2228e`; D16 verified
+at `fc2228e`, its conditions completed afterwards from the same review.
