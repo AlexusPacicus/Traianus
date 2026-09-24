@@ -315,6 +315,12 @@ Reviewed by:               instrument-auditor (blind subagent, review package bu
                            2026-09-24; phase 1 (specification), round 3 of 3; commit aa89b67
                            (revision 3); CHANGES, 2 blocking, 15 non-blocking; record frozen for
                            phase 1, items carried to phase 2, verdict open; D20–D21 verified.
+                           (Under the rule amended in e54261c that round was round 1 on revision
+                           3's design, and its blocking items kept the record in phase 1.)
+                           instrument-auditor (blind subagent, review package built at 9307b04),
+                           2026-09-24; phase 1 (specification), round 4 (round 2 of 3 on
+                           revision 3's design); commit 9307b04 (revision 4); CHANGES, 2 blocking,
+                           10 non-blocking; round-3 blocking items resolved; D22 verified.
 ```
 
 ## Review history
@@ -434,3 +440,24 @@ Reviewed by:               instrument-auditor (blind subagent, review package bu
   null-space basis named; notes in one display keep that display's position; the K6 import's side
   effects declared; D19's wording at the joint; contracts.md's app.py citation moved to :273-274.
   The packaging item stays tracked separately.
+- **Revision 4** — `instrument-auditor` subagent, blind by construction (package built from
+  `9307b04`, lock set), 2026-09-24, phase 1, round 4 (round 2 of 3 on revision 3's design):
+  **CHANGES**, 2 blocking, 10 non-blocking; both round-3 blocking items resolved; D22 verified.
+  Blocking, both introduced by the fix: (1) the stop rules do not reach |E| ≤ 2ν — the decrement
+  of stop (a) falls below its bound about one iteration before |E| does (after a KKT step E is of
+  second order in the step), so a working search would fail search_converged; the noise floor of
+  stop (b) can end the search with |E| up to 2(1 + ρ)ν / (ρ − |μ + Δμ|); the order of the stop
+  test and the Dφ check is unstated (Dφ = 0 at a stationary point would fire search_descent on a
+  correct search); 2ν on |E| is not derived; (2) Dφ = ∇Sᵀp − ρ|E| has no derivations.md entry,
+  and nothing makes it negative for the KKT step: Dφ ≤ −pᵀWp − (ρ − |μ + Δμ|)|E|, and positive
+  definiteness on the null space does not control pᵀWp once E ≠ 0. Non-blocking: first-order
+  stationarity is reported but not bounded, and test (i)'s tolerance must come from the stop
+  rule; κ's chance level is 225/(|M| − 1), so when the middle cells differ between the arms D_q
+  mixes in a difference of chance levels (report |M| per arm, the targets with different k*, D̄ on
+  equal k*; whether to correct for chance is the author's decision before code); merit_bound's ν,
+  a search with no step, the benchmark's margin, D22's unneeded condition; symbols still
+  colliding (u, s, M, k); the finite-difference step's backward point; the engine's dominant
+  attractor uses unnormalised axes and dict order (declare, as for friction); D20 and D21 wording
+  (leg reversal, the radial rate's proof); the round-3 entry describes the superseded rule; outside
+  Z, definitions.md cites _storage.py:114 for geodesic_axes (created at :123), and the package
+  still carries prior results.
