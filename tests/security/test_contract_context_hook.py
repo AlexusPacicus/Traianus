@@ -407,6 +407,8 @@ def test_every_requirement_of_the_real_registry_resolves(hook):
     ("tests/unit/test_k6_colour_predictability.py", "k6"),
     ("tools/experiments/r4_neighbourhood.py", "r4"),
     ("tests/unit/test_r4_neighbourhood.py", "r4"),
+    ("tools/experiments/k8_orthogonal_dipole.py", "k8"),
+    ("tests/unit/test_k8_orthogonal_dipole.py", "k8"),
 ])
 def test_the_real_registry_covers_the_vector_path_and_the_measurements(hook, target, name):
     registry = hook.load_registry(hook.REGISTRY_PATH)

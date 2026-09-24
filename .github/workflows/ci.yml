@@ -104,6 +104,7 @@ jobs:
             tests/unit/test_check_doc_citations.py \
             tests/unit/test_context_pack.py \
             tests/unit/test_delegation_contract.py \
+            tests/unit/test_k8_orthogonal_dipole.py \
             tests/unit/test_load_spinoza_corpus.py \
             tests/unit/test_manifold_nodes_idempotency_migration.py \
             tools/hooks/confine_review_reads.py \
@@ -113,6 +114,7 @@ jobs:
             tools/audit/context_pack.py \
             tools/audit/delegation_contract.py \
             tools/audit/run_process.py \
+            tools/experiments/k8_orthogonal_dipole.py \
             tools/experiments/tooling/load_spinoza_corpus.py
       - name: Mypy (strict, whole control plane)
         run: |

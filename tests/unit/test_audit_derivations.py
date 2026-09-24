@@ -329,3 +329,144 @@ def test_d10_q_sits_at_zero_in_its_own_perspective_exactly(rng):
 def test_d10_breaks_for_a_direction_parallel_to_q(rng):
     q = _unit(rng.standard_normal(D))
     assert np.linalg.norm(_perp(5.0 * q, q)) < ATOL
+
+
+# D13 ---------------------------------------------------------------------------------------------
+
+
+def test_d13_tail_formula_by_exhaustive_enumeration():
+    for n in range(1, 7):
+        for r in range(1, n + 1):
+            assert _exceed_probability(n, r) == Fraction(n + 1 - r, n + 1)
+
+
+def test_d13_instance_used_by_k8():
+    per_candidate = Fraction(1000 + 1 - 951, 1001)
+    assert per_candidate == Fraction(50, 1001)
+    assert per_candidate <= Fraction(1, 20)
+
+
+def test_d13_breaks_at_the_950th_value():
+    below = Fraction(1000 + 1 - 950, 1001)
+    assert below == Fraction(51, 1001)
+    assert below > Fraction(1, 20)
+
+
+# D14 ---------------------------------------------------------------------------------------------
+
+
+def _modified_gram_schmidt_project(w, vectors):
+    """Gram-Schmidt of `vectors` (in the given order), then subtract w's component on each."""
+    basis = []
+    for v in vectors:
+        u = v.astype(float).copy()
+        for b in basis:
+            u = u - np.dot(u, b) * b
+        basis.append(u / np.linalg.norm(u))
+    out = w.copy()
+    for b in basis:
+        out = out - np.dot(out, b) * b
+    return out
+
+
+def test_d14_projection_is_independent_of_order_and_of_the_orthonormal_basis(rng):
+    for _ in range(20):
+        vectors = [rng.standard_normal(D) for _ in range(4)]
+        w = rng.standard_normal(D)
+        order1 = _modified_gram_schmidt_project(w, vectors)
+        order2 = _modified_gram_schmidt_project(w, list(reversed(vectors)))
+        q, _ = np.linalg.qr(np.column_stack(vectors))
+        qr_projection = w - q @ (q.T @ w)
+        assert np.allclose(order1, order2, rtol=0.0, atol=ATOL)
+        assert np.allclose(order1, qr_projection, rtol=0.0, atol=ATOL)
+
+
+def test_d14_breaks_with_linearly_dependent_columns(rng):
+    v1, v2, v3 = (rng.standard_normal(D) for _ in range(3))
+    vectors = [v1, v2, v3, v1 + v2]  # rank(s_1..s_4) = 3, not 4: D14's condition fails
+    w = rng.standard_normal(D)
+    with np.errstate(invalid="ignore", divide="ignore"):
+        order1 = _modified_gram_schmidt_project(w, vectors)
+        order2 = _modified_gram_schmidt_project(w, list(reversed(vectors)))
+    assert np.any(np.isnan(order1)) or not np.allclose(order1, order2, rtol=0.0, atol=ATOL)
+
+
+# D15 ---------------------------------------------------------------------------------------------
+
+
+def _orthonormal_complement(s):
+    """E: an orthonormal basis of S-perp, from the complete QR of S's columns."""
+    m = s.shape[1]
+    q_complete, _ = np.linalg.qr(s, mode="complete")
+    return q_complete[:, m:]
+
+
+def test_d15_projection_equals_e_e_transpose_g_and_norms_match(rng):
+    for _ in range(20):
+        s = np.column_stack([rng.standard_normal(D) for _ in range(4)])
+        q, _ = np.linalg.qr(s)
+        e = _orthonormal_complement(s)
+        g = rng.standard_normal(D)
+        p_perp_g = g - q @ (q.T @ g)
+        assert np.allclose(p_perp_g, e @ (e.T @ g), rtol=0.0, atol=ATOL)
+        assert np.isclose(np.linalg.norm(p_perp_g), np.linalg.norm(e.T @ g), rtol=0.0, atol=ATOL)
+
+
+def test_d15_breaks_when_the_complement_basis_is_not_orthonormal(rng):
+    s = np.column_stack([rng.standard_normal(D) for _ in range(4)])
+    q, _ = np.linalg.qr(s)
+    e = _orthonormal_complement(s)
+    scaled = e * np.arange(1, e.shape[1] + 1)  # spans S-perp, but columns are not unit/orthogonal
+    g = rng.standard_normal(D)
+    p_perp_g = g - q @ (q.T @ g)
+    assert not np.allclose(p_perp_g, scaled @ (scaled.T @ g), rtol=0.0, atol=ATOL)
+
+
+# D16 ---------------------------------------------------------------------------------------------
+
+
+def _resid(y, X):
+    beta, *_ = np.linalg.lstsq(X, y, rcond=None)
+    return y - X @ beta
+
+
+def _d16_setup(rng, n=300):
+    s1, s2, s3, s4 = (_unit(rng.standard_normal(D)) for _ in range(4))
+    q, _ = np.linalg.qr(np.column_stack([s1, s2, s3, s4]))
+    v = rng.standard_normal((n, D))
+    x, y_, lam3, a8 = v @ s1, v @ s2, v @ s3, v @ s4
+    b = np.column_stack(
+        [np.ones(n), _z(x), _z(y_), _z(x) ** 2, _z(y_) ** 2, _z(x) * _z(y_), _z(lam3), _z(a8)]
+    )
+    return q, v, b
+
+
+def test_d16_residual_identity_for_a_general_direction(rng):
+    for _ in range(10):
+        q, v, b = _d16_setup(rng)
+        w = rng.standard_normal(D)
+        pw = w - q @ (q.T @ w)
+        pw = pw - q @ (q.T @ pw)  # twice (D14)
+        assert np.allclose(_resid(v @ w, b), _resid(v @ pw, b), rtol=0.0, atol=1e-9)
+
+
+def test_d16_in_particular_form_scales_the_lambda2_residual(rng):
+    for _ in range(10):
+        q, v, b = _d16_setup(rng)
+        w2 = rng.standard_normal(D)
+        pw2 = w2 - q @ (q.T @ w2)
+        pw2 = pw2 - q @ (q.T @ pw2)
+        u = pw2 / np.linalg.norm(pw2)
+        z = v @ u
+        lam2 = v @ w2 / (w2 @ w2)
+        scale = (w2 @ w2) / np.linalg.norm(pw2)
+        assert np.allclose(_resid(z, b), scale * _resid(lam2, b), rtol=0.0, atol=1e-9)
+
+
+def test_d16_breaks_when_b_omits_one_of_the_spanning_functionals(rng):
+    q, v, b = _d16_setup(rng)
+    b_missing = b[:, :-1]  # drops z(a_8): B no longer contains every functional of S (condition)
+    w = rng.standard_normal(D)
+    pw = w - q @ (q.T @ w)
+    pw = pw - q @ (q.T @ pw)
+    assert not np.allclose(_resid(v @ w, b_missing), _resid(v @ pw, b_missing), rtol=0.0, atol=1e-9)
