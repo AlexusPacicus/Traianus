@@ -15,8 +15,10 @@ Artefacts (inputs)
   embeddings.npy   NPY v1.0; header {'descr': '<f4', 'fortran_order': False, 'shape': (2221, 384)};
                    IEEE-754 binary32, little-endian, C order.
                    sha256 eafb0e97172830f2404e96fa08d74bf6cccc0b6cbe84d47b790a476603e7d8d1.
-                   Built by tools/experiments/tooling/freeze_spinoza_embeddings.py: encoder output
-                   (batched) normalised in binary32 (raw / ‖raw‖, both binary32), stored binary32.
+                   Built by tools/experiments/tooling/freeze_spinoza_embeddings.py (`embed`):
+                   encoder output (batched) cast to binary64, normalised in binary64
+                   (raw / ‖raw‖), then rounded to binary32 and stored (corrected 2026-09-24: this
+                   line said the normalisation ran in binary32).
   labels.json      UTF-8 JSON array of 2,221 {"label", "part"} objects, row order = embeddings rows.
                    sha256 1d60699353d810f089730c6203ee28f9c416e3004b60781bc965cec284097f4f.
   nsm_axes_8.json  tests/fixtures; UTF-8 JSON array of 8 {"id", "simbolo", "tag", "vector"}, vector =
@@ -29,7 +31,9 @@ Integrity: no nulls in, no silent bit flips
   Null elimination, after the digest check and before any computation; any violation stops the
   run with the row or key named:
     every value finite (no NaN, no ±Inf); every row's ‖v‖ within 3e-5 of 1 (a binary32
-    normalisation over d = 384 terms errs by at most ≈ d·2⁻²⁴ ≈ 2.3e-5); no JSON null, empty or
+    normalisation over d = 384 terms errs by at most ≈ d·2⁻²⁴ ≈ 2.3e-5; the artefact's rows,
+    normalised in binary64 and then rounded to binary32, err by at most ≈ 2⁻²⁴ ≈ 6e-8, so the
+    bound holds with room, corrected 2026-09-24); no JSON null, empty or
     duplicate label; every "part" present, non-null and non-empty (declared: checked although K6
     does not read it); label count = row count; 8 axes with unique ids, each 384 finite values,
     ‖a_k‖ > 0 (amended 2026-09-19).
