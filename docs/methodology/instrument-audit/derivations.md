@@ -103,8 +103,8 @@ D18 For Pos(t) = (1 − t)A + tB + 4t(1 − t)D, f = 1 + Var and τ(D) = ∫₀�
     (∇‖x‖ = x/‖x‖ for x ≠ 0); the integrand's derivative is bounded on [0, 1] away from the single
     possible zero of Pos', so differentiation under the integral holds.
 
-D19 τ(0, t) = ∫₀ᵗ √f(Pos(s)) ‖Pos'(s)‖ ds is continuous and strictly increasing on [0, 1] when
-    τ(0, 1) > 0, so t* with τ(0, t*) = τ(0, 1)/2 exists and is unique.
+D19 τ(0, t) = ∫₀ᵗ √f(Pos(s)) ‖Pos'(s)‖ ds is continuous and strictly increasing on [0, 1], so t*
+    with τ(0, t*) = τ(0, 1)/2 exists and is unique.
     Conditions: f ≥ 1; Pos affine or quadratic in t with Pos' not identically zero.
     Proof: the integrand is ≥ 0 and is 0 only where Pos'(s) = 0, which happens at most at one s
     (D18's condition); an integral of a function positive except at one point is strictly
