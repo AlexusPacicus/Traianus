@@ -225,6 +225,10 @@ Text matches code?         Checked at review (phase 2).
 Reviewed by:               instrument-auditor (blind subagent, review package built at be7a611),
                            2026-09-24; phase 1 (specification), round 1 of 3; commit be7a611
                            (revision 1); CHANGES, 3 blocking, 16 non-blocking; D17–D19 verified.
+                           instrument-auditor (blind subagent, review package built at c44725f),
+                           2026-09-24; phase 1 (specification), round 2 of 3; commit c44725f
+                           (revision 2); PASS, 0 blocking, 14 non-blocking; round-1 items
+                           addressed.
 ```
 
 ## Review history
@@ -258,3 +262,23 @@ Reviewed by:               instrument-auditor (blind subagent, review package bu
   bootstrap of the median difference; (3) the quadrature control re-evaluates at the found D with
   the same draws and compares decisions. Every non-blocking item addressed in place; §0's wording
   corrected in contracts.md; the packaging item is a tooling change, tracked separately.
+- **Revision 2** — `instrument-auditor` subagent, blind by construction (package built from
+  `c44725f`, lock set), 2026-09-24, phase 1, round 2: **PASS**, 0 blocking, 14 non-blocking; every
+  round-1 item addressed. The reviewer disclosed that its session context held the user's memory
+  index, which states outcomes of other records (R4, R5), nothing about Z. Non-blocking, to fix
+  before phase 2 (items 6 and 8 before any code): (1) D ⊥ (B − A) restricts the search to arcs
+  symmetric about the bisector, not only the flat direction — declare it, and that "λ" here is the
+  bisector plane in ℝ⁸, not definitions.md's λ; (2) τ₆₄ is not guaranteed convex: D is the local
+  minimiser reached from w = 0, and a stop with H not positive definite needs its own report;
+  (3) the backtracking needs a floor, and δ against a difference of two evaluations may be 2δ;
+  report the middle's argmax margin; (4) δ derived for n = 64 only, with the cancellation argument
+  written; (5) the Hessian step should scale with ‖B − A‖; (6) empty or degenerate cells (no FIT
+  notes, T = 0, a NaN gap) undefined; (7) the tie tolerance's margin is ≈ 10–20× (γ₃₈₄), not
+  1,000×; (8) Z2 details — the ready timestamp, whether the timed search re-runs Z1's, the
+  warm-up, Z2's n and the n_scored scope, median and percentile methods, three outcomes;
+  (9) no noise treatment for ready's 95th percentile; (10) Z2's frames evenly spaced in t,
+  without easing; (11) hash the imported K6 module's own file and set the thread variables before
+  numpy; (12) tests that each control can fail, a known-answer test for the search, an entry for
+  τ(s(B − A)) = τ(0), and a wording fix; outside Z, (13) contracts.md §0's engine-path paragraph
+  is stale after b3be386 (the engine normalises in binary32; its citations moved to
+  app.py:204-205 and :273-274); (14) the package still carries prior results.
