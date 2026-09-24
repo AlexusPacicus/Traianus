@@ -98,12 +98,14 @@ jobs:
             tests/security/test_hook_case_identity.py \
             tests/security/test_hook_startup_surface.py \
             tests/security/test_review_confinement.py \
+            tests/unit/test_check_doc_citations.py \
             tests/unit/test_context_pack.py \
             tests/unit/test_delegation_contract.py \
             tests/unit/test_load_spinoza_corpus.py \
             tests/unit/test_manifold_nodes_idempotency_migration.py \
             tools/hooks/confine_review_reads.py \
             tools/hooks/require_contract_context.py \
+            tools/audit/check_doc_citations.py \
             tools/audit/context_pack.py \
             tools/audit/delegation_contract.py \
             tools/experiments/tooling/load_spinoza_corpus.py
