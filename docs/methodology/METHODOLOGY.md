@@ -57,9 +57,13 @@ matches its artifact, not that the artifact measures what the text says.
 | Enforced by | `tdd-cycle` skill | `instrument-audit` skill (step 2(a)); planned: `research-loop` |
 
 **Proportionality.** A full instrument audit is for figures that decide a pre-registered
-outcome; any other figure is exploration, labelled as such. Phase 1 gets at most three review
-rounds; after the third, the record freezes and remaining items are resolved in phase 2 against
-the code.
+outcome; any other figure is exploration, labelled as such. Phase 1 rounds count per design: a
+revision that changes an arm's design, rather than fixing what a review asked, starts a new
+count. After the third round on one design, non-blocking items are no longer reviewed in phase 1;
+they are resolved in phase 2 against the code. A blocking item never passes to phase 2: a record
+with one stays in phase 1, revised and reviewed again, until a round returns none; if that keeps
+failing on the same design, the design itself becomes the author's question (amended 2026-09-24,
+by the author, after the Z record's third round returned blocking items on a redesigned arm).
 
 **Contract first.** Before any code, each measurement gets a contract: exact input, exact output,
 the function between them, and the data layer at bit level (formats, dtypes, byte order, digests,
