@@ -1,5 +1,11 @@
 # Technical Specification: Semantic Control Simplex & Dual-Speed Parabolic Corrector
 
+> **Status (2026-09-24): partly superseded; read against the code, not as a description of it.**
+> - §1 (Semantic Control Simplex): never wired; `traianus/geometry/simplex.py` was removed (LEDGER seq 60). The engine's recalibration signal is `VarianceTracker` (`traianus/telemetry/variance_tracker.py`).
+> - §2 (Parabolic Corrector): `traianus/geometry/parabolic.py` exists; the engine has no caller.
+> - §3 (SVD filter): not part of the ingestion pipeline and not called by the Polar Projector; `traianus/geometry/svd_filter.py` has no caller. It centres by the corpus mean, removes u1 of the centred data and returns the unit vector with the residual norm (LEDGER seq 62, 63).
+> - §4: not run as described. The WAL concurrency test bounds read p99 at 10 ms, measured (LEDGER seq 61), not < 0.1 ms.
+
 This document specifies the mathematical and architectural consolidation of the **Traianus** spatial control substrate following the definitive purge of heuristic dependencies. A continuous cellular control model is established based on a **Semantic Control Simplex** (with self-bounded deviation faces) and an asynchronous reconstruction engine accelerated by a **3-Point Parabolic Corrector**.
 
 ---
