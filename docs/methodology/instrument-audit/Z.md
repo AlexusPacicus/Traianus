@@ -274,6 +274,10 @@ Reviewed by:               instrument-auditor (blind subagent, review package bu
                            2026-09-24; phase 1 (specification), round 2 of 3; commit c44725f
                            (revision 2); PASS, 0 blocking, 14 non-blocking; round-1 items
                            addressed.
+                           instrument-auditor (blind subagent, review package built at aa89b67),
+                           2026-09-24; phase 1 (specification), round 3 of 3; commit aa89b67
+                           (revision 3); CHANGES, 2 blocking, 15 non-blocking; record frozen for
+                           phase 1, items carried to phase 2, verdict open; D20–D21 verified.
 ```
 
 ## Review history
@@ -350,3 +354,24 @@ Reviewed by:               instrument-auditor (blind subagent, review package bu
   "a note j" in the wording; (13) contracts.md §0's engine-path paragraph corrected (outside Z);
   (14) the packaging item stays tracked separately. This revision changes the three-point arm, so
   it goes back to a blind phase-1 review (round 3 of 3).
+- **Revision 3** — `instrument-auditor` subagent, blind by construction (package built from
+  `aa89b67`, lock set), 2026-09-24, phase 1, round 3 of 3: **CHANGES**, 2 blocking, 15
+  non-blocking; D20–D21 verified; round-2 items addressed except 13 (contracts.md cites app.py one
+  line early). Third round: the record freezes for phase 1 and the items carry to phase 2, verdict
+  open. Blocking: (1) no check can fail for a search that does not work — a noise-floor stop is
+  valid whatever |G|, an ascent step ends silently at the floor (the halving tests an absolute
+  value), merit descent and search_reproduced pass for a search that never moves, and the
+  known-answer test starts at its own answer: a search returning m₀ gives D_q = 0 everywhere and
+  passes every check; (2) φ is not one function — ρ is recomputed per iteration and can fall, so
+  the code check can fail for a correct search; the noise floor is derived for F, not φ (whose
+  rounding is (1 + ρ)δ); and the fallback's ρ need not make its step a descent direction.
+  Non-blocking: the stated reason for "no flat direction" (F is constant on the whole segment; the
+  constraint removes it); D21's wording (star-shaped level sets, internal tangency |μ| > 1,
+  ‖∇G‖ = 0, the tangent hyperplane is not the route's direction); which acceptance test decides a
+  step; the argmax margin in coordinate units against a residual in τ units; δ's itemisation
+  understates the count (the bound still holds); the degenerate-state test (a tolerance for
+  λ₂ = 0; two notes span a plane); name collisions (F, G, B, λ, δ, L, V); the quadrature control
+  barely re-examines m; "both legs longer" should be "the sum grows"; the representable
+  finite-difference step and the null-space basis; notes present in only one display; the K6
+  import's side effects; D19's wording at the joint; outside Z, contracts.md:72 one line early and
+  the prior results still packaged.
