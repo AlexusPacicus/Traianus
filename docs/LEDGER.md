@@ -1890,3 +1890,36 @@
   receipts.
 
 * **Status:** `Consolidated`.
+
+### seq 61 — 2026-09-24 — `test_concurrent_reads_during_background_write`'s p99 bound recalibrated from 180 measured runs
+
+* **Context:** the 5ms p99 bound (`tests/unit/storage/test_sqlite_engine_concurrency.py`) had
+  already flaked intermittently under full-suite load (LEDGER seq 52, seq 53) since it was first
+  measured and defended at 5ms in seq 44 (20/20 green then, isolated and under load). Before
+  touching it again, measured rather than assumed (AGENTS §1, "no magic numbers"): investigated
+  directly by the executing agent, not delegated, per the approved plan.
+
+* **Measurement:** 180 real runs on the working machine — 20 isolated (baseline) + 150 isolated
+  with per-run p99 logging (temporary instrumentation, reverted after, never committed) + 10 full
+  test-suite runs. Isolated: min 0.65ms, median 0.79ms, mean 1.20ms, max 7.87ms; 6/150 (4%)
+  exceeded the old 5ms bound. Full-suite: 9/10 green, 1 failure at 9.56ms — the highest value
+  observed anywhere, and the more realistic condition (this test only ever runs as part of
+  `pytest tests/` in practice). Root cause: this machine's 8GB of RAM was down to ~51MB free at
+  measurement time, with three concurrent Claude Code sessions and the Claude.app shell alone
+  accounting for roughly 1.4GB — real OS-level scheduling/paging contention external to the code,
+  not a concurrency bug (the isolated test never failed on a code defect; every exceedance
+  coincided with system-level contention).
+
+* **Δ executed:** bound raised from 5ms to 10ms — the smallest whole-millisecond value clearing
+  every one of the 180 measured runs, chosen against a concrete reference point: ~100ms is the
+  Nielsen/Miller "instantaneous" human-perceptibility threshold, so 10ms leaves an order of
+  magnitude of margin before this bound could ever mask something a person would notice. The
+  under-tracer bound scaled proportionally (50ms → 100ms, preserving the existing ~10x ratio). The
+  comment records the measurement basis in-line, so a future re-opening has a number to react to,
+  not a blank assumption.
+
+* **Gate:** `pytest tests/` → 2632 passed / 1 skipped / 5 deselected. One `EXECUTE_SAFE` receipt
+  (case `3afa6534`). Done directly by the executing agent, not delegated (small, single-constant
+  change with its justification already established by direct measurement).
+
+* **Status:** `Consolidated`.
