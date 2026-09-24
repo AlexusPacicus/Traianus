@@ -1141,3 +1141,37 @@ verdes, sin cambio.
 
 **Próximo paso:**
 1. Documentación de formato fijo — retomar con el autor qué entregable concreto quiere.
+
+### Cierre (svd_filter, segunda vuelta)
+
+**Contexto:** al preguntarle al autor su opinión sobre el cambio de `svd_filter.py` recién
+fusionado, señaló un problema real que la primera vuelta no resolvía: renormalizar cada vector por
+separado distorsiona la geometría relativa del corpus (dos vectores con distinta "dosis" de
+contaminación por `u1` pueden acabar siendo el mismo vector), y propuso una fórmula concreta para
+resolverlo junto con el hueco de bias removal que `POC.md` ya había señalado.
+
+**Se hizo:**
+- **`SVDAnisotropyFilter`, segunda revisión** (`7f6668e`): `fit()` guarda la media del corpus
+  (`self.mean_`); `transform` centra el vector por esa media *antes* de proyectar `u1` (antes se
+  proyectaba sobre el vector crudo), y devuelve `(vector_unitario, norma_residual)` en vez de
+  descartar el escalar — señal reutilizable para `d_esc`, `L` o un tensor de control. Cambio de
+  firma deliberado (tupla en vez de array), seguro porque nada lo llama todavía.
+  Sigue sin cablear. LEDGER seq 63.
+- **Error en mi propio contrato, detectado por el subagente:** afirmé que un test seguiría dando
+  `ortho` como dirección superviviente bajo la nueva fórmula; a mano, no es cierto — un offset
+  ortogonal *constante* por fila lo absorbe por completo el centrado, colapsando el residuo a casi
+  cero. El subagente lo verificó por cálculo directo y rehizo el fixture con una señal ortogonal
+  que varía por fila, preservando el propósito real del test en vez de forzarlo a pasar.
+
+**Resultado:** un commit de código (`7f6668e`) y uno de ledger, en `main`. Suite: 2634 verdes
+(9/9 en el fichero del módulo, dos nuevos).
+
+**Resuelto de entradas anteriores:** ninguna — `svd_filter.py` ya estaba cerrado; esto es un
+refinamiento posterior a la conversación con el autor, no una reapertura de un pendiente.
+
+**Sin resolver / decisión pendiente:**
+- «Documentación con formato fijo» — sigue siendo lo siguiente en la cola.
+- Lo de siempre: K8, camino tras la fusión a `main`, restos en disco, ramas de otras sesiones.
+
+**Próximo paso:**
+1. Documentación de formato fijo — retomar con el autor qué entregable concreto quiere.
