@@ -150,9 +150,30 @@ Comparable arms?           Valid only if every condition in Validity holds. Z1 c
                            interpolation eat that saving, and the 100 ms bound asks whether the
                            search itself is fast enough.
 Text matches code?         Checked at review (phase 2).
-Reviewed by:
+Reviewed by:               instrument-auditor (blind subagent, review package built at be7a611),
+                           2026-09-24; phase 1 (specification), round 1 of 3; commit be7a611
+                           (revision 1); CHANGES, 3 blocking, 16 non-blocking; D17–D19 verified.
 ```
 
 ## Review history
 
-None yet.
+- **Revision 1** — `instrument-auditor` subagent, blind by construction (package built from
+  `be7a611`, lock set), 2026-09-24, phase 1, round 1: **CHANGES**, 3 blocking, 16 non-blocking;
+  D17–D19 verified. Blocking: (1) the search's stopping rule and cap are not derived and rounding
+  decides them — the objective is exactly flat along D = s(B − A), |s| ≤ ¼ (τ is a length, so a
+  change of speed along the chord leaves it unchanged), so the minimising D is not identified and
+  steepest descent is ill-conditioned there, and the Armijo test drops below τ's rounding long
+  before the ε step rule can stop it; (2) Z2's arms are not fully specified (whether per-step
+  computes t* and the level-2 partition, the level-1 view per frame, the keyframe schedule and
+  interpolation weights, execution order, timing granularity, warm-up targets) and the median
+  comparison has zero margin and no treatment of timing noise; (3) the quadrature control re-runs
+  the rounding-decided search, leaves the repeat's draws unspecified and demands identity with no
+  derived tolerance. Non-blocking: tie rules for dominant attractors; Lloyd's site order, empty
+  cells, the EVAL notes assigned, and ties that can make it cycle; the bisection's output; the
+  descent check is a code check; near-zero eigenvalue gaps; small n in the bootstrap; the 1e-12
+  tie tolerance and Monte Carlo ranks restated; the seed as an override of contracts.md §0; the
+  engine's K_cin evidence is its caller (app.py:619-622), with the axes' norms to report; missing
+  reported margins and search diagnostics; the 100 ms citations unverified and compute-only;
+  k = 5 and 50 when |M| is small; unit tests (bit flips, negative cases, D18's known answers);
+  D19's redundant condition; and, outside Z, contracts.md §0's binary32 wording against the freeze
+  script, and review packages that include prior results (data/refapp/*_result.json).
