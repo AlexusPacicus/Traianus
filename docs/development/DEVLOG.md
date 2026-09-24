@@ -1110,3 +1110,34 @@ subidos. Suite: 2632 verdes, sin cambio.
 **Próximo paso:**
 1. `svd_filter.py`: recordar qué hace y decidir arreglar el código o el docstring.
 2. Documentación de formato fijo, después.
+
+### Cierre (svd_filter)
+
+**Contexto:** tras recordarle al autor qué hacía `svd_filter.py`, decidió ambas cosas a la vez: el
+docstring pasa a describir con precisión lo que el código hace (reducción de anisotropía por
+proyección ortogonal), y además pidió una comprobación real — que `transform` devuelva vectores
+renormalizados a norma unitaria, invariante básico del sustrato (AGENTS §3.1) que el filtro violaba.
+
+**Se hizo:**
+- **`SVDAnisotropyFilter` corregido** (`3d03bfa`): docstring del módulo y de la clase reescritos
+  con la formulación exacta del autor; terminología arreglada (era "left singular vector", el
+  código usa el derecho, `fit()` ya lo decía bien — inconsistencia interna cerrada). `transform` y
+  `fit_transform` renormalizan a norma L2 unitaria, con guarda por `eps` para el caso borde de un
+  solo vector (donde filtrar deja un vector casi nulo que no se puede renormalizar sin dividir por
+  ~0). Tres tests existentes reescritos, no debilitados, para el nuevo contrato; dos nuevos.
+  Ningún llamador añadido — sigue sin cablear, esto cierra la consistencia, no la decisión de
+  cablearlo. LEDGER seq 62.
+
+**Resultado:** un commit de código (`3d03bfa`) y uno de ledger, fusionados a `main`. Suite: 2632
+verdes, sin cambio.
+
+**Resuelto de entradas anteriores:**
+- `svd_filter.py` — cerrado, las dos mitades del backlog de módulos sin cablear (Δ4 ayer, este
+  hoy) resueltas.
+
+**Sin resolver / decisión pendiente:**
+- «Documentación con formato fijo» — siguiente en la cola, por orden del autor.
+- Lo de siempre: K8, camino tras la fusión a `main`, restos en disco, ramas de otras sesiones.
+
+**Próximo paso:**
+1. Documentación de formato fijo — retomar con el autor qué entregable concreto quiere.
