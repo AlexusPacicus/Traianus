@@ -513,6 +513,84 @@ entrada de las 15:09. Árbol limpio y todo subido. Suite sin ejecutar: solo docu
 4. Decidir el color por perspectiva y el estado de R4 antes de su script.
 5. Aclarar lo del modelo de HF y la lista de ruff.
 
+### Cierre (09:48 del día 21)
+
+**Contexto:** escrito la mañana del 21; recoge el trabajo del 20 tras el bloque de las 17:08: R5
+congelado, el hito cumplido y un cliente sin entrada de notas visible, sin detalle de nota ni lista.
+
+**Se hizo:**
+- **Sonda de la entrada de notas** contra una copia de la base de prueba: el motor procesa la nota de
+  forma asíncrona y le da el id `NODE_<n>` en `pending_approval`; sale en `/nodos` y en `/spatial` y
+  sirve de ancla, sin cambios de motor. Se retiró la valoración de «día 5 muy cargado»: sus piezas
+  son de cliente sobre endpoints que ya existen.
+- **Contrato A** (`1f384a2`, subagente): la entrada espera a `NODE_<n>` y refresca el mapa sin
+  recargar; el estado de cada nota se marca con un anillo, en un buffer aparte del bloque de 64
+  bytes; los errores salen en línea y la clave de idempotencia se reutiliza en los reintentos. El
+  chat principal ejecutó las pruebas manuales contra la copia: pasan. El shader no se había
+  compilado antes y compiló.
+- **Decisión del autor sobre R5:** apuntar a un nodo del mapa muestra su id y su texto sin cambiar la
+  perspectiva; un clic sigue abriendo la perspectiva. Enmienda de la regla 2 de `R5.md` (`21e99cf`),
+  antes de cualquier ejecución.
+- **Contrato B** (`d80c44b`, subagente): seleccionar por id, panel de la nota (id, texto, estado,
+  relaciones), tarjeta al pasar el ratón, alternancia Mapa | Lista con las 15 más cercanas por `y`,
+  «Entered as NODE_<n>» y una maquetación en columna sin solapes. Pruebas manuales: pasan.
+- **Dos hallazgos al probarlo.** (1) El motor guarda la etiqueta como texto de las notas del corpus,
+  porque `/ingesta/vector` no recibe texto (`metadata` solo se registra): el cliente enseña
+  etiquetas, no frases. (2) Las relaciones del panel son vecinos cercanos con su id, y el id dice a
+  qué proposición pertenece: en la vista Mapa de R5 harían de lista de relacionadas. Además, los ids
+  de nota pueden saltarse números, porque un reintento duplicado consume uno.
+- **Decisiones del autor:** relaciones ocultas por defecto, con un interruptor, y arreglar el motor
+  antes de R5. El contrato del motor (`text` opcional en `/ingesta/vector`) quedó preparado y
+  validado, sin lanzar.
+- **Puerta de Python.** El subagente ejecutó un `python3 -` con heredoc vacío en A y en B, y el chat
+  principal intentó por descuido un `python3 -c`, que el perímetro denegó. El autor decidió aplicar
+  AGENTS 2.5 en código, en el binario de Python, en vez de enumerar variantes. La llevó otra sesión
+  (la sonda de `SessionStart` pasó, según su nota de memoria) y dejó dos commits en
+  `feat/python-gate` (`d747e03`, `31ab270`) que esta sesión no ha revisado.
+- **Valoración del trabajo,** pedida por el autor: el preregistro tiene efecto real; los riesgos son
+  la proporción entre método y producto, los hallazgos que aparecen tarde y que R5 dirá menos de lo
+  que parece (tareas que favorecen a la lista; esperadas de T06–T10 propuestas por el chat
+  principal). Sin cambio de plan.
+- **Idea del autor, para después de la PoC:** las dimensiones iniciales (los ejes) y las aristas las
+  elige y nombra el usuario, y el mapa se lee como bloques sólidos de color. Está en memoria; falta
+  su sección «Exploration» en `POC.md`.
+
+**Resultado:** tres commits de esta sesión desde el bloque de las 17:08: `1f384a2`, `21e99cf` y
+`d80c44b`. Ninguno está subido: el remoto sigue en `c662c7d` y esas ramas solo existen en local. El
+contrato del motor no se lanzó y los JSON de los contratos viven fuera del repositorio. Suite completa
+sin ejecutar en esta sesión (cambios de cliente y de documentación). La rama abierta es
+`feat/python-gate`, de otra sesión, y este bloque se commitea en ella.
+
+**Resuelto de entradas anteriores:**
+- 2026-09-20 (17:08): el contrato del día 5 con entrada de notas, lista y detalle con id y texto,
+  hecho en A y B; queda la consolidación.
+- 2026-09-20 (15:09): el campo de ingesta que desborda en un panel estrecho, resuelto por la
+  maquetación de B.
+
+**Sin resolver / decisión pendiente:**
+- Autor: color por perspectiva antes del script de R4 (recomendación del chat principal: no
+  promoverlo); prórroga el martes 22; modelo de HF; lista de ruff de CI (`ci.yml` ya recoge los
+  ficheros de la puerta de Python); integrar las ramas; la fila del día 7 de R5 («list-first»);
+  subir lo que está en local.
+- Relaciones ocultas por defecto: contrato C sin escribir, más una regla en `R5.md` y su entrada en
+  Scope changes.
+- Texto del corpus: falta el contrato del cargador, recargar el corpus en una base nueva y declarar
+  su estado para R4 y R5. Choca con la rama sin fusionar de R1-INV4, que toca el mismo endpoint.
+- Consolidar desde el cliente (botón y llave ética): sin diseño.
+- Puerta de Python: revisión, cableado en los ajustes (del autor), AGENTS 2.5 y 6.2 y LEDGER seq 55.
+  `.claude/settings.local.json` sigue sin seguimiento y no está ignorado por git.
+- Sección «Exploration» de los ejes y aristas elegidos por el usuario, en `POC.md`.
+- **Riesgo:** R4 sin script y pocos días de ventana; el resto del día 5 y R5 dependen del texto del
+  corpus y de las relaciones ocultas.
+
+**Próximo paso (lunes 21, en orden):**
+1. Lanzar el contrato del motor y después el del cargador; recargar el corpus y declarar su estado.
+2. Contrato C (relaciones ocultas) y la regla en `R5.md`.
+3. Decidir el color por perspectiva y empezar el script de R4 (ficha con fase 1 aprobada).
+4. Revisar la puerta de Python y darle su cableado.
+5. Martes 22: comprobación del hito y prórroga por la tarde; entrar las cinco notas antes de la
+   primera pasada de R5.
+
 ---
 
 ## 2026-09-21
