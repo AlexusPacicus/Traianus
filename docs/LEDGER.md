@@ -1964,3 +1964,47 @@
   file). `ruff`/`mypy` clean on the CI scope. Two `EXECUTE_SAFE` receipts.
 
 * **Status:** `Consolidated`.
+
+### seq 63 — 2026-09-24 — `SVDAnisotropyFilter` centres by the corpus mean and exposes the residual norm
+
+* **Context:** discussing seq 62 with the author surfaced two further gaps in the same,
+  still-unwired module. First, independent per-vector renormalization discards real information:
+  two vectors that end up pointing the same direction after filtering, but had different
+  magnitudes of anisotropic contamination, become identical outputs — a real distortion of the
+  corpus's relative geometry (pairwise distances, the kind `ε`-adjacency and `K_cin` depend on),
+  not just a vector-level rounding. Second, `transform()` removed `u1` from the raw vector `v`,
+  never actually subtracting the corpus mean the way `fit()` already computes internally (only to
+  find `u1`'s direction) — so seq 62's fix was anisotropy reduction only, not the bias removal
+  `POC.md`'s original spec asked for. The author gave an exact five-step formula closing both at
+  once.
+
+* **Δ executed:** `fit()` now stores the corpus mean unconditionally as `self.mean_` (computed the
+  same way regardless of `n`; the existing `n == 1` special-casing for finding `u1` via SVD is
+  untouched). `transform(v)` centers `v` by `self.mean_`, projects out `u1` from the *centered*
+  vector, and returns `(unit_vector, residual_norm)` — the L2 norm of the centered-and-projected
+  vector before its own guarded renormalization, exposed as a reusable per-vector signal (a
+  candidate feature for `d_esc`, the luminance channel `L`, or a control-tensor signal) instead of
+  discarded. `fit_transform(X)` is the row-wise equivalent, returning `(unit_vectors,
+  residual_norms)`. Both signatures change from a bare array to a 2-tuple — an intentional,
+  API-breaking change, safe because nothing calls this module yet.
+
+* **A contract error, caught by the implementer, not by review:** the delegation asserted that
+  `test_filter_preserves_orthogonal_components`'s fixture (a row-*constant* orthogonal offset)
+  would still show "the surviving direction is exactly `ortho`" under the new formula. Worked by
+  hand against the actual arithmetic: false — mean-centering fully absorbs a row-constant offset
+  into `self.mean_`, so the centered data has zero orthogonal component in every row for this
+  exactly-rank-1 fixture, and projecting out `u1` then collapses every row's residual to ~0 (the
+  `eps` guard fires) instead of surviving as `ortho`. The fixture was redesigned with a per-row
+  *varying* orthogonal component (`0.5 + 0.1·noise` instead of a constant `0.5`) to preserve the
+  test's real intent — a genuine, non-degenerate signal surviving centering and projection —
+  verified against an independent re-implementation of the five-step formula, not a hand-derived
+  target vector (not hand-derivable for a non-degenerate 2D fixture).
+
+* **How it was built:** delegated to `engine-implementer` (`scope: engine`, `attribution: null`) on
+  `feat/svd-filter-mean-centering-and-residual`, commit `7f6668e`. Still unwired — this is about
+  the operation's completeness and correctness, not a decision to use it.
+
+* **Gate:** `pytest tests/` → 2634 passed / 1 skipped / 5 deselected (9/9 in the module's own test
+  file, two new). `ruff`/`mypy` clean on the CI scope. Two `EXECUTE_SAFE` receipts.
+
+* **Status:** `Consolidated`.
