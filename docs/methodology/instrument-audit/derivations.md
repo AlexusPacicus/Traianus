@@ -105,13 +105,41 @@ D18 For Pos(t) = (1 − t)A + tB + 4t(1 − t)D, f = 1 + Var and τ(D) = ∫₀�
 
 D19 τ(0, t) = ∫₀ᵗ √f(Pos(s)) ‖Pos'(s)‖ ds is continuous and strictly increasing on [0, 1], so t*
     with τ(0, t*) = τ(0, 1)/2 exists and is unique.
-    Conditions: f ≥ 1; Pos affine or quadratic in t with Pos' not identically zero.
-    Proof: the integrand is ≥ 0 and is 0 only where Pos'(s) = 0, which happens at most at one s
-    (D18's condition); an integral of a function positive except at one point is strictly
-    increasing; continuity and the intermediate value theorem give existence.
+    Conditions: f ≥ 1; Pos continuous on [0, 1] and, piece by piece, affine or quadratic in t, with
+    Pos' zero at finitely many points at most (a straight segment, a parabola, or two straight
+    legs joined at a point).
+    Proof: the integrand is ≥ 0 and is 0 only where Pos'(s) = 0, finitely many points; an integral
+    of a function positive except at finitely many points is strictly increasing; continuity and
+    the intermediate value theorem give existence.
+
+D20 For P ≠ Q and the straight leg L(s) = P + s(Q − P), s ∈ [0, 1]:
+    τ_seg(P, Q) = ‖Q − P‖ ∫₀¹ √f(L(s)) ds, and with u = (Q − P)/‖Q − P‖:
+    ∇_Q τ_seg = u ∫₀¹ √f(L) ds + ‖Q − P‖ ∫₀¹ s · ∇f(L) / (2√f(L)) ds,
+    ∇_P τ_seg = −u ∫₀¹ √f(L) ds + ‖Q − P‖ ∫₀¹ (1 − s) · ∇f(L) / (2√f(L)) ds,
+    with ∇f = ∇Var (D17). Additivity: for R = P + r(Q − P), r ∈ [0, 1],
+    τ_seg(P, Q) = τ_seg(P, R) + τ_seg(R, Q).
+    Conditions: P ≠ Q (for the gradients); f ≥ 1.
+    Proof: τ of the leg is ∫₀¹ √f(L(s)) ‖L'(s)‖ ds with ‖L'‖ = ‖Q − P‖ constant. ∂L/∂Q = s·I,
+    ∂L/∂P = (1 − s)·I, ∂‖Q − P‖/∂Q = u = −∂‖Q − P‖/∂P; the integrand is smooth in P and Q for
+    P ≠ Q, so differentiation under the integral holds. Additivity: split ∫₀¹ at r and substitute
+    s = r·σ and s = r + (1 − r)·σ.
+
+D21 With τ_A(m) = τ_seg(A, m), τ_B(m) = τ_seg(m, B), F = τ_A + τ_B and G = τ_A − τ_B: at a local
+    minimiser m* of F subject to G = 0 there is μ with ∇F(m*) = μ∇G(m*), i.e.
+    (1 − μ)∇τ_A(m*) = −(1 + μ)∇τ_B(m*). The two gradients are parallel, so the level sets
+    {τ_A = r} and {τ_B = r}, r = τ_A(m*) = τ_B(m*), share their tangent hyperplane at m*: two
+    friction-time hyperspheres of equal radius, one around A and one around B, touch at m*.
+    Conditions: m* ∉ {A, B} (D20's gradients exist); ∇τ_A(m*) ≠ 0 and ∇τ_B(m*) ≠ 0 (the level sets
+    are hypersurfaces there); ∇G(m*) ≠ 0 (constraint qualification).
+    Proof: the Lagrange multiplier theorem for one equality constraint; a hypersurface's tangent
+    hyperplane is the orthogonal complement of its gradient, and parallel gradients give the same
+    complement.
 ```
 
-Used by: K6 (D2, D4, D6, D7, D8, D11), R4 (D2, D5, D6, D9, D10), Z (D5, D9, D17, D18, D19).
+D18 is not used by Z since its revision 3 (the three-point route became two straight legs); it
+stays as verified.
+
+Used by: K6 (D2, D4, D6, D7, D8, D11), R4 (D2, D5, D6, D9, D10), Z (D5, D9, D17, D19, D20, D21).
 
 ## En palabras
 
@@ -143,6 +171,12 @@ Used by: K6 (D2, D4, D6, D7, D8, D11), R4 (D2, D5, D6, D9, D10), Z (D5, D9, D17,
   usa la búsqueda del camino más rápido.
 - **D19** A lo largo de una ruta el tiempo de fricción solo crece, así que el punto que la parte en
   dos mitades de igual tiempo existe y es único.
+- **D20** El tiempo de fricción de un tramo recto es su longitud por la fricción media a lo largo
+  de él; se sabe cómo cambia al mover cualquiera de sus extremos, y partir el tramo no cambia el
+  total.
+- **D21** Donde el camino más rápido por el punto medio tiene sus dos mitades iguales, las dos
+  hiperesferas de tiempo de fricción, una alrededor del inicio y otra del final, se tocan y
+  comparten el plano tangente: esa es la dirección del camino en el punto medio.
 
 Verified by the `instrument-auditor` subagent (maths only), 2026-09-18, at `e2f6d70`: D9 defect
 (count vs. fraction) and missing conditions in D1, D2, D4, D6, D7, D10; D11, D12, the D8 tie form
