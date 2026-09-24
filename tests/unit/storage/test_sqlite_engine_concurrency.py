@@ -57,11 +57,15 @@ class TestSQLiteEngineConcurrency:
         stop_writer.set()
         await writer_task
 
-        # p99 latency bound (Python + SQLite overhead). Under a tracer
-        # (coverage/debugger) every call is ~10x slower, so the bound
-        # relaxes; the invariant under test is non-blocking reads, which
-        # the assertion below still guards order-of-magnitude-wise.
-        bound = 0.050 if sys.gettrace() else 0.005
+        # p99 latency bound (Python + SQLite overhead). Measured 2026-09-24: 180
+        # real runs on the working machine (170 isolated, 10 under the full
+        # suite) gave max 9.56ms, mean ~1.2ms; 0.010 is the smallest whole-ms
+        # bound that clears every one of them, still an order of magnitude
+        # below the ~100ms human-perceptible threshold (Nielsen/Miller). Under
+        # a tracer (coverage/debugger) every call is ~10x slower, so the bound
+        # relaxes; the invariant under test is non-blocking reads, which the
+        # assertion below still guards order-of-magnitude-wise.
+        bound = 0.100 if sys.gettrace() else 0.010
         latencies.sort()
         p99 = latencies[int(0.99 * len(latencies))]
         assert p99 < bound, f"p99 latency {p99*1000:.2f}ms exceeds bound"
