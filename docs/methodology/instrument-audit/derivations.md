@@ -106,40 +106,56 @@ D18 For Pos(t) = (1 − t)A + tB + 4t(1 − t)D, f = 1 + Var and τ(D) = ∫₀�
 D19 τ(0, t) = ∫₀ᵗ √f(Pos(s)) ‖Pos'(s)‖ ds is continuous and strictly increasing on [0, 1], so t*
     with τ(0, t*) = τ(0, 1)/2 exists and is unique.
     Conditions: f ≥ 1; Pos continuous on [0, 1] and, piece by piece, affine or quadratic in t, with
-    Pos' zero at finitely many points at most (a straight segment, a parabola, or two straight
-    legs joined at a point).
-    Proof: the integrand is ≥ 0 and is 0 only where Pos'(s) = 0, finitely many points; an integral
-    of a function positive except at finitely many points is strictly increasing; continuity and
-    the intermediate value theorem give existence.
+    Pos' zero or undefined at finitely many points at most (a straight segment, a parabola, or two
+    straight legs joined at a point, where Pos' is undefined).
+    Proof: the integrand is ≥ 0 and is 0 or undefined only at finitely many points; an integral of
+    a function positive except at finitely many points is strictly increasing; continuity and the
+    intermediate value theorem give existence.
 
-D20 For P ≠ Q and the straight leg L(s) = P + s(Q − P), s ∈ [0, 1]:
-    τ_seg(P, Q) = ‖Q − P‖ ∫₀¹ √f(L(s)) ds, and with u = (Q − P)/‖Q − P‖:
-    ∇_Q τ_seg = u ∫₀¹ √f(L) ds + ‖Q − P‖ ∫₀¹ s · ∇f(L) / (2√f(L)) ds,
-    ∇_P τ_seg = −u ∫₀¹ √f(L) ds + ‖Q − P‖ ∫₀¹ (1 − s) · ∇f(L) / (2√f(L)) ds,
+D20 For P ≠ Q and the straight leg Λ(s) = P + s(Q − P), s ∈ [0, 1]:
+    τ_seg(P, Q) = ‖Q − P‖ ∫₀¹ √f(Λ(s)) ds, and with u = (Q − P)/‖Q − P‖:
+    ∇_Q τ_seg = u ∫₀¹ √f(Λ) ds + ‖Q − P‖ ∫₀¹ s · ∇f(Λ) / (2√f(Λ)) ds,
+    ∇_P τ_seg = −u ∫₀¹ √f(Λ) ds + ‖Q − P‖ ∫₀¹ (1 − s) · ∇f(Λ) / (2√f(Λ)) ds,
     with ∇f = ∇Var (D17). Additivity: for R = P + r(Q − P), r ∈ [0, 1],
-    τ_seg(P, Q) = τ_seg(P, R) + τ_seg(R, Q).
+    τ_seg(P, Q) = τ_seg(P, R) + τ_seg(R, Q). Radial rate: d/dr τ_seg(P, P + r·u) = √f(P + r·u) ≥ 1.
     Conditions: P ≠ Q (for the gradients); f ≥ 1.
-    Proof: τ of the leg is ∫₀¹ √f(L(s)) ‖L'(s)‖ ds with ‖L'‖ = ‖Q − P‖ constant. ∂L/∂Q = s·I,
-    ∂L/∂P = (1 − s)·I, ∂‖Q − P‖/∂Q = u = −∂‖Q − P‖/∂P; the integrand is smooth in P and Q for
+    Proof: τ of the leg is ∫₀¹ √f(Λ(s)) ‖Λ'(s)‖ ds with ‖Λ'‖ = ‖Q − P‖ constant. ∂Λ/∂Q = s·I,
+    ∂Λ/∂P = (1 − s)·I, ∂‖Q − P‖/∂Q = u = −∂‖Q − P‖/∂P; the integrand is smooth in P and Q for
     P ≠ Q, so differentiation under the integral holds. Additivity: split ∫₀¹ at r and substitute
-    s = r·σ and s = r + (1 − r)·σ.
+    s = r·σ and s = r + (1 − r)·σ. Radial rate: by additivity τ_seg(P, P + r·u) = ∫₀ʳ √f(P + σu) dσ.
 
-D21 With τ_A(m) = τ_seg(A, m), τ_B(m) = τ_seg(m, B), F = τ_A + τ_B and G = τ_A − τ_B: at a local
-    minimiser m* of F subject to G = 0 there is μ with ∇F(m*) = μ∇G(m*), i.e.
-    (1 − μ)∇τ_A(m*) = −(1 + μ)∇τ_B(m*). The two gradients are parallel, so the level sets
-    {τ_A = r} and {τ_B = r}, r = τ_A(m*) = τ_B(m*), share their tangent hyperplane at m*: two
-    friction-time hyperspheres of equal radius, one around A and one around B, touch at m*.
-    Conditions: m* ∉ {A, B} (D20's gradients exist); ∇τ_A(m*) ≠ 0 and ∇τ_B(m*) ≠ 0 (the level sets
-    are hypersurfaces there); ∇G(m*) ≠ 0 (constraint qualification).
-    Proof: the Lagrange multiplier theorem for one equality constraint; a hypersurface's tangent
-    hyperplane is the orthogonal complement of its gradient, and parallel gradients give the same
-    complement.
+D21 With τ_A(m) = τ_seg(A, m), τ_B(m) = τ_seg(m, B), S = τ_A + τ_B and E = τ_A − τ_B: at a local
+    minimiser m* of S subject to E = 0 there is μ with ∇S(m*) = μ∇E(m*), i.e.
+    (1 − μ)∇τ_A(m*) = −(1 + μ)∇τ_B(m*), and μ ≠ ±1. The two gradients are parallel, so the level
+    sets {τ_A = r} and {τ_B = r}, r = τ_A(m*) = τ_B(m*), share their tangent hyperplane at m*: two
+    friction-time hyperspheres of equal radius, one around A and one around B, touch at m*. For
+    |μ| < 1 the gradients point in opposite directions (the two touch from outside); for |μ| > 1
+    in the same direction (one touches the other from inside). The shared hyperplane is not the
+    route's direction at m*: the two-leg route has a corner there.
+    Conditions: m* ∉ {A, B} (D20's gradients exist); ∇E(m*) ≠ 0 (constraint qualification). The
+    level sets are hypersurfaces automatically: by D20's radial rate, ⟨∇τ_A(m), (m − A)/‖m − A‖⟩ =
+    √f(m) ≥ 1, and likewise for τ_B with (m − B)/‖m − B‖, so neither gradient vanishes; each level
+    set is star-shaped around its centre. On the segment AB, ⟨∇E, u⟩ = 2√f > 0 (u the unit chord),
+    so ∇E ≠ 0 there.
+    Proof: the Lagrange multiplier theorem for one equality constraint; μ = ±1 would make one of
+    the two gradients zero, which the radial rate excludes; a hypersurface's tangent hyperplane is
+    the orthogonal complement of its gradient, and parallel gradients give the same complement.
+
+D22 Merit with a non-decreasing penalty. For φ_ρ(m) = S(m) + ρ|E(m)|, penalties
+    ρ_1 ≤ ρ_2 ≤ … ≤ ρ_K and iterates m_0, m_1, …, m_K where each step k satisfies
+    φ_{ρ_k}(m_k) ≤ φ_{ρ_k}(m_{k−1}):
+    φ_{ρ_K}(m_K) ≤ φ_{ρ_1}(m_0) + Σ_{k=2}^{K} (ρ_k − ρ_{k−1}) · |E(m_{k−1})|.
+    Conditions: ρ non-decreasing; each step accepted under its own ρ_k.
+    Proof: φ_{ρ_k}(m_{k−1}) = φ_{ρ_{k−1}}(m_{k−1}) + (ρ_k − ρ_{k−1})|E(m_{k−1})|, so
+    φ_{ρ_k}(m_k) ≤ φ_{ρ_{k−1}}(m_{k−1}) + (ρ_k − ρ_{k−1})|E(m_{k−1})|; chain from k = K down to 2 and
+    use φ_{ρ_1}(m_1) ≤ φ_{ρ_1}(m_0).
 ```
 
 D18 is not used by Z since its revision 3 (the three-point route became two straight legs); it
 stays as verified.
 
-Used by: K6 (D2, D4, D6, D7, D8, D11), R4 (D2, D5, D6, D9, D10), Z (D5, D9, D17, D19, D20, D21).
+Used by: K6 (D2, D4, D6, D7, D8, D11), R4 (D2, D5, D6, D9, D10), Z (D5, D9, D17, D19, D20, D21,
+D22).
 
 ## En palabras
 
@@ -176,7 +192,10 @@ Used by: K6 (D2, D4, D6, D7, D8, D11), R4 (D2, D5, D6, D9, D10), Z (D5, D9, D17,
   total.
 - **D21** Donde el camino más rápido por el punto medio tiene sus dos mitades iguales, las dos
   hiperesferas de tiempo de fricción, una alrededor del inicio y otra del final, se tocan y
-  comparten el plano tangente: esa es la dirección del camino en el punto medio.
+  comparten el plano tangente en ese punto (el camino de dos tramos hace allí un vértice, así que
+  ese plano no es la dirección del camino).
+- **D22** Si la penalización del mérito solo crece, el mérito final queda acotado por el inicial
+  más lo que añadió cada subida de la penalización: es lo que comprueba que la búsqueda bajó.
 
 Verified by the `instrument-auditor` subagent (maths only), 2026-09-18, at `e2f6d70`: D9 defect
 (count vs. fraction) and missing conditions in D1, D2, D4, D6, D7, D10; D11, D12, the D8 tie form

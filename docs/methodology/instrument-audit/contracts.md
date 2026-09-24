@@ -69,7 +69,7 @@ Conversions
 
 Engine path (what the map is drawn from), for comparison
   provider output binary32 (one text at a time) → ‖·‖ and division in binary32
-  (traianus/app.py:272-273) → .astype(np.float64).tobytes() (:204-205) → SQLite BLOB of 384 × 8
+  (traianus/app.py:273-274) → .astype(np.float64).tobytes() (:204-205) → SQLite BLOB of 384 × 8
   bytes, native byte order ('<f8' on x86-64 and arm64). Not the artefact's arithmetic, which
   normalises in binary64 and then rounds to binary32 (Artefacts above; corrected 2026-09-24, with
   the line citations), and single-text and batched encoding are not guaranteed bit-identical
