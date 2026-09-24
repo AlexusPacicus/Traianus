@@ -86,9 +86,32 @@ D11 With λ clipped to s = ±1: d_esc² = 1 − y² − 2s⟨v, w⟩ + ‖w‖²
 D12 λ is never clipped when ‖w‖ ≥ √(1 − y²), in particular whenever ‖w‖ ≥ 1.
     Conditions: ‖v‖ = 1.
     Proof: Cauchy–Schwarz with D2: |⟨v, w⟩| = |⟨P⊥v, w⟩| ≤ √(1 − y²)·‖w‖ ≤ ‖w‖².
+
+    (D13–D16 belong to the frozen K8 record, on branch feat/k8-z-axis; the numbers stay reserved.)
+
+D17 For c ∈ ℝⁿ and Var(c) = (1/n) Σ_k (c_k − c̄)², c̄ = (1/n) Σ_k c_k:
+    ∇Var(c) = (2/n)(c − c̄·1). For n = 8: ∇Var(c) = ¼(c − c̄·1).
+    Conditions: none.
+    Proof: ∂Var/∂c_k = (2/n)(c_k − c̄) − (2/n)·(1/n)·Σ_j (c_j − c̄), and Σ_j (c_j − c̄) = 0.
+
+D18 For Pos(t) = (1 − t)A + tB + 4t(1 − t)D, f = 1 + Var and τ(D) = ∫₀¹ √f(Pos(t)) ‖Pos'(t)‖ dt:
+    ∂τ/∂D = ∫₀¹ [ 4t(1 − t) · ‖Pos'‖ · ∇f(Pos) / (2√f(Pos)) + 4(1 − 2t) · √f(Pos) · Pos'/‖Pos'‖ ] dt,
+    with Pos'(t) = (B − A) + 4(1 − 2t)D and ∇f = ∇Var (D17).
+    Conditions: Pos'(t) ≠ 0 for almost every t (Pos' is affine in t, so it vanishes at most at one
+    t unless it vanishes identically, which requires A = B and D = 0); f ≥ 1 > 0.
+    Proof: ∂Pos/∂D = 4t(1 − t)·I and ∂Pos'/∂D = 4(1 − 2t)·I; the chain rule on √f(Pos) and on ‖Pos'‖
+    (∇‖x‖ = x/‖x‖ for x ≠ 0); the integrand's derivative is bounded on [0, 1] away from the single
+    possible zero of Pos', so differentiation under the integral holds.
+
+D19 τ(0, t) = ∫₀ᵗ √f(Pos(s)) ‖Pos'(s)‖ ds is continuous and strictly increasing on [0, 1] when
+    τ(0, 1) > 0, so t* with τ(0, t*) = τ(0, 1)/2 exists and is unique.
+    Conditions: f ≥ 1; Pos affine or quadratic in t with Pos' not identically zero.
+    Proof: the integrand is ≥ 0 and is 0 only where Pos'(s) = 0, which happens at most at one s
+    (D18's condition); an integral of a function positive except at one point is strictly
+    increasing; continuity and the intermediate value theorem give existence.
 ```
 
-Used by: K6 (D2, D4, D6, D7, D8, D11), R4 (D2, D5, D6, D9, D10).
+Used by: K6 (D2, D4, D6, D7, D8, D11), R4 (D2, D5, D6, D9, D10), Z (D5, D9, D17, D18, D19).
 
 ## En palabras
 
@@ -114,6 +137,12 @@ Used by: K6 (D2, D4, D6, D7, D8, D11), R4 (D2, D5, D6, D9, D10).
   perspectiva; con el operador, exactamente en cero.
 - **D11** Si λ se recorta, la distancia de escape tiene otra fórmula.
 - **D12** Si el dipolo mide al menos 1, λ nunca se recorta para notas unitarias.
+- **D17** La varianza de las 8 coordenadas crece en la dirección que separa cada coordenada de su
+  media; es lo que dice cómo cambia la fricción al mover el punto.
+- **D18** Cuánto cambia el tiempo de fricción de la ruta al mover su punto medio: la fórmula que
+  usa la búsqueda del camino más rápido.
+- **D19** A lo largo de una ruta el tiempo de fricción solo crece, así que el punto que la parte en
+  dos mitades de igual tiempo existe y es único.
 
 Verified by the `instrument-auditor` subagent (maths only), 2026-09-18, at `e2f6d70`: D9 defect
 (count vs. fraction) and missing conditions in D1, D2, D4, D6, D7, D10; D11, D12, the D8 tie form
