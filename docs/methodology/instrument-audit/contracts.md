@@ -229,14 +229,17 @@ Input    V (§0, after §0 Conversions); FIT = rows 0, 2, 4, …; EVAL = rows 1,
 Output   data/refapp/K8_result.json (§0 Results format) with: digests (four artefacts and two code
          files, by file name); environment (§0 Determinism); stopped; valid;
          first_failed_condition (null when valid); failed_conditions and conditions_checked
-         (identifiers, in check order); rankings_match; construction: sigma_min_M, sigma_max_M,
-         survival, eta, u_from_w2_deviation, u_orthogonality_max, u_norm_deviation,
+         (identifiers, in check order); rankings_match; the construction figures, as top-level
+         keys (amended 2026-09-24: "construction" is a label, not a key): sigma_min_M,
+         sigma_max_M, survival, eta, u_from_w2_deviation, u_orthogonality_max, u_norm_deviation,
          nulls_orthogonality_max and nulls_norm_deviation_max (each for deciding and sigma),
          sd_z, spread_bound. When not stopped, also: cond_B, basis_columns, tau,
          tau_sigma_reference, r2_z, adjusted_r2_z, margin (r2_z − tau), admissible (null when
          valid = false), fragility (4·eta/sd_z), fragile, positive_control {r2, tau},
          control_in and control_out {rho, r2, deviation}, d16_max_deviation, descriptive
-         {pearson_r {x, y, lambda_3, a_8}, sd_z_rank_among_null_sd, clip_fractions {x, lambda_3}}.
+         {pearson_r {x, y, lambda_3, a_8}, sd_z_rank_among_null_sd, clip_fractions {x, lambda_3}};
+         sd_z_rank_among_null_sd = 1 + #{deciding null channels with sd < sd(z)} (amended
+         2026-09-24).
          When stopped, every figure not computed is null.
          Identifiers, in check order: k6_result_valid, k6_selected_channels, ranking_reproduced,
          fallback_flags_agree, fallback_none, rank, survival, u_from_w2, u_orthogonal,
