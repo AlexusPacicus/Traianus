@@ -1923,3 +1923,44 @@
   change with its justification already established by direct measurement).
 
 * **Status:** `Consolidated`.
+
+### seq 62 — 2026-09-24 — `SVDAnisotropyFilter`: docstrings corrected to its real spec, output re-normalized to unit L2 norm
+
+* **Context:** `POC.md`'s "Built but not wired" section flagged `SVDAnisotropyFilter` beyond just
+  lacking a caller: "it removes the neighbourhood's direction of largest variance, not the shared
+  bias its spec describes; it must not be wired as is." Two separate defects, confirmed against
+  the code: (1) the module docstring claimed the "first **left** singular vector" and an
+  "isotropic tangent space suitable for polar projection" — `fit()`'s own docstring already said
+  "right" correctly, an internal inconsistency; the actual operation (orthogonal projection onto
+  the null space of the first **right** singular vector, `Vt[0]`) is anisotropy reduction, not
+  bias removal. (2) `transform()`/`fit_transform()` returned `v - (u1·v)u1` with no
+  re-normalization — since Traianus's substrate is L2-unit-normalized (AGENTS §3.1), subtracting a
+  component from a unit vector leaves it below unit norm; the filter's output violated the
+  substrate's own basic invariant and could never have been wired as-is even with an accurate
+  docstring.
+
+* **Δ executed:** module and class docstrings rewritten to the author's own stated spec: "local
+  anisotropy reduction via orthogonal projection onto the null space of the first singular vector
+  (u1), removing the dominant component of the embedding cone," with the left/right terminology
+  fixed throughout. `transform()` now divides its filtered result by its own L2 norm, guarded by
+  `self.eps` (the single-vector edge case — fitting on one row makes `u1` that row's own
+  direction, so filtering it leaves a near-zero vector that must not be divided by ~0).
+  `fit_transform()` applies the same guarded normalization row-wise, vectorized with `np.where`.
+
+* **Test surface:** two new assertions (unit-norm output; the eps guard stays finite) plus three
+  existing tests reworked, not weakened, to match the new contract — `test_filter_preserves_orthogonal_components`
+  now asserts the surviving direction exactly (the pre-normalization value in that fixture already
+  coincided with the expected unit direction); `test_filter_identity_on_isotropic_data` now asserts
+  unit norm plus cosine similarity ≈ 1 with the input, and that `u1_` is exactly zero on isotropic
+  data (documents *why* the transform reduces to pure re-normalization there); the old
+  coefficient-of-variation uniformity test — trivial once every output is pinned to norm 1 —
+  replaced by `test_filter_output_norms_are_unit`, asserting the real new invariant directly.
+
+* **How it was built:** delegated to `engine-implementer` (`scope: engine`, `attribution: null`) on
+  `fix/svd-filter-spec-and-renormalization`, commit `3d03bfa`. No caller added — the module stays
+  unwired; this closes the correctness/consistency gap `POC.md` flagged, not the wiring decision.
+
+* **Gate:** `pytest tests/` → 2632 passed / 1 skipped / 5 deselected (7/7 in the module's own test
+  file). `ruff`/`mypy` clean on the CI scope. Two `EXECUTE_SAFE` receipts.
+
+* **Status:** `Consolidated`.
