@@ -2,7 +2,7 @@
 
 The mathematical and data contract of each measurement: exact input, exact output, the function
 between them, and the bit-level data engineering that makes code and contract comparable. Records
-(`K6.md`, `R4.md`) describe the instrument; this file states what it computes. Shortcuts are
+(`K6.md`, `R4.md`, `K8.md`) describe the instrument; this file states what it computes. Shortcuts are
 proved in `derivations.md` and verified by `tests/unit/test_audit_derivations.py`.
 
 Language: the formal parts are mathematics and data layout; each "En palabras" line is in
@@ -214,3 +214,75 @@ vecinas más que un eje cualquiera. Para no fiarse de una sola cifra, se remuest
 notas contiguas y de direcciones; R4 se sostiene solo si, para todas las longitudes de bloque, el
 intervalo entero queda por debajo de cero. Si el resultado de K6 no es válido (valid = false), R4
 no se ejecuta (corregido el 2026-09-19).
+
+## 3. K8 — predictability of the orthogonalised second dipole
+
+```
+Input    V (§0, after §0 Conversions); FIT = rows 0, 2, 4, …; EVAL = rows 1, 3, 5, … (1,110).
+         A (§0). K6_result.json, a consumed result (§0 Integrity, file layer), sha256 in K8.md;
+         read: valid, ranking_fit, rankings_match, fallback.dipole_{1,2,3}, steps[s].selected.
+         Pinned code, digested and refused on mismatch exactly like the artefacts (one read, one
+         sha256, check_digests): tools/experiments/k6_colour_predictability.py and
+         traianus/geometry/polar_projector.py, sha256 in K8.md.
+         Seed 20260924: K8 overrides §0 Random numbers' seed; same generator (PCG64), same
+         numpy pin.
+Output   data/refapp/K8_result.json (§0 Results format) with: digests (four artefacts and two code
+         files, by file name); environment (§0 Determinism); stopped; valid;
+         first_failed_condition (null when valid); failed_conditions and conditions_checked
+         (identifiers, in check order); rankings_match; construction: sigma_min_M, sigma_max_M,
+         survival, eta, u_from_w2_deviation, u_orthogonality_max, u_norm_deviation,
+         nulls_orthogonality_max and nulls_norm_deviation_max (each for deciding and sigma),
+         sd_z, spread_bound. When not stopped, also: cond_B, basis_columns, tau,
+         tau_sigma_reference, r2_z, adjusted_r2_z, margin (r2_z − tau), admissible (null when
+         valid = false), fragility (4·eta/sd_z), fragile, positive_control {r2, tau},
+         control_in and control_out {rho, r2, deviation}, d16_max_deviation, descriptive
+         {pearson_r {x, y, lambda_3, a_8}, sd_z_rank_among_null_sd, clip_fractions {x, lambda_3}}.
+         When stopped, every figure not computed is null.
+         Identifiers, in check order: k6_result_valid, k6_selected_channels, ranking_reproduced,
+         fallback_flags_agree, fallback_none, rank, survival, u_from_w2, u_orthogonal,
+         nulls_orthogonal, spread, cond_B, d16_identity, positive_control, control_in_exact,
+         control_in_side, control_out_exact, control_out_side. The first eleven stop the run.
+         Basis column names (design_basis): 1, z(x), z(y), z(x)^2, z(y)^2, z(x)z(y),
+         z(c_1:lambda_3), z(c_2:a_8).
+Function
+  frame:   ranking = rank_axes(V_FIT, Â, ids), must equal ranking_fit; build_frame → ĉ₁, w_1, w_2,
+           w_3, p₈ and fallback flags, which must equal the K6 result's and all be false.
+  M = [ĉ₁, w_1/‖w_1‖, w_3/‖w_3‖, p₈/‖p₈‖] ∈ ℝ^{384×4}; Q from numpy.linalg.qr(M) (reduced).
+  P(w) = w' − Q(Qᵀw'), w' = w − Q(Qᵀw)             two passes (D14).
+  u = P(w_2) / ‖P(w_2)‖.
+  on EVAL: x, y, λ₂, λ₃, a₈, h as eval_channels computes them (x, λ₂, λ₃ unclipped);
+           z = ⟨v, u⟩ by channels_along.
+  nulls:   rng = make_rng(20260924); g = draw_deciding_null(rng, 1000, 384), then
+           g_Σ = draw_sigma_null(rng, X_c, 1000); w⁰ = P(g_i)/‖P(g_i)‖ for both sets;
+           null channels by channels_along.
+  B = design_basis(x, y, [("lambda_3", λ₃), ("a_8", a₈)]); R²(·; B) and resid(u; B) =
+           u − ols_fit(u, B) as §1.
+  τ = sort(R²(deciding nulls; B))[950]; tau_sigma_reference = sort(R²(Σ nulls; B))[950].
+  decision: admissible ⇔ R²(z; B) ≤ τ; margin = R²(z; B) − τ.
+  checks (thresholds and reasoning in K8.md): σ_min(M) ≥ 1e-6; ‖P(w_2)‖/‖w_2‖ ≥ 1e-6;
+           |⟨u, w_2⟩ − ‖P(w_2)‖| ≤ 1e-12·‖w_2‖; |⟨u, s⟩| ≤ 1e-12 for each column s of M and
+           |‖u‖ − 1| ≤ 1e-12; the same two bounds for every w⁰ of both sets;
+           sd(z) > γ₃₈₄ · max‖v‖ over EVAL, γ₃₈₄ = 384·(ε/2)/(1 − 384·(ε/2)),
+           ε = np.finfo(np.float64).eps; cond(B) ≤ 1e5;
+           max |resid(z; B) − (‖w_2‖²/‖P(w_2)‖)·resid(λ₂; B)| ≤ 1e-9·sd(z) (D16);
+           R²(h; B) > τ; controls as §1 on B with ρ_in = τ/2 and ρ_out = (1 + τ)/2, each
+           R² within 1e-9 of its ρ, ρ_in admissible and ρ_out not.
+  η = ε·σ_max(M) / (σ_min(M)·survival); fragile ⇔ 4η/sd(z) ≥ |margin|.
+Threads  The K8 script sets OMP_NUM_THREADS = OPENBLAS_NUM_THREADS = VECLIB_MAXIMUM_THREADS = 1
+         itself, before its own first numpy import; it does not rely on the K6 module setting
+         them on import, which holds only if that module is imported before numpy.
+Refusal  A digest mismatch (artefacts or code) or a validate_inputs rejection writes no result.
+         A stop condition writes the result with stopped = true and valid = false.
+```
+
+En palabras: K8 reutiliza el marco de K6 y comprueba primero que el código importado lo reproduce
+igual (mismo orden de ejes, mismos dipolos) y que nada ha cambiado desde la revisión: las huellas
+cubren los datos, el resultado de K6 y los dos ficheros de código. Toma el segundo dipolo y le quita
+todo lo que tiene en común con las cuatro direcciones que el mapa ya muestra (ancla, eje x y los dos
+colores); lo que queda, normalizado, es la dirección de z. Mide qué parte de la variación de z
+explica la base de K6 en su paso 3 (la posición en segundo grado y los dos colores) y la compara con
+1.000 direcciones al azar tomadas en ese mismo espacio restante: si z no se explica más que el valor
+951 de esas 1.000, se admite. Antes de medir comprueba que la dirección y las 2.000 direcciones al
+azar son de verdad ortogonales a esas cuatro, que z sale del segundo dipolo y no de otro vector, y
+que z varía más de lo que varía el puro redondeo; si algo de eso falla, se para y lo deja escrito.
+La semilla es propia (20260924), distinta de la de K6, con el mismo generador.
