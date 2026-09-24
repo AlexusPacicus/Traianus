@@ -977,3 +977,107 @@ tocar. `refapp-01` publicado y verificado
 1. Autor: decidir el camino a `main`.
 2. v2 en `refapp-01`, cuando el autor quiera.
 3. Limpieza manual de los restos en disco que `rm` no me deja tocar.
+
+### Cierre (23:38)
+
+**Contexto:** el autor fusionó el PR de modularización a `main` por su cuenta (`7ed20c2`) y pidió
+un plan para atacar el backlog general del DEVLOG más los tres módulos sin cablear. Aparte, pidió
+quitar toda atribución/publicidad de Claude en commits y PRs — aplicado desde este cierre en
+adelante.
+
+**Se hizo:**
+- **Plan explícito** (modo plan), aprobado por el autor: cinco deltas — dos bugs declarados desde
+  el día 2, retirar `scope: client`, retirar `simplex.py`, e investigar la prueba intermitente sin
+  delegar. K8 quedó fuera (no seleccionado); "documentación con formato fijo" y `svd_filter.py`
+  quedaron declarados, sin entregable definido, para que el autor decida.
+- **Δ1 — `/ingesta` rechaza clave vacía** (`a38cc77`): mismo check que ya tenía `/ingesta/vector`
+  (REMEDIATION-01 §3.1, mitad que faltaba). LEDGER seq 57.
+- **Δ2 — manifest del paquete** (`a76d802`): `_is_denied` comparaba con `startswith` crudo; una
+  cita de `data/spinoza/telemetry` sin barra final caía en `unresolved` en vez de `denied`. El
+  subagente encontró que mi contrato afirmaba mal que solo una entrada de `DENIED` terminaba en
+  barra (son tres) y generalizó el arreglo en vez de parchear solo telemetry. LEDGER seq 58.
+- **Atribución opcional en los contratos de delegación** (`2155a71`), hecho antes de Δ3 porque su
+  propio esquema exigía una línea `Co-Authored-By` obligatoria — bloqueaba lanzar cualquier
+  contrato sin publicidad de Claude. `attribution` pasa a `str | None`; sin ella, el commit del
+  subagente no lleva línea de coautoría.
+- **Δ3 — retirar `scope: client`** (`877bf20` + `11d7ab0`): `frontend/src/**` ya no existe, así que
+  ni el `scope: client` del contrato ni el gate `tsc` ni la expectativa `manual` eran alcanzables.
+  Quitados de los tres `Literal` de `delegation_contract.py`, de sus tres validadores dedicados, de
+  `AGENTS.md` §6.1 y de `engine-implementer.md`. El propio informe del subagente señaló una
+  inconsistencia en mi contrato (`AGENTS.md` seguía diciendo «or client change» pese a que ya no
+  quedaba `frontend/src/**`); la cerré yo en un commit aparte. LEDGER seq 59.
+- **Δ4 — retirar `traianus/geometry/simplex.py`** (`18b8ca7`): verificado contra el código, no
+  contra el docstring, que `SemanticSimplex` no es una pieza a la espera de una llamada — el
+  mecanismo real de señal de recalibración es `VarianceTracker` (EWMA + Schmitt trigger,
+  `traianus/telemetry/variance_tracker.py`), consumido por `app.py`. `SemanticSimplex` es un
+  diseño alternativo que nunca se conectó, con su propia constante `RECALIBRATION_SIGNAL`
+  desconectada de la real. `ParabolicCorrector` y `SVDAnisotropyFilter` quedaron fuera del plan
+  (el primero es un corte de alcance a propósito; el segundo tiene un desajuste real spec/código
+  que el autor debe decidir cómo resolver, no yo). LEDGER seq 60.
+- Cada delta: contrato JSON validado antes de lanzar, revisado por mí tras el commit, `pytest
+  tests/` + `ruff` + `mypy` en verde, fusionado a `main` y subido antes del siguiente.
+
+**Resultado:** ocho commits nuevos en `main` (cuatro de código/gobernanza, cuatro de LEDGER),
+todos subidos a `origin`. Suite: 2632 verdes / 1 omitido / 5 deseleccionados al cierre (bajó de
+2672 por las eliminaciones netas de test surface en Δ3 y Δ4). Nada de esto tocó `refapp-01`.
+
+**Resuelto de entradas anteriores:**
+- `/ingesta` acepta clave vacía — cerrado (Δ1).
+- Manifest del paquete (`data/spinoza/telemetry`) — cerrado (Δ2).
+- `AGENTS.md` §6.1 `scope: client` inalcanzable — cerrado (Δ3), en vez de dejado declarado.
+- Uno de los tres módulos sin cablear (`simplex.py`) — cerrado (Δ4).
+
+**Sin resolver / decisión pendiente:**
+- Autor: camino a `main` — ya no aplica como tal (el autor fusionó `feat/client-oklch-color`
+  directamente); queda decidir qué sigue.
+- Autor: `svd_filter.py` — ¿arreglar el código para restar un sesgo compartido real, o corregir el
+  docstring/spec para que describa la resta de PCA que ya hace? Sin decidir.
+- Autor: «documentación con formato fijo» — sin entregable concreto definido.
+- K8 (eje z), fuera de este plan por decisión del autor.
+- Prueba intermitente: investigación (Δ5) empezada, sin cerrar a esta hora — sigue en la entrada
+  de mañana.
+- Restos en disco y limpieza de ramas de otras sesiones: sin cambios, igual que antes.
+
+**Próximo paso:**
+1. Terminar Δ5 (prueba intermitente) y decidir con el autor si toca la cota o no.
+2. Autor: decidir `svd_filter.py` y «documentación con formato fijo».
+3. Autor: decidir qué sigue tras la fusión directa a `main`.
+
+---
+
+## 2026-09-24
+
+**Contexto:** continuación de la sesión de ayer; queda Δ5 del plan de backlog — investigar
+`test_concurrent_reads_during_background_write` antes de tocar su cota, sin delegar (memoria: no
+magic numbers).
+
+**Se hizo:**
+- **30 corridas medidas**, ninguna con código tocado antes: 20 aisladas (solo ese test, nada más
+  corriendo) y 10 con la suite completa (`pytest tests/`, ~2632 tests, condición real de CI y de
+  cada sesión de trabajo).
+- **Aisladas: 20/20 en verde.** Sin excepción.
+- **Bajo la suite completa: 9/10 en verde, 1 fallo real.** El único fallo: p99 de 9,56 ms contra
+  la cota de 5 ms (case 9,56 > 5, no un margen minúsculo). Memoria libre de la máquina en el
+  momento de medir: ~51 MB (`vm_stat`, páginas libres × 16 KB) — mismo cuadro que el cierre del
+  22-09 (≈62 MB libres, varios procesos de la app de Claude compitiendo por CPU/memoria).
+- **Lectura:** el patrón coincide con lo ya registrado en LEDGER seq 52/53 (2 de 10 falló
+  entonces; el mismo tipo de fallo, nunca en aislamiento). No es un bug de contención en el código
+  — la prueba aislada nunca falla — es una cota de reloj de pared que la máquina real, bajo carga
+  real, a veces no cumple.
+
+**Resultado:** ningún cambio de código. Medida tomada y documentada; no toco la cota sin que el
+autor decida qué hacer con ella.
+
+**Resuelto de entradas anteriores:**
+- Prueba intermitente: investigada (Δ5); la medida está sobre la mesa, la decisión no.
+
+**Sin resolver / decisión pendiente:**
+- Autor: con 29/30 en verde y el único fallo bajo carga real de la propia máquina de trabajo —
+  ¿relajar la cota (con esta medida como base, no un número inventado), aceptarla como flake
+  conocido y documentado, o investigar más (qué corre justo antes de este test en la suite
+  completa)? Sin decidir.
+- Todo lo demás de la entrada de ayer sigue igual: `svd_filter.py`, «documentación con formato
+  fijo», K8, camino tras la fusión a `main`, restos en disco, ramas de otras sesiones.
+
+**Próximo paso:**
+1. Autor: decidir qué hacer con la cota de `test_concurrent_reads_during_background_write`.
