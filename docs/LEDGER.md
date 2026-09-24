@@ -2120,3 +2120,40 @@
   `7e2eaebf`, `23b93b47`) and for each governed test file.
 
 * **Status:** `Consolidated`.
+
+### seq 67 — 2026-09-24 — `fit_epoch_frame`: a channel spread within the rounding bound of its projections is zero
+
+* **Context:** CI on `main` was red from its first run of 2026-09-23 (`7ed20c2`) through `dcc6f72`,
+  on one test, `test_degenerate_spread_maps_to_the_centre`: on Linux, five identical rows gave
+  `(x, y) = (-1.0, -0.745…)` or `(-1.0, -1.0)` instead of the centre; on macOS it passed, so every
+  local run was green. `_standardize` treats a spread as zero only when `k·σ <= 0.0` exactly.
+  Linux's BLAS rounds the population's dot products differently from the single row's, `np.std`
+  returns a σ of order 1e-17, and `(value − μ)/spread` becomes a ratio of rounding errors. Latent
+  in practice: real populations (the PoC base, 2226 nodes) have genuine spread, and a one-node
+  epoch has σ exactly 0 on any platform.
+
+* **Decisions (the author's, on the executing agent's proposal):** fix the engine, not the test;
+  the threshold is derived, not calibrated: `γ_n = n·u/(1 − n·u)` (Higham, 2nd ed., §3.1), bound
+  `γ · max‖v‖ · ‖u_c‖` per channel by Cauchy–Schwarz, where `u_c` is the direction the channel is a
+  dot product with; applied in `fit_epoch_frame`, which stores σ = 0.0 so the frozen frame records
+  the degenerate channel. Frames already persisted are not rewritten (AGENTS 4.1).
+
+* **Δ executed (`b78a857`):** `_gamma`, `_effective_axes` (the same directions as `raw_channels`,
+  via `_geometry`) and `_rounding_floor` (`γ_d` for `y`, `γ_{d+1}` for the three channels that
+  divide by a squared norm after the dot product); `raw_channels`, `_standardize`,
+  `derive_spatial_observables`, `EpochFrame` and `app.py` unchanged. Tests: rows differing only in
+  the last bits are zeroed and map to the centre (red on macOS before the fix:
+  σ(λ₃) = 3.1e-18); a genuine 1e-9 spread is kept; non-degenerate σ is bit-identical to `np.std`.
+
+* **How it was built:** delegated to `engine-implementer` (`scope: engine`, `attribution: null`) from
+  a validated `DelegationContract`. The contract's `symbol` selector for a test method lacked the
+  class prefix (`TestObservables.…`), so the emitted `context_pack` command exited 1; the subagent
+  fixed the selector and reran it, serving the Engine path paragraph the contract hook requires.
+  Diff reviewed and the suite re-run by the executing agent. The Linux confirmation is the CI run
+  on `main` after the push.
+
+* **Gate:** `pytest tests/` → 2872 passed / 1 skipped / 5 deselected (3 new). `ruff` clean on the CI
+  scope; `mypy traianus/` clean. `EXECUTE_SAFE` receipts for both files (cases `96351727`,
+  `491c21ad`).
+
+* **Status:** `Consolidated`.
