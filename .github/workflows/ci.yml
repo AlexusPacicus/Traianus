@@ -99,6 +99,7 @@ jobs:
             tests/security/test_hook_startup_surface.py \
             tests/security/test_python_gate.py \
             tests/security/test_python_gate_bash_hook.py \
+            tests/security/test_python_gate_wiring.py \
             tests/security/test_review_confinement.py \
             tests/unit/test_check_doc_citations.py \
             tests/unit/test_context_pack.py \
