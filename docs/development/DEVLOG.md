@@ -1081,3 +1081,32 @@ autor decida qué hacer con ella.
 
 **Próximo paso:**
 1. Autor: decidir qué hacer con la cota de `test_concurrent_reads_during_background_write`.
+
+### Cierre (11:59)
+
+**Contexto:** tras la entrada de esta mañana (180 corridas medidas, decisión pendiente): el autor
+preguntó por el umbral de percepción humana antes de decidir el número, luego confirmó.
+
+**Se hizo:**
+- **Referencia dada:** los tres límites de Nielsen/Miller (~100ms instantáneo, ~1s sin romper el
+  hilo de pensamiento, ~10s el límite de atención) — ni la cota vieja (5ms) ni el fallo medido
+  (9,56ms) se acercan a lo perceptible.
+- **Cota recalibrada a 10ms** (`9728c1e`): el entero de milisegundo más pequeño que cubre las 180
+  corridas de hoy, elegido contra esa referencia, no una aproximación a ojo. Comentario en el
+  código con la medida y su fecha, para que una futura reapertura tenga un número real, no una
+  suposición. Cota bajo trazador escalada proporcionalmente (50ms → 100ms). Hecho directamente,
+  sin delegar (cambio de una constante, ya justificado por la medición). LEDGER seq 61.
+
+**Resultado:** un commit de código (`9728c1e`) y uno de ledger (`f77d69b`), ambos en `main`,
+subidos. Suite: 2632 verdes, sin cambio.
+
+**Resuelto de entradas anteriores:**
+- Prueba intermitente — cerrada del todo (medida, decidida, implementada).
+
+**Sin resolver / decisión pendiente:**
+- Autor: `svd_filter.py`, «documentación con formato fijo» (siguiente en la cola, por orden del
+  autor), K8, camino tras la fusión a `main`, restos en disco, ramas de otras sesiones.
+
+**Próximo paso:**
+1. `svd_filter.py`: recordar qué hace y decidir arreglar el código o el docstring.
+2. Documentación de formato fijo, después.
