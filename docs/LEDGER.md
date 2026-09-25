@@ -2157,3 +2157,33 @@
   `491c21ad`).
 
 * **Status:** `Consolidated`.
+
+### seq 68 — 2026-09-25 — Contract registry rule `z`: the Z script and its tests require contracts.md §0 and §4
+
+* **Context:** the Z record (`docs/methodology/instrument-audit/Z.md`, branch `feat/zoom-record`)
+  closed phase 1 on 2026-09-25. Revision 5 changed the three-point arm's search (a bisection along
+  the chord's parallels and Newton inside a tube where the middle is unique; derivations D23–D26)
+  and Z1's score (each note's neighbourhood hypersphere over all EVAL notes, corrected against a
+  zoom with no information). Three blind rounds on that design passed (`3664906`, `5bfac58`,
+  `9582421`); revision 8 (`4cde898`) applied the last round's items. Its contract is
+  `contracts.md` §4 (`0f9ad7c`); §3 stays reserved for the frozen K8 record.
+
+* **Decision (the author):** before any Z code, register the rule, so that the contract hook
+  (AGENTS 3.7) denies Edit/Write on `tools/experiments/zoom_*.py` and `tests/unit/test_zoom_*.py`
+  unless `context_pack` served §0 and §4.
+
+* **Δ executed (`53022bd`):** rule `z` appended after `r4` in `tools/hooks/contract_registry.json`;
+  the pin in `tests/unit/test_load_spinoza_corpus.py` expects five rules and the exact `z` rule; the
+  real-registry coverage test in `tests/security/test_contract_context_hook.py` maps the two zoom
+  paths to `z`. Hook code and window unchanged.
+
+* **How it was built:** delegated to `engine-implementer` (`scope: tools`, `attribution: null`) from
+  a validated `DelegationContract`, whose context served §0 (the corpus-loader rule requires it to
+  edit its test file). T1 and T2 red for the stated reasons; T3, every requirement of the real
+  registry resolves, a guard. Diff reviewed and the suite re-run by the executing agent.
+
+* **Gate:** `pytest tests/` → 2874 passed / 1 skipped / 5 deselected (2 new). `ruff` clean on the CI
+  scope; `mypy traianus/` clean. `EXECUTE_SAFE` receipts for both test files (cases `7a13dec2`,
+  `09e37b1a`).
+
+* **Status:** `Consolidated` on `feat/zoom-record`, not merged.

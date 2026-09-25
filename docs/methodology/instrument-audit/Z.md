@@ -811,3 +811,8 @@ Reviewed by:               instrument-auditor (blind subagent, review package bu
   the rule's error along the chord; the known world cites it. (7) The benchmark's caveat says
   "sign": rounding can make the computed E non-monotone, but the bisection uses only its sign,
   which can be wrong only where |E| ≤ ν + ‖∇E‖·ρ_pt.
+- **Contract and registry** (2026-09-25) — contracts.md §4 is Z's contract (`0f9ad7c`; §3 stays
+  reserved for the frozen K8 record), and the registry rule `z` (`53022bd`, LEDGER seq 68) makes
+  the contract hook deny Edit/Write on tools/experiments/zoom_*.py and tests/unit/test_zoom_*.py
+  unless context_pack served §0 and §4. Next: the implementation by `instrument-implementer`,
+  test-first, then the blind phase-2 review.
