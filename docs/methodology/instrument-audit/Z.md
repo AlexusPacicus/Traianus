@@ -460,6 +460,12 @@ Reviewed by:               instrument-auditor (blind subagent, review package bu
                            verified; no arm changed.
                            Revision 7 applies those items and changes no arm: its review is
                            round 3 of 3 on revision 5's design.
+                           instrument-auditor (blind subagent, review package built at ff61178),
+                           2026-09-25; phase 1 (specification), round 3 of 3 on revision 5's
+                           design; commit ff61178 (revision 7); PASS, 0 blocking, 7
+                           non-blocking; round-2 items addressed (5 in part); D20, D23–D26
+                           verified; no arm changed. Phase 1 closed; the 7 items carry to
+                           phase 2, items 3 and 5 before any code.
 ```
 
 ## Review history
@@ -737,3 +743,33 @@ Reviewed by:               instrument-auditor (blind subagent, review package bu
   directions. (6) The |E(m)| bound is stated for the exact E at the computed m, and the reported
   value may exceed it by a further ν. This revision changes no arm: round 3 of 3 on revision 5's
   design.
+- **Revision 7** — `instrument-auditor` subagent, blind by construction (package built from
+  `ff61178`, lock set), 2026-09-25, phase 1, round 3 of 3 on revision 5's design: **PASS**, 0
+  blocking, 7 non-blocking; round-2 items addressed, 5 in part; D20, D23–D26 verified again; no
+  arm changed. Phase 1 closes on this design; the items carry to phase 2, 3 and 5 before any
+  code. The reviewer did not open the packaged results of other records and disclosed the memory
+  index and recent commit messages in its context (other records' outcomes, Z's process status;
+  nothing on Z's hypothesis or results). Non-blocking: (1) two lines still use r, a bare O and P
+  for the score and the candidate count ("r = 1 at O = K for any P", "r = O/K"); they should read
+  R_j(K) = 1 at O_j(K) = K for any N_c, and R_j(K) = O_j(K)/K; (2) the symbol table is
+  incomplete — c(v) is missing (c_k a component, c_i, c_j notes' vectors, c̄, ‖c‖; c_k at k = 1
+  reads as definitions.md's c₁), and so are p₀, f, τ and τ_seg with P, Q and s (P is also a
+  state's point, Q also the QR factor), lo, hi, m*, the generic ρ, ω_min(H) (ω is T's
+  eigenvalues), Pos and ease; "ν a route's τ" should say τ's rounding bound; n is not only the
+  targets scored (Z2's n counts targets with a route); "hypersphere" names both D21's level sets
+  and D25's neighbour sets, next to the middle's "sphere"; contracts.md §0's d = 384 and v_i (a
+  component) collide with d = ‖B − A‖ and v_i (a note's vector); (3) N_U is written as 1,110,
+  which is only the real data's value, and so are K up to 1,108, rng.permutation(1109) and the
+  band ±0.003607 — the known world has N_U = 168, K up to 166 and a band of ±4/√(168·166) ≈
+  ±0.0240; hard-coded, the band is about ±0.6 of the known world's null s.d. bound and null_world
+  would often fail on a correct pipeline: state N_U = |U| and the band as its formula; (4) the
+  count "middle cells decided inside the last move" should read "argmax margin below 2ρ₂ or
+  2ρ₃"; (5) test (ii) must require the search to end at (2) — ρ₃ bounds the remaining move only
+  at a converged stop — and should say that ν, ν_g, Θ and ρ₃ keep their formula with the injected
+  friction; (6) D20 is stated for the integral while the record uses its node-sum form for the
+  64-node τ (state it, and test that form against finite differences of the 64-node τ), and D26's
+  proof uses additivity, which the 64- and 128-node τ lack — in the known world g is still even in
+  z, so ∇g(0) = 0, and a node-by-node projection keeps z = 0 a strict local minimiser up to the
+  rule's error: add a quadrature form to D26; (7) rounding can make the computed E non-monotone
+  anywhere between two nearby evaluations; what can go wrong only where |E| ≤ ν + ‖∇E‖·ρ_pt is
+  the sign, which is all the bisection uses — say "sign", not "monotonicity".
