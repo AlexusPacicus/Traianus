@@ -228,7 +228,7 @@ no se ejecuta (corregido el 2026-09-19).
 Input    V (§0, after §0 Conversions); FIT = rows 0, 2, 4, … (1,111); EVAL = rows 1, 3, 5, …
          (1,110). A (§0), used as â_1 … â_8. No consumed result.
          Pinned code: tools/experiments/k6_colour_predictability.py, imported (not copied) for
-         check_digests, load_inputs and validate_inputs only; after the import its file
+         check_digests, load_inputs, validate_inputs and IntegrityError only; after the import its file
          (module.__file__) is hashed and the run refused unless the sha256 equals Z.md's (limits
          declared there: the file on disk, not the loaded bytecode; §0's one-read rule cannot
          apply to an imported module).

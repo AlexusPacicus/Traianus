@@ -3,10 +3,10 @@
 The question, hypothesis and refuters live in the RefApp-01 repository (`ZOOM.md`), which a blind
 reviewer never opens (definitions.md, Not allowed).
 
-## Instrument audit record (revision 11)
+## Instrument audit record (revision 12)
 
 ```
-Instrument audit — Z1 (neighbourhood kept along a zoom) and Z2 (zoom latency) (revision 11)
+Instrument audit — Z1 (neighbourhood kept along a zoom) and Z2 (zoom latency) (revision 12)
 
 Scope: two arms that zoom from the barycentre to a note by different routes, each judged at the
   start, the middle and the end of its route. Z1 measures, for each displayed note, how much of its
@@ -54,11 +54,12 @@ Script: tools/experiments/zoom_three_point.py; unit tests: tests/unit/test_zoom_
   the tests of D5, D17, D19, D20, D21, D23, D24, D25 and D26 in
   tests/unit/test_audit_derivations.py.
   The script sets OMP_NUM_THREADS = OPENBLAS_NUM_THREADS = VECLIB_MAXIMUM_THREADS = 1 itself,
-  before its first numpy import. It imports, and does not copy, check_digests, load_inputs and
-  validate_inputs from tools/experiments/k6_colour_predictability.py (reviewed code); after the
-  import it hashes the file the module was loaded from (module.__file__) with hashlib, not through
-  the module's own check_digests (which an edit could disable), and refuses to run unless its
-  sha256 = 6289c596792154f6bb799606265c68719c6b8c7ae8b69084116dfb23c77876d2. Declared limits:
+  before its first numpy import. It imports, and does not copy, check_digests, load_inputs,
+  validate_inputs and IntegrityError (their exception, raised by the pin check too) from
+  tools/experiments/k6_colour_predictability.py (reviewed code); after the import it hashes the
+  file the module was loaded from (module.__file__) with hashlib, not through the module's own
+  check_digests (which an edit could disable), and refuses to run unless its sha256 =
+  6289c596792154f6bb799606265c68719c6b8c7ae8b69084116dfb23c77876d2. Declared limits:
   this checks the file on disk, not the bytes the interpreter loaded (a stale bytecode cache is not
   seen); the "read once, hash and parse the same bytes" rule of contracts.md §0 cannot apply to an
   imported module; and importing it runs its top-level code, which sets the thread variables again
@@ -191,7 +192,10 @@ Routes (the only difference between the arms): both use the same line and the sa
     accepted step, which is never evaluated; after a failure while evaluating a later point, the
     iterate before that point. The three-point arm is built on that m, scored, and enters D_q,
     the quadrature control, the reported figures and Z2, but valid is then false (Validity), so
-    nothing is decided on it and those figures are diagnostics only.
+    nothing is decided on it and those figures are diagnostics only. A search that fails at its
+    first point, z = 0, leaves no m and so no three-point arm: the target drops out of D_q and Z2;
+    after a non-positive slope there its two-point arm is still built and scored, with ρ₂ null,
+    and after no sign change neither arm has a middle.
 States, the same definition in both arms:
   start: P = A. middle: P = m₀ (benchmark) or m (three-point). end: P = B.
   If the search ends at z = 0, m = m₀ bit for bit and D_q = 0 for that target.
@@ -355,9 +359,12 @@ Z2 (latency), per target with a route, on the three-point route with the m found
     between the start and middle displays with weight w = 2t_f, one with t_f > ½ between the middle
     and end displays with w = 2t_f − 1; position (1 − w)·pos_prev + w·pos_next for the EVAL notes in
     both displays, and, for a note in only one of the two, the position it has in that one.
-  per-step: the same level-2 partition, computed and timed in this arm too; then at each frame the
-    notes in view, T and the display recomputed from scratch at the route's point P(t_f): level 0
-    while t_f < ½; level 1, the axis cell of the current P, while ½ ≤ t_f < 1; level 2 at t_f = 1.
+  per-step: the same level-2 partition — T_cell, the Lloyd iteration and the EVAL assignment, not
+    the level-2 state — computed and timed in this arm too; then at each frame the notes in view,
+    T and the display recomputed from scratch at the route's point P(t_f): level 0 while t_f < ½;
+    level 1, the axis cell of the current P, while ½ ≤ t_f < 1; level 2, q's cell of that
+    partition, at t_f = 1, at P = B exactly. Each arm builds each state it shows once: the
+    keyframes arm 3, the per-step arm N_f.
   Untimed and shared by both arms: the 64 Gauss–Legendre nodes and weights, and the notes' axis
     coordinates and dominant attractors, computed once per run before any timing; each state's
     cell is filtered from them inside the timed calls, and everything that depends on the route's
@@ -395,9 +402,9 @@ Reported, not deciding: the score per arm and state (mean over targets); per L u
   over targets; the middle cells' argmax margins; τ₂ = τ_seg(A, B), τ₃ = S(m) and their ratio; ξ;
   ‖m − m₀‖; h/h_max; the search diagnostics above; the eigenvalue gaps; Lloyd iterations and
   cells per end state; the leading direction of T at the start state (the corpus's dominant
-  spread seen through the axes); the eight ‖a_k‖; the smallest d; for Z2, the median of Δ_q and
-  the 95th percentile of ready with their intervals per L and their margins (to 0 and to 100 ms),
-  and the timer overhead.
+  spread seen through the axes); the eight ‖a_k‖; the smallest positive d; for Z2, the median of
+  Δ_q and the 95th percentile of ready with their intervals per L and their margins (to 0 and to
+  100 ms), and the timer overhead.
 Draws: rng = numpy.random.default_rng(20260924) (PCG64; this record overrides the seed of
   contracts.md §0, as its §4 states), in this order and nowhere else: for each EVAL note
   in index order, rng.permutation(N_c) (permutation control); then, for Z1, for each L used in
@@ -443,7 +450,9 @@ Unit tests (committed with the script, reviewed in phase 2; they can fail). In
   appears in its own neighbour lists; the block counts and the L filter by n; the first three
   entries of the first permutation from seeds 20260924 and 20260925 match values recorded in the
   test; the timer overhead is subtracted, and once more from the keyframes arm's total; the timed
-  search rebuilds its line inside its interval; the arms' interleaving order; search_reproduced;
+  search rebuilds its line inside its interval; each Z2 arm builds each state once (the keyframes
+  arm 3, the per-step arm N_f, its last at P = B); the arms' interleaving order; search_reproduced;
+  which point a failed search leaves (with a cap of 1, m = m₀ although a step was accepted);
   the smallest positive d skips a target with d = 0; the known world's corpus meets D26's
   conditions, its 84 offsets are distinct, no pair's three are equally spaced (twice one minus
   the other two at least 5.0·10⁻³ in absolute value), and its null_world passes, with a smallest
@@ -949,3 +958,14 @@ Reviewed by:               instrument-auditor (blind subagent, review package bu
   module is said to be imported for three functions only, but check_pin also raises its
   IntegrityError; (N5) both docstrings cite revision 10; (N6) the lists in quadrature_control
   lack annotations (mypy, outside CI).
+- **Changes in revision 12** — B1 and the six non-blocking items, no change to either arm's
+  design (the author, 2026-09-26, who chose the level-2 frame at P = B exactly and to name the
+  exception rather than define one). (B1) The per-step arm computes the level-2 partition alone
+  — T_cell, the Lloyd iteration and the EVAL assignment — and builds the level-2 state once, at
+  t_f = 1 and P = B exactly, so each arm builds each state it shows once (3 against N_f); a test
+  counts the states per arm. (N1) A search that fails at z = 0 is stated: no m, no three-point
+  arm, the target out of D_q and Z2, the two-point arm still scored after a non-positive slope.
+  (N2) A test pins which point a failed search leaves. (N3) "the smallest positive d" in the
+  reported figures. (N4) IntegrityError is named among the imports, here and in contracts.md §4.
+  (N5) The docstrings cite this revision. (N6) The lists are annotated. The code goes to phase
+  2, round 3.
