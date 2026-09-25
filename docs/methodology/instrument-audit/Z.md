@@ -3,10 +3,10 @@
 The question, hypothesis and refuters live in the RefApp-01 repository (`ZOOM.md`), which a blind
 reviewer never opens (definitions.md, Not allowed).
 
-## Instrument audit record (revision 10)
+## Instrument audit record (revision 11)
 
 ```
-Instrument audit — Z1 (neighbourhood kept along a zoom) and Z2 (zoom latency) (revision 10)
+Instrument audit — Z1 (neighbourhood kept along a zoom) and Z2 (zoom latency) (revision 11)
 
 Scope: two arms that zoom from the barycentre to a note by different routes, each judged at the
   start, the middle and the end of its route. Z1 measures, for each displayed note, how much of its
@@ -186,10 +186,12 @@ Routes (the only difference between the arms): both use the same line and the sa
     be convex (each leg's integrand is a product of positive convex functions of m), so it is not
     claimed to be the global one. Reported per target: iterations, the decrement at the stop, μ̂,
     h/h_max, ⟨∇E, u⟩ and |E(m)| at m, ξ, ρ_pt, the steps that fell back to −∇g, and, for a failed
-    search, why. A search that fails after its first point still leaves m, the last point it
-    evaluated: the three-point arm is built on it, scored, and enters D_q, the quadrature control,
-    the reported figures and Z2, but valid is then false (Validity), so nothing is decided on it
-    and those figures are diagnostics only.
+    search, why. A search that fails after its first point still leaves m = mid(z) at the last
+    iterate whose mid(z), g and ∇g step (1) computed: at the cap, the iterate before the last
+    accepted step, which is never evaluated; after a failure while evaluating a later point, the
+    iterate before that point. The three-point arm is built on that m, scored, and enters D_q,
+    the quadrature control, the reported figures and Z2, but valid is then false (Validity), so
+    nothing is decided on it and those figures are diagnostics only.
 States, the same definition in both arms:
   start: P = A. middle: P = m₀ (benchmark) or m (three-point). end: P = B.
   If the search ends at z = 0, m = m₀ bit for bit and D_q = 0 for that target.
@@ -912,3 +914,12 @@ Reviewed by:               instrument-auditor (blind subagent, review package bu
   with fewer than 20 targets scored in both arms, and with fewer than 20 with a route; (10) D21
   on random synthetic frictions; and a test for each code change. The code goes to phase 2,
   round 2.
+- **Revision 10 implemented** (2026-09-26) — `instrument-implementer`, `a4e9274`: items 4, 5, 8
+  and 12 in code, each with a test that was red before its change; the n_scored tests (item 9),
+  which pass on the existing code and were shown to fail by breaking each clause in turn; D21's
+  tests on 200 random synthetic frictions (item 10), with the half-chord, centre and directions
+  drawn too; the full suite passed. Its report found item 2's wording loose.
+- **Changes in revision 11** — one sentence, no change to either arm's design (2026-09-26): a
+  failed search's m is mid(z) at the last iterate whose mid(z), g and ∇g step (1) computed, not
+  "the last point it evaluated" — at the cap the last accepted step is never evaluated, and a
+  failure while evaluating a later point leaves the iterate before it.
