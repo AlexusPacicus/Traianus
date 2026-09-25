@@ -526,6 +526,14 @@ Reviewed by:               instrument-auditor (blind subagent, review package bu
                            non-blocking; every record line mapped; D5, D17, D19–D21, D23–D26
                            tested; contracts.md §0 and §4 conform; revision 8's seven items and
                            revision 9's offsets verified against the code; no result exists.
+                           instrument-auditor (blind subagent, review package built at 05adb96),
+                           2026-09-26; phase 2 (code, before the first run), round 2; commit
+                           05adb96 (revision 11; script and tests at a4e9274); CHANGES, 1
+                           blocking, 6 non-blocking; round-1 items 1–12 resolved in record and
+                           code, revision 11's failed-search sentence matches the code; D5, D17,
+                           D19–D21, D23–D26 tested; contracts.md §0 and §4 conform; blocking: the
+                           per-step arm builds the level-2 state twice (N_f + 1 states against
+                           the record's N_f); no result exists.
 ```
 
 ## Review history
@@ -923,3 +931,21 @@ Reviewed by:               instrument-auditor (blind subagent, review package bu
   failed search's m is mid(z) at the last iterate whose mid(z), g and ∇g step (1) computed, not
   "the last point it evaluated" — at the cap the last accepted step is never evaluated, and a
   failure while evaluating a later point leaves the iterate before it.
+- **Phase 2, round 2** — `instrument-auditor` subagent, blind by construction (package built from
+  `05adb96`, lock set), 2026-09-26, phase 2 (code, before the first run), round 2: **CHANGES**, 1
+  blocking, 6 non-blocking; round-1 items 1–12 resolved in record and code; revision 11's
+  sentence matches the code; D5, D17, D19–D21 and D23–D26 tested; contracts.md §0 and §4 conform;
+  no result exists. The reviewer did not open the packaged results of other records and
+  disclosed the memory index, the project instructions and recent commit subjects in its context
+  (nothing on Z's hypothesis or results). Blocking: (B1) the per-step arm calls level 2 in full at
+  P = B, eigh and display included, keeps only its partition and builds the level-2 state again
+  at t = 1, so it computes N_f + 1 states against the record's N_f — unequal work per arm
+  (failure pattern 1), which moves every Δ_q toward keyframes being faster by an amount unknown
+  before the run; the Z2 tests replace both arms or check only their order, so none sees it.
+  Non-blocking: (N1) a search that fails at its first point leaves no m and no three-point arm,
+  so the target drops out of D_q and Z2 while its two-point arm is still scored — unstated;
+  (N2) no test pins which point a failed search leaves (e.g. at a cap of 1, m = m₀ although a
+  step was accepted); (N3) the reported-figures line still says "the smallest d"; (N4) the K6
+  module is said to be imported for three functions only, but check_pin also raises its
+  IntegrityError; (N5) both docstrings cite revision 10; (N6) the lists in quadrature_control
+  lack annotations (mypy, outside CI).
