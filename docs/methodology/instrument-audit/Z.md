@@ -386,6 +386,10 @@ Reviewed by:               instrument-auditor (blind subagent, review package bu
                            10 non-blocking; round-3 blocking items resolved; D22 verified.
                            Revision 5 changes the search's design and Z1's score (the author,
                            2026-09-25): its review is round 1 of 3 on that design.
+                           instrument-auditor (blind subagent, review package built at d175b56),
+                           2026-09-25; phase 1 (specification), round 1 of 3 on revision 5's
+                           design; commit d175b56 (revision 5); PASS, 0 blocking, 11
+                           non-blocking; D20 (amended) and D23–D26 verified.
 ```
 
 ## Review history
@@ -563,3 +567,34 @@ Reviewed by:               instrument-auditor (blind subagent, review package bu
   citation moved to _storage.py:123. The packaging item stays tracked separately. This revision
   changes the three-point arm's search and Z1's score, so it goes to a blind phase-1 review as
   round 1 of 3 on its design.
+- **Revision 5** — `instrument-auditor` subagent, blind by construction (package built from
+  `d175b56`, lock set), 2026-09-25, phase 1, round 1 of 3 on revision 5's design: **PASS**, 0
+  blocking, 11 non-blocking; D20 (amended) and D23–D26 verified; both round-4 blocking items
+  resolved by the design. The reviewer did not open the packaged results of other records
+  (data/refapp/K6_result.json, R4_result.json) and disclosed that its session context held the
+  user's memory index (outcomes of other records, Z's process status; nothing on Z's hypothesis
+  or results). Non-blocking, items 1, 2 and 6 before any code: (1) the known world's quadrature
+  expectation is not fixed by D26 — the six notes (p, q′, β) with q′ ∉ {p, q} are symmetric
+  under permutations of the other axes and land on one display point, so their order is decided
+  by rounding, which differs between the 64-node m and the 128-node m₀; D_q at 128 nodes is then
+  not 0 and the decision can flip on a correct pipeline — use generic offsets (distinct β per
+  pair, mirror pairs kept in each half, Σ_k c_k constant) or state the caveat; (2) ν_g and the
+  |E(m)| claim leave out the rounding of the point itself (ε·‖m‖∞, of order C, not d), which
+  matters for d below about C/20; (3) the middle cell's margin understates the residual — the
+  decrement allows √(2b/ω_min(H)), P's float grid ε·‖P‖∞ exceeds d·ε when d < ‖P‖∞, and
+  ‖Z_N αp‖∞ omits the move along u; (4) D23 is proved for the integral but applied to the 64-
+  and 128-node E: it holds for any quadrature with positive weights, Σw = 1 and Σw·s = ½, which
+  D23's conditions should state; (5) test (ii)'s synthetic friction must satisfy
+  ‖∇√f‖ < 1/(2√2); (6) test (iv) cannot fire as worded — a consistently flipped gradient makes
+  the finite-difference Hessian not positive definite, the fallback is then a descent direction
+  for the flipped gradient and the search ends at the floor; inject the flip into p only;
+  (7) the known world's positions: 1-based positions with FIT on even ones contradict the order
+  FIT, EVAL, …, and the loop order over {p, q} and β is not fixed; (8) symbols still colliding:
+  ν (bound and ν_j(K)), h (difference step and offset), c₁ (definitions.md's anchor), t (in
+  [0, 1] here, in [0, d] in D23–D24), o_j in ℝ⁷ and o_k in ℝ³⁸⁴; (9) the permutation band cannot
+  see an error in the chance correction below 0.0036 (P = N_U instead of N_U − 1 passes both
+  controls), so the off-by-one test must use a defect the band detects, the K′ < K branch has no
+  run-time control (declare it), the score takes rankings, and the two-sided 4σ tail is ≈ 6.3e-5;
+  (10) contracts.md has no section for Z yet, needed before phase 2; (11) derivations.md's
+  "Used by" lists D9 for Z, no longer used, and the record's test lists omit D5, which the
+  identity control uses.
