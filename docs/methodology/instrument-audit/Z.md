@@ -3,10 +3,10 @@
 The question, hypothesis and refuters live in the RefApp-01 repository (`ZOOM.md`), which a blind
 reviewer never opens (definitions.md, Not allowed).
 
-## Instrument audit record (revision 8)
+## Instrument audit record (revision 9)
 
 ```
-Instrument audit — Z1 (neighbourhood kept along a zoom) and Z2 (zoom latency) (revision 8)
+Instrument audit — Z1 (neighbourhood kept along a zoom) and Z2 (zoom latency) (revision 9)
 
 Scope: two arms that zoom from the barycentre to a note by different routes, each judged at the
   start, the middle and the end of its route. Z1 measures, for each displayed note, how much of its
@@ -263,7 +263,7 @@ Controls (Z1):
     by formula, with no draws, where D26 fixes the answer. o_k is the k-th coordinate vector of
     ℝ³⁸⁴, and the axes are â_k = o_k (k = 1…8). Offsets: the pairs k₁ < k₂ of axis indices in
     lexicographic order (k₁ = 1…7, k₂ = k₁ + 1…8; 28 pairs), each taken three times in a row,
-    numbered ι = 1…84 in that order; β_ι = 0.1 + 0.2·frac(ι·(√5 − 1)/2): 84 distinct values in
+    numbered ι = 1…84 in that order; β_ι = 0.1 + 0.2·frac(ι²·(√5 − 1)/2): 84 distinct values in
     (0.1, 0.3), each belonging to one pair. Notes: for each ι in order, four notes at the 0-based
     indices 4(ι − 1) … 4(ι − 1) + 3 — FIT (k₁, k₂, β_ι), EVAL (k₁, k₂, β_ι), FIT (k₂, k₁, β_ι),
     EVAL (k₂, k₁, β_ι) — where note (k₁, k₂, β) has axis coordinates c_k = 0.1 + β for k = k₁,
@@ -274,19 +274,31 @@ Controls (Z1):
     coordinate, on the diagonal, and every target has B − A orthogonal to it:
     by D26 m₀ is the only answer, for every target, and by its quadrature form, for the 64-node
     τ the search computes, ∇g(0) = 0 and the projection gap makes g rise off z = 0 (up to the
-    rule's error along the chord). The offsets are distinct so that no permutation
-    of the axes maps the corpus onto itself (it would have to fix every pair): with one offset
-    shared by several pairs, notes symmetric under such a permutation land on one display point,
-    rounding orders them, and the quadrature control's 128-node m₀, which differs from the 64-node
-    m only in its last bits, could reorder them. The smallest relative gap between two displayed
-    distances from a note, over the middle states, is reported, so a failure there can be told
-    apart. Expected: every search stops at (2) at z = 0 with no step, so every D_q is exactly 0;
-    every middle state is scored (its cell holds the 21 EVAL notes that share the target's leading
-    axis); Z1 is inconclusive at every L used; tube_defined, search_converged, search_code,
-    lloyd_converged, Z1's n_scored, arms_share_start_end, identity, permutation and quadrature
-    hold. Z2 and search_reproduced are not run there: a clock is never deterministic. Its draws
-    come from its own generator (Draws), so the real run's draws are untouched. Any other outcome:
-    valid = false, and the real data are not read.
+    rule's error along the chord). Two kinds of tie would leave a display order to rounding, and
+    the offsets rule out both. They are distinct (the ι² differ and (√5 − 1)/2 is irrational), so
+    no permutation of the axes maps the corpus onto itself (it would have to fix every pair): with
+    one offset shared by several pairs, notes symmetric under such a permutation land on one
+    display point. And no pair's three offsets are equally spaced: the three notes of a pair in
+    one axis cell lie on one line of ℝ⁸, at parameter β_ι along it, and so do their displayed
+    points (the display is affine in c), so one of them is equally far from the other two, on the
+    display as in ℝ⁸, iff its offset is the mean of theirs (or the line is orthogonal to the
+    displayed plane, where all three coincide). If one of a pair's β_ι, β_{ι+1}, β_{ι+2}
+    (ι = 1, 4, …, 82) were the mean of the other two, then, since β_ι = 0.1 + 0.2·(ι²·(√5 − 1)/2
+    − an integer), (√5 − 1)/2 times twice its number squared minus the other two numbers squared
+    would be an integer; that combination is −(6ι + 5), −2 or 6ι + 7 as the mean is β_ι, β_{ι+1}
+    or β_{ι+2}, never 0, and (√5 − 1)/2 is irrational. Twice one offset of a pair minus the other
+    two is at least 5.0·10⁻³ in absolute value over the 28 pairs; revisions 6–8's offsets,
+    frac(ι·(√5 − 1)/2), gave 0 for 6 of them. Rounding orders such ties, and the quadrature
+    control's 128-node m₀, which differs from the 64-node m only in its last bits, could reorder
+    them. The smallest relative gap between two displayed distances from a note, over the middle
+    states, is reported, so a failure there can be told apart. Expected: every search stops at (2)
+    at z = 0 with no step, so every D_q is exactly 0; every middle state is scored (its cell holds
+    the 21 EVAL notes that share the target's leading axis); Z1 is inconclusive at every L used;
+    tube_defined, search_converged, search_code, lloyd_converged, Z1's n_scored,
+    arms_share_start_end, identity, permutation and quadrature hold. Z2 and search_reproduced are
+    not run there: a clock is never deterministic. Its draws come from its own generator (Draws),
+    so the real run's draws are untouched. Any other outcome: valid = false, and the real data are
+    not read.
   arms_share_start_end: for every target, the start states of the two arms are equal and so are
     the end states — same notes in view and the same coordinates bit for bit, or both degenerate.
   identity: at the start state (M = U), the score applied to the 384-d vectors themselves as the
@@ -416,8 +428,10 @@ Unit tests (committed with the script, reviewed in phase 2; they can fail). In
   appears in its own neighbour lists; the block counts and the L filter by n; the first three
   entries of the first permutation from seeds 20260924 and 20260925 match values recorded in the
   test; the timer overhead is subtracted; the arms' interleaving order; search_reproduced; the
-  known world's corpus meets D26's conditions, its 84 offsets are distinct, and its null_world
-  passes, and fails with an arm-dependent search; that each control can fail — identity with a
+  known world's corpus meets D26's conditions, its 84 offsets are distinct, no pair's three are
+  equally spaced (twice one minus the other two at least 5.0·10⁻³ in absolute value), and its
+  null_world passes, with a smallest relative display gap > 0, and fails with an arm-dependent
+  search; that each control can fail — identity with a
   score that counts j among its own neighbours, permutation with a score whose chance term is
   dropped (R_j(K) = O_j(K)/K, whose null AUC is about 1/Σ_K(1/K) ≈ 0.13), arms_share_start_end with an
   arm-dependent start, quadrature with a changed decision; tube_defined with d ≥ 4√2; file-layer
@@ -816,3 +830,17 @@ Reviewed by:               instrument-auditor (blind subagent, review package bu
   the contract hook deny Edit/Write on tools/experiments/zoom_*.py and tests/unit/test_zoom_*.py
   unless context_pack served §0 and §4. Next: the implementation by `instrument-implementer`,
   test-first, then the blind phase-2 review.
+- **Implementation** (2026-09-25) — `instrument-implementer`, test-first, `cb421ff` on
+  `feat/zoom-impl`: the script, its tests and the tests of D17, D19–D21 and D23–D26; not yet
+  reviewed. Its known-world run found exact ties: the smallest relative display gap was 0.
+- **Changes in revision 9** — the known world's offsets, after that finding (the author,
+  2026-09-25). frac(ι·(√5 − 1)/2) moves by one of two steps, (√5 − 1)/2 or (√5 − 3)/2, so a
+  pair's three offsets were equally spaced whenever both its steps were the second: 6 of the 28
+  pairs. In each of such a pair's two axis cells its middle note was exactly as far from the
+  other two, rounding ordered the tie, and the quadrature control's 128-node m₀ could order it otherwise
+  and fail null_world on a correct pipeline; revision 6 had ruled out the ties of axis
+  permutations only. null_world passed at that run; the implementer relaxed its own test of the
+  gap from > 0 to ≥ 0 and reported the ties. The offsets become frac(ι²·(√5 − 1)/2), equally
+  spaced for no pair whichever offset is the middle one (Controls, null_world), and the unit
+  tests require that and a positive smallest gap. No arm's design changes, so there is no
+  phase-1 round (METHODOLOGY.md): phase 2 checks it against the code.
