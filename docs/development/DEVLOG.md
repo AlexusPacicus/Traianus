@@ -1443,3 +1443,46 @@ la regla del registro están listos. Todavía no hay código de Z.
 2. Revisión ciega de fase 2.
 3. Primera ejecución: el mundo conocido y, si pasa, los datos reales.
 4. Fusionar en `main` la regla de metodología y §0.
+
+### Cierre (18:54)
+
+**Contexto:** tras la entrada anterior quedaba lanzar la implementación de Z en una rama propia.
+
+**Se hizo:**
+- **Encargo:** rama `feat/zoom-impl` desde `feat/zoom-record` y encargo a `instrument-implementer`
+  con Opus (elección del autor). La ficha ocupa 44 KB, más que el tope de 40 KB de
+  `context_pack`, así que el contexto fue en tres paquetes.
+- **Corte y reanudación:** la primera ejecución se cortó a medias por el límite de uso de la API,
+  sin commit; se reanudó con su contexto intacto y terminó.
+- **Implementación `cb421ff`:** el script, sus tests y los tests de D17, D19–D21 y D23–D26.
+  - Revisado el alcance y los puntos críticos del script. El orden es el de la ficha: huella del
+    módulo de K6, mundo conocido, artefactos.
+  - Suite repetida: 2983 verdes, en unos 90 s frente a 58 antes.
+  - El mundo conocido pasa, incluida la cuadratura, y falla con una búsqueda que depende del brazo.
+  - No se tocaron datos reales.
+- **Hallazgo del implementador: empates exactos en el mundo conocido** (separación mínima en
+  pantalla 0,0).
+  - Causa: los desplazamientos frac(ι·φ) solo avanzan con dos tamaños de paso, así que en cerca
+    de 1 de cada 4 pares los tres quedan igual de espaciados. Las notas de un par están en una
+    recta, y la del medio queda a igual distancia de las otras dos.
+  - El argumento de la revisión 6 solo descartaba las permutaciones de ejes. Con esta semilla pasó,
+    pero la cuadratura con 128 nodos podría romper esos empates en otro orden.
+  - El implementador relajó su test de separación > 0 a ≥ 0 sin tocar la ficha.
+
+**Resultado:** `feat/zoom-impl` en `cb421ff`, local. Z está implementada, sin revisión de fase 2 ni
+primera ejecución.
+
+**Resuelto de entradas anteriores:**
+- 2026-09-25, próximo paso 1: rama e implementación, hechas.
+
+**Sin resolver / decisión pendiente:**
+- **Autor:** arreglar ya el mundo conocido o dejarlo a la revisión de fase 2. El arreglo sería
+  cambiar a desplazamientos cuadráticos, frac(ι²·(√5 − 1)/2): revisión 9 de la ficha, una línea
+  del script y volver a exigir separación > 0 en el test. Recomendado: arreglarlo ya.
+- Lo demás de la entrada anterior sigue igual.
+
+**Próximo paso:**
+1. Decisión del autor sobre el mundo conocido; si es arreglarlo, revisión 9 y un contrato corto al
+   implementador.
+2. Revisión ciega de fase 2.
+3. Primera ejecución.
