@@ -500,6 +500,14 @@ Reviewed by:               instrument-auditor (blind subagent, review package bu
                            non-blocking; round-2 items addressed (5 in part); D20, D23–D26
                            verified; no arm changed. Phase 1 closed; the 7 items carry to
                            phase 2, items 3 and 5 before any code.
+                           Revisions 8 and 9 change no arm and had no phase-1 round: phase 2
+                           checks them against the code.
+                           instrument-auditor (blind subagent, review package built at 33a12e3),
+                           2026-09-25; phase 2 (code, before the first run), round 1; commit
+                           33a12e3 (revision 9; script and tests); PASS, 0 blocking, 12
+                           non-blocking; every record line mapped; D5, D17, D19–D21, D23–D26
+                           tested; contracts.md §0 and §4 conform; revision 8's seven items and
+                           revision 9's offsets verified against the code; no result exists.
 ```
 
 ## Review history
@@ -844,3 +852,30 @@ Reviewed by:               instrument-auditor (blind subagent, review package bu
   spaced for no pair whichever offset is the middle one (Controls, null_world), and the unit
   tests require that and a positive smallest gap. No arm's design changes, so there is no
   phase-1 round (METHODOLOGY.md): phase 2 checks it against the code.
+- **Revision 9 implemented** (2026-09-25) — `instrument-implementer`, `33a12e3`: the offset line
+  and the two tests, red on the earlier offsets for the stated reasons (6 pairs equally spaced, a
+  smallest display gap of 0), then green; the full suite passed.
+- **Phase 2, round 1** — `instrument-auditor` subagent, blind by construction (package built from
+  `33a12e3`, lock set), 2026-09-25, phase 2 (code, before the first run), round 1: **PASS**, 0
+  blocking, 12 non-blocking; every line of the record mapped to code; D5, D17, D19–D21 and
+  D23–D26 tested; contracts.md §0 and §4 conform down to the data layer; revision 8's seven items
+  and revision 9's offsets verified against the code, with D20's node-sum and D26's quadrature
+  forms, never reviewed in a phase-1 round, checked by the reviewer; no result exists. The
+  reviewer did not open the packaged results of other records and disclosed the memory index,
+  the project instructions and recent commit messages in its context (other records' outcomes,
+  Z's process status; nothing on Z's hypothesis or results). Non-blocking, to fix before the
+  first run: (1) code the record does not describe — the score cache, exact since the ranks are
+  fixed per run, and the --out option; (2) a failed search still gives the three-point arm its
+  last point as a middle, which is scored and enters D_q, the quadrature control, the reported
+  figures and Z2; valid is then false, but the record does not say so; (3) a line without a sign
+  change at z = 0 fails search_code (no_sign_change), unnamed in the record; (4) Z2's timed
+  search reuses the line built in the Z1 pass, so the QR for Z_N is not timed, and the per-step
+  frames filter each note's cell, computed once per corpus, against "recomputed from scratch";
+  (5) the keyframes arm reads the clock once more inside its timed call and only one overhead is
+  subtracted, so each Δ_q carries about one timer read against keyframes; (6) the warm-up takes
+  the first 10 targets with a route, not the first 10 EVAL targets; (7) the engine also computes
+  the dominant attractor at traianus/app.py:693-696; (8) the K6 pin is checked by the pinned
+  module's own check_digests, so an edit that disabled it would disable the pin at run time (the
+  unit test hashes the file independently); (9) no test makes n_scored fail; (10) D21's test
+  uses one fixed case, not random inputs; (11) "as its contract will state" is stale; (12) the
+  smallest d is taken over every target, excluded ones included.
