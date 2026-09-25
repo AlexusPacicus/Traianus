@@ -1,6 +1,6 @@
 """Z — three-point zoom against a two-point benchmark.
 
-Implements docs/methodology/instrument-audit/Z.md (instrument audit record, revision 8) against
+Implements docs/methodology/instrument-audit/Z.md (instrument audit record, revision 9) against
 docs/methodology/instrument-audit/contracts.md (§0 data layer, §4 Z) and
 docs/methodology/instrument-audit/derivations.md (D5, D17, D19–D21, D23–D26).
 Two arms zoom from the FIT barycentre to each EVAL note in axis coordinates: along the segment
@@ -1344,7 +1344,7 @@ def known_world() -> tuple[Array, Array]:
     v = np.zeros((4 * 3 * len(pairs), 384))
     for iota in range(1, 3 * len(pairs) + 1):
         k1, k2 = pairs[(iota - 1) // 3]
-        x = iota * golden
+        x = iota ** 2 * golden
         beta = 0.1 + 0.2 * (x - math.floor(x))
         for r, (first, second) in enumerate(((k1, k2), (k1, k2), (k2, k1), (k2, k1))):
             i = 4 * (iota - 1) + r

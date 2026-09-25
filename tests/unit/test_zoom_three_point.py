@@ -1,6 +1,6 @@
 """Unit tests of tools/experiments/zoom_three_point.py.
 
-Specification: docs/methodology/instrument-audit/Z.md (revision 8), docs/methodology/instrument-audit/contracts.md
+Specification: docs/methodology/instrument-audit/Z.md (revision 9), docs/methodology/instrument-audit/contracts.md
 sections 0 and 4, docs/methodology/instrument-audit/derivations.md (D5, D17, D19-D21, D23-D26). Synthetic inputs
 only: CI has no .data/, and the measurement is never run on the real artefact here.
 """
@@ -692,6 +692,13 @@ def test_the_known_world_meets_d26s_conditions_with_84_distinct_offsets():
     assert np.bincount(np.argmax(ev, axis=1), minlength=8).tolist() == [21] * 8
 
 
+def test_no_pair_in_the_known_world_has_its_three_offsets_equally_spaced():
+    v, _ = zoom.known_world()
+    triples = (v[0::4, :8].max(axis=1) - 0.1).reshape(28, 3)
+    spread = np.abs(2.0 * triples - np.roll(triples, 1, axis=1) - np.roll(triples, 2, axis=1))
+    assert {p: float(row.min()) for p, row in enumerate(spread) if row.min() < 5.0e-3} == {}
+
+
 @pytest.fixture(scope="module")
 def known():
     return zoom.null_world()
@@ -704,7 +711,7 @@ def test_the_null_world_passes(known):
     assert list(known["conditions"]) == list(zoom.CONDITIONS[1:-1])
     assert all(known["conditions"].values())
     gap = known["smallest_relative_display_gap"]
-    assert isinstance(gap, float) and 0.0 <= gap < 1.0
+    assert isinstance(gap, float) and 0.0 < gap < 1.0
     json.dumps(known, allow_nan=False)
 
 
