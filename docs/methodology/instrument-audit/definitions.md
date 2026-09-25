@@ -11,7 +11,7 @@ Vectors      v ∈ S^383, L2-normalized. Corpus: the 2,221 Spinoza chunks frozen
              .data/spinoza_frozen, gitignored), float32 on disk, used as float64.
 Basis        8 NSM geodetic axes a_1…a_8, tests/fixtures/nsm_axes_8.json (epoch
              PROSTHETIC_NSM_V1); â_k = a_k / ‖a_k‖. Stored in table geodesic_axes
-             (traianus/storage/_storage.py:114); epochs: docs/architecture/ARCHITECTURE.md §7.
+             (traianus/storage/_storage.py:123); epochs: docs/architecture/ARCHITECTURE.md §7.
 Operator     traianus/geometry/polar_projector.py, for anchor c₁ and poles c_A, c_B:
                ĉ₁ = c₁ / ‖c₁‖;  P⊥x = x − ⟨x, ĉ₁⟩ĉ₁                          (:235-237)
                v_dipole = P⊥c_A − P⊥c_B  (collinear fallback 2δ·u⊥)          (:184-188)

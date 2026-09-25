@@ -117,12 +117,15 @@ D20 For P ≠ Q and the straight leg Λ(s) = P + s(Q − P), s ∈ [0, 1]:
     ∇_Q τ_seg = u ∫₀¹ √f(Λ) ds + ‖Q − P‖ ∫₀¹ s · ∇f(Λ) / (2√f(Λ)) ds,
     ∇_P τ_seg = −u ∫₀¹ √f(Λ) ds + ‖Q − P‖ ∫₀¹ (1 − s) · ∇f(Λ) / (2√f(Λ)) ds,
     with ∇f = ∇Var (D17). Additivity: for R = P + r(Q − P), r ∈ [0, 1],
-    τ_seg(P, Q) = τ_seg(P, R) + τ_seg(R, Q). Radial rate: d/dr τ_seg(P, P + r·u) = √f(P + r·u) ≥ 1.
+    τ_seg(P, Q) = τ_seg(P, R) + τ_seg(R, Q). Reversal: τ_seg(P, Q) = τ_seg(Q, P). Radial rate:
+    d/dr τ_seg(P, P + r·u) = √f(P + r·u) ≥ 1.
     Conditions: P ≠ Q (for the gradients); f ≥ 1.
     Proof: τ of the leg is ∫₀¹ √f(Λ(s)) ‖Λ'(s)‖ ds with ‖Λ'‖ = ‖Q − P‖ constant. ∂Λ/∂Q = s·I,
     ∂Λ/∂P = (1 − s)·I, ∂‖Q − P‖/∂Q = u = −∂‖Q − P‖/∂P; the integrand is smooth in P and Q for
     P ≠ Q, so differentiation under the integral holds. Additivity: split ∫₀¹ at r and substitute
-    s = r·σ and s = r + (1 − r)·σ. Radial rate: by additivity τ_seg(P, P + r·u) = ∫₀ʳ √f(P + σu) dσ.
+    s = r·σ and s = r + (1 − r)·σ. Reversal: substitute s = 1 − σ; ‖P − Q‖ = ‖Q − P‖. Radial rate:
+    substituting σ = r·s, τ_seg(P, P + r·u) = r ∫₀¹ √f(P + r·s·u) ds = ∫₀ʳ √f(P + σu) dσ, whose
+    derivative in r is the integrand at σ = r (fundamental theorem of calculus; √f is continuous).
 
 D21 With τ_A(m) = τ_seg(A, m), τ_B(m) = τ_seg(m, B), S = τ_A + τ_B and E = τ_A − τ_B: at a local
     minimiser m* of S subject to E = 0 there is μ with ∇S(m*) = μ∇E(m*), i.e.
@@ -134,9 +137,9 @@ D21 With τ_A(m) = τ_seg(A, m), τ_B(m) = τ_seg(m, B), S = τ_A + τ_B and E =
     route's direction at m*: the two-leg route has a corner there.
     Conditions: m* ∉ {A, B} (D20's gradients exist); ∇E(m*) ≠ 0 (constraint qualification). The
     level sets are hypersurfaces automatically: by D20's radial rate, ⟨∇τ_A(m), (m − A)/‖m − A‖⟩ =
-    √f(m) ≥ 1, and likewise for τ_B with (m − B)/‖m − B‖, so neither gradient vanishes; each level
-    set is star-shaped around its centre. On the segment AB, ⟨∇E, u⟩ = 2√f > 0 (u the unit chord),
-    so ∇E ≠ 0 there.
+    √f(m) ≥ 1, and likewise for τ_B = τ_seg(B, ·) (D20's reversal) with (m − B)/‖m − B‖, so neither
+    gradient vanishes; each level set is star-shaped around its centre. On the segment AB,
+    ⟨∇E, u⟩ = 2√f > 0 (u the unit chord), so ∇E ≠ 0 there.
     Proof: the Lagrange multiplier theorem for one equality constraint; μ = ±1 would make one of
     the two gradients zero, which the radial rate excludes; a hypersurface's tangent hyperplane is
     the orthogonal complement of its gradient, and parallel gradients give the same complement.
@@ -234,10 +237,11 @@ D26 A world where the benchmark's middle is the answer. With S and E as in D21, 
 ```
 
 D18 is not used by Z since its revision 3 (the three-point route became two straight legs); it
-stays as verified.
+stays as verified. D22 is not used by Z since its revision 5 (the search keeps every point on
+E = 0, so there is no merit function); it stays as verified.
 
 Used by: K6 (D2, D4, D6, D7, D8, D11), R4 (D2, D5, D6, D9, D10), Z (D5, D9, D17, D19, D20, D21,
-D22).
+D23, D24, D25, D26).
 
 ## En palabras
 
