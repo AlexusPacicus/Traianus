@@ -423,6 +423,11 @@ Reviewed by:               instrument-auditor (blind subagent, review package bu
                            non-blocking; D20 (amended) and D23–D26 verified.
                            Revision 6 applies those items and changes no arm: its review is
                            round 2 of 3 on revision 5's design.
+                           instrument-auditor (blind subagent, review package built at cdafd6c),
+                           2026-09-25; phase 1 (specification), round 2 of 3 on revision 5's
+                           design; commit cdafd6c (revision 6); PASS, 0 blocking, 6
+                           non-blocking; round-1 items addressed (3 and 8 in part); D23–D26
+                           verified; no arm changed.
 ```
 
 ## Review history
@@ -653,3 +658,26 @@ Reviewed by:               instrument-auditor (blind subagent, review package bu
   (10) contracts.md's section for Z is written once phase 1 closes, before any code, as K8's was.
   (11) derivations.md's "Used by" drops D9 for Z; the record's test list includes D5. This
   revision changes no arm, so it is round 2 of 3 on revision 5's design.
+- **Revision 6** — `instrument-auditor` subagent, blind by construction (package built from
+  `cdafd6c`, lock set), 2026-09-25, phase 1, round 2 of 3 on revision 5's design: **PASS**, 0
+  blocking, 6 non-blocking; round-1 items addressed, 3 and 8 in part; D23–D26 verified again;
+  the claim that no arm changed holds. The reviewer did not open the packaged results of other
+  records and disclosed the memory index in its context, as in round 1. Non-blocking, before
+  phase 2: (1) r₂ omits the bisection's sign-error term — the computed middle can sit
+  (ν + ‖∇E‖·ρ_ℓ)/⟨∇E, u⟩ from the exact zero on its line, about 64–128 times ½·d·ε, which ν_g
+  already carries; and the rounded midpoint fl((lo + hi)/2) guarantees d·ε, not ½·d·ε;
+  (2) test (ii)'s tolerance √(2b/ω_min(H)) is a distance in z while the touching point is in ℝ⁸ —
+  compare in z with z* = Z_Nᵀ(m* − A), or in m with r₃, and say that the bound is first order;
+  (3) the caveat that the quadrature estimate may depart from monotone is stale — by D23's
+  quadrature form the 64-node E is strictly increasing on the segment; what the quadrature
+  departs from is additivity, and only rounding can break monotonicity, within
+  |E| ≤ ν + ‖∇E‖·ρ_ℓ; (4) D23's conditions omit s_i ∈ [0, 1], used by the quadrature bound, and,
+  now that f need not be 1 + Var, f continuously differentiable (D20's differentiation under the
+  integral and D24's implicit function theorem need it); (5) new symbol collisions — g (objective
+  and (√5 − 1)/2), n (targets and offset index), ℓ (the line and the level index), P (the point
+  and "P = N_U", which should be N_c), r (residual and r_j(K)), M_ℓ next to M, δ and u⊥ against
+  definitions.md's "2δ·u⊥", c = 0.1·1 + β(o_p − o_q) adding vectors of ℝ³⁸⁴ to one of ℝ⁸, b (the
+  bound and the bootstrap index), p and q (the direction and the target against the known
+  world's axes), and contracts.md's V against V_j(K) once Z's section exists; (6) the bound on
+  |E(m)| is on the exact E at the computed m, while the reported value is computed and can
+  exceed it by a further ν — say so, so that no phase-2 test asserts it on the computed value.
