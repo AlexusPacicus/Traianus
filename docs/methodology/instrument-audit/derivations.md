@@ -119,6 +119,10 @@ D20 For P ≠ Q and the straight leg Λ(s) = P + s(Q − P), s ∈ [0, 1]:
     with ∇f = ∇Var (D17) when f = 1 + Var. Additivity: for R = P + r(Q − P), r ∈ [0, 1],
     τ_seg(P, Q) = τ_seg(P, R) + τ_seg(R, Q). Reversal: τ_seg(P, Q) = τ_seg(Q, P). Radial rate:
     d/dr τ_seg(P, P + r·u) = √f(P + r·u) ≥ 1.
+    Node-sum form: for a rule with nodes s_i ∈ [0, 1] and weights w_i,
+    τ_seg(P, Q) = ‖Q − P‖ Σ_i w_i √f(Λ(s_i)) has the exact gradients of the same form, each ∫₀¹ … ds
+    replaced by Σ_i w_i … at s = s_i; reversal holds when the rule is symmetric under s ↦ 1 − s
+    (Gauss–Legendre is); additivity and the radial rate hold only up to the rule's error.
     Conditions: P ≠ Q (for the gradients); f ≥ 1 and continuously differentiable (f = 1 + Var is
     a polynomial).
     Proof: τ of the leg is ∫₀¹ √f(Λ(s)) ‖Λ'(s)‖ ds with ‖Λ'‖ = ‖Q − P‖ constant. ∂Λ/∂Q = s·I,
@@ -127,6 +131,9 @@ D20 For P ≠ Q and the straight leg Λ(s) = P + s(Q − P), s ∈ [0, 1]:
     s = r·σ and s = r + (1 − r)·σ. Reversal: substitute s = 1 − σ; ‖P − Q‖ = ‖Q − P‖. Radial rate:
     substituting σ = r·s, τ_seg(P, P + r·u) = r ∫₀¹ √f(P + r·s·u) ds = ∫₀ʳ √f(P + σu) dσ, whose
     derivative in r is the integrand at σ = r (fundamental theorem of calculus; √f is continuous).
+    Node-sum form: differentiate the finite sum term by term with the same ∂Λ/∂Q, ∂Λ/∂P and
+    ∂‖Q − P‖; reversal maps node s_i to 1 − s_i, which the symmetric rule contains with the same
+    weight.
 
 D21 With τ_A(m) = τ_seg(A, m), τ_B(m) = τ_seg(m, B), S = τ_A + τ_B and E = τ_A − τ_B: at a local
     minimiser m* of S subject to E = 0 there is μ with ∇S(m*) = μ∇E(m*), i.e.
@@ -234,8 +241,14 @@ D25 Neighbourhood a zoom keeps at every scale, against a zoom with no informatio
 D26 A world where the benchmark's middle is the answer. With S and E as in D21, f = 1 + Var (D17)
     and m₀ the τ-midpoint of the segment AB (D19): if A = a·1 and ⟨B − A, 1⟩ = 0 with B ≠ A, then
     S(m) ≥ τ_seg(A, B) = S(m₀) for every m ∈ ℝ⁸, and m₀ is the only minimiser of S subject to
-    E = 0.
-    Conditions: A on the diagonal; B − A orthogonal to it; B ≠ A.
+    E = 0. Quadrature form (every τ_seg by one rule, D20's node-sum form; g, Z_N and mid(z) as in
+    D24 and the record): g(−z) = g(z), so ∇g(0) = 0; and S(m) ≥ S(π(m)) node by node, π below,
+    with a gap of at least h²/(‖m − A‖ + ξ) + h²/(‖B − m‖ + d − ξ), h = ‖m − π(m)‖,
+    ξ = ⟨π(m) − A, u⟩ ∈ [0, d], d = ‖B − A‖. What is lost is only the constancy of S along the
+    segment, which additivity gave: it holds up to the rule's error, so z = 0 minimises g up to
+    that error.
+    Conditions: A on the diagonal; B − A orthogonal to it; B ≠ A; for the quadrature form, the
+    rule's nodes in [0, 1], positive weights summing to 1.
     Proof: u = (B − A)/‖B − A‖, π(x) = A + ⟨x − A, u⟩·u, Π = I − 11ᵀ/8, so Var(x) = ‖Πx‖²/8,
     ΠA = 0 and Πu = u. For x = A + ξ·u + Y with Y ⊥ u: Πx = ξ·u + ΠY and ⟨u, ΠY⟩ = ⟨Πu, Y⟩ = 0, so
     Var(x) = (ξ² + ‖ΠY‖²)/8 ≥ ξ²/8 = Var(π(x)). π is 1-Lipschitz, so projecting the route A → m → B
@@ -243,7 +256,15 @@ D26 A world where the benchmark's middle is the answer. With S and E as in D21, 
     covers the segment AB, and so takes at least τ_seg(A, B). Equality needs the route to stay on
     the line (a leg with a component orthogonal to u is strictly longer than its projection, and
     f ≥ 1) and not to turn back, i.e. m on the segment, where S = τ_seg(A, B) (D20 additivity) and
-    E, strictly increasing (D21: ⟨∇E, u⟩ = 2√f), is zero only at m₀ (D19).
+    E, strictly increasing (D21: ⟨∇E, u⟩ = 2√f), is zero only at m₀ (D19). Quadrature form: the
+    reflection R(x) = 2π(x) − x is an affine isometry that fixes A and B and turns Y into −Y, so
+    Var(R(x)) = Var(x); it maps the nodes of each leg onto those of the reflected leg, so S and E
+    computed by the rule are R-invariant; ℓ_{−z} = R(ℓ_z), the zero on ℓ_{−z} is the image of the
+    zero on ℓ_z (unique, D23), and g(−z) = g(z); an even differentiable function has ∇g(0) = 0.
+    π is affine with π(A) = A, so it maps the nodes of the leg A → m onto those of A → π(m), and
+    likewise for m → B; node by node √f does not rise, and the leg's length drops by
+    ‖m − A‖ − ξ = h²/(‖m − A‖ + ξ) (likewise for the other leg); with Σ_i w_i √f ≥ 1 on the
+    projected leg, each drop bounds that leg's share of the gap.
 ```
 
 D18 is not used by Z since its revision 3 (the three-point route became two straight legs); it
