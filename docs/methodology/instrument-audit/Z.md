@@ -3,10 +3,10 @@
 The question, hypothesis and refuters live in the RefApp-01 repository (`ZOOM.md`), which a blind
 reviewer never opens (definitions.md, Not allowed).
 
-## Instrument audit record (revision 6)
+## Instrument audit record (revision 7)
 
 ```
-Instrument audit — Z1 (neighbourhood kept along a zoom) and Z2 (zoom latency) (revision 6)
+Instrument audit — Z1 (neighbourhood kept along a zoom) and Z2 (zoom latency) (revision 7)
 
 Scope: two arms that zoom from the barycentre to a note by different routes, each judged at the
   start, the middle and the end of its route. Z1 measures, for each displayed note, how much of its
@@ -15,15 +15,28 @@ Scope: two arms that zoom from the barycentre to a note by different routes, eac
   measures compute time in this script (numpy, one thread), not the client's end-to-end latency.
   Not measured: colour, legibility, anything shown while the camera moves, and the smooth curve a
   client may draw through the three points (see Routes).
-Symbols used here, chosen not to collide with definitions.md or with each other: S and E the
-  search's objective and constraint; u the unit chord and ξ ∈ [0, d] the position along it, as in
-  D21–D26 (the unit roundoff is written ε/2; t is the zoom's time only); ν the rounding bound of a
-  route's τ, ν_g that of the search's objective; h a point's offset from the chord and δ the
-  finite-difference step; c_Arm Armijo's constant; ω₁ ≥ ω₂ ≥ … eigenvalues; Γ the Gram array;
-  X_E the EVAL matrix; U the EVAL notes, N_U = 1,110; M the EVAL notes in view, N_M of them;
-  V_j(K) a note's hypersphere (D25); N_f the number of displayed frames; N_boot the number of
-  bootstrap resamples; L a block length; σ a Voronoi site; o_k a coordinate vector of ℝ³⁸⁴ and
-  β_n the known world's offsets.
+Symbols, each with one meaning here and none of definitions.md's (v, a_k, â_k, c₁, c_A, c_B, ĉ₁,
+  P⊥, v_dipole, δ, u⊥, r, λ, λ_k, d_esc, x, y) or contracts.md's V:
+  points and the search — A, B, d = ‖B − A‖, q the target; u the unit chord (as in D21–D26) and
+    ξ ∈ [0, d] the position along it; z ∈ ℝ⁷ the offset coordinates, Z_N their basis, h = ‖z‖;
+    ℓ_z the line, mid(z) its middle; m, m₀ the middles; S, E objective and constraint; μ, μ̂
+    multipliers; g the search's objective; H its Hessian; p the step's direction, Dg its slope,
+    α its length; Θ the stop's threshold; ζ, ζ₊, ζ₋ the finite-difference steps; c_Arm Armijo's
+    constant;
+  rounding — ε = np.finfo(np.float64).eps (the unit roundoff is written ε/2), γ_N, C, err_A and
+    err_B the legs' errors, κ the index of z's coordinates; ν a route's
+    τ, ν_g the search's objective, ρ_pt a computed point; ρ₂, ρ₃ the radii of the middles' own
+    spheres;
+  states and score — P a state's point, k* its cell, T and T_cell tension tensors, e₁, e₂ and
+    ω₁ ≥ ω₂ ≥ … their eigenvectors and eigenvalues, σ a Voronoi site; U the EVAL notes,
+    N_U = 1,110, N_c = N_U − 1; M the notes in view, N_M of them; j a note, K a scale,
+    K′ = min(K, N_M − 1); hyp_j(K) and shown_j(K) its hypersphere and its displayed neighbours,
+    O_j(K) their overlap, R_j(K) its score, R_NX(K) and AUC as in D25; Γ the Gram array, X_E the
+    EVAL matrix;
+  statistics — D_q, D̄, n the targets scored, L a block length, N_boot the resamples, b a
+    resample's index; Z2's t the zoom's time (only), t_f, N_f, w, pos_prev, pos_next, Δ_q, ready;
+  known world — o_k a coordinate vector of ℝ³⁸⁴, k₁ < k₂ a pair of axes, ι its offset's number,
+    β_ι the offset, i a note's 0-based index.
 Script: tools/experiments/zoom_three_point.py; unit tests: tests/unit/test_zoom_three_point.py;
   the tests of D5, D17, D19, D20, D21, D23, D24, D25 and D26 in
   tests/unit/test_audit_derivations.py.
@@ -49,9 +62,10 @@ Data: definitions.md (2,221 vectors, 8-axis basis). The script refuses to run, w
   note. None of this is read before the known world (Controls, null_world) has passed.
 Space: axis coordinates c(v) = (⟨v, â_1⟩, …, ⟨v, â_8⟩) ∈ ℝ⁸. Barycentre p₀ = mean over FIT of c.
   Friction factor f(c) = 1 + Var(c), Var the population variance of the 8 components (ddof = 0).
-  Declared: the engine applies the same factor to the stored axis vectors — its caller builds B_0
-  from the geodetic matrix (traianus/app.py:619-622) and compute_kinetic_resistance
-  (traianus/geometry/observables.py:77-92) uses B_0's rows as given — while this record uses â_k;
+  Declared: the engine applies the same factor to the stored axis vectors — its caller builds its
+  basis matrix from the geodetic matrix (traianus/app.py:619-622) and compute_kinetic_resistance
+  (traianus/geometry/observables.py:77-92) uses that matrix's rows as given — while this record
+  uses â_k;
   the eight ‖a_k‖ are reported, so the difference has a size. Declared likewise: the engine's
   dominant attractor (traianus/app.py:282-285, :551-554) is the argmax of ⟨v, a_k⟩ over the stored,
   unnormalised axis vectors, a tie going to the first key in the matrix's iteration order; this
@@ -59,7 +73,7 @@ Space: axis coordinates c(v) = (⟨v, â_1⟩, …, ⟨v, â_8⟩) ∈ ℝ⁸. B
 Friction-time along a straight leg (D20): τ_seg(P, Q) = ‖Q − P‖ ∫₀¹ √f(P + s(Q − P)) ds, computed
   with the 64 Gauss–Legendre nodes and weights of numpy.polynomial.legendre.leggauss(64) mapped to
   [0, 1] (128 in the quadrature control only). Rounding bound, for 64 nodes and evaluated at the
-  current route: ν = γ₂₅₆ · max(1, C²) · τ, γ_m = m(ε/2) / (1 − m(ε/2)),
+  current route: ν = γ₂₅₆ · max(1, C²) · τ, γ_N = N(ε/2) / (1 − N(ε/2)) for N operations,
   ε = np.finfo(np.float64).eps, C the largest absolute axis coordinate among the route's
   quadrature points, τ the route's total. Count, to first order, per node: Var, with the rounding
   of the node's coordinates and of their mean, has an absolute error of about 19ε·C²; the
@@ -68,22 +82,27 @@ Friction-time along a straight leg (D20): τ_seg(P, Q) = ‖Q − P‖ ∫₀¹ 
   components per leg) and the products bring the relative error of a node's term to about
   (19·max(1, C²) + 72)·ε/2. The sum of 64 positive terms adds γ₆₃ (Higham, Accuracy and Stability
   of Numerical Algorithms, 2nd ed., §4.2): about (19·max(1, C²) + 135)·ε/2 in all, below
-  128·max(1, C²)·ε for every C. An upper bound, not a tight one. The errors of the two legs, e_A
-  and e_B, satisfy |e_A + e_B| ≤ ν and |e_A − e_B| ≤ ν, so S and E below each carry at most ν.
+  128·max(1, C²)·ε for every C. An upper bound, not a tight one. The errors of the two legs, err_A
+  and err_B, satisfy |err_A + err_B| ≤ ν and |err_A − err_B| ≤ ν, so S and E below each carry at
+  most ν.
 Targets: every q in EVAL, in index order (1,110 zooms). Each zoom goes from A = p₀ to B = c(q),
   d = ‖B − A‖. A target with d = 0 is excluded and counted (no route); the smallest d over targets
   is reported. d < 4√2 is D23's condition; |c_k| ≤ 1 gives d ≤ 4√2, and a target with d ≥ 4√2
   fails tube_defined (a code or data error).
 Routes (the only difference between the arms): both use the same line and the same bisection.
   u = (B − A)/d; Z_N = the last 7 columns of the complete Q of numpy.linalg.qr(u as an 8 × 1
-  matrix, mode="complete"), an orthonormal basis of u⊥, fixed per target. For z ∈ ℝ⁷ the line
+  matrix, mode="complete"), an orthonormal basis of the hyperplane orthogonal to u, fixed per
+  target. For z ∈ ℝ⁷ the line
   ℓ_z(ξ) = A + ξ·u + Z_N z. mid(z): bisection on ξ ∈ [0, d] keeping the invariant
   E(ℓ_z(lo)) < 0 ≤ E(ℓ_z(hi)), from lo = 0, hi = d, until hi − lo ≤ ε·d; ξ = (lo + hi)/2,
   mid(z) = ℓ_z(ξ). E(m) = τ_seg(A, m) − τ_seg(m, B) (D21).
-  two-point (benchmark): the segment A → B, with middle m₀ = mid(0). On the segment E < 0 exactly
-    where τ_seg(A, ·) < τ_seg(A, B)/2 (D20 additivity), so m₀ is the segment's τ-midpoint, unique
-    (D19); the quadrature estimate may depart from monotone by its own error, which the quadrature
-    control covers.
+  two-point (benchmark): the segment A → B, with middle m₀ = mid(0). With exact integrals, on the
+    segment E < 0 exactly where τ_seg(A, ·) < τ_seg(A, B)/2 (D20 additivity), so m₀ is the
+    segment's τ-midpoint, unique (D19). With the 64-node rule E is still strictly increasing on
+    the segment (D23's quadrature form at h = 0), so its zero is unique; what the rule departs
+    from is additivity, so that zero is not exactly the exact integral's τ-midpoint — which the
+    quadrature control covers. Only rounding can break the monotonicity, and only where
+    |E| ≤ ν + ‖∇E‖·ρ_pt, which the middle's sphere accounts for (ρ₂, States).
   three-point: two straight legs A → m → B, with m ∈ ℝ⁸ free (author, 2026-09-24): m is where two
     friction-time hyperspheres of equal radius, one around A and one around B, touch. Written as:
     minimise S(m) = τ_seg(A, m) + τ_seg(m, B) subject to E(m) = 0; at a local solution the
@@ -111,23 +130,24 @@ Routes (the only difference between the arms): both use the same line and the sa
     The critical points of g are D21's Lagrange points, with μ = μ̂ (D24); μ̂ is reported and
     |μ̂| ≥ 1 counted.
     Rounding of a point: the computed ℓ_z(ξ), A + ξ·u + Z_N z in float64, differs from the exact
-    point by at most ρ_ℓ = γ₁₀·‖M_ℓ‖ (to first order: one product, a 7-term dot product and two
-    additions per component), M_ℓ the vector of |A_k| + ξ·|u_k| + Σ_j |(Z_N)_kj|·|z_j|.
-    Rounding of g at the current z: ν_g = (1 + |μ̂|)·ν + ½·|⟨∇S, u⟩|·d·ε
-    + (‖∇S‖ + |μ̂|·‖∇E‖)·ρ_ℓ. Count, to first order: S at the computed point carries ν, and the
-    point sits within ρ_ℓ of its exact place on the line, which moves S by at most ‖∇S‖·ρ_ℓ; the
-    bisection's signs are right wherever |E| > ν + ‖∇E‖·ρ_ℓ, so that place lies within ½·d·ε (half
-    the last interval) of one where |E| is at most that; moving along u to the exact zero changes
-    S by −μ̂·E (D24, first order). A comparison between two evaluations of g uses 2ν_g.
-    Hessian H of g: central differences of ∇g with step δ = ε^{1/3}·d per coordinate (the
+    point by at most ρ_pt = γ₁₀·‖(|A_k| + ξ·|u_k| + Σ_κ |(Z_N)_kκ|·|z_κ|)_{k=1…8}‖ (to first order:
+    one product, a 7-term dot product and two additions per component).
+    Rounding of g at the current z: ν_g = (1 + |μ̂|)·ν + |⟨∇S, u⟩|·d·ε + (‖∇S‖ + |μ̂|·‖∇E‖)·ρ_pt.
+    Count, to first order: S at the computed point carries ν, and the point sits within ρ_pt of its
+    exact place on the line, which moves S by at most ‖∇S‖·ρ_pt; the bisection's signs are right
+    wherever |E| > ν + ‖∇E‖·ρ_pt, and the rounded midpoint fl((lo + hi)/2) lies in the last
+    interval, of width at most d·ε, so that place lies within d·ε of one where |E| is at most
+    ν + ‖∇E‖·ρ_pt; moving along u to the exact zero changes S by −μ̂·E (D24, first order). A
+    comparison between two evaluations of g uses 2ν_g.
+    Hessian H of g: central differences of ∇g with step ζ = ε^{1/3}·d per coordinate (the
     problem's length scale; Nocedal and Wright, Numerical Optimization, 2nd ed., §8.1), taken as
-    the representable δ₊ = (z_j + δ) − z_j and δ₋ = z_j − (z_j − δ): column j =
-    (∇g(z⁺_j) − ∇g(z⁻_j))/(δ₊ + δ₋), z⁺_j and z⁻_j being z with its j-th coordinate moved by +δ₊ or
-    −δ₋; then symmetrised. A difference point outside the domain means the search is at the edge:
+    the representable ζ₊ = (z_κ + ζ) − z_κ and ζ₋ = z_κ − (z_κ − ζ): column κ =
+    (∇g(z⁺_κ) − ∇g(z⁻_κ))/(ζ₊ + ζ₋), z⁺_κ and z⁻_κ being z with its κ-th coordinate moved by +ζ₊ or
+    −ζ₋; then symmetrised. A difference point outside the domain means the search is at the edge:
     it fails search_converged.
     Iteration, from z = 0 (so the search starts on the benchmark's middle), each step in this
     order: (1) at z: mid(z), g, ∇g and H. (2) Stop: H positive definite (a Cholesky factorisation
-    succeeds) and the Newton decrement ½∇gᵀH⁻¹∇g ≤ b := 2ν_g/(1 − 2c_Arm), c_Arm = 10⁻⁴: converged
+    succeeds) and the Newton decrement ½∇gᵀH⁻¹∇g ≤ Θ := 2ν_g/(1 − 2c_Arm), c_Arm = 10⁻⁴: converged
     (Boyd and Vandenberghe, Convex Optimization, §9.5.1). (3) Direction: p = −H⁻¹∇g if H is
     positive definite, otherwise p = −∇g; Dg = ∇gᵀp is negative for either unless ∇g = 0. ∇g = 0
     with H not positive definite is a critical point not certified as a minimum: it fails
@@ -137,28 +157,33 @@ Routes (the only difference between the arms): both use the same line and the sa
     default, declared); the first trial that passes is the step. The halving ends at
     α·|Dg| ≤ 2ν_g, below which a change of g is rounding: that floor stop fails search_converged.
     A search that works stops at (2) first: at a Newton step the computed change of g is
-    −½∇gᵀH⁻¹∇g, plus the quadratic model's remainder, plus at most 2ν_g of rounding, so above b the
+    −½∇gᵀH⁻¹∇g, plus the quadratic model's remainder, plus at most 2ν_g of rounding, so above Θ the
     full step passes Armijo unless the remainder exceeds the margin — and near a minimum the
     remainder is of third order in the step. (5) A cap of 100 iterations, a guard: reaching it
     fails search_converged.
-    m = mid(z) at the stop, and |E(m)| ≤ ν + ½·⟨∇E, u⟩·d·ε + 2‖∇E‖·ρ_ℓ holds by construction (the
-    bisection), not by a stop rule. m is the local solution the search reaches from m₀; S need not
+    m = mid(z) at the stop. The exact E at the computed m satisfies
+    |E(m)| ≤ ν + ⟨∇E, u⟩·d·ε + 2‖∇E‖·ρ_pt by construction (the bisection), not by a stop rule; the
+    value computed and reported can exceed that bound by a further ν, so no test asserts the bound
+    on it. m is the local solution the search reaches from m₀; S need not
     be convex (each leg's integrand is a product of positive convex functions of m), so it is not
     claimed to be the global one. Reported per target: iterations, the decrement at the stop, μ̂,
-    h/h_max, ⟨∇E, u⟩ and |E(m)| at m, ξ, ρ_ℓ, the steps that fell back to −∇g, and, for a failed
+    h/h_max, ⟨∇E, u⟩ and |E(m)| at m, ξ, ρ_pt, the steps that fell back to −∇g, and, for a failed
     search, why.
 States, the same definition in both arms:
   start: P = A. middle: P = m₀ (benchmark) or m (three-point). end: P = B.
   If the search ends at z = 0, m = m₀ bit for bit and D_q = 0 for that target.
 Notes in view, one Voronoi level per state. The dominant attractor of a note, of q or of a point
-  is argmax_k of its axis coordinates, ties to the lower axis index. For the middle P, the argmax
-  margin (first minus second largest coordinate) is reported per target and arm next to 2r, r the
-  residual in P (a move of r in every coordinate changes the margin by at most 2r): for the
-  benchmark r₂ = ½·d·ε + ρ_ℓ (half the bisection's last interval, and the point's rounding); for
-  the three-point arm r₃ = r₂ + √(2b/ω_min(H))·(1 + ‖Z_Nᵀ∇E‖/⟨∇E, u⟩) — the move the stop still
-  allows in z, the untaken Newton step bounded through the decrement, carried to m through D24's
-  ∇ξ, which also moves m along u. Targets whose margin is below 2r are counted, since their cell
-  could depend on that residual.
+  is argmax_k of its axis coordinates, ties to the lower axis index. Each computed middle has its
+  own sphere, of radius ρ₂ (benchmark) or ρ₃ (three-point): the points it could stand for, given
+  what fixed it. ρ₂ = (ν + ‖∇E‖·ρ_pt)/⟨∇E, u⟩ + d·ε + ρ_pt: where |E| ≤ ν + ‖∇E‖·ρ_pt the
+  bisection's sign can be wrong, which spreads the zero over that much of its line; the last
+  interval adds d·ε, and the point's rounding ρ_pt. ρ₃ = ρ₂ + √(2Θ/ω_min(H))·(1 + ‖Z_Nᵀ∇E‖/⟨∇E, u⟩):
+  the move the stop still allows in z (the untaken Newton step, bounded through the decrement),
+  carried to m through D24's ∇ξ, which also moves m along u; first order. A move of ρ in every
+  coordinate changes the argmax margin (first minus second largest coordinate) by at most 2ρ, so
+  the middle's margin is reported per target and arm next to 2ρ₂ or 2ρ₃, and targets whose
+  margin is below it are counted: their cell could depend on where in its sphere the middle
+  stands.
   start (level 0): all notes.
   middle (level 1): the axis cell of P, k* = its dominant attractor; in view, the notes whose
     dominant attractor is k* (FIT for fitting, EVAL for display).
@@ -185,12 +210,13 @@ Frame at a state: T = ½ Σ (c_i − P)(c_i − P)ᵀ over the FIT notes in view
   counted.
 Z1's score (D25), per target, arm and state. A state is scored iff it is not degenerate and
   N_M ≥ 2 (D25's condition); otherwise it is counted per arm and state. For each j in M and
-  K = 1, …, N_U − 2 = 1,108: V_j(K) = its K nearest in 384-d among U \ {j} (largest ⟨v_j, v_i⟩
+  K = 1, …, N_U − 2 = 1,108: hyp_j(K) = its K nearest in 384-d among U \ {j} (largest ⟨v_j, v_i⟩
   from one Gram array Γ = X_E X_Eᵀ over the EVAL rows; ties by lower index) — j's hypersphere, the
-  same in both arms and at every state; K′ = min(K, N_M − 1); n_j(K) = its K′ nearest on the
-  displayed plane among M \ {j} (Euclidean; ties by lower index); O_j(K) = |V_j(K) ∩ n_j(K)|;
-  r_j(K) = (O_j(K)/K − K′/(N_U − 1)) / (1 − K′/(N_U − 1)); R_NX(K) = the mean over j in M of
-  r_j(K); the state's score AUC = [Σ_K R_NX(K)/K] / [Σ_K 1/K]. It is 1 when the zoom keeps every
+  same in both arms and at every state; K′ = min(K, N_M − 1); shown_j(K) = its K′ nearest on the
+  displayed plane among M \ {j} (Euclidean; ties by lower index);
+  O_j(K) = |hyp_j(K) ∩ shown_j(K)|;
+  R_j(K) = (O_j(K)/K − K′/(N_U − 1)) / (1 − K′/(N_U − 1)); R_NX(K) = the mean over j in M of
+  R_j(K); the state's score AUC = [Σ_K R_NX(K)/K] / [Σ_K 1/K]. It is 1 when the zoom keeps every
   note's hypersphere in order, 0 on average for a zoom with no information (a random view shown
   in a random order, D25), and below 0 when the zoom does worse than that. It judges the whole
   zoom: a view that cuts a note's real neighbours off scores lower even with a perfect display,
@@ -219,16 +245,17 @@ Controls (Z1):
   null_world, run first, before the real data are read: the whole pipeline — targets, search,
     states, score, bootstrap, rule and Z1's other controls — on a synthetic corpus built in memory
     by formula, with no draws, where D26 fixes the answer. o_k is the k-th coordinate vector of
-    ℝ³⁸⁴, and the axes are â_k = o_k (k = 1…8). Offsets: for the pairs p < q of axis indices in
-    lexicographic order (p = 1…7, q = p + 1…8; 28 pairs) and ℓ = 1…3, n = 3·(the pair's number − 1)
-    + ℓ runs over 1…84 and β_n = 0.1 + 0.2·frac(n·g), g = (√5 − 1)/2: 84 distinct values in
-    (0.1, 0.3), each belonging to one pair. Notes: for each n in order, four notes at the 0-based
-    indices 4(n − 1) … 4(n − 1) + 3 — FIT (p, q, β_n), EVAL (p, q, β_n), FIT (q, p, β_n),
-    EVAL (q, p, β_n) — where (p, q, β) has axis coordinates c = 0.1·1 + β(o_p − o_q) and vector
-    v = Σ_k c_k o_k + √(1 − ‖c‖²)·o_{9+i}, i the note's 0-based index (0…335), so ‖v‖ = 1 and the
-    parts beyond the axes are orthogonal between notes. FIT = even indices (168) and EVAL = odd
-    (168), as in the real data. Each mirror pair (p, q, β_n), (q, p, β_n) lies in the same half,
-    so the FIT barycentre is 0.1·1, on the diagonal, and every target has B − A orthogonal to it:
+    ℝ³⁸⁴, and the axes are â_k = o_k (k = 1…8). Offsets: the pairs k₁ < k₂ of axis indices in
+    lexicographic order (k₁ = 1…7, k₂ = k₁ + 1…8; 28 pairs), each taken three times in a row,
+    numbered ι = 1…84 in that order; β_ι = 0.1 + 0.2·frac(ι·(√5 − 1)/2): 84 distinct values in
+    (0.1, 0.3), each belonging to one pair. Notes: for each ι in order, four notes at the 0-based
+    indices 4(ι − 1) … 4(ι − 1) + 3 — FIT (k₁, k₂, β_ι), EVAL (k₁, k₂, β_ι), FIT (k₂, k₁, β_ι),
+    EVAL (k₂, k₁, β_ι) — where note (k₁, k₂, β) has axis coordinates c_k = 0.1 + β for k = k₁,
+    0.1 − β for k = k₂ and 0.1 otherwise, and vector v = Σ_k c_k o_k + √(1 − ‖c‖²)·o_{9+i}, i the
+    note's 0-based index (0…335), so ‖v‖ = 1 and the parts beyond the axes are orthogonal between
+    notes. FIT = even indices (168) and EVAL = odd (168), as in the real data. Each mirror pair
+    (k₁, k₂, β_ι), (k₂, k₁, β_ι) lies in the same half, so the FIT barycentre is 0.1 in every
+    coordinate, on the diagonal, and every target has B − A orthogonal to it:
     by D26 m₀ is the only answer, for every target. The offsets are distinct so that no permutation
     of the axes maps the corpus onto itself (it would have to fix every pair): with one offset
     shared by several pairs, notes symmetric under such a permutation land on one display point,
@@ -246,7 +273,7 @@ Controls (Z1):
     the end states — same notes in view and the same coordinates bit for bit, or both degenerate.
   identity: at the start state (M = U), the score applied to the 384-d vectors themselves as the
     "displayed" coordinates (Euclidean on unit vectors orders as the dot product, D5) gives
-    r_j(K) = 1 for every note and scale (D25 (a)). A note out of order counts as a tie iff its
+    R_j(K) = 1 for every note and scale (D25 (a)). A note out of order counts as a tie iff its
     similarity to j and that of the note it swapped with lie within 1e-12 of each other. The
     worst-case float64 error of a 384-term dot product of unit vectors is γ₃₈₄ ≈ 4.3e-14, and the
     Euclidean side adds rounding of the same order, so 1e-12 leaves a margin of ≈ 10–20× (not
@@ -258,7 +285,7 @@ Controls (Z1):
     1/(N_U(N_U − 2)), the notes' permutations being independent; with the normal approximation
     over 1,110 independent notes, a correct score falls outside with probability ≈ 6.3e-5 at the
     bound, and less, since the variance is an upper bound. Declared limits: the band cannot see an
-    error in the chance term smaller than about 0.0036 in AUC (P = N_U instead of N_U − 1 shifts
+    error in the chance term smaller than about 0.0036 in AUC (N_c = N_U instead of N_U − 1 shifts
     it by about 8e-4 and passes; identity passes too, since r = 1 at O = K for any P) — D25's unit
     tests, which enumerate every arrangement, cover those; and at the start state K′ = K, so the
     branch K′ < K (views of fewer than K + 1 notes) has no run-time control: it is exercised by the
@@ -273,7 +300,8 @@ Z2 (latency), per target with a route, on the three-point route with the m found
   time.perf_counter_ns; the timer overhead (the median of 1,000 empty timed calls) subtracted from
   every timing and timestamp difference. Warm-up: the first 10 EVAL targets run once, search and
   both arms, untimed and discarded; then every target is timed. N_f = 60 displayed frames at
-  t_f = f/(N_f − 1), f = 0, …, N_f − 1, evenly spaced in t without easing (a 1-second zoom at 60
+  the times t_f = (frame number)/(N_f − 1), frame number 0 … N_f − 1 (the subscript f names a
+  frame, not the friction), evenly spaced in t without easing (a 1-second zoom at 60
   frames per second; both choices declared: easing would change which frames fall before the
   middle). On the three-point route t ∈ [0, ½] runs linearly along A → m and t ∈ [½, 1] along
   m → B, so the middle is at t = ½.
@@ -283,7 +311,7 @@ Z2 (latency), per target with a route, on the three-point route with the m found
   keyframes: the three states (notes in view, T, display; level 2 includes its Lloyd partition),
     a timestamp once the third state exists, then the N_f frames: a frame with t_f ≤ ½ interpolates
     between the start and middle displays with weight w = 2t_f, one with t_f > ½ between the middle
-    and end displays with w = 2t_f − 1; position (1 − w)·x_prev + w·x_next for the EVAL notes in
+    and end displays with w = 2t_f − 1; position (1 − w)·pos_prev + w·pos_next for the EVAL notes in
     both displays, and, for a note in only one of the two, the position it has in that one.
   per-step: the same level-2 partition, computed and timed in this arm too; then at each frame the
     notes in view, T and the display recomputed from scratch at the route's point P(t_f): level 0
@@ -345,10 +373,12 @@ Unit tests (committed with the script, reviewed in phase 2; they can fail). In
   orthogonal to the diagonal. In tests/unit/test_zoom_three_point.py, for the search: (i) a search
   that does not work must fail — with A and B off the diagonal, where m₀ is not a solution
   (∇g(0) ≠ 0), the search must end at (2) with g(z) < g(0) − 2ν_g; a search that returns its
-  input fails this test; (ii) through D21's synthetic friction, injected in the test — one with
-  f ≥ 1 and ‖∇√f‖ < 1/(2√2) everywhere, so that D23's tube holds for it — from its own m₀, ending
-  within √(2b/ω_min(H)) of the known touching point, b the bound of (2): the distance to the
-  minimum that the decrement allows; (iii) the known answers where m₀ is the solution, which the
+  input fails this test; (ii) through D21's synthetic friction, injected in the test: √f affine
+  on the region the legs sweep (so the 64-node τ is exact along every leg), with √f ≥ 1 and
+  ‖∇√f‖ < 1/(2√2) there (so D23's tube holds for it), and A and B placed so that the touching
+  point m* follows in closed form by symmetry; from its own m₀, the search must end with m* in
+  the found m's own sphere, ‖m − m*‖ ≤ ρ₃ (States; first order), compared in ℝ⁸; (iii) the known
+  answers where m₀ is the solution, which the
   search must return with no step — A and B on the diagonal (f = 1 on the segment, ≥ 1
   elsewhere, and the sum of the two legs grows off it) and B − A orthogonal to the diagonal from
   A on it (D26); (iv) search_code fires when the direction p, once computed, is replaced by −p
@@ -428,6 +458,8 @@ Reviewed by:               instrument-auditor (blind subagent, review package bu
                            design; commit cdafd6c (revision 6); PASS, 0 blocking, 6
                            non-blocking; round-1 items addressed (3 and 8 in part); D23–D26
                            verified; no arm changed.
+                           Revision 7 applies those items and changes no arm: its review is
+                           round 3 of 3 on revision 5's design.
 ```
 
 ## Review history
@@ -681,3 +713,27 @@ Reviewed by:               instrument-auditor (blind subagent, review package bu
   world's axes), and contracts.md's V against V_j(K) once Z's section exists; (6) the bound on
   |E(m)| is on the exact E at the computed m, while the reported value is computed and can
   exceed it by a further ν — say so, so that no phase-2 test asserts it on the computed value.
+- **Changes in revision 7** — the six round-2 items, no change to either arm's design (the
+  author, 2026-09-25). (1) Each computed middle has its own sphere: ρ₂ = (ν + ‖∇E‖·ρ_pt)/⟨∇E, u⟩
+  + d·ε + ρ_pt (the zone where the bisection's sign can be wrong, the last interval, now d·ε since
+  the rounded midpoint only stays inside it, and the point's rounding), ρ₃ = ρ₂ plus the move the
+  stop allows carried to m; the argmax margin is compared with 2ρ₂ or 2ρ₃. ν_g and the |E(m)|
+  bound use d·ε. (2) Test (ii) compares in ℝ⁸ and passes iff the known touching point lies in the
+  found m's own sphere, ‖m − m*‖ ≤ ρ₃, first order; its friction has √f affine on the region the
+  legs sweep, so the 64-node τ is exact there and m* follows in closed form. (3) The benchmark's
+  caveat now says what the quadrature departs from — additivity, not monotonicity, which D23's
+  quadrature form gives — and where rounding can break monotonicity. (4) D23's conditions state
+  s_i ∈ [0, 1] and f continuously differentiable, with f ≥ 1 and ‖∇√f‖ < 1/(2√2) needed on the
+  legs only; D20's conditions ask f continuously differentiable and its ∇f = ∇Var holds for
+  f = 1 + Var. (5) One table of symbols, each with one meaning and none of definitions.md's or
+  contracts.md's V: the stop's threshold is Θ, the finite-difference steps ζ, the radii ρ₂, ρ₃
+  and the point's rounding ρ_pt, γ_N for a count of N operations, err_A, err_B for the legs'
+  errors, κ for z's coordinates; the hypersphere, the displayed neighbours, the per-note score
+  and the per-note AUC are hyp_j(K), shown_j(K), R_j(K) and AUC_j (in D25 too, whose part (c)
+  no longer uses κ or c); the known world's pairs are k₁ < k₂, its offsets β_ι with ι their
+  number, its coordinates written per component; "u⊥" is written as the hyperplane orthogonal to
+  u; the engine's basis matrix is no longer called B_0; Z2's frames are numbered in words, not
+  by f; D23 and D26 write the offset vector Y, D23's proof W, and û_A, û_B for the legs'
+  directions. (6) The |E(m)| bound is stated for the exact E at the computed m, and the reported
+  value may exceed it by a further ν. This revision changes no arm: round 3 of 3 on revision 5's
+  design.
