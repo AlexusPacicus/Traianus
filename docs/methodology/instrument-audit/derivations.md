@@ -154,81 +154,87 @@ D22 Merit with a non-decreasing penalty. For φ_ρ(m) = S(m) + ρ|E(m)|, penalti
     use φ_{ρ_1}(m_1) ≤ φ_{ρ_1}(m_0).
 
 D23 E is strictly increasing along chords' parallels inside a tube. With τ_A, τ_B and E as in D21,
-    d = ‖B − A‖, u = (B − A)/d, y ⊥ u, h = ‖y‖ and m(t) = A + t·u + y: if 0 < d < 4√2 and
-    h ≤ h_max(d) = (4√2 − d)·√(d / (8√2 − d)), then ⟨∇E(m(t)), u⟩ > 0 for every t ∈ [0, d]
-    (t ∈ (0, d) when h = 0), so t ↦ E(m(t)) is strictly increasing there and has at most one zero
-    in [0, d]. Its existence is not claimed. The tube is sufficient, not necessary.
-    Conditions: f = 1 + Var over 8 components (D17); m(t) ∉ {A, B} (D20's gradients), which h > 0
-    or t ∈ (0, d) ensures. For axis coordinates of unit vectors |c_k| ≤ 1, so d ≤ 4√2.
+    d = ‖B − A‖, u = (B − A)/d, y ⊥ u, h = ‖y‖ and m(ξ) = A + ξ·u + y: if 0 < d < 4√2 and
+    h ≤ h_max(d) = (4√2 − d)·√(d / (8√2 − d)), then ⟨∇E(m(ξ)), u⟩ > 0 for every ξ ∈ [0, d]
+    (ξ ∈ (0, d) when h = 0), so ξ ↦ E(m(ξ)) is strictly increasing there and has at most one zero
+    in [0, d]. Its existence is not claimed. The tube is sufficient, not necessary. The same holds
+    when every τ_seg is a quadrature ‖Q − P‖·Σ_i w_i √f(Λ(s_i)) with w_i > 0, Σ_i w_i = 1 and
+    Σ_i w_i s_i = ½ (Gauss–Legendre mapped to [0, 1] qualifies), D20's gradients taken on the same
+    nodes.
+    Conditions: f ≥ 1 and ‖∇√f‖ < G := 1/(2√2) everywhere, which f = 1 + Var over 8 components
+    meets (step (i)); m(ξ) ∉ {A, B} (D20's gradients), which h > 0 or ξ ∈ (0, d) ensures. For axis
+    coordinates of unit vectors |c_k| ≤ 1, so d ≤ 4√2.
     Proof: (i) ∇√f = ∇f/(2√f) and, by D17, ‖∇Var‖² = Var/2, so
-    ‖∇√f‖ = (1/(2√2))·√(Var/(1 + Var)) < G := 1/(2√2) everywhere. (ii) h = 0 is D21's
-    ⟨∇E, u⟩ = 2√f on the open segment. For h > 0, by D20 with r_A = ‖m − A‖, r_B = ‖B − m‖,
+    ‖∇√f‖ = (1/(2√2))·√(Var/(1 + Var)) < G. (ii) By D20, with r_A = ‖m − A‖, r_B = ‖B − m‖,
     a_A = (m − A)/r_A, a_B = (B − m)/r_B and I_A, I_B ≥ 1 the two legs' ∫₀¹ √f ds:
     ∇E = I_A·a_A + I_B·a_B + r_A ∫₀¹ s·∇√f(Λ_A) ds − r_B ∫₀¹ (1 − s)·∇√f(Λ_B) ds. On [0, d],
-    ⟨a_A, u⟩ = t/r_A ≥ 0 and ⟨a_B, u⟩ = (d − t)/r_B ≥ 0, so by (i)
-    ⟨∇E, u⟩ > Φ(t) := t/r_A + (d − t)/r_B − (G/2)(r_A + r_B), r_A = √(t² + h²),
-    r_B = √((d − t)² + h²). (iii) t/√(t² + h²) is concave on t ≥ 0 and (d − t)/√((d − t)² + h²)
-    on t ≤ d; r_A and r_B are convex; so Φ is concave on [0, d], its minimum is at an end, and
-    Φ(0) = Φ(d) by t ↔ d − t. (iv) With η = h/d, Φ(0) ≥ 0 ⟺ √(1 + η²)(η + √(1 + η²)) ≤ 2/(Gd) =
-    4√2/d; with η = sinh θ the left side is (e^{2θ} + 1)/2, so the condition is e^{2θ} ≤
-    w := 8√2/d − 1, i.e. η ≤ sinh(½ ln w) = (w − 1)/(2√w), which is h ≤ h_max(d).
+    ⟨a_A, u⟩ = ξ/r_A ≥ 0 and ⟨a_B, u⟩ = (d − ξ)/r_B ≥ 0, so by (i)
+    ⟨∇E, u⟩ > Φ(ξ) := ξ/r_A + (d − ξ)/r_B − (G/2)(r_A + r_B), r_A = √(ξ² + h²),
+    r_B = √((d − ξ)² + h²). With the quadrature, I_A, I_B = Σ_i w_i √f ≥ 1 and the two interior
+    terms are at most r_A·G·Σ_i w_i s_i = r_A·G/2 and r_B·G·Σ_i w_i(1 − s_i) = r_B·G/2 in size, so
+    the same Φ bounds it. (iii) For h = 0, Φ = 2 − Gd/2 > 0 on (0, d). For h > 0,
+    ξ/√(ξ² + h²) is concave on ξ ≥ 0 and (d − ξ)/√((d − ξ)² + h²) on ξ ≤ d; r_A and r_B are convex;
+    so Φ is concave on [0, d], its minimum is at an end, and Φ(0) = Φ(d) by ξ ↔ d − ξ. (iv) With
+    η = h/d, Φ(0) ≥ 0 ⟺ √(1 + η²)(η + √(1 + η²)) ≤ 2/(Gd) = 4√2/d; with η = sinh θ the left side
+    is (e^{2θ} + 1)/2, so the condition is e^{2θ} ≤ w := 8√2/d − 1, i.e.
+    η ≤ sinh(½ ln w) = (w − 1)/(2√w), which is h ≤ h_max(d).
 
 D24 The search in the tube is the constrained problem. With d, u, S, E as in D21 and D23, Z_N an
-    8 × 7 matrix with orthonormal columns spanning u⊥, and m(z) = A + t(z)·u + Z_N z, where t(z) is
-    the zero of t ↦ E(A + t·u + Z_N z) in [0, d] (unique by D23 for ‖z‖ ≤ h_max(d)): t is
-    continuously differentiable with ∇t = −Z_Nᵀ∇E / ⟨∇E, u⟩, and g(z) = S(m(z)) has
+    8 × 7 matrix with orthonormal columns spanning u⊥, and m(z) = A + ξ(z)·u + Z_N z, where ξ(z) is
+    the zero of ξ ↦ E(A + ξ·u + Z_N z) in [0, d] (unique by D23 for ‖z‖ ≤ h_max(d)): ξ is
+    continuously differentiable with ∇ξ = −Z_Nᵀ∇E / ⟨∇E, u⟩, and g(z) = S(m(z)) has
     ∇g = Z_Nᵀ(∇S − μ̂∇E), μ̂ = ⟨∇S, u⟩ / ⟨∇E, u⟩.
     ∇g(z) = 0 iff ∇S(m(z)) = μ̂∇E(m(z)): the critical points of g are D21's Lagrange points in the
     tube, with μ = μ̂. z ↦ m(z) is one-to-one onto {E = 0} ∩ {0 ≤ ⟨m − A, u⟩ ≤ d,
     ‖Z_Nᵀ(m − A)‖ ≤ h_max(d)}, with inverse z = Z_Nᵀ(m − A), so local minimisers of g and of S on
-    that set correspond. First order: for m′ = m + δ·u with E(m′) = 0,
+    that set correspond. First order: for m′ = m + Δξ·u with E(m′) = 0,
     S(m′) − S(m) = −μ̂·E(m) + O(E(m)²).
     Conditions: those of D23; the zero exists in [0, d] at z (checked, not implied); m ∉ {A, B}.
-    Proof: E is continuously differentiable away from A and B (D20) and ∂E(m(z))/∂t = ⟨∇E, u⟩ > 0
-    (D23), so the implicit function theorem gives t continuously differentiable with
-    ⟨∇E, u⟩∇t + Z_Nᵀ∇E = 0; the chain rule gives ∇g = Z_Nᵀ∇S + ⟨∇S, u⟩∇t. If ∇g = 0, the vector
+    Proof: E is continuously differentiable away from A and B (D20) and ∂E(m(z))/∂ξ = ⟨∇E, u⟩ > 0
+    (D23), so the implicit function theorem gives ξ continuously differentiable with
+    ⟨∇E, u⟩∇ξ + Z_Nᵀ∇E = 0; the chain rule gives ∇g = Z_Nᵀ∇S + ⟨∇S, u⟩∇ξ. If ∇g = 0, the vector
     ∇S − μ̂∇E has no component on u⊥ (the columns of Z_N) and, by μ̂'s definition, none on u, so it
     is 0; conversely ∇S = μ∇E gives μ = μ̂ (take ⟨·, u⟩, with ⟨∇E, u⟩ ≠ 0) and ∇g = 0. One-to-one:
     Z_Nᵀ(m − A) = z because Z_Nᵀu = 0, and D23 makes the zero on each parallel unique; both maps are
-    continuous. First order: −E(m) = E(m′) − E(m) = ⟨∇E, u⟩δ + O(δ²), and
-    S(m′) − S(m) = ⟨∇S, u⟩δ + O(δ²).
+    continuous. First order: −E(m) = E(m′) − E(m) = ⟨∇E, u⟩Δξ + O(Δξ²), and
+    S(m′) − S(m) = ⟨∇S, u⟩Δξ + O(Δξ²).
 
 D25 Neighbourhood a zoom keeps at every scale, against a zoom with no information (co-ranking: Lee
     and Verleysen, Neurocomputing 72, 2009; the weights 1/K: Lee et al., Neurocomputing 169, 2015;
     both cited from memory, not verified). U is the set of notes that can be shown (N_U of them),
-    M ⊆ U the notes in view (N_M), j ∈ M, P = N_U − 1. For K = 1, …, N_U − 2: ν_j(K) = j's K
-    nearest in 384-d among U \ {j} (its hypersphere, the same whatever the view);
+    M ⊆ U the notes in view (N_M), j ∈ M, N_c = N_U − 1 the candidates. For K = 1, …, N_U − 2:
+    V_j(K) = j's K nearest in 384-d among U \ {j} (its hypersphere, the same whatever the view);
     K′ = min(K, N_M − 1); n_j(K) = j's K′ nearest on the displayed plane among M \ {j};
-    O_j(K) = |ν_j(K) ∩ n_j(K)|;
-    r_j(K) = (O_j(K)/K − K′/P) / (1 − K′/P),   R_NX(K) = (1/N_M) Σ_{j∈M} r_j(K),
+    O_j(K) = |V_j(K) ∩ n_j(K)|;
+    r_j(K) = (O_j(K)/K − K′/N_c) / (1 − K′/N_c),   R_NX(K) = (1/N_M) Σ_{j∈M} r_j(K),
     AUC = [Σ_K R_NX(K)/K] / [Σ_K 1/K] = (1/N_M) Σ_{j∈M} a_j,   a_j = [Σ_K r_j(K)/K] / [Σ_K 1/K].
-    (a) r_j(K) ≤ 1, with equality iff K′ = K and n_j(K) = ν_j(K): a view with fewer than K + 1
-    notes cannot reach 1 at scale K. With M = U and n_j(K) = ν_j(K) for every j and K, AUC = 1.
+    (a) r_j(K) ≤ 1, with equality iff K′ = K and n_j(K) = V_j(K): a view with fewer than K + 1
+    notes cannot reach 1 at scale K. With M = U and n_j(K) = V_j(K) for every j and K, AUC = 1.
     (b) If the view and its order carry no information — n_j(K) is the first K′ of a uniformly
     random arrangement of N_M − 1 notes out of U \ {j}, independent across j — then
-    E[r_j(K)] = 0 and Var[r_j(K)] = K′(P − K) / (K(P − K′)(P − 1)) ≤ 1/(N_U − 2), so E[AUC] = 0,
-    Var[a_j] ≤ 1/(N_U − 2) and Var[AUC] ≤ 1/(N_M(N_U − 2)).
-    (c) With M = U, K′ = K and r_j(K) = (P·O_j(K)/K − K)/(P − K); at K = 15,
-    R_NX(15) = (κ − c)/(15 − c), κ = (1/N_U) Σ_j O_j(15), c = 225/P (D9 with P candidates).
-    Conditions: N_U ≥ 3 (K = 1 exists and K < P); N_M ≥ 2 (K′ ≥ 1).
+    E[r_j(K)] = 0 and Var[r_j(K)] = K′(N_c − K) / (K(N_c − K′)(N_c − 1)) ≤ 1/(N_U − 2), so
+    E[AUC] = 0, Var[a_j] ≤ 1/(N_U − 2) and Var[AUC] ≤ 1/(N_M(N_U − 2)).
+    (c) With M = U, K′ = K and r_j(K) = (N_c·O_j(K)/K − K)/(N_c − K); at K = 15,
+    R_NX(15) = (κ − c)/(15 − c), κ = (1/N_U) Σ_j O_j(15), c = 225/N_c (D9 with N_c candidates).
+    Conditions: N_U ≥ 3 (K = 1 exists and K < N_c); N_M ≥ 2 (K′ ≥ 1).
     Proof: (a) O_j(K) ≤ K′ ≤ K and r_j(K) is increasing in O_j(K); at O_j(K) = K′ it equals
-    (K′/K − K′/P)/(1 − K′/P), which is 1 iff K′ = K. (b) Under the null n_j(K) is a uniform random
-    K′-subset of the P others, so O_j(K) is Hypergeometric(P, K, K′): mean K′K/P, variance
-    K′K(P − K)(P − K′)/(P²(P − 1)); r_j(K) is affine in O_j(K) with slope 1/(K(1 − K′/P)), which
-    gives mean 0 and the variance stated; K′(P − K) ≤ K(P − K′) since K′ ≤ K. a_j is a weighted mean
-    of the r_j(K) with weights summing to 1, and the standard deviation of a sum is at most the sum
-    of the standard deviations (Minkowski); the a_j are independent across j, so
-    Var[AUC] = Σ_j Var[a_j]/N_M². (c) Substitute K′ = K; at K = 15 divide the numerator and the
-    denominator by P/15.
+    (K′/K − K′/N_c)/(1 − K′/N_c), which is 1 iff K′ = K. (b) Under the null n_j(K) is a uniform
+    random K′-subset of the N_c others, so O_j(K) is Hypergeometric(N_c, K, K′): mean K′K/N_c,
+    variance K′K(N_c − K)(N_c − K′)/(N_c²(N_c − 1)); r_j(K) is affine in O_j(K) with slope
+    1/(K(1 − K′/N_c)), which gives mean 0 and the variance stated; K′(N_c − K) ≤ K(N_c − K′) since
+    K′ ≤ K. a_j is a weighted mean of the r_j(K) with weights summing to 1, and the standard
+    deviation of a sum is at most the sum of the standard deviations (Minkowski); the a_j are
+    independent across j, so Var[AUC] = Σ_j Var[a_j]/N_M². (c) Substitute K′ = K; at K = 15
+    divide the numerator and the denominator by N_c/15.
 
 D26 A world where the benchmark's middle is the answer. With S and E as in D21, f = 1 + Var (D17)
     and m₀ the τ-midpoint of the segment AB (D19): if A = a·1 and ⟨B − A, 1⟩ = 0 with B ≠ A, then
     S(m) ≥ τ_seg(A, B) = S(m₀) for every m ∈ ℝ⁸, and m₀ is the only minimiser of S subject to
     E = 0.
     Conditions: A on the diagonal; B − A orthogonal to it; B ≠ A.
-    Proof: u = (B − A)/‖B − A‖, π(x) = A + ⟨x − A, u⟩·u, P = I − 11ᵀ/8, so Var(x) = ‖Px‖²/8, PA = 0
-    and Pu = u. For x = A + t·u + y with y ⊥ u: Px = t·u + Py and ⟨u, Py⟩ = ⟨Pu, y⟩ = 0, so
-    Var(x) = (t² + ‖Py‖²)/8 ≥ t²/8 = Var(π(x)). π is 1-Lipschitz, so projecting the route A → m → B
+    Proof: u = (B − A)/‖B − A‖, π(x) = A + ⟨x − A, u⟩·u, Π = I − 11ᵀ/8, so Var(x) = ‖Πx‖²/8,
+    ΠA = 0 and Πu = u. For x = A + ξ·u + y with y ⊥ u: Πx = ξ·u + Πy and ⟨u, Πy⟩ = ⟨Πu, y⟩ = 0, so
+    Var(x) = (ξ² + ‖Πy‖²)/8 ≥ ξ²/8 = Var(π(x)). π is 1-Lipschitz, so projecting the route A → m → B
     does not raise √f and does not lengthen it; the projection runs along the line from A to B,
     covers the segment AB, and so takes at least τ_seg(A, B). Equality needs the route to stay on
     the line (a leg with a component orthogonal to u is strictly longer than its projection, and
@@ -240,8 +246,8 @@ D18 is not used by Z since its revision 3 (the three-point route became two stra
 stays as verified. D22 is not used by Z since its revision 5 (the search keeps every point on
 E = 0, so there is no merit function); it stays as verified.
 
-Used by: K6 (D2, D4, D6, D7, D8, D11), R4 (D2, D5, D6, D9, D10), Z (D5, D9, D17, D19, D20, D21,
-D23, D24, D25, D26).
+Used by: K6 (D2, D4, D6, D7, D8, D11), R4 (D2, D5, D6, D9, D10), Z (D5, D17, D19, D20, D21, D23,
+D24, D25, D26).
 
 ## En palabras
 
