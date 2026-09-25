@@ -3,10 +3,10 @@
 The question, hypothesis and refuters live in the RefApp-01 repository (`ZOOM.md`), which a blind
 reviewer never opens (definitions.md, Not allowed).
 
-## Instrument audit record (revision 13)
+## Instrument audit record (revision 14)
 
 ```
-Instrument audit — Z1 (neighbourhood kept along a zoom) and Z2 (zoom latency) (revision 13)
+Instrument audit — Z1 (neighbourhood kept along a zoom) and Z2 (zoom latency) (revision 14)
 
 Scope: two arms that zoom from the barycentre to a note by different routes, each judged at the
   start, the middle and the end of its route. Z1 measures, for each displayed note, how much of its
@@ -52,7 +52,8 @@ Symbols, each with one meaning here and none of definitions.md's (v, a_k, â_k, 
   uncertainty sphere (radius ρ₂ or ρ₃).
 Script: tools/experiments/zoom_three_point.py; unit tests: tests/unit/test_zoom_three_point.py;
   the tests of D5, D17, D19, D20, D21, D23, D24, D25 and D26 in
-  tests/unit/test_audit_derivations.py.
+  tests/unit/test_audit_derivations.py. The script's and its tests' docstrings cite the last
+  revision of this record that changed code; a revision that changes only wording leaves them.
   The script sets OMP_NUM_THREADS = OPENBLAS_NUM_THREADS = VECLIB_MAXIMUM_THREADS = 1 itself,
   before its first numpy import. It imports, and does not copy, check_digests, load_inputs,
   validate_inputs and IntegrityError (their exception, raised by the pin check too) from
@@ -243,7 +244,9 @@ Z1's score (D25), per target, arm and state. A state is scored iff it is not deg
   (largest ⟨v_j, v_i⟩ from one Gram array Γ = X_E X_Eᵀ over the EVAL rows; ties by lower index) —
   j's neighbourhood hypersphere, the
   same in both arms and at every state; K′ = min(K, N_M − 1); shown_j(K) = its K′ nearest on the
-  displayed plane among M \ {j} (Euclidean; ties by lower index);
+  displayed plane among M \ {j}, ordered by squared Euclidean distance (the distance's order in
+  exact arithmetic, without the square root's rounding, which could merge two distinct squared
+  distances into a tie; ties by lower index);
   O_j(K) = |hyp_j(K) ∩ shown_j(K)|;
   R_j(K) = (O_j(K)/K − K′/(N_U − 1)) / (1 − K′/(N_U − 1)); R_NX(K) = the mean over j in M of
   R_j(K); the state's score AUC = [Σ_K R_NX(K)/K] / [Σ_K 1/K]. It is 1 when the zoom keeps every
@@ -394,7 +397,11 @@ Validity, checked in this order, every failure listed: null_world; tube_defined 
   search_reproduced. Any failure: valid = false, and neither Z1 nor Z2 is decided. Counts
   reported: targets excluded (no route), degenerate states and states not scored per arm and
   state, states with a near-zero eigenvalue gap, failed searches by reason, steps that fell back
-  to −∇g, |μ̂| ≥ 1, middles whose argmax margin is below 2ρ₂ or 2ρ₃.
+  to −∇g, |μ̂| ≥ 1, middles whose argmax margin is below 2ρ₂ or 2ρ₃. The state counts see only
+  the arms that exist: a target whose search fails inside its first evaluation has no
+  three-point arm (and, after no sign change, no two-point arm either), so it adds no
+  three-point state to them and shows as missing only among the failed searches, with valid
+  false (search_code).
 Reported, not deciding: the score per arm and state (mean over targets); per L used, D̄, the
   interval and the margins of its bounds to 0, n and n_blocks(L); the middle cells k* per arm,
   N_M per arm, the targets whose middle cells differ and D̄ over those whose cells agree; per
@@ -453,7 +460,10 @@ Unit tests (committed with the script, reviewed in phase 2; they can fail). In
   test; the timer overhead is subtracted, and once more from the keyframes arm's total; the timed
   search rebuilds its line inside its interval; each Z2 arm builds each state once (the keyframes
   arm 3, the per-step arm N_f, its last at P = B); the arms' interleaving order; search_reproduced;
-  which point a failed search leaves (with a cap of 1, m = m₀ although a step was accepted);
+  which point a failed search leaves (with a cap of 1, m = m₀ although a step was accepted; after
+  a difference point of H fails at a later iterate, that iterate; after a non-positive slope at a
+  later iterate, the one before it; at z = 0, a non-positive slope leaves the two-point arm only,
+  with ρ₂ null, and no sign change neither arm, and such a target is out of D_q and of Z2);
   the smallest positive d skips a target with d = 0; the known world's corpus meets D26's
   conditions, its 84 offsets are distinct, no pair's three are equally spaced (twice one minus
   the other two at least 5.0·10⁻³ in absolute value), and its null_world passes, with a smallest
@@ -1008,3 +1018,11 @@ Reviewed by:               instrument-auditor (blind subagent, review package bu
   first evaluation adds no degenerate or not-scored state and Z1's n can fall short without a
   count explaining it; (4) the docstrings cite revision 12, the last revision that changed code
   — state that convention once.
+- **Changes in revision 14** — the four phase-2 round-3 items, after phase 2 closed; no change to
+  either arm's design, and no further round, as for K6 (the author, 2026-09-26). (1) The test
+  list adds the other paths of a failed search: a difference point of H failing at a later
+  iterate, a non-positive slope at a later iterate, and at z = 0 a non-positive slope (two-point
+  arm only, ρ₂ null) or no sign change (neither arm), such a target out of D_q and Z2. (2) The
+  display order is by squared Euclidean distance, stated with the reason. (3) The state counts
+  see only existing arms; a search failing inside its first evaluation shows only among the
+  failed searches. (4) The docstrings cite the last revision that changed code.
