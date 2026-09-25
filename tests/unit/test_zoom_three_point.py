@@ -1,11 +1,12 @@
 """Unit tests of tools/experiments/zoom_three_point.py.
 
-Specification: docs/methodology/instrument-audit/Z.md (revision 10), docs/methodology/instrument-audit/contracts.md
+Specification: docs/methodology/instrument-audit/Z.md (revision 12), docs/methodology/instrument-audit/contracts.md
 sections 0 and 4, docs/methodology/instrument-audit/derivations.md (D5, D17, D19-D21, D23-D26). Synthetic inputs
 only: CI has no .data/, and the measurement is never run on the real artefact here.
 """
 
 import dataclasses
+import functools
 import hashlib
 import itertools
 import json
@@ -204,6 +205,27 @@ def test_the_iteration_cap_fails_search_converged(monkeypatch):
     monkeypatch.setattr(zoom, "MAX_ITERATIONS", 1)
     found = zoom.search(_off_diagonal_line(), R64)
     assert (found.condition, found.stop, found.iterations) == ("search_converged", "cap", 1)
+
+
+def test_a_search_stopped_by_the_cap_leaves_the_iterate_before_its_last_accepted_step(monkeypatch):
+    """With a cap of 1 and z = 0 not a solution, m = m₀ bit for bit although a step was accepted."""
+    line = _off_diagonal_line()
+    start = zoom.evaluate(line, Z0, R64)
+    assert np.linalg.norm(start.grad) > 1e6 * start.nu_g
+    accepted = []
+    line_search = zoom.line_search
+
+    def accepting(*args):
+        accepted.append(line_search(*args))
+        return accepted[-1]
+
+    monkeypatch.setattr(zoom, "line_search", accepting)
+    monkeypatch.setattr(zoom, "MAX_ITERATIONS", 1)
+    found = zoom.search(line, R64)
+    assert (found.condition, found.stop, found.iterations) == ("search_converged", "cap", 1)
+    assert len(accepted) == 1 and accepted[0].any()
+    assert not found.point.z.any()
+    assert found.m.tobytes() == zoom.mid(line, Z0, R64)[1].tobytes()
 
 
 def test_a_step_that_falls_back_to_minus_the_gradient_is_counted(monkeypatch):
@@ -677,7 +699,7 @@ def test_the_smallest_positive_d_skips_a_target_with_d_0():
     assert targets[0].d == 0.0 and targets[0].search is None
     positive = min(t.d for t in targets[1:])
     assert positive > 0.0
-    assert zoom.reported(corpus, a, targets, np.ones(8))["smallest_d"] == positive
+    assert zoom.reported(corpus, a, targets, np.ones(8))["smallest_positive_d"] == positive
 
 
 def _middle_not_scored(t):
@@ -921,6 +943,104 @@ def test_search_reproduced_fails_when_the_timed_search_finds_another_m(monkeypat
     assert not zoom.z2_pass(corpus, a, targets[:3], zoom.RULE_64, _Clock()).reproduced
 
 
+def _spy_builds(monkeypatch):
+    """Record every state make_state builds, the point of every frame (T's eigh) and of every Lloyd run."""
+    built, framed, partitioned = [], [], []
+    make_state, frame, lloyd = zoom.make_state, zoom.frame, zoom.lloyd
+
+    def making(*args):
+        built.append(make_state(*args))
+        return built[-1]
+
+    def framing(p, points):
+        framed.append(p)
+        return frame(p, points)
+
+    def partitioning(x, p):
+        partitioned.append(p)
+        return lloyd(x, p)
+
+    monkeypatch.setattr(zoom, "make_state", making)
+    monkeypatch.setattr(zoom, "frame", framing)
+    monkeypatch.setattr(zoom, "lloyd", partitioning)
+    return built, framed, partitioned
+
+
+def _counted(spies, call):
+    """(states built, frames computed, Lloyd runs) during one call, and what it returned."""
+    for seen in spies:
+        seen.clear()
+    returned = call()
+    return tuple(len(seen) for seen in spies), returned
+
+
+def _identical(x, y):
+    """The same state bit for bit: point, notes, display and eigenvalue gap."""
+    shown = [None if s.display is None else s.display.tobytes() for s in (x, y)]
+    return (
+        x.point.tobytes() == y.point.tobytes()
+        and np.array_equal(x.fit_view, y.fit_view)
+        and np.array_equal(x.view, y.view)
+        and shown[0] == shown[1]
+        and x.eigen_gap == y.eigen_gap
+    )
+
+
+def _routes(small):
+    corpus, _, targets = small
+    return [(corpus.ev[t.pos], t.search.m) for t in targets if t.search is not None and t.search.m is not None]
+
+
+def test_each_z2_arm_builds_each_state_it_shows_once_keyframes_3_per_step_n_f(monkeypatch, small):
+    """The per-step arm computes the level-2 partition (one Lloyd run), not the level-2 state."""
+    corpus, a, _ = small
+    spies = _spy_builds(monkeypatch)
+    routes = _routes(small)
+    assert routes
+    for b, m in routes:
+        keyframes, _ = _counted(spies, functools.partial(zoom.keyframes_arm, corpus, a, m, b, _Clock()))
+        per_step, _ = _counted(spies, functools.partial(zoom.per_step_arm, corpus, a, m, b))
+        assert (keyframes, per_step) == ((3, 3, 1), (zoom.N_FRAMES, zoom.N_FRAMES, 1))
+
+
+def test_the_per_step_arms_last_frame_is_built_at_b_exactly_and_is_the_keyframes_end_state(monkeypatch, small):
+    corpus, a, _ = small
+    spies = _spy_builds(monkeypatch)
+    built, framed, _ = spies
+    routes = _routes(small)
+    assert any(zoom.route_point(a, m, b, 1.0).tobytes() != b.tobytes() for b, m in routes)
+    for b, m in routes:
+        _counted(spies, functools.partial(zoom.keyframes_arm, corpus, a, m, b, _Clock()))
+        end = built[-1]
+        _, frames = _counted(spies, functools.partial(zoom.per_step_arm, corpus, a, m, b))
+        assert framed[-1].tobytes() == frames[-1].point.tobytes() == b.tobytes()
+        assert _identical(frames[-1], end)
+
+
+def _degenerate_corpus():
+    """EVAL note 0 has axis 2 dominant and no FIT note does: its end state is degenerate."""
+    fit, ev = np.zeros((4, 8)), np.zeros((4, 8))
+    fit[:, :3] = [[0.9, 0.1, 0.0], [0.2, 0.8, 0.0], [0.6, 0.3, 0.2], [0.1, 0.5, 0.3]]
+    ev[:, :3] = [[0.1, 0.2, 0.7], [0.2, 0.1, 0.6], [0.7, 0.2, 0.0], [0.3, 0.6, 0.0]]
+    return _corpus(fit, ev)
+
+
+def test_a_degenerate_end_state_is_built_once_by_each_z2_arm_at_b_without_a_partition(monkeypatch):
+    corpus = _degenerate_corpus()
+    a, b, m = corpus.fit.mean(axis=0), corpus.ev[0], np.full(8, 0.7)
+    assert zoom.route_point(a, m, b, 1.0).tobytes() != b.tobytes()
+    assert not np.any(corpus.fit_cell == zoom.attractor(b))
+    state, found = zoom.level2(corpus, b)
+    assert state.degenerate and found is None and len(state.fit_view) == 0
+    assert state.view.tolist() == np.flatnonzero(corpus.eval_cell == zoom.attractor(b)).tolist()
+    spies = _spy_builds(monkeypatch)
+    keyframes, _ = _counted(spies, functools.partial(zoom.keyframes_arm, corpus, a, m, b, _Clock()))
+    end = spies[0][-1]
+    per_step, frames = _counted(spies, functools.partial(zoom.per_step_arm, corpus, a, m, b))
+    assert (keyframes, per_step) == ((3, 3, 0), (zoom.N_FRAMES, zoom.N_FRAMES, 0))
+    assert _identical(end, state) and _identical(frames[-1], state)
+
+
 def test_keyframes_interpolate_in_view_notes_and_keep_a_note_shown_in_one_display_only():
     prev = (np.array([[0.0, 0.0], [2.0, 2.0], [0.0, 0.0]]), np.array([True, True, False]))
     nxt = (np.array([[4.0, 0.0], [0.0, 0.0], [1.0, 1.0]]), np.array([True, False, True]))
@@ -1140,6 +1260,6 @@ def test_a_valid_run_writes_every_key_of_the_contract_in_the_result_format(tmp_p
     }
     assert set(result["reported"]) == {
         "score_mean", "middle_cells_differ", "crossings", "tau_ratio", "start_leading_direction",
-        "axis_norms", "smallest_d",
+        "axis_norms", "smallest_positive_d",
     }
     assert result["reported"]["axis_norms"] == [1.0] * 8

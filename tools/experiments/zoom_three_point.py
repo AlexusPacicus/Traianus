@@ -1,6 +1,6 @@
 """Z — three-point zoom against a two-point benchmark.
 
-Implements docs/methodology/instrument-audit/Z.md (instrument audit record, revision 10) against
+Implements docs/methodology/instrument-audit/Z.md (instrument audit record, revision 12) against
 docs/methodology/instrument-audit/contracts.md (§0 data layer, §4 Z) and
 docs/methodology/instrument-audit/derivations.md (D5, D17, D19–D21, D23–D26).
 Two arms zoom from the FIT barycentre to each EVAL note in axis coordinates: along the segment
@@ -576,18 +576,26 @@ def lloyd(x: Array, p: Array) -> Lloyd:
     return Lloyd(labels, means, LLOYD_CAP, False)
 
 
-def level2(corpus: Corpus, b: Array) -> tuple[State, Lloyd | None]:
-    """Level 2: q's cell of the Lloyd partition of q's axis cell; degenerate without FIT notes."""
+def level2_partition(
+    corpus: Corpus, b: Array
+) -> tuple[NDArray[np.intp], NDArray[np.intp], Lloyd | None]:
+    """The level-2 partition alone: q's cell of the Lloyd partition of q's axis cell around B, its FIT
+    and EVAL notes, and the partition; the whole axis cell and None when it holds no FIT note."""
     k = attractor(b)
     fit_cell = np.flatnonzero(corpus.fit_cell == k)
     eval_cell = np.flatnonzero(corpus.eval_cell == k)
     if len(fit_cell) == 0:
-        return State(b, fit_cell, eval_cell, None, None), None
+        return fit_cell, eval_cell, None
     found = lloyd(corpus.fit[fit_cell], b)
     assigned = np.argmin(_sq_dist(corpus.ev[eval_cell], found.means), axis=1)
     own = int(np.argmin(_sq_dist(b[None, :], found.means)[0]))
-    state = make_state(corpus, b, fit_cell[found.labels == own], eval_cell[assigned == own])
-    return state, found
+    return fit_cell[found.labels == own], eval_cell[assigned == own], found
+
+
+def level2(corpus: Corpus, b: Array) -> tuple[State, Lloyd | None]:
+    """Level 2: the state at P = B on q's cell of its partition; degenerate without FIT notes."""
+    fit_view, view, found = level2_partition(corpus, b)
+    return make_state(corpus, b, fit_view, view), found
 
 
 def argmax_margin(p: Array) -> float:
@@ -854,7 +862,10 @@ def quadrature_control(
     """m kept; m₀ and the benchmark's middle state, |E(m)| and ∇g at m recomputed with `rule`;
     Z1 decided again per L on the same bootstrap draws (replayed from `state`)."""
     before = {t.pos for t in d_q_of(targets)[0]}
-    after, d_q, abs_e, grad_norm = [], [], [], []
+    after: list[int] = []
+    d_q: list[float] = []
+    abs_e: list[float | None] = []
+    grad_norm: list[float | None] = []
     changed = 0
     for t in targets:
         three = t.arms.get("three_point")
@@ -1070,18 +1081,17 @@ def keyframes_arm(
 
 
 def per_step_arm(corpus: Corpus, a: Array, m: Array, b: Array) -> list[State]:
-    """The level-2 partition, then every frame recomputed at P(t): level 0 for t < ½, level 1 for
-    ½ ≤ t < 1, level 2 at t = 1."""
-    end, _ = level2(corpus, b)
+    """The level-2 partition alone, then every frame's state built once at P(t): level 0 for t < ½,
+    level 1 for ½ ≤ t < 1, level 2 on that partition at t = 1, at P = B exactly."""
+    fit_view, view, _ = level2_partition(corpus, b)
     frames = []
     for t in frame_times().tolist():
-        p = route_point(a, m, b, t)
         if t < 0.5:
-            frames.append(level0(corpus, p))
+            frames.append(level0(corpus, route_point(a, m, b, t)))
         elif t < 1.0:
-            frames.append(level1(corpus, p))
+            frames.append(level1(corpus, route_point(a, m, b, t)))
         else:
-            frames.append(make_state(corpus, p, end.fit_view, end.view))
+            frames.append(make_state(corpus, b, fit_view, view))
     return frames
 
 
@@ -1277,7 +1287,7 @@ def reported(corpus: Corpus, a: Array, targets: Sequence[Target], axis_norms: Ar
         ],
         "start_leading_direction": None if basis is None else basis[:, 0].tolist(),
         "axis_norms": axis_norms.tolist(),
-        "smallest_d": min((t.d for t in targets if t.d > 0.0), default=None),
+        "smallest_positive_d": min((t.d for t in targets if t.d > 0.0), default=None),
     }
 
 
