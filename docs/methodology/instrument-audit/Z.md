@@ -544,6 +544,15 @@ Reviewed by:               instrument-auditor (blind subagent, review package bu
                            D19–D21, D23–D26 tested; contracts.md §0 and §4 conform; blocking: the
                            per-step arm builds the level-2 state twice (N_f + 1 states against
                            the record's N_f); no result exists.
+                           instrument-auditor (blind subagent, review package built at ec26df4),
+                           2026-09-26; phase 2 (code, before the first run), round 3; commit
+                           ec26df4 (revision 13; script and tests at 83870fa); PASS, 0
+                           blocking, 4 non-blocking; round-2 blocking item B1 (each Z2 arm
+                           builds each state it shows once: 3 and N_f, the last per-step frame
+                           at P = B) and items N1–N6 resolved in record and code; revision 13's
+                           failed-search sentences match the code; every record line mapped; D5,
+                           D17, D19–D21, D23–D26 tested; contracts.md §0 and §4 conform; no
+                           result exists.
 ```
 
 ## Review history
@@ -982,3 +991,20 @@ Reviewed by:               instrument-auditor (blind subagent, review package bu
   failed search leaves m at the last iterate whose mid(z), g and ∇g step (1) computed, whatever
   failed after them (a difference point for H, a trial, the next iterate's evaluation); at z = 0
   that is m₀, with D_q = 0; only a failure inside the first evaluation leaves no m.
+- **Phase 2, round 3** — `instrument-auditor` subagent, blind by construction (package built from
+  `ec26df4`, lock set), 2026-09-26, phase 2 (code, before the first run), round 3: **PASS**, 0
+  blocking, 4 non-blocking; round 2's B1 and N1–N6 resolved in record and code; revision 13's
+  sentences match the code on every path; every record line mapped; D5, D17, D19–D21 and
+  D23–D26 tested; contracts.md §0 and §4 conform; no result exists. The reviewer did not open the
+  packaged results of other records and disclosed the memory index, the project instructions and
+  recent commit subjects in its context (nothing on Z's hypothesis or results). Non-blocking, to
+  fix before the first run: (1) only the cap case of the failed-search sentences is tested — a
+  difference point of H failing after the first iterate, a non-positive slope at a later
+  iterate, and at z = 0 a non-positive slope (two-point arm only, ρ₂ null) or no sign change
+  (neither arm) are correct by reading but untested; (2) the record says "Euclidean; ties by
+  lower index", while the display order uses the squared distance, the same order in exact
+  arithmetic, but in float64 the square root can merge two distinct squared distances into a
+  tie; (3) the counts look only at arms that exist, so a target whose search fails inside its
+  first evaluation adds no degenerate or not-scored state and Z1's n can fall short without a
+  count explaining it; (4) the docstrings cite revision 12, the last revision that changed code
+  — state that convention once.
