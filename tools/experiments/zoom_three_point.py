@@ -1,6 +1,6 @@
 """Z — three-point zoom against a two-point benchmark.
 
-Implements docs/methodology/instrument-audit/Z.md (instrument audit record, revision 9) against
+Implements docs/methodology/instrument-audit/Z.md (instrument audit record, revision 10) against
 docs/methodology/instrument-audit/contracts.md (§0 data layer, §4 Z) and
 docs/methodology/instrument-audit/derivations.md (D5, D17, D19–D21, D23–D26).
 Two arms zoom from the FIT barycentre to each EVAL note in axis coordinates: along the segment
@@ -21,6 +21,7 @@ for _var in ("OMP_NUM_THREADS", "OPENBLAS_NUM_THREADS", "VECLIB_MAXIMUM_THREADS"
     os.environ[_var] = "1"
 
 import argparse
+import hashlib
 import json
 import math
 import platform
@@ -1009,9 +1010,16 @@ def z2_decision(per_l: Mapping[str, Mapping[str, Any]]) -> str | None:
 @dataclass(frozen=True)
 class Z2Pass:
     overhead: float
-    delta: Array
+    keyframes: Array
+    per_step: Array
     ready: Array
     reproduced: bool
+
+    @property
+    def delta(self) -> Array:
+        """Δ_q = time_keyframes(q) − time_per-step(q), paired per target."""
+        diff: Array = self.keyframes - self.per_step
+        return diff
 
 
 def frame_times() -> Array:
@@ -1089,38 +1097,48 @@ def timer_overhead(clock: Callable[[], int]) -> float:
 def z2_pass(
     corpus: Corpus, a: Array, targets: Sequence[Target], rule: Rule, clock: Callable[[], int]
 ) -> Z2Pass:
-    """Warm-up on the first N_WARMUP targets with a route, then per target: the search (timed,
-    shared), and the two arms timed once each, keyframes first at even EVAL positions."""
+    """Warm-up on the first N_WARMUP targets with a route, then per target: the line built again and
+    the search (timed, shared), and the two arms timed once each, keyframes first at even EVAL
+    positions; the keyframes total loses the overhead once more, for its timestamp read."""
     overhead = timer_overhead(clock)
     routed = [t for t in targets if t.line is not None and t.search is not None and t.search.m is not None]
     for t in routed[:N_WARMUP]:
-        assert t.line is not None and t.search is not None and t.search.m is not None
-        again = search(t.line, rule)
+        assert t.search is not None and t.search.m is not None
+        b = corpus.ev[t.pos]
+        again = search(make_line(a, b), rule)
         m = again.m if again.m is not None else t.search.m
-        keyframes_arm(corpus, a, m, t.line.b, clock)
-        per_step_arm(corpus, a, m, t.line.b)
-    delta, ready, reproduced = [], [], True
+        keyframes_arm(corpus, a, m, b, clock)
+        per_step_arm(corpus, a, m, b)
+    times: dict[str, list[float]] = {"keyframes": [], "per_step": []}
+    ready, reproduced = [], True
     for t in routed:
-        assert t.line is not None and t.search is not None and t.search.m is not None
+        assert t.search is not None and t.search.m is not None
+        b = corpus.ev[t.pos]
         start = clock()
-        again = search(t.line, rule)
+        again = search(make_line(a, b), rule)
         search_ns = clock() - start - overhead
         reproduced = reproduced and again.m is not None and again.m.tobytes() == t.search.m.tobytes()
         m = again.m if again.m is not None else t.search.m
         order = ("keyframes", "per_step") if t.pos % 2 == 0 else ("per_step", "keyframes")
-        times: dict[str, float] = {}
         to_stamp = 0.0
         for arm in order:
             start = clock()
             if arm == "keyframes":
-                _, stamp = keyframes_arm(corpus, a, m, t.line.b, clock)
+                _, stamp = keyframes_arm(corpus, a, m, b, clock)
+                end = clock()
                 to_stamp = stamp - start - overhead
+                times[arm].append(end - start - 2.0 * overhead)
             else:
-                per_step_arm(corpus, a, m, t.line.b)
-            times[arm] = clock() - start - overhead
-        delta.append(times["keyframes"] - times["per_step"])
+                per_step_arm(corpus, a, m, b)
+                times[arm].append(clock() - start - overhead)
         ready.append(search_ns + to_stamp)
-    return Z2Pass(overhead, np.array(delta, dtype=float), np.array(ready, dtype=float), reproduced)
+    return Z2Pass(
+        overhead,
+        np.array(times["keyframes"], dtype=float),
+        np.array(times["per_step"], dtype=float),
+        np.array(ready, dtype=float),
+        reproduced,
+    )
 
 
 def z2_section(rng: np.random.Generator, passed: Z2Pass) -> dict[str, Any]:
@@ -1259,7 +1277,7 @@ def reported(corpus: Corpus, a: Array, targets: Sequence[Target], axis_norms: Ar
         ],
         "start_leading_direction": None if basis is None else basis[:, 0].tolist(),
         "axis_norms": axis_norms.tolist(),
-        "smallest_d": min((t.d for t in targets), default=None),
+        "smallest_d": min((t.d for t in targets if t.d > 0.0), default=None),
     }
 
 
@@ -1435,6 +1453,14 @@ def _write(result: Mapping[str, Any], out_path: Path) -> dict[str, Any]:
     return loaded
 
 
+def check_pin(k6_file: Path) -> None:
+    """The K6 module file's sha256 by hashlib here, not through the module's own check_digests, which
+    an edit could disable; a mismatch refuses the run."""
+    actual = hashlib.sha256(k6_file.read_bytes()).hexdigest()
+    if actual != K6_SHA256:
+        raise k6.IntegrityError(f"sha256 mismatch for {k6_file}: expected {K6_SHA256}, got {actual}")
+
+
 def run(
     k6_file: Path,
     embeddings: Path,
@@ -1445,7 +1471,7 @@ def run(
     clock: Callable[[], int] = time.perf_counter_ns,
 ) -> dict[str, Any]:
     """Pin check, then the known world, then (only if it passed) the artefacts and the real run."""
-    k6.check_digests({Path(k6_file): K6_SHA256})
+    check_pin(Path(k6_file))
     artefacts = (Path(embeddings), Path(labels), Path(axes))
     result: dict[str, Any] = {
         "digests": {Path(k6_file).name: K6_SHA256, **{p.name: None for p in artefacts}},

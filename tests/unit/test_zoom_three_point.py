@@ -1,6 +1,6 @@
 """Unit tests of tools/experiments/zoom_three_point.py.
 
-Specification: docs/methodology/instrument-audit/Z.md (revision 9), docs/methodology/instrument-audit/contracts.md
+Specification: docs/methodology/instrument-audit/Z.md (revision 10), docs/methodology/instrument-audit/contracts.md
 sections 0 and 4, docs/methodology/instrument-audit/derivations.md (D5, D17, D19-D21, D23-D26). Synthetic inputs
 only: CI has no .data/, and the measurement is never run on the real artefact here.
 """
@@ -667,6 +667,57 @@ def test_tube_defined_fails_for_a_target_at_d_of_at_least_4_root_2():
     assert zoom.target_conditions(targets)["tube_defined"] is False
 
 
+def test_the_smallest_positive_d_skips_a_target_with_d_0():
+    centre = np.full(8, 0.125)
+    fit = np.array([centre + 0.25 * _e(0), centre - 0.25 * _e(0), centre + 0.25 * _e(1), centre - 0.25 * _e(1)])
+    ev = np.array([centre, centre + 0.5 * _e(2), centre + 0.25 * (_e(3) - _e(4)), centre + 0.375 * _e(5)])
+    corpus = _corpus(fit, ev)
+    a = corpus.fit.mean(axis=0)
+    targets = zoom.run_targets(corpus, a, zoom.RULE_64)
+    assert targets[0].d == 0.0 and targets[0].search is None
+    positive = min(t.d for t in targets[1:])
+    assert positive > 0.0
+    assert zoom.reported(corpus, a, targets, np.ones(8))["smallest_d"] == positive
+
+
+def _middle_not_scored(t):
+    """The target with its three-point middle state not scored, its route kept."""
+    three = t.arms["three_point"]
+    unscored = dataclasses.replace(three, scores={**three.scores, "middle": None})
+    return dataclasses.replace(t, arms={**t.arms, "three_point": unscored})
+
+
+def _without_route(t):
+    """The target as the Z2 pass sees one without a route."""
+    return dataclasses.replace(t, line=None, search=None)
+
+
+@pytest.mark.parametrize("short", ["z1", "z2"])
+def test_n_scored_fails_with_fewer_than_20_targets_scored_in_both_arms_or_with_a_route(
+    monkeypatch, small, short
+):
+    _, _, targets = small
+    keep = zoom.MIN_BLOCKS - 1
+    if short == "z1":
+        changed = [t if t.pos < keep else _middle_not_scored(t) for t in targets]
+        monkeypatch.setattr(zoom, "run_targets", lambda corpus, a, rule: changed)
+    else:
+        monkeypatch.setattr(zoom, "run_targets", lambda corpus, a, rule: targets)
+        original = zoom.z2_pass
+        monkeypatch.setattr(
+            zoom,
+            "z2_pass",
+            lambda corpus, a, given, rule, clock: original(
+                corpus, a, [t if t.pos < keep else _without_route(t) for t in given], rule, clock
+            ),
+        )
+    v, a = _structured_world()
+    measured = zoom.measure(v, a, np.random.default_rng(zoom.SEED), clock=_Clock())
+    n_z1, n_z2 = measured.sections["z1"]["n"], measured.sections["z2"]["n"]
+    assert (n_z1 < zoom.MIN_BLOCKS <= n_z2) if short == "z1" else (n_z2 < zoom.MIN_BLOCKS <= n_z1)
+    assert measured.conditions["n_scored"] is False
+
+
 # The known world (Z.md, Controls, null_world; D26) ----------------------------------------------
 
 
@@ -778,13 +829,61 @@ class _Clock:
         return self.now
 
 
-def test_z2_subtracts_the_timer_overhead_from_every_timing(monkeypatch, small):
+def test_z2_subtracts_the_timer_overhead_from_every_timing_and_once_more_from_the_keyframes_total(
+    monkeypatch, small
+):
+    """Every reading costs 10, the overhead; the keyframes arm works 1000 before its timestamp and
+    300 after it, the per-step arm 700."""
     corpus, a, targets = small
     monkeypatch.setattr(zoom, "N_WARMUP", 2)
-    passed = zoom.z2_pass(corpus, a, targets[:4], zoom.RULE_64, _Clock())
+    clock = _Clock()
+    keyframes, per_step = zoom.keyframes_arm, zoom.per_step_arm
+
+    def keyframes_arm(*args):
+        clock.now += 1000
+        found = keyframes(*args)
+        clock.now += 300
+        return found
+
+    def per_step_arm(*args):
+        clock.now += 700
+        return per_step(*args)
+
+    monkeypatch.setattr(zoom, "keyframes_arm", keyframes_arm)
+    monkeypatch.setattr(zoom, "per_step_arm", per_step_arm)
+    passed = zoom.z2_pass(corpus, a, targets[:4], zoom.RULE_64, clock)
     assert passed.overhead == 10
-    assert passed.delta.tolist() == [10.0] * 4
-    assert passed.ready.tolist() == [0.0] * 4
+    assert passed.delta.tolist() == [600.0] * 4
+    assert passed.keyframes.tolist() == [1300.0] * 4
+    assert passed.per_step.tolist() == [700.0] * 4
+    assert passed.ready.tolist() == [1000.0] * 4
+    assert passed.reproduced
+
+
+def test_z2_times_the_search_with_its_line_built_again_inside_its_interval(monkeypatch, small):
+    """Building a line costs 1000 on the clock: the search's time, so ready, holds it, and every
+    search, the warm-up's included, runs on the line just built, not on the Z1 pass's."""
+    corpus, a, targets = small
+    monkeypatch.setattr(zoom, "N_WARMUP", 2)
+    clock = _Clock()
+    built, searched = [], []
+    make_line, search = zoom.make_line, zoom.search
+
+    def building(a, b):
+        clock.now += 1000
+        built.append(make_line(a, b))
+        return built[-1]
+
+    def searching(line, rule):
+        searched.append(line)
+        return search(line, rule)
+
+    monkeypatch.setattr(zoom, "make_line", building)
+    monkeypatch.setattr(zoom, "search", searching)
+    passed = zoom.z2_pass(corpus, a, targets[:4], zoom.RULE_64, clock)
+    assert passed.ready.tolist() == [1000.0] * 4
+    assert len(searched) == len(built) == 2 + 4
+    assert all(line is new for line, new in zip(searched, built))
     assert passed.reproduced
 
 
@@ -891,9 +990,17 @@ def fake_measure(monkeypatch):
     return seen
 
 
+def _check_nothing(expected):
+    """check_digests disabled, as an edit could: each file's bytes are read and returned, never compared."""
+    return {Path(p): Path(p).read_bytes() for p in expected}
+
+
+@pytest.mark.parametrize("disabled", [False, True], ids=["check-digests", "check-digests-disabled"])
 def test_a_single_bit_flip_in_the_k6_module_file_is_refused_before_the_known_world(
-    tmp_path, world_calls, fake_measure
+    tmp_path, monkeypatch, world_calls, fake_measure, disabled
 ):
+    if disabled:
+        monkeypatch.setattr(k6, "check_digests", _check_nothing)
     copy = tmp_path / "k6_colour_predictability.py"
     copy.write_bytes(zoom.K6_FILE.read_bytes())
     paths, expected = _write_inputs(tmp_path)
@@ -955,7 +1062,7 @@ def test_a_known_world_failure_writes_nulls_and_never_reads_the_artefacts(tmp_pa
     paths, expected = _write_inputs(tmp_path)
     out = tmp_path / "Z_result.json"
     result = zoom.run(zoom.K6_FILE, *paths, expected, out)
-    assert read == [{zoom.K6_FILE: zoom.K6_SHA256}]
+    assert read == []
     assert result["valid"] is False and result["first_failed_condition"] == "null_world"
     assert result["failed_conditions"] == result["conditions_checked"] == ["null_world"]
     assert result["null_world"] == failed

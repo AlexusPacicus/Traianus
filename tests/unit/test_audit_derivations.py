@@ -372,10 +372,10 @@ def _route_s(a, m, b, rule):
     return zoom.tau_seg(a, m, rule) + zoom.tau_seg(m, b, rule)
 
 
-def _affine_friction(c0, slope, axis):
-    grad = slope * _axis(axis)
+def _affine_friction(c0, grad, centre):
+    """√f = c0 + ⟨grad, x − centre⟩: affine, so the rule is exact on every straight leg."""
     return zoom.Friction(
-        root=lambda x: c0 + slope * x[:, axis], root_grad=lambda x: np.tile(grad, (len(x), 1))
+        root=lambda x: c0 + (x - centre) @ grad, root_grad=lambda x: np.tile(grad, (len(x), 1))
     )
 
 
@@ -547,12 +547,23 @@ def test_d20_additivity_breaks_off_the_segment_and_the_rate_off_a_unit_direction
 # D21 --------------------------------------------------------------------------------------------
 
 
-def _touching_case(offset=0.0):
-    """√f = 2 + 0.3·x₂, A = −e₁, B = e₁: E = 0 on x₁ = 0 by symmetry; S there is least at x₂ = t*."""
-    c0, slope = 2.0, 0.3
-    rule = zoom.gauss_legendre(64, _affine_friction(c0, slope, 1))
-    t_star = -slope / (c0 + math.sqrt(c0**2 - 2.0 * slope**2))
-    return rule, -_axis(0), _axis(0), (t_star + offset) * _axis(1)
+def _touching_case(rng, offset=0.0):
+    """A random affine √f = c0 + slope·⟨x − c, v⟩ and A = c − a·u, B = c + a·u (u ⊥ v, unit); c0 ≥ 1.5,
+    a ≤ 1.5 and |slope| ≤ ½ keep √f ≥ 1.28 on the legs. The reflection through the hyperplane at c
+    orthogonal to u swaps A and B and keeps f, so E = 0 on it. There, at c + t·v + w (w ⊥ u, v),
+    S = 2√(a² + t² + ‖w‖²)·(c0 + slope·t/2), exact for the rule since √f is affine: least at w = 0, and
+    ∂S/∂t has the sign of slope·t² + c0·t + slope·a²/2, which crosses 0 upwards at
+    t* = −slope·a²/(c0 + √(c0² − 2·slope²·a²)). Returns the rule, A, B and c + (t* + offset)·v, the
+    offset taken towards larger √f."""
+    c0, half = rng.uniform(1.5, 3.0), rng.uniform(0.3, 1.5)
+    slope = rng.choice((-1.0, 1.0)) * rng.uniform(0.05, 0.5)
+    centre = rng.uniform(-0.5, 0.5, 8)
+    frame, _ = np.linalg.qr(rng.standard_normal((8, 2)))
+    u, v = frame[:, 0], frame[:, 1]
+    rule = zoom.gauss_legendre(64, _affine_friction(c0, slope * v, centre))
+    t_star = -slope * half**2 / (c0 + math.sqrt(c0**2 - 2.0 * slope**2 * half**2))
+    m = centre + (t_star + math.copysign(offset, slope)) * v
+    return rule, centre - half * u, centre + half * u, m
 
 
 def _lagrange(rule, a, b, m):
@@ -564,27 +575,30 @@ def _lagrange(rule, a, b, m):
     return grad_a, grad_b, grad_s - mu * grad_e, mu
 
 
-def test_d21_equal_friction_time_hyperspheres_touch_at_the_known_point():
-    rule, a, b, m = _touching_case()
-    assert abs(zoom.route_e(a, m, b, rule)) <= ATOL
-    grad_a, grad_b, residual, mu = _lagrange(rule, a, b, m)
-    assert np.allclose(residual, 0.0, atol=ATOL)
-    assert abs(mu) < 1.0
-    assert np.allclose((1.0 - mu) * grad_a, -(1.0 + mu) * grad_b, atol=ATOL)
-    root = rule.friction.root(m[None, :])[0]
-    assert root >= 1.0
-    assert _close(float(grad_a @ _unit(m - a)), root)
-    assert _close(float(grad_b @ _unit(m - b)), root)
-    on_segment = a + 0.3 * (b - a)
-    slope = _chord_slope(a, on_segment, b, rule)
-    assert _close(slope, 2.0 * rule.friction.root(on_segment[None, :])[0])
+def test_d21_equal_friction_time_hyperspheres_touch_at_the_known_point(rng):
+    for _ in range(TRIALS):
+        rule, a, b, m = _touching_case(rng)
+        root = rule.friction.root(np.array([a, m, b]))  # affine: least on each leg at an end
+        assert root.min() >= 1.0 and not (np.array_equal(m, a) or np.array_equal(m, b))
+        assert abs(zoom.route_e(a, m, b, rule)) <= ATOL
+        grad_a, grad_b, residual, mu = _lagrange(rule, a, b, m)
+        assert np.allclose(residual, 0.0, atol=ATOL)
+        assert abs(mu) < 1.0
+        assert np.allclose((1.0 - mu) * grad_a, -(1.0 + mu) * grad_b, atol=ATOL)
+        assert _close(float(grad_a @ _unit(m - a)), root[1])
+        assert _close(float(grad_b @ _unit(m - b)), root[1])
+        on_segment = a + 0.3 * (b - a)
+        slope = _chord_slope(a, on_segment, b, rule)
+        assert _close(slope, 2.0 * rule.friction.root(on_segment[None, :])[0])
 
 
-def test_d21_breaks_at_another_point_of_the_constraint():
-    rule, a, b, m = _touching_case(offset=0.05)
-    assert abs(zoom.route_e(a, m, b, rule)) <= ATOL
-    _, _, residual, _ = _lagrange(rule, a, b, m)
-    assert np.linalg.norm(residual) > 1e-3
+def test_d21_breaks_at_another_point_of_the_constraint(rng):
+    for _ in range(TRIALS):
+        rule, a, b, m = _touching_case(rng, offset=0.05)
+        assert rule.friction.root(np.array([a, m, b])).min() >= 1.0
+        assert abs(zoom.route_e(a, m, b, rule)) <= ATOL
+        _, _, residual, _ = _lagrange(rule, a, b, m)
+        assert np.linalg.norm(residual) > 1e-3
 
 
 # D23 --------------------------------------------------------------------------------------------
