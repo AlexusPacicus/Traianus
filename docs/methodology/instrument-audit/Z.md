@@ -3,10 +3,10 @@
 The question, hypothesis and refuters live in the RefApp-01 repository (`ZOOM.md`), which a blind
 reviewer never opens (definitions.md, Not allowed).
 
-## Instrument audit record (revision 9)
+## Instrument audit record (revision 10)
 
 ```
-Instrument audit — Z1 (neighbourhood kept along a zoom) and Z2 (zoom latency) (revision 9)
+Instrument audit — Z1 (neighbourhood kept along a zoom) and Z2 (zoom latency) (revision 10)
 
 Scope: two arms that zoom from the barycentre to a note by different routes, each judged at the
   start, the middle and the end of its route. Z1 measures, for each displayed note, how much of its
@@ -56,13 +56,15 @@ Script: tools/experiments/zoom_three_point.py; unit tests: tests/unit/test_zoom_
   The script sets OMP_NUM_THREADS = OPENBLAS_NUM_THREADS = VECLIB_MAXIMUM_THREADS = 1 itself,
   before its first numpy import. It imports, and does not copy, check_digests, load_inputs and
   validate_inputs from tools/experiments/k6_colour_predictability.py (reviewed code); after the
-  import it hashes the file the module was loaded from (module.__file__) and refuses to run unless
-  its sha256 = 6289c596792154f6bb799606265c68719c6b8c7ae8b69084116dfb23c77876d2. Declared limits:
+  import it hashes the file the module was loaded from (module.__file__) with hashlib, not through
+  the module's own check_digests (which an edit could disable), and refuses to run unless its
+  sha256 = 6289c596792154f6bb799606265c68719c6b8c7ae8b69084116dfb23c77876d2. Declared limits:
   this checks the file on disk, not the bytes the interpreter loaded (a stale bytecode cache is not
   seen); the "read once, hash and parse the same bytes" rule of contracts.md §0 cannot apply to an
   imported module; and importing it runs its top-level code, which sets the thread variables again
   (to the same values) and imports traianus.geometry.polar_projector, which the pin does not cover
-  and the three imported functions do not use. Result: data/refapp/Z_result.json, committed.
+  and the three imported functions do not use. Result: data/refapp/Z_result.json, committed; the
+  option --out writes the same result to another path, and only the default one is committed.
 Data: definitions.md (2,221 vectors, 8-axis basis). The script refuses to run, writing no result,
   unless sha256(embeddings.npy) = eafb0e97172830f2404e96fa08d74bf6cccc0b6cbe84d47b790a476603e7d8d1,
   sha256(labels.json) = 1d60699353d810f089730c6203ee28f9c416e3004b60781bc965cec284097f4f and
@@ -80,9 +82,9 @@ Space: axis coordinates c(v) = (⟨v, â_1⟩, …, ⟨v, â_8⟩) ∈ ℝ⁸. B
   (traianus/geometry/observables.py:77-92) uses that matrix's rows as given — while this record
   uses â_k;
   the eight ‖a_k‖ are reported, so the difference has a size. Declared likewise: the engine's
-  dominant attractor (traianus/app.py:282-285, :551-554) is the argmax of ⟨v, a_k⟩ over the stored,
-  unnormalised axis vectors, a tie going to the first key in the matrix's iteration order; this
-  record uses â_k and the lower axis index (States).
+  dominant attractor (traianus/app.py:282-285, :551-554, :693-696) is the argmax of ⟨v, a_k⟩ over
+  the stored, unnormalised axis vectors, a tie going to the first key in the matrix's iteration
+  order; this record uses â_k and the lower axis index (States).
 Friction-time along a straight leg (D20):
   τ_seg(start, end) = ‖end − start‖ ∫₀¹ √f(start + s(end − start)) ds, computed with the 64
   Gauss–Legendre nodes and weights of numpy.polynomial.legendre.leggauss(64) mapped to [0, 1] (128
@@ -100,7 +102,7 @@ Friction-time along a straight leg (D20):
   and err_B, satisfy |err_A + err_B| ≤ ν and |err_A − err_B| ≤ ν, so S and E below each carry at
   most ν.
 Targets: every q in EVAL, in index order (1,110 zooms). Each zoom goes from A = p₀ to B = c(q),
-  d = ‖B − A‖. A target with d = 0 is excluded and counted (no route); the smallest d over targets
+  d = ‖B − A‖. A target with d = 0 is excluded and counted (no route); the smallest positive d
   is reported. d < 4√2 is D23's condition; |c_k| ≤ 1 gives d ≤ 4√2, and a target with d ≥ 4√2
   fails tube_defined (a code or data error).
 Routes (the only difference between the arms): both use the same line and the same bisection.
@@ -135,7 +137,9 @@ Routes (the only difference between the arms): both use the same line and the sa
     Domain, the tube (D23): ‖z‖ ≤ h_max(d) = (4√2 − d)·√(d/(8√2 − d)), and E(ℓ_z(0)) < 0 ≤
     E(ℓ_z(d)). Inside it the zero of E on each line in [0, d] is unique (D23, which holds for the
     64- and the 128-node τ, both Gauss–Legendre); the second condition is its existence, which D23
-    does not give. z = 0 is inside (E(A) = −τ_seg(A, B) < 0 < E(B)). The tube is where the search
+    does not give. z = 0 is inside (E(A) = −τ_seg(A, B) < 0 < E(B)); if the computed signs say
+    otherwise there, the search fails search_code (no_sign_change, a code or data error), and no
+    later z can meet it, since each passed the domain test as a trial. The tube is where the search
     can guarantee its answer, not part of m's definition: a search that ends against its edge fails
     search_converged (below), and h/h_max = ‖z‖/h_max(d) at the found m is reported per target.
     Objective g(z) = S(mid(z)), both legs on the 64 nodes. Gradient (D24): ∇g = Z_Nᵀ(∇S − μ̂∇E),
@@ -182,7 +186,10 @@ Routes (the only difference between the arms): both use the same line and the sa
     be convex (each leg's integrand is a product of positive convex functions of m), so it is not
     claimed to be the global one. Reported per target: iterations, the decrement at the stop, μ̂,
     h/h_max, ⟨∇E, u⟩ and |E(m)| at m, ξ, ρ_pt, the steps that fell back to −∇g, and, for a failed
-    search, why.
+    search, why. A search that fails after its first point still leaves m, the last point it
+    evaluated: the three-point arm is built on it, scored, and enters D_q, the quadrature control,
+    the reported figures and Z2, but valid is then false (Validity), so nothing is decided on it
+    and those figures are diagnostics only.
 States, the same definition in both arms:
   start: P = A. middle: P = m₀ (benchmark) or m (three-point). end: P = B.
   If the search ends at z = 0, m = m₀ bit for bit and D_q = 0 for that target.
@@ -238,7 +245,8 @@ Z1's score (D25), per target, arm and state. A state is scored iff it is not deg
   zoom: a view that cuts a note's real neighbours off scores lower even with a perfect display,
   and a view of fewer than K + 1 notes cannot reach 1 at scale K. The weights 1/K count every
   scale factor about alike (1–10 weighs about as much as 10–100); a uniform weight would give
-  nearly all the weight to the largest neighbourhoods.
+  nearly all the weight to the largest neighbourhoods. A score is computed once per identical view
+  and display and reused, which is exact, since the neighbourhood ranks are fixed per run.
 Statistic (Z1): D_q = AUC_middle(q, three-point) − AUC_middle(q, two-point), over the targets whose
   middle state is scored in both arms. At the start and at the end both arms have the same P and
   the same notes in view by construction, so their displays must be identical (control below) and
@@ -329,16 +337,17 @@ Controls (Z1):
     so no tolerance is needed.
 Z2 (latency), per target with a route, on the three-point route with the m found above.
   time.perf_counter_ns; the timer overhead (the median of 1,000 empty timed calls) subtracted from
-  every timing and timestamp difference. Warm-up: the first 10 EVAL targets run once, search and
-  both arms, untimed and discarded; then every target is timed. N_f = 60 displayed frames at
-  the times t_f = (frame number)/(N_f − 1), frame number 0 … N_f − 1 (the subscript f names a
-  frame, not the friction), evenly spaced in t without easing (a 1-second zoom at 60
-  frames per second; both choices declared: easing would change which frames fall before the
-  middle). On the three-point route t ∈ [0, ½] runs linearly along A → m and t ∈ [½, 1] along
-  m → B, so the middle is at t = ½.
-  search: the search for m, whose first step computes m₀ = mid(0), re-run in the timed pass; it
-    must reproduce the m of the Z1 pass bit for bit (search_reproduced). Timed once per target and
-    shared: both arms start after it.
+  every timing and timestamp difference, and once more from the keyframes arm's total, since that
+  timed call reads the clock once inside, for its timestamp. Warm-up: the first 10 EVAL targets
+  with a route run once, search and both arms, untimed and discarded; then every target is timed.
+  N_f = 60 displayed frames at the times t_f = (frame number)/(N_f − 1), frame number 0 … N_f − 1
+  (the subscript f names a frame, not the friction), evenly spaced in t without easing (a 1-second
+  zoom at 60 frames per second; both choices declared: easing would change which frames fall
+  before the middle). On the three-point route t ∈ [0, ½] runs linearly along A → m and t ∈ [½, 1]
+  along m → B, so the middle is at t = ½.
+  search: the line (u, Z_N and d) built again and the search for m, whose first step computes
+    m₀ = mid(0), re-run in the timed pass; it must reproduce the m of the Z1 pass bit for bit
+    (search_reproduced). Timed once per target and shared: both arms start after it.
   keyframes: the three states (notes in view, T, display; level 2 includes its Lloyd partition),
     a timestamp once the third state exists, then the N_f frames: a frame with t_f ≤ ½ interpolates
     between the start and middle displays with weight w = 2t_f, one with t_f > ½ between the middle
@@ -347,6 +356,10 @@ Z2 (latency), per target with a route, on the three-point route with the m found
   per-step: the same level-2 partition, computed and timed in this arm too; then at each frame the
     notes in view, T and the display recomputed from scratch at the route's point P(t_f): level 0
     while t_f < ½; level 1, the axis cell of the current P, while ½ ≤ t_f < 1; level 2 at t_f = 1.
+  Untimed and shared by both arms: the 64 Gauss–Legendre nodes and weights, and the notes' axis
+    coordinates and dominant attractors, computed once per run before any timing; each state's
+    cell is filtered from them inside the timed calls, and everything that depends on the route's
+    point is computed there too.
   One timed call per arm per target; the arms interleaved per target, keyframes first at even
     positions of EVAL order and per-step first at odd positions, so drift affects both alike.
   Statistics: Δ_q = time_keyframes(q) − time_per-step(q), paired per target; ready(q) =
@@ -384,7 +397,7 @@ Reported, not deciding: the score per arm and state (mean over targets); per L u
   the 95th percentile of ready with their intervals per L and their margins (to 0 and to 100 ms),
   and the timer overhead.
 Draws: rng = numpy.random.default_rng(20260924) (PCG64; this record overrides the seed of
-  contracts.md §0, as its contract will state), in this order and nowhere else: for each EVAL note
+  contracts.md §0, as its §4 states), in this order and nowhere else: for each EVAL note
   in index order, rng.permutation(N_c) (permutation control); then, for Z1, for each L used in
   ascending order and b = 1…N_boot, rng.integers(0, n_blocks(L), n_blocks(L)); then the same loop
   twice for Z2 with its n, first for the median of Δ, then for the 95th percentile of ready. The
@@ -396,7 +409,7 @@ Unit tests (committed with the script, reviewed in phase 2; they can fail). In
   D26, each on inputs satisfying its conditions and with a negative case, tolerances by
   derivations.md's rule; D20's node-sum gradients against central finite differences of the
   64-node τ, its reversal for the symmetric rule, and its additivity and radial rate for the
-  integral; D21 on a synthetic friction whose touching point is known; D23's slope on random
+  integral; D21 on random synthetic frictions whose touching point is known; D23's slope on random
   parallels inside the tube for the integral and for the 64-node quadrature, and h_max against
   its closed form; D24's gradient against finite differences of g computed through the
   bisection; D25 (b) exactly, by enumerating every arrangement for small N_U and N_M (no draws),
@@ -427,19 +440,22 @@ Unit tests (committed with the script, reviewed in phase 2; they can fail). In
   notes in view never include a FIT note and fitting never uses an EVAL note; a note j never
   appears in its own neighbour lists; the block counts and the L filter by n; the first three
   entries of the first permutation from seeds 20260924 and 20260925 match values recorded in the
-  test; the timer overhead is subtracted; the arms' interleaving order; search_reproduced; the
-  known world's corpus meets D26's conditions, its 84 offsets are distinct, no pair's three are
-  equally spaced (twice one minus the other two at least 5.0·10⁻³ in absolute value), and its
-  null_world passes, with a smallest relative display gap > 0, and fails with an arm-dependent
-  search; that each control can fail — identity with a
-  score that counts j among its own neighbours, permutation with a score whose chance term is
-  dropped (R_j(K) = O_j(K)/K, whose null AUC is about 1/Σ_K(1/K) ≈ 0.13), arms_share_start_end with an
-  arm-dependent start, quadrature with a changed decision; tube_defined with d ≥ 4√2; file-layer
-  integrity per contracts.md §0 — a single-bit flip at the header, the first and the last data
-  byte and a random position of each of the three data files and of the K6 module's file is
-  refused, writing nothing. The memory-layer cases are those of the imported validate_inputs,
-  covered by tests/unit/test_k6_colour_predictability.py; one test checks that this script calls
-  it (a NaN row is refused before writing).
+  test; the timer overhead is subtracted, and once more from the keyframes arm's total; the timed
+  search rebuilds its line inside its interval; the arms' interleaving order; search_reproduced;
+  the smallest positive d skips a target with d = 0; the known world's corpus meets D26's
+  conditions, its 84 offsets are distinct, no pair's three are equally spaced (twice one minus
+  the other two at least 5.0·10⁻³ in absolute value), and its null_world passes, with a smallest
+  relative display gap > 0, and fails with an arm-dependent search; that each control can fail —
+  identity with a score that counts j among its own neighbours, permutation with a score whose
+  chance term is dropped (R_j(K) = O_j(K)/K, whose null AUC is about 1/Σ_K(1/K) ≈ 0.13),
+  arms_share_start_end with an arm-dependent start, quadrature with a changed decision;
+  tube_defined with d ≥ 4√2; n_scored with fewer than 20 targets scored in both arms (Z1), and
+  with fewer than 20 with a route (Z2); file-layer integrity per contracts.md §0 — a single-bit
+  flip at the header, the first and the last data byte and a random position of each of the three
+  data files and of the K6 module's file is refused, writing nothing, the K6 module's file also
+  with the module's check_digests disabled. The memory-layer cases are those of the imported
+  validate_inputs, covered by tests/unit/test_k6_colour_predictability.py; one test checks that
+  this script calls it (a NaN row is refused before writing).
 
 Same thing in every arm?   Both arms share targets, space, friction factor, quadrature, the line
                            and its bisection, the state definitions, the level rule, T, the display
@@ -879,3 +895,20 @@ Reviewed by:               instrument-auditor (blind subagent, review package bu
   unit test hashes the file independently); (9) no test makes n_scored fail; (10) D21's test
   uses one fixed case, not random inputs; (11) "as its contract will state" is stale; (12) the
   smallest d is taken over every target, excluded ones included.
+- **Changes in revision 10** — the twelve phase-2 round-1 items, no change to either arm's design
+  (the author, 2026-09-25, who chose to declare item 2, to fix items 5 and 8 in code rather than
+  declare them, and a second phase-2 round). Record only: (1) a score is computed once per
+  identical view and display and reused, which is exact, and --out is declared; (2) a search
+  that fails after its first point still gives the three-point arm its last point, which is
+  scored, but valid is then false and its figures are diagnostics only; (3) no_sign_change at
+  z = 0 fails search_code, and no later z can meet it; (6) the warm-up takes the first 10
+  targets with a route; (7) traianus/app.py:693-696 joins the dominant-attractor citation;
+  (11) the draws cite §4. Record and code: (4) the timed search builds its line again (u, Z_N,
+  d) inside its interval, and what is computed once per run, untimed and shared by both arms, is
+  declared (the quadrature nodes and weights, the notes' axis coordinates and dominant
+  attractors); (5) the overhead is subtracted once more from the keyframes arm's total, for its
+  timestamp read; (8) the script hashes the K6 module's file with hashlib, not through the
+  module's check_digests; (12) the smallest positive d is reported. Tests: (9) n_scored fails
+  with fewer than 20 targets scored in both arms, and with fewer than 20 with a route; (10) D21
+  on random synthetic frictions; and a test for each code change. The code goes to phase 2,
+  round 2.
