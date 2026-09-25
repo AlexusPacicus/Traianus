@@ -1376,3 +1376,70 @@ previa de la puerta (`1b059dd`).
 2. **Con fase 1 en PASS:** `contracts.md` §4, regla en el registro, `instrument-implementer` y
    fase 2.
 3. **Fusionar en `main`** la regla de metodología y las correcciones de `contracts.md` §0.
+
+## 2026-09-25
+
+**Contexto:** la ficha Z seguía en fase 1 tras la ronda 4 (CHANGES, 2 bloqueantes en la búsqueda
+SQP), con dos decisiones del autor pendientes: la búsqueda por bisección y la corrección de κ por
+azar.
+
+**Se hizo:**
+- **Búsqueda rediseñada (autor):** m se desliza por una paralela a la cuerda con la misma
+  bisección que el punto medio de referencia, así que todo punto visitado cumple E = 0, y Newton
+  busca sin restricción en las 7 direcciones ortogonales. Se descartaron:
+  - una bisección fija de 16–20 pasos, propuesta desde fuera: deja |E| unas 10⁷ veces por encima
+    del redondeo;
+  - L-BFGS, elegido y retirado el mismo día: una parada por ‖∇g‖ contra su redondeo no la alcanza
+    una búsqueda que compara valores, y certificar con la Hessiana al final comprueba la dirección
+    de Newton, no la de L-BFGS.
+- **Derivaciones D23–D26**, comprobadas numéricamente con awk, sin Python:
+  - D23: el tubo donde el cero es único. El autor lo fijó como zona de validez, no como parte de
+    la definición de m.
+  - D24: la búsqueda en el tubo equivale al problema con restricción.
+  - D25: Z1 pasa de recall@15 dentro de la celda al AUC de R_NX con peso 1/K, sobre la hiperesfera
+    de vecindad de cada nota en todo EVAL (autor: juzgar el zoom entero). La corrección por azar es
+    la media exacta sobre todas las pantallas posibles; se comprobó enumerándolas todas. Desaparece
+    el umbral |M| ≥ 16, donde el recall valía 15 fuera cual fuera la pantalla.
+  - D26: un mundo donde la respuesta es m₀.
+- **Mundo conocido (idea del autor):** un corpus sintético por fórmula, donde los dos brazos
+  coinciden, pasa por todo Z1 antes de leer datos reales.
+- **`ZOOM.md` (refapp-01):** Z1 actualizado; se quitó la distorsión del modelo de muelles, que
+  necesitaba escalas y constantes sin definir para una cifra que no decide.
+- **Revisiones 5–8 y tres rondas ciegas sobre el diseño nuevo:** PASS, con 11, 6 y 7 no
+  bloqueantes. **Fase 1 cerrada.** Hallazgos que cambiaron algo:
+  - el mundo conocido era demasiado simétrico y el redondeo decidía el orden en pantalla, así que
+    pasó a desplazamientos distintos por par;
+  - N_U escrito como 1.110 habría hecho fallar el mundo nulo (su banda es ±0,024, no ±0,0036),
+    así que pasó a fórmula;
+  - mis renombrados de símbolos crearon colisiones nuevas, así que se hizo una tabla completa.
+- **`contracts.md` §4 (Z)**, con el §3 reservado para K8. **Regla `z` en el registro**, delegada a
+  `engine-implementer` con contrato JSON validado: diff revisado y suite repetida (2874 verdes),
+  LEDGER seq 68.
+
+**Resultado:** `feat/zoom-record` en `e05b14b` y `feat/client-oklch-color` (refapp-01) en
+`f1c7457`, ambas locales. La ficha Z está en la revisión 8 con la fase 1 cerrada, y el contrato y
+la regla del registro están listos. Todavía no hay código de Z.
+
+**Resuelto de entradas anteriores:**
+- 2026-09-24 (23:53), sobre la revisión 5: la búsqueda por bisección y la corrección por azar,
+  decididas. La corrección va dentro de D25.
+- 2026-09-24 (23:53), próximo paso 1: la revisión 5 y sus rondas, hechas; la fase 1 está cerrada.
+- 2026-09-24 (23:53), próximo paso 2: `contracts.md` §4 y la regla en el registro, hechos.
+- 2026-09-24 (23:53), huecos: `definitions.md` cita ya `_storage.py:123`.
+
+**Sin resolver / decisión pendiente:**
+- **Sigue solo en `feat/zoom-record`:** la regla de metodología (`e54261c`) y las correcciones de
+  `contracts.md` §0 no están en `main`.
+- **Ceguera:** el paquete de revisión sigue incluyendo los resultados de K6 y R4, que los revisores
+  no abrieron, y el revisor ve el índice de memoria, cosa que declaró en cada ronda.
+- **Sin tocar desde el 24-09:** el test sin commitear que ejecutó el implementador de K8, y que
+  Ruff en CI no cubre el script de K6 ni `test_audit_derivations.py`.
+- **Los 7 no bloqueantes de la ronda 3** se aplicaron en la revisión 8 sin ronda nueva: los
+  comprueba la fase 2.
+
+**Próximo paso:**
+1. Rama `feat/zoom-impl` desde `feat/zoom-record`; encargo a `instrument-implementer`: script,
+   tests y tests de D20–D26, empezando por los tests.
+2. Revisión ciega de fase 2.
+3. Primera ejecución: el mundo conocido y, si pasa, los datos reales.
+4. Fusionar en `main` la regla de metodología y §0.
