@@ -228,6 +228,76 @@ def test_a_search_stopped_by_the_cap_leaves_the_iterate_before_its_last_accepted
     assert found.m.tobytes() == zoom.mid(line, Z0, R64)[1].tobytes()
 
 
+def _accepted_steps(monkeypatch):
+    """Every step the line search accepts, in order."""
+    accepted = []
+    line_search = zoom.line_search
+
+    def accepting(*args):
+        accepted.append(line_search(*args))
+        return accepted[-1]
+
+    monkeypatch.setattr(zoom, "line_search", accepting)
+    return accepted
+
+
+def _gradients_negated_while(monkeypatch):
+    """τ's node-sum gradients negated while the returned list is not empty: ⟨∇E, u⟩ changes sign."""
+    forced = []
+    grad = zoom.tau_seg_grad
+    monkeypatch.setattr(
+        zoom,
+        "tau_seg_grad",
+        lambda p, q, rule: tuple(-g for g in grad(p, q, rule)) if forced else grad(p, q, rule),
+    )
+    return forced
+
+
+def test_a_difference_point_of_h_outside_the_domain_at_a_later_iterate_leaves_that_iterate(monkeypatch):
+    """The tube's radius set to the length of the first accepted step z₁: the search takes that step as
+    before, and at z₁ a difference point for H lies outside; m = mid(z₁) bit for bit, not m₀."""
+    line = _off_diagonal_line()
+    accepted = _accepted_steps(monkeypatch)
+    zoom.search(line, R64)
+    z1 = accepted[0]
+    radius = float(np.sqrt(z1 @ z1))
+    assert radius > zoom.EPS ** (1.0 / 3.0) * line.d
+    accepted.clear()
+    monkeypatch.setattr(zoom, "h_max", lambda d: radius)
+    found = zoom.search(line, R64)
+    assert (found.condition, found.stop, found.iterations) == ("search_converged", "edge", 1)
+    assert len(accepted) == 1 and accepted[0].tobytes() == z1.tobytes()
+    assert found.point.z.tobytes() == z1.tobytes()
+    assert found.m.tobytes() == zoom.mid(line, z1, R64)[1].tobytes()
+    assert found.m.tobytes() != zoom.mid(line, Z0, R64)[1].tobytes()
+
+
+@pytest.mark.parametrize("later", [1, 2], ids=["at-z1", "at-z2"])
+def test_a_non_positive_slope_at_a_later_iterate_leaves_the_iterate_before_it(monkeypatch, later):
+    """⟨∇E, u⟩ forced below 0 only while step (1) evaluates the iterate the `later`-th accepted step
+    reaches, not at H's difference points: m = mid of the iterate before, m₀ when later = 1."""
+    line = _off_diagonal_line()
+    accepted = _accepted_steps(monkeypatch)
+    forced = _gradients_negated_while(monkeypatch)
+    evaluate = zoom.evaluate
+
+    def evaluating(line, z, rule):
+        if len(accepted) == later and z.tobytes() == accepted[-1].tobytes():
+            forced.append(1)
+        try:
+            return evaluate(line, z, rule)
+        finally:
+            forced.clear()
+
+    monkeypatch.setattr(zoom, "evaluate", evaluating)
+    found = zoom.search(line, R64)
+    assert (found.condition, found.stop, found.iterations) == ("search_code", "slope_not_positive", later)
+    before = Z0 if later == 1 else accepted[0]
+    assert len(accepted) == later and found.point.z.tobytes() == before.tobytes()
+    assert found.m.tobytes() == zoom.mid(line, before, R64)[1].tobytes()
+    assert (found.m.tobytes() == found.first.m.tobytes()) == (later == 1)
+
+
 def test_a_step_that_falls_back_to_minus_the_gradient_is_counted(monkeypatch):
     original = zoom.newton_step
     calls = []
@@ -738,6 +808,99 @@ def test_n_scored_fails_with_fewer_than_20_targets_scored_in_both_arms_or_with_a
     n_z1, n_z2 = measured.sections["z1"]["n"], measured.sections["z2"]["n"]
     assert (n_z1 < zoom.MIN_BLOCKS <= n_z2) if short == "z1" else (n_z2 < zoom.MIN_BLOCKS <= n_z1)
     assert measured.conditions["n_scored"] is False
+
+
+# A search that fails inside its first evaluation, at z = 0 (Z.md, Routes; Validity) ---------------
+
+FAILED_AT_Z0 = 0
+
+
+def _state_counts(counted, arm):
+    """One arm's state counts: degenerate, not scored, near-zero eigenvalue gap."""
+    return {key: counted[key][arm] for key in ("degenerate", "not_scored", "near_zero_eigen_gap")}
+
+
+def _failed_at_z0(monkeypatch, small, force, reason):
+    """measure (Z1 and Z2) on the structured world, EVAL note FAILED_AT_Z0's search failing inside its
+    first evaluation through force(B). Checks what both such failures share: no m and no three-point
+    arm, the target out of D_q and of Z2 (searched once, by Z1), search_code the only failed
+    condition, and counts that see only the arms that exist. Returns the target, the measurement and
+    the counts of the other targets."""
+    corpus, _, targets = small
+    b = corpus.ev[FAILED_AT_Z0]
+    assert [row.tobytes() for row in corpus.ev].count(b.tobytes()) == 1
+    scored = {t.pos for t in zoom.d_q_of(targets)[0]}
+    assert FAILED_AT_Z0 in scored and zoom.counts(targets)["failed_searches"] == {}
+    force(b)
+    searched = []
+    search = zoom.search
+
+    def recording(line, rule):
+        searched.append(line.b.tobytes())
+        return search(line, rule)
+
+    monkeypatch.setattr(zoom, "search", recording)
+    v, a = _structured_world()
+    measured = zoom.measure(v, a, np.random.default_rng(zoom.SEED), clock=_Clock())
+    t = measured.targets[FAILED_AT_Z0]
+    assert (t.search.condition, t.search.stop, t.search.iterations) == ("search_code", reason, 0)
+    assert t.search.first is None and t.search.m is None and "three_point" not in t.arms
+    assert {s.pos for s in zoom.d_q_of(measured.targets)[0]} == scored - {FAILED_AT_Z0}
+    assert searched.count(b.tobytes()) == 1 and measured.sections["z2"]["n"] == len(targets) - 1
+    assert [c for c, ok in measured.conditions.items() if not ok] == ["search_code"]
+    counted = measured.sections["counts"]
+    others = zoom.counts([s for s in targets if s.pos != FAILED_AT_Z0])
+    assert counted["excluded"] == 0 and counted["failed_searches"] == {reason: 1}
+    assert counted["margin_below_2rho"] == others["margin_below_2rho"]
+    assert _state_counts(counted, "three_point") == _state_counts(others, "three_point")
+    return t, measured, others
+
+
+def test_at_z_0_a_non_positive_slope_leaves_the_two_point_arm_only_with_rho_2_null(monkeypatch, small):
+    """⟨∇E, u⟩ < 0 forced during that target's search alone, so its first evaluation fails; the
+    benchmark's middle m₀ is still built and scored, with ρ₂ null."""
+
+    def force(b):
+        forced = _gradients_negated_while(monkeypatch)
+        search = zoom.search
+
+        def forcing(line, rule):
+            if line.b.tobytes() == b.tobytes():
+                forced.append(1)
+            try:
+                return search(line, rule)
+            finally:
+                forced.clear()
+
+        monkeypatch.setattr(zoom, "search", forcing)
+
+    t, measured, _ = _failed_at_z0(monkeypatch, small, force, "slope_not_positive")
+    assert set(t.arms) == {"two_point"}
+    two = t.arms["two_point"]
+    assert two.rho is None and two.scores["middle"] is not None
+    assert two.middle.tobytes() == zoom.mid(t.line, Z0, R64)[1].tobytes()
+    arms = measured.sections["targets"][FAILED_AT_Z0]["arms"]
+    assert arms["three_point"] is None and arms["two_point"]["rho"] is None
+    unforced = zoom.counts(small[2])
+    assert _state_counts(measured.sections["counts"], "two_point") == _state_counts(unforced, "two_point")
+
+
+def test_at_z_0_no_sign_change_leaves_neither_arm(monkeypatch, small):
+    """E forced below 0 on that target's lines alone: neither the search at z = 0 nor the benchmark
+    finds a middle."""
+
+    def force(b):
+        route_e = zoom.route_e
+        monkeypatch.setattr(
+            zoom,
+            "route_e",
+            lambda a, m, q, rule: -1.0 if q.tobytes() == b.tobytes() else route_e(a, m, q, rule),
+        )
+
+    t, measured, others = _failed_at_z0(monkeypatch, small, force, "no_sign_change")
+    assert t.arms == {} and t.line is not None and zoom.mid(t.line, Z0, R64) is None
+    assert measured.sections["targets"][FAILED_AT_Z0]["arms"] == {"two_point": None, "three_point": None}
+    assert _state_counts(measured.sections["counts"], "two_point") == _state_counts(others, "two_point")
 
 
 # The known world (Z.md, Controls, null_world; D26) ----------------------------------------------
