@@ -3,10 +3,10 @@
 The question, hypothesis and refuters live in the RefApp-01 repository (`ZOOM.md`), which a blind
 reviewer never opens (definitions.md, Not allowed).
 
-## Instrument audit record (revision 12)
+## Instrument audit record (revision 13)
 
 ```
-Instrument audit — Z1 (neighbourhood kept along a zoom) and Z2 (zoom latency) (revision 12)
+Instrument audit — Z1 (neighbourhood kept along a zoom) and Z2 (zoom latency) (revision 13)
 
 Scope: two arms that zoom from the barycentre to a note by different routes, each judged at the
   start, the middle and the end of its route. Z1 measures, for each displayed note, how much of its
@@ -187,15 +187,16 @@ Routes (the only difference between the arms): both use the same line and the sa
     be convex (each leg's integrand is a product of positive convex functions of m), so it is not
     claimed to be the global one. Reported per target: iterations, the decrement at the stop, μ̂,
     h/h_max, ⟨∇E, u⟩ and |E(m)| at m, ξ, ρ_pt, the steps that fell back to −∇g, and, for a failed
-    search, why. A search that fails after its first point still leaves m = mid(z) at the last
-    iterate whose mid(z), g and ∇g step (1) computed: at the cap, the iterate before the last
-    accepted step, which is never evaluated; after a failure while evaluating a later point, the
-    iterate before that point. The three-point arm is built on that m, scored, and enters D_q,
-    the quadrature control, the reported figures and Z2, but valid is then false (Validity), so
-    nothing is decided on it and those figures are diagnostics only. A search that fails at its
-    first point, z = 0, leaves no m and so no three-point arm: the target drops out of D_q and Z2;
-    after a non-positive slope there its two-point arm is still built and scored, with ρ₂ null,
-    and after no sign change neither arm has a middle.
+    search, why. A failed search leaves m = mid(z) at the last iterate whose mid(z), g and ∇g
+    step (1) computed, whatever failed after them — a difference point for H, a trial, or the
+    next iterate's own evaluation; at the cap the last accepted step is never evaluated, so m is
+    the iterate before it. The three-point arm is built on that m, scored, and enters D_q, the
+    quadrature control, the reported figures and Z2, but valid is then false (Validity), so
+    nothing is decided on it and those figures are diagnostics only; when that iterate is z = 0,
+    m = m₀ and D_q = 0. Only a failure inside that first evaluation, at z = 0, leaves no m and so
+    no three-point arm: the target drops out of D_q and Z2; after a non-positive slope there its
+    two-point arm is still built and scored, with ρ₂ null, and after no sign change neither arm
+    has a middle.
 States, the same definition in both arms:
   start: P = A. middle: P = m₀ (benchmark) or m (three-point). end: P = B.
   If the search ends at z = 0, m = m₀ bit for bit and D_q = 0 for that target.
@@ -969,3 +970,15 @@ Reviewed by:               instrument-auditor (blind subagent, review package bu
   reported figures. (N4) IntegrityError is named among the imports, here and in contracts.md §4.
   (N5) The docstrings cite this revision. (N6) The lists are annotated. The code goes to phase
   2, round 3.
+- **Revision 12 implemented** (2026-09-26) — `instrument-implementer`, `83870fa`: the level-2
+  partition split from its state (level2_partition), so the per-step arm builds its level-2
+  state once, at P = B exactly; tests that count the states each Z2 arm builds (3 and N_f, the
+  degenerate end state included) and that its last frame is the keyframes arm's end state bit
+  for bit, both red before the change; a test that a search stopped by a cap of 1 leaves m₀,
+  shown able to fail; the reported key is smallest_positive_d; Z1's states unchanged bit for bit
+  on four synthetic corpora; mypy clean on the script; the full suite passed. Its report found
+  the failed-search sentences ambiguous at z = 0 and for a difference point of H.
+- **Changes in revision 13** — wording only, no change to either arm's design (2026-09-26): a
+  failed search leaves m at the last iterate whose mid(z), g and ∇g step (1) computed, whatever
+  failed after them (a difference point for H, a trial, the next iterate's evaluation); at z = 0
+  that is m₀, with D_q = 0; only a failure inside the first evaluation leaves no m.
