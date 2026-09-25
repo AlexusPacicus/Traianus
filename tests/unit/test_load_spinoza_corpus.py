@@ -1022,8 +1022,14 @@ def _registry_rules():
 def test_the_registry_has_the_corpus_loader_rule_and_the_others_are_unchanged():
     registry, rules = _registry_rules()
     assert registry["window_seconds"] == 14400
-    assert set(rules) == {"engine-vector-path", "k6", "r4", "corpus-loader"}
+    assert set(rules) == {"engine-vector-path", "k6", "r4", "corpus-loader", "z"}
     assert rules["corpus-loader"] == _rule("corpus-loader", [LOADER, THIS_TEST], ("heading", SECTION_0))
+    assert rules["z"] == _rule(
+        "z",
+        ["tools/experiments/zoom_*.py", "tests/unit/test_zoom_*.py"],
+        ("heading", SECTION_0),
+        ("heading", "4. Z — three-point zoom against a two-point benchmark"),
+    )
     assert rules["engine-vector-path"] == _rule(
         "engine-vector-path",
         ["traianus/app.py", "traianus/storage/**", "traianus/representation/**", "traianus/geometry/**"],
