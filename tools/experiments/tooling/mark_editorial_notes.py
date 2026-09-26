@@ -165,6 +165,22 @@ def _footnote_text(block: str) -> str:
     return _normalize(re.sub(r"^\[\d+\]\s*", "", block))
 
 
+def _coverage(chunk: str, sentences: list[str]) -> float:
+    """Share of chunk's non-whitespace characters covered by the union of
+    the matched footnote sentences' occurrences in the chunk."""
+    covered = bytearray(len(chunk))
+    for sentence in sentences:
+        start = chunk.find(sentence)
+        assert start != -1, "matched sentence not found in its own chunk"
+        for i in range(start, start + len(sentence)):
+            covered[i] = 1
+    total = sum(1 for ch in chunk if not ch.isspace())
+    if total == 0:
+        return 0.0
+    hit = sum(1 for i, ch in enumerate(chunk) if covered[i] and not ch.isspace())
+    return hit / total
+
+
 def mark_part(blocks: list[str], manifest: dict, part_prefix: str) -> PartMarks:
     """Identify footnote-derived and continuation-candidate manifest labels.
 
@@ -174,6 +190,7 @@ def mark_part(blocks: list[str], manifest: dict, part_prefix: str) -> PartMarks:
     result = PartMarks()
     labels = list(manifest.items())
     cursor = 0
+    label_sentences: dict[str, list[str]] = {}
 
     def find_from(start: int, needle: str) -> int | None:
         for idx in range(start, len(labels)):
@@ -213,6 +230,7 @@ def mark_part(blocks: list[str], manifest: dict, part_prefix: str) -> PartMarks:
             label, _ = labels[idx]
             matched_labels.append(label)
             result.marked[label] = {"footnote": n, "part": part_prefix}
+            label_sentences.setdefault(label, []).append(sentence)
             cursor = advance(idx, sentence)
         result.footnote_blocks.append({
             "part": part_prefix, "footnote": n, "text": block,
@@ -239,6 +257,12 @@ def mark_part(blocks: list[str], manifest: dict, part_prefix: str) -> PartMarks:
                 cursor = advance(idx, sentence)
             j += 1
         i = j
+
+    chunk_by_label = dict(labels)
+    for label, info in result.marked.items():
+        coverage = _coverage(chunk_by_label[label], label_sentences[label])
+        info["coverage"] = coverage
+        info["pure"] = coverage == 1.0
     return result
 
 
@@ -265,18 +289,24 @@ def analyze(raw: str, data_dir: Path = DEFAULT_DATA_DIR) -> dict:
         marked.update(result.marked)
         unmatched.extend(result.unmatched)
         continuation_candidates.update(result.continuation_candidates)
+        part_pure = sum(1 for info in result.marked.values() if info["pure"])
         counts[cfg["prefix"]] = {
             "footnote_blocks": len(result.footnote_blocks),
             "marked": len(result.marked),
             "unmatched": len(result.unmatched),
             "continuation_candidates": len(result.continuation_candidates),
+            "pure": part_pure,
+            "mixed": len(result.marked) - part_pure,
         }
 
+    total_pure = sum(1 for info in marked.values() if info["pure"])
     counts["total"] = {
         "footnote_blocks": len(footnote_blocks),
         "marked": len(marked),
         "unmatched": len(unmatched),
         "continuation_candidates": len(continuation_candidates),
+        "pure": total_pure,
+        "mixed": len(marked) - total_pure,
     }
 
     return {
@@ -320,7 +350,8 @@ def main(argv: list[str] | None = None) -> int:
     total = report["counts"]["total"]
     print(f"[+] footnote blocks: {total['footnote_blocks']} | "
           f"marked labels: {total['marked']} | "
-          f"continuation candidates: {total['continuation_candidates']}")
+          f"continuation candidates: {total['continuation_candidates']} | "
+          f"pure: {total['pure']} | mixed: {total['mixed']}")
     return 0
 
 
