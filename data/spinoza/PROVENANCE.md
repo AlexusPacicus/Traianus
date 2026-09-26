@@ -39,6 +39,19 @@ aware sentence segmentation (N.B., initials, roman numerals up to 6 chars,
 citation names) with a lossless guarantee enforced by
 tests/unit/test_build_spinoza_corpus.py.
 
+## Editorial footnotes in the manifests (found 2026-09-26)
+
+The rule above says Gutenberg footnote text blocks are removed. They are
+not: `extract_part` in `build_spinoza_corpus.py` deletes every `[N]` marker
+before splitting blocks, so the later filter on blocks starting with `[N]`
+never matches, and all 17 footnote blocks inside the five parts entered the
+manifests as corpus text. The manifests and every result built on them are
+left as they are; the chunks are marked instead:
+
+| File | Derived by | Notes |
+|---|---|---|
+| `editorial_marks.json` | `tools/experiments/tooling/mark_editorial_notes.py` | For every footnote block of PG#3800 inside the parts, the manifest labels whose chunk contains its sentences: 25 labels, 11 **pure** (the whole chunk is footnote text) and 14 **mixed** (Spinoza's text with a footnote residue fused in, coverage 2–40%). Blocks that continue a footnote without a marker (e.g. Latin verse) are listed as `continuation_candidates` (40), not marked, for the author to confirm or reject. |
+
 ## History / superseded sources
 
 - `part1_god.md` was originally an operator-local file (`/Ethics_1.md`,
