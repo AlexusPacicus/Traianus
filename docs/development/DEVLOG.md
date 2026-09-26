@@ -1299,3 +1299,259 @@ de la sesión del python-gate.
 **Próximo paso:**
 1. Autor: elegir entre K8 y la v2 en `refapp-01`.
 2. Retirar o actualizar las dos referencias desfasadas a `simplex.py`.
+
+### Cierre (23:53)
+
+**Contexto:** sesión nueva sobre `feat/python-gate-integration` para verificar y cerrar la puerta
+de Python; después, K8 y un estudio nuevo del zoom. Trabajo de otra sesión en este tramo, no
+descrito aquí: la nota de estado de `simplex_control_spec` (`de1505a`, seq 65) y la integración
+previa de la puerta (`1b059dd`).
+
+**Se hizo:**
+- **Puerta de Python cerrada.** Verificada en sesión nueva (`python3` resuelve al shim, R1 deniega
+  rutas, los scripts commiteados corren). Cableado de `settings.json` commiteado (`54c7f8c`),
+  AGENTS v1.11.0 (`24dac44`), test de cableado (`037b411`). El cableado rompió un test que fija
+  `settings.json` y lo arregló un segundo contrato (`d30c676`). `.gitignore` (`cdef5f7`), LEDGER seq
+  66, fusión en `main` y push (`dcc6f72`).
+- **CI de `main` en rojo desde el 23-09, sin que nadie lo viera.** `test_degenerate_spread_maps_to_the_centre`
+  fallaba solo en Linux: el BLAS redondea distinto y una σ de ~1e-17 no contaba como cero.
+  Arreglado en el motor con una cota de redondeo derivada (`b78a857`), LEDGER seq 67; CI verde en
+  `4247093`, subido.
+- **Tres textos de otro chat, contrastados con el repo y descartados:** un «K8» que reabría d_esc y
+  la luminancia (rechazados por K6), una máquina de estados de cámara que el cliente no tiene y un
+  esquema de Fisher que mezcla dos Fisher distintos. Lo aprovechable, aparcado en `refapp-01`.
+- **K8, como estaba registrado.** Ficha con fase 1 PASS en la segunda ronda, D13–D16, tabla de
+  decisión preregistrada, contrato §3, script y tests (`0c54aea`). Fase 2: CHANGES, porque
+  `u_from_w2` era una identidad. D16 mostró que el residuo de z es el de λ₂ a escala, y K6 ya había
+  descartado λ₂. **Congelado por el autor antes de ejecutarlo** (`5b50d94`): z pasa a ser la
+  profundidad de un zoom continuo.
+- **Estudio del zoom, abierto en `refapp-01/ZOOM.md`.** Postulado del autor: el tiempo es la
+  métrica de la fricción de la continuidad de la entidad geométrica; su forma operativa ya existe
+  en el motor (K_cin). Con el autor se fijaron las definiciones (8 coordenadas de ejes, tensor de
+  tensión, Voronoi centroidal por niveles, un brazo de dos puntos y otro de tres, tres estados
+  juzgados) y se aceptó el paso 1 (Z1 vecindades, Z2 latencia).
+- **Ficha Z, cuatro revisiones y cuatro rondas ciegas.** Hallazgos:
+  - Inicio y final son idénticos en los dos brazos, así que Z1 se decide solo en el estado medio.
+  - τ es plano a lo largo de la cuerda.
+  - Restringir el punto medio al plano simétrico excluía los arcos torcidos. El autor propuso la
+    alternativa: m donde se tocan dos hiperesferas de τ de igual radio (rev. 3, D20–D21).
+- **Regla nueva de metodología, del autor** (`e54261c`): las rondas de fase 1 cuentan por diseño, y
+  un bloqueante nunca pasa a fase 2. Motivo: la ronda 3 dejó bloqueantes sobre un brazo rediseñado.
+- **`contracts.md` §0 corregido:** el artefacto se normalizó en binary64 (`b3be386`), y la ruta del
+  motor normaliza en binary32, con las citas de línea al día (`2749945`, `9307b04`).
+
+**Resultado:**
+- **`main` en `4247093`, subido:** puerta de Python y arreglo de CI.
+- **K8 congelado** en la rama local `feat/k8-z-axis`, sin fusionar.
+- **La ficha Z en revisión 4, fase 1 abierta** (ronda 4: CHANGES, 2 bloqueantes en la búsqueda).
+  Vive, junto con la regla nueva y las correcciones de §0, en la rama local `feat/zoom-record`,
+  donde va esta entrada.
+- **Los commits de `refapp-01`** (`ZOOM.md`, K8 en `POC.md`) son locales, sin subir.
+
+**Resuelto de entradas anteriores:**
+- 2026-09-24 (14:14): «elegir entre K8 y la v2»: se eligió K8, que después quedó congelado y
+  sustituido por el estudio del zoom.
+- 2026-09-24 (14:14): las referencias desfasadas a `simplex.py` las cerró otra sesión (seq 65).
+- `feat/python-gate`: integrada y en `main`. La rama local sigue existiendo, ya fusionada.
+
+**Sin resolver / decisión pendiente:**
+- **Autor, para la revisión 5 de Z:**
+  - Cambiar la búsqueda SQP, que ha tenido bloqueantes en tres rondas, por una factible por
+    construcción: m ajustado por bisección a lo largo de la cuerda y búsqueda sin restricción en 7
+    dimensiones.
+  - Si κ se corrige por azar: su nivel de azar es 225/(|M|−1) y varía si los brazos caen en celdas
+    distintas.
+- **Llevar a `main`** la regla de metodología y las correcciones de §0, que hoy solo están en
+  `feat/zoom-record`.
+- **Huecos encontrados:**
+  - El empaquetador de revisiones mete resultados previos (`data/refapp/*_result.json`).
+  - El revisor ciego ve el índice de memoria, que enuncia resultados de otras fichas.
+  - El implementador de K8 ejecutó con `pytest` un test sin commitear (zona gris de AGENTS 2.5).
+  - Ruff en CI no cubre el script de K6 ni `test_audit_derivations.py`.
+  - `definitions.md` cita `_storage.py:114` para `geodesic_axes`, que se crea en `:123`.
+
+**Próximo paso:**
+1. **Autor:** decidir la búsqueda por bisección y la corrección por azar. Después, revisión 5 de Z
+   con ronda nueva.
+2. **Con fase 1 en PASS:** `contracts.md` §4, regla en el registro, `instrument-implementer` y
+   fase 2.
+3. **Fusionar en `main`** la regla de metodología y las correcciones de `contracts.md` §0.
+
+## 2026-09-25
+
+**Contexto:** la ficha Z seguía en fase 1 tras la ronda 4 (CHANGES, 2 bloqueantes en la búsqueda
+SQP), con dos decisiones del autor pendientes: la búsqueda por bisección y la corrección de κ por
+azar.
+
+**Se hizo:**
+- **Búsqueda rediseñada (autor):** m se desliza por una paralela a la cuerda con la misma
+  bisección que el punto medio de referencia, así que todo punto visitado cumple E = 0, y Newton
+  busca sin restricción en las 7 direcciones ortogonales. Se descartaron:
+  - una bisección fija de 16–20 pasos, propuesta desde fuera: deja |E| unas 10⁷ veces por encima
+    del redondeo;
+  - L-BFGS, elegido y retirado el mismo día: una parada por ‖∇g‖ contra su redondeo no la alcanza
+    una búsqueda que compara valores, y certificar con la Hessiana al final comprueba la dirección
+    de Newton, no la de L-BFGS.
+- **Derivaciones D23–D26**, comprobadas numéricamente con awk, sin Python:
+  - D23: el tubo donde el cero es único. El autor lo fijó como zona de validez, no como parte de
+    la definición de m.
+  - D24: la búsqueda en el tubo equivale al problema con restricción.
+  - D25: Z1 pasa de recall@15 dentro de la celda al AUC de R_NX con peso 1/K, sobre la hiperesfera
+    de vecindad de cada nota en todo EVAL (autor: juzgar el zoom entero). La corrección por azar es
+    la media exacta sobre todas las pantallas posibles; se comprobó enumerándolas todas. Desaparece
+    el umbral |M| ≥ 16, donde el recall valía 15 fuera cual fuera la pantalla.
+  - D26: un mundo donde la respuesta es m₀.
+- **Mundo conocido (idea del autor):** un corpus sintético por fórmula, donde los dos brazos
+  coinciden, pasa por todo Z1 antes de leer datos reales.
+- **`ZOOM.md` (refapp-01):** Z1 actualizado; se quitó la distorsión del modelo de muelles, que
+  necesitaba escalas y constantes sin definir para una cifra que no decide.
+- **Revisiones 5–8 y tres rondas ciegas sobre el diseño nuevo:** PASS, con 11, 6 y 7 no
+  bloqueantes. **Fase 1 cerrada.** Hallazgos que cambiaron algo:
+  - el mundo conocido era demasiado simétrico y el redondeo decidía el orden en pantalla, así que
+    pasó a desplazamientos distintos por par;
+  - N_U escrito como 1.110 habría hecho fallar el mundo nulo (su banda es ±0,024, no ±0,0036),
+    así que pasó a fórmula;
+  - mis renombrados de símbolos crearon colisiones nuevas, así que se hizo una tabla completa.
+- **`contracts.md` §4 (Z)**, con el §3 reservado para K8. **Regla `z` en el registro**, delegada a
+  `engine-implementer` con contrato JSON validado: diff revisado y suite repetida (2874 verdes),
+  LEDGER seq 68.
+
+**Resultado:** `feat/zoom-record` en `e05b14b` y `feat/client-oklch-color` (refapp-01) en
+`f1c7457`, ambas locales. La ficha Z está en la revisión 8 con la fase 1 cerrada, y el contrato y
+la regla del registro están listos. Todavía no hay código de Z.
+
+**Resuelto de entradas anteriores:**
+- 2026-09-24 (23:53), sobre la revisión 5: la búsqueda por bisección y la corrección por azar,
+  decididas. La corrección va dentro de D25.
+- 2026-09-24 (23:53), próximo paso 1: la revisión 5 y sus rondas, hechas; la fase 1 está cerrada.
+- 2026-09-24 (23:53), próximo paso 2: `contracts.md` §4 y la regla en el registro, hechos.
+- 2026-09-24 (23:53), huecos: `definitions.md` cita ya `_storage.py:123`.
+
+**Sin resolver / decisión pendiente:**
+- **Sigue solo en `feat/zoom-record`:** la regla de metodología (`e54261c`) y las correcciones de
+  `contracts.md` §0 no están en `main`.
+- **Ceguera:** el paquete de revisión sigue incluyendo los resultados de K6 y R4, que los revisores
+  no abrieron, y el revisor ve el índice de memoria, cosa que declaró en cada ronda.
+- **Sin tocar desde el 24-09:** el test sin commitear que ejecutó el implementador de K8, y que
+  Ruff en CI no cubre el script de K6 ni `test_audit_derivations.py`.
+- **Los 7 no bloqueantes de la ronda 3** se aplicaron en la revisión 8 sin ronda nueva: los
+  comprueba la fase 2.
+
+**Próximo paso:**
+1. Rama `feat/zoom-impl` desde `feat/zoom-record`; encargo a `instrument-implementer`: script,
+   tests y tests de D20–D26, empezando por los tests.
+2. Revisión ciega de fase 2.
+3. Primera ejecución: el mundo conocido y, si pasa, los datos reales.
+4. Fusionar en `main` la regla de metodología y §0.
+
+### Cierre (18:54)
+
+**Contexto:** tras la entrada anterior quedaba lanzar la implementación de Z en una rama propia.
+
+**Se hizo:**
+- **Encargo:** rama `feat/zoom-impl` desde `feat/zoom-record` y encargo a `instrument-implementer`
+  con Opus (elección del autor). La ficha ocupa 44 KB, más que el tope de 40 KB de
+  `context_pack`, así que el contexto fue en tres paquetes.
+- **Corte y reanudación:** la primera ejecución se cortó a medias por el límite de uso de la API,
+  sin commit; se reanudó con su contexto intacto y terminó.
+- **Implementación `cb421ff`:** el script, sus tests y los tests de D17, D19–D21 y D23–D26.
+  - Revisado el alcance y los puntos críticos del script. El orden es el de la ficha: huella del
+    módulo de K6, mundo conocido, artefactos.
+  - Suite repetida: 2983 verdes, en unos 90 s frente a 58 antes.
+  - El mundo conocido pasa, incluida la cuadratura, y falla con una búsqueda que depende del brazo.
+  - No se tocaron datos reales.
+- **Hallazgo del implementador: empates exactos en el mundo conocido** (separación mínima en
+  pantalla 0,0).
+  - Causa: los desplazamientos frac(ι·φ) solo avanzan con dos tamaños de paso, así que en cerca
+    de 1 de cada 4 pares los tres quedan igual de espaciados. Las notas de un par están en una
+    recta, y la del medio queda a igual distancia de las otras dos.
+  - El argumento de la revisión 6 solo descartaba las permutaciones de ejes. Con esta semilla pasó,
+    pero la cuadratura con 128 nodos podría romper esos empates en otro orden.
+  - El implementador relajó su test de separación > 0 a ≥ 0 sin tocar la ficha.
+
+**Resultado:** `feat/zoom-impl` en `cb421ff`, local. Z está implementada, sin revisión de fase 2 ni
+primera ejecución.
+
+**Resuelto de entradas anteriores:**
+- 2026-09-25, próximo paso 1: rama e implementación, hechas.
+
+**Sin resolver / decisión pendiente:**
+- **Autor:** arreglar ya el mundo conocido o dejarlo a la revisión de fase 2. El arreglo sería
+  cambiar a desplazamientos cuadráticos, frac(ι²·(√5 − 1)/2): revisión 9 de la ficha, una línea
+  del script y volver a exigir separación > 0 en el test. Recomendado: arreglarlo ya.
+- Lo demás de la entrada anterior sigue igual.
+
+**Próximo paso:**
+1. Decisión del autor sobre el mundo conocido; si es arreglarlo, revisión 9 y un contrato corto al
+   implementador.
+2. Revisión ciega de fase 2.
+3. Primera ejecución.
+
+## 2026-09-26
+
+**Contexto:** Z estaba implementada (`cb421ff`), con empates exactos en el mundo conocido y el
+autor por decidir si arreglarlos antes de la fase 2.
+
+**Se hizo:**
+- **Mundo conocido (revisión 9, código `33a12e3`):** desplazamientos frac(ι²·(√5 − 1)/2). Con los
+  lineales, 6 de los 28 pares quedaban igual de espaciados. Con los cuadráticos no queda ninguno,
+  y el argumento cubre las tres posibles notas del medio, no solo la del medio en ι.
+- **Fase 2, tres rondas ciegas:**
+  - Ronda 1: PASS, 12 no bloqueantes. Se aplicaron en la revisión 10 y en el código `a4e9274`:
+    - la búsqueda cronometrada construye su recta;
+    - al brazo de fotogramas clave se le resta un segundo overhead, por su marca de tiempo;
+    - el pin de K6 se comprueba con hashlib;
+    - se informa la d mínima positiva;
+    - tests de n_scored y de D21 con fricciones aleatorias.
+    El autor eligió declarar la búsqueda fallida y arreglar en código el overhead y el pin.
+  - Ronda 2: CHANGES, 1 bloqueante. El brazo por pasos construía dos veces el estado de nivel 2
+    (61 estados frente a 60), lo que inclinaba Δ a favor de los fotogramas clave. Revisión 12 y
+    código `83870fa`: partición separada del estado y fotograma de t = 1 exactamente en B
+    (elección del autor).
+  - Ronda 3: PASS, 4 no bloqueantes. Se aplicaron sin otra ronda, como en K6 (revisión 14,
+    tests `6c51f45`).
+  - Las revisiones 11 y 13 son solo de redacción: qué punto deja una búsqueda fallida.
+- **Plan de ejecución** en commit antes de ejecutar (`afc606e`): dos ejecuciones, que tienen que
+  ser iguales fuera de `z2`. Z2 solo decide si las dos coinciden (elección del autor).
+- **Primera ejecución** (`2747476`): las dos son válidas e iguales fuera de `z2`.
+  - Z1: no concluyente (D̄ = 7,22·10⁻⁷, n = 1110).
+  - Z2: confirmado en las dos (mediana de Δ −0,91 y −0,92 ms; percentil 95 de ready 47,9 y
+    48,6 ms).
+- **Lectura del autor** (`476ebd6`; refapp-01 `ff067b8`):
+  - En este corpus los dos brazos son el mismo zoom, porque la fricción es casi plana: τ supera
+    la longitud en un 0,058 % mediano.
+  - No pone a prueba el postulado.
+  - Z2 confirma los fotogramas clave frente a recalcular cada fotograma, no tres puntos frente a
+    dos.
+  - Aparte, como exploración: la pantalla 2-D conserva poco del vecindario real, con
+    puntuaciones de 0,049, 0,038 y 0,022 al inicio, en el medio y al final.
+
+**Resultado:** `feat/zoom-impl` en `476ebd6` y `feat/client-oklch-color` (refapp-01) en `ff067b8`,
+ambas locales. Z tiene la fase 2 cerrada, su resultado y la lectura del autor.
+
+**Resuelto de entradas anteriores:**
+- 2026-09-25 (cierre 18:54): la decisión sobre el mundo conocido y los próximos pasos 1–3
+  (arreglo, revisión de fase 2 y primera ejecución) están hechos.
+- 2026-09-25: los 7 no bloqueantes que se aplicaron en la revisión 8 sin ronda quedaron
+  comprobados en la fase 2.
+
+**Sin resolver / decisión pendiente:**
+- **Autor:**
+  - qué zoom usa el cliente: dos puntos con fotogramas clave, o tres puntos;
+  - una fricción que importe sería una hipótesis nueva, a partir de algo medido;
+  - el estudio de la pantalla 2-D, más adelante.
+- **Sin integrar en `main`:** `feat/zoom-record` y `feat/zoom-impl`, que incluyen la regla de
+  metodología `e54261c` y las correcciones de `contracts.md` §0. Refapp-01 sin subir.
+- **Huecos menores:**
+  - ningún test comprueba que una búsqueda fallida que deja m entra en D_q y en Z2 (solo ocurre
+    con valid = false);
+  - el test de D21 siempre da μ = 0, así que el caso |μ| > 1 no se prueba.
+- **Ceguera:** el paquete sigue incluyendo los resultados de K6 y R4, y el revisor ve el índice de
+  memoria. Lo declaró en cada ronda.
+- **Sin tocar desde el 24-09:** el test sin commitear del implementador de K8. Ruff en CI no
+  cubre los scripts de K6 y Z ni sus tests.
+
+**Próximo paso:**
+1. Decisiones del autor sobre el zoom del cliente.
+2. Integrar las ramas de Z en `main`, con su entrada en el LEDGER, y comprobar el CI en Linux.
+3. Subir refapp-01.

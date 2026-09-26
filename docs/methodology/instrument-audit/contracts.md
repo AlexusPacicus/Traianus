@@ -15,8 +15,10 @@ Artefacts (inputs)
   embeddings.npy   NPY v1.0; header {'descr': '<f4', 'fortran_order': False, 'shape': (2221, 384)};
                    IEEE-754 binary32, little-endian, C order.
                    sha256 eafb0e97172830f2404e96fa08d74bf6cccc0b6cbe84d47b790a476603e7d8d1.
-                   Built by tools/experiments/tooling/freeze_spinoza_embeddings.py: encoder output
-                   (batched) normalised in binary32 (raw / ‖raw‖, both binary32), stored binary32.
+                   Built by tools/experiments/tooling/freeze_spinoza_embeddings.py (`embed`):
+                   encoder output (batched) cast to binary64, normalised in binary64
+                   (raw / ‖raw‖), then rounded to binary32 and stored (corrected 2026-09-24: this
+                   line said the normalisation ran in binary32).
   labels.json      UTF-8 JSON array of 2,221 {"label", "part"} objects, row order = embeddings rows.
                    sha256 1d60699353d810f089730c6203ee28f9c416e3004b60781bc965cec284097f4f.
   nsm_axes_8.json  tests/fixtures; UTF-8 JSON array of 8 {"id", "simbolo", "tag", "vector"}, vector =
@@ -29,7 +31,9 @@ Integrity: no nulls in, no silent bit flips
   Null elimination, after the digest check and before any computation; any violation stops the
   run with the row or key named:
     every value finite (no NaN, no ±Inf); every row's ‖v‖ within 3e-5 of 1 (a binary32
-    normalisation over d = 384 terms errs by at most ≈ d·2⁻²⁴ ≈ 2.3e-5); no JSON null, empty or
+    normalisation over d = 384 terms errs by at most ≈ d·2⁻²⁴ ≈ 2.3e-5; the artefact's rows,
+    normalised in binary64 and then rounded to binary32, err by at most ≈ 2⁻²⁴ ≈ 6e-8, so the
+    bound holds with room, corrected 2026-09-24); no JSON null, empty or
     duplicate label; every "part" present, non-null and non-empty (declared: checked although K6
     does not read it); label count = row count; 8 axes with unique ids, each 384 finite values,
     ‖a_k‖ > 0 (amended 2026-09-19).
@@ -64,11 +68,12 @@ Conversions
   â_k = a_k / np.sqrt(a_k @ a_k), binary64.
 
 Engine path (what the map is drawn from), for comparison
-  provider output binary32 (one text at a time) → ‖·‖ and division in binary32 →
-  .astype(np.float64).tobytes() → SQLite BLOB of 384 × 8 bytes, native byte order ('<f8' on
-  x86-64 and arm64) (traianus/app.py:188, :256-257). Same arithmetic class as the artefact, but
-  single-text and batched encoding are not guaranteed bit-identical: a measured figure on the
-  artefact and the rendered map can differ at ≈ 1e-7. Closed by decision (POC.md, Corpus
+  provider output binary32 (one text at a time) → ‖·‖ and division in binary32
+  (traianus/app.py:273-274) → .astype(np.float64).tobytes() (:204-205) → SQLite BLOB of 384 × 8
+  bytes, native byte order ('<f8' on x86-64 and arm64). Not the artefact's arithmetic, which
+  normalises in binary64 and then rounds to binary32 (Artefacts above; corrected 2026-09-24, with
+  the line citations), and single-text and batched encoding are not guaranteed bit-identical
+  either: a measured figure on the artefact and the rendered map can differ at ≈ 1e-7. Closed by decision (POC.md, Corpus
   loading): the engine is loaded with the artefact's vectors, one at a time, in text order,
   through /ingesta/vector, which stores v̂ (Conversions above, computed as K6 does) byte for
   byte, not the received row widened (verified 2026-09-19, tests/integration/
@@ -214,3 +219,92 @@ vecinas más que un eje cualquiera. Para no fiarse de una sola cifra, se remuest
 notas contiguas y de direcciones; R4 se sostiene solo si, para todas las longitudes de bloque, el
 intervalo entero queda por debajo de cero. Si el resultado de K6 no es válido (valid = false), R4
 no se ejecuta (corregido el 2026-09-19).
+
+## 4. Z — three-point zoom against a two-point benchmark
+
+§3 is reserved for the frozen K8 record (branch feat/k8-z-axis), as D13–D16 are.
+
+```
+Input    V (§0, after §0 Conversions); FIT = rows 0, 2, 4, … (1,111); EVAL = rows 1, 3, 5, …
+         (1,110). A (§0), used as â_1 … â_8. No consumed result.
+         Pinned code: tools/experiments/k6_colour_predictability.py, imported (not copied) for
+         check_digests, load_inputs, validate_inputs and IntegrityError only; after the import its file
+         (module.__file__) is hashed and the run refused unless the sha256 equals Z.md's (limits
+         declared there: the file on disk, not the loaded bytecode; §0's one-read rule cannot
+         apply to an imported module).
+         Seeds: 20260924 for the real run, 20260925 for the known world; Z overrides §0 Random
+         numbers' seed; same generator (PCG64), same numpy pin.
+         The known world is built in memory by the formula in Z.md (Controls, null_world): 336
+         notes in ℝ³⁸⁴, axes o_1 … o_8, FIT = even indices, EVAL = odd; no file, no draw.
+Order    import and pin check → known world (build, then the whole Z1 pipeline and its controls)
+         → only if it passed: read the three artefacts (§0: one read, sha256, parse the same
+         bytes), validate_inputs, then the real run (Z1, its controls, Z2).
+Output   data/refapp/Z_result.json (§0 Results format; null, never NaN) with:
+         digests — the K6 module always; the three artefacts when read (null otherwise);
+         environment — §0 Determinism, plus the thread variables as set;
+         valid; first_failed_condition (null when valid); failed_conditions and
+         conditions_checked (identifiers, in check order);
+         null_world — passed, all_d_q_zero, the Z1 decision per L used, the conditions checked
+           there with their outcome, smallest_relative_display_gap;
+         targets — one entry per EVAL target in index order: index, d, excluded (no route),
+           search {stop ("converged" or the failing reason), iterations, decrement, theta, nu_g,
+           mu_hat, h_over_hmax, slope (⟨∇E, u⟩ at m), abs_e (computed |E(m)|), xi, rho_pt,
+           fallback_steps}, per arm {k_star, argmax_margin, rho (ρ₂ or ρ₃), n_m, degenerate,
+           eigen_gap, auc per state (null when not scored)}, tau_2, tau_3, m_minus_m0_norm,
+           crossings (the scales K where R_NX of the three-point middle minus the benchmark's
+           changes sign), lloyd {iterations, cells};
+         z1 — n, per L used {n_blocks, d_bar, interval [rank 249, rank 9749], margins of both
+           bounds to 0, ranks 233, 265, 9733, 9765}, d_bar over targets whose middle cells agree,
+           decision ("refuted", "keeps_more", "inconclusive"; null when valid = false);
+         controls — identity {passed, ties}, permutation {auc, band}, arms_share_start_end
+           {passed}, quadrature {passed, decisions per L, targets whose k* or score changed,
+           abs_e_128, grad_norm_128};
+         z2 — timer_overhead_ns, n, per L used {median Δ interval, ready p95 interval, margins to
+           0 and to 100 ms}, decision ("refuted", "confirmed", "inconclusive"; null when
+           valid = false);
+         counts — every count in Z.md's Validity line; reported — every figure in Z.md's
+           Reported line not already above, under the same names in snake case.
+         Identifiers, in check order: null_world, tube_defined, search_converged, search_code,
+         lloyd_converged, n_scored, arms_share_start_end, identity, permutation, quadrature,
+         search_reproduced.
+Function (every definition in Z.md; shortcuts D5, D17, D19–D21, D23–D26)
+  c(v) = (⟨v, â_k⟩)_{k=1…8}; p₀ = mean over FIT of c; f(c) = 1 + Var(c), ddof = 0.
+  τ_seg: D20's node-sum form on numpy.polynomial.legendre.leggauss(64) mapped to [0, 1] (128 in
+           the quadrature control); ν by Z.md's count.
+  per target q: A = p₀, B = c(q), d = ‖B − A‖; d = 0 → excluded; d ≥ 4√2 → tube_defined fails.
+  u = (B − A)/d; Z_N = last 7 columns of numpy.linalg.qr(u[:, None], mode="complete")'s
+           orthogonal factor; ℓ_z(ξ) = A + ξ·u + Z_N z; mid(z) by bisection on ξ ∈ [0, d] to
+           hi − lo ≤ ε·d; m₀ = mid(0), the same function for both arms.
+  search:  Newton on g(z) = S(mid(z)) from z = 0 in D23's tube, with the stop, direction, step
+           length, floor and cap of Z.md, in its order; ∇g by D24; H by central differences of
+           ∇g with ζ = ε^{1/3}·d.
+  states:  start P = A, all notes; middle P = m₀ or m, the axis cell of P; end P = B, the Lloyd
+           partition of Z.md; frame e₁, e₂ from numpy.linalg.eigh of T over the FIT notes in
+           view; degenerate as Z.md.
+  score:   D25 with U = the EVAL notes of the run, N_U = |U| (1,110 real, 168 known world),
+           hyp_j(K) from Γ = X_E X_Eᵀ, shown_j(K) Euclidean on the display, ties by lower index;
+           AUC per state.
+  Z1:      D_q = AUC_middle(three-point) − AUC_middle(two-point); block bootstrap and rule of
+           Z.md; permutation band ±4/√(N_U(N_U − 2)) at the run's N_U.
+  Z2:      timing, interleaving, statistics and rule of Z.md; not run in the known world.
+Threads  The Z script sets OMP_NUM_THREADS = OPENBLAS_NUM_THREADS = VECLIB_MAXIMUM_THREADS = 1
+         itself, before its own first numpy import.
+Refusal  A pin mismatch of the K6 module writes no result. A known-world failure writes the
+         result with valid = false, null_world's figures, and every real-data figure null; the
+         artefacts are not read. A digest mismatch or a validate_inputs rejection writes no
+         result. Any other failed condition writes the result with valid = false and the
+         decisions null.
+```
+
+En palabras: Z compara dos formas de hacer zoom desde el centro del corpus hasta una nota: en línea
+recta (dos puntos) o pasando por un punto medio elegido para que la ruta tarde lo menos posible en
+tiempo de fricción (tres puntos). Antes de leer un solo dato real, el script construye por fórmula
+un mundo sintético en el que se sabe que las dos rutas coinciden, y ejecuta en él todo Z1: tiene que
+dar diferencia cero en todas las notas y ninguna conclusión. Si no, no lee los datos reales. Con los
+datos reales, para cada nota, busca el punto medio sin salirse del tubo donde es único, juzga el
+estado medio de cada ruta por cuántas de las vecinas reales de cada nota (su hiperesfera de
+vecindad) quedan cerca en pantalla a todas las escalas, descontado lo que lograría un zoom sin
+información, y compara las dos rutas con un remuestreo por bloques. Z2 mide el tiempo de cálculo de
+las dos maneras de producir los fotogramas. El resultado guarda por nota la búsqueda, los márgenes y
+las esferas de incertidumbre, y dice qué condición falló si alguna falla; entonces no decide nada. La
+semilla es propia (20260924), y la del mundo sintético otra (20260925).

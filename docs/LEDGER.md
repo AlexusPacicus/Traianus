@@ -2157,3 +2157,64 @@
   `491c21ad`).
 
 * **Status:** `Consolidated`.
+
+### seq 68 — 2026-09-25 — Contract registry rule `z`: the Z script and its tests require contracts.md §0 and §4
+
+* **Context:** the Z record (`docs/methodology/instrument-audit/Z.md`, branch `feat/zoom-record`)
+  closed phase 1 on 2026-09-25. Revision 5 changed the three-point arm's search (a bisection along
+  the chord's parallels and Newton inside a tube where the middle is unique; derivations D23–D26)
+  and Z1's score (each note's neighbourhood hypersphere over all EVAL notes, corrected against a
+  zoom with no information). Three blind rounds on that design passed (`3664906`, `5bfac58`,
+  `9582421`); revision 8 (`4cde898`) applied the last round's items. Its contract is
+  `contracts.md` §4 (`0f9ad7c`); §3 stays reserved for the frozen K8 record.
+
+* **Decision (the author):** before any Z code, register the rule, so that the contract hook
+  (AGENTS 3.7) denies Edit/Write on `tools/experiments/zoom_*.py` and `tests/unit/test_zoom_*.py`
+  unless `context_pack` served §0 and §4.
+
+* **Δ executed (`53022bd`):** rule `z` appended after `r4` in `tools/hooks/contract_registry.json`;
+  the pin in `tests/unit/test_load_spinoza_corpus.py` expects five rules and the exact `z` rule; the
+  real-registry coverage test in `tests/security/test_contract_context_hook.py` maps the two zoom
+  paths to `z`. Hook code and window unchanged.
+
+* **How it was built:** delegated to `engine-implementer` (`scope: tools`, `attribution: null`) from
+  a validated `DelegationContract`, whose context served §0 (the corpus-loader rule requires it to
+  edit its test file). T1 and T2 red for the stated reasons; T3, every requirement of the real
+  registry resolves, a guard. Diff reviewed and the suite re-run by the executing agent.
+
+* **Gate:** `pytest tests/` → 2874 passed / 1 skipped / 5 deselected (2 new). `ruff` clean on the CI
+  scope; `mypy traianus/` clean. `EXECUTE_SAFE` receipts for both test files (cases `7a13dec2`,
+  `09e37b1a`).
+
+* **Status:** `Consolidated` on `feat/zoom-record`, not merged.
+
+### seq 69 — 2026-09-26 — Z study merged into `main`: record, contract, script, result and reading
+
+* **Context:** the Z study (a three-point zoom against a two-point benchmark; question and reading
+  in RefApp-01's `ZOOM.md`) ran its full cycle on `feat/zoom-record` and `feat/zoom-impl`: record
+  `docs/methodology/instrument-audit/Z.md` to revision 14, phase 1 closed (three blind rounds on
+  revision 5's design), phase 2 closed (three blind rounds: PASS `ebc8c69`, CHANGES with one
+  blocking item `691c61f`, PASS `6947f1f`), run plan committed before the run (`afc606e`), first
+  run (`2747476`) and the author's reading (`476ebd6`).
+
+* **Decision (the author):** integrate both branches into `main` in one `--no-ff` merge;
+  `feat/zoom-record` is contained in `feat/zoom-impl`.
+
+* **Δ merged:** Z.md; contracts.md §4 (Z) and §0 corrections (`b3be386`, `2749945`); derivations
+  D20 amended and D23–D26; definitions.md's `_storage.py:123` citation; the methodology rule that
+  phase-1 rounds count per design and a blocking item never passes to phase 2 (`e54261c`, in
+  METHODOLOGY.md and both `instrument-audit` skill mirrors); registry rule `z` (seq 68);
+  `tools/experiments/zoom_three_point.py` and its tests, the D17, D19–D21, D23–D26 tests in
+  `tests/unit/test_audit_derivations.py`; `data/refapp/Z_result.json`; the DEVLOG entries of
+  2026-09-25 and 2026-09-26. Nothing under `traianus/` changes.
+
+* **Result (recorded, not re-read here):** valid; Z1 inconclusive at every L (D̄ = 7.22e-7,
+  n = 1,110), the arms the same zoom on this corpus because the friction is nearly flat; Z2
+  confirmed in both runs for keyframes against per-step recomputation within 100 ms.
+
+* **Gate:** `pytest tests/` on the branch tip → 2998 passed / 1 skipped / 5 deselected, re-run by
+  the executing agent; `mypy` clean on the Z script. CI covers the new tests through
+  `pytest tests/ -m "not model"`; its ruff scope does not include the K6 or Z scripts (known gap).
+  The Linux confirmation is the CI run on `main` after the push.
+
+* **Status:** `Consolidated`.
