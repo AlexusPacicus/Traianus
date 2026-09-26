@@ -535,8 +535,8 @@ def _cells_world():
     return v, (["x", "y", "-x", "-y"], a), labels
 
 
-def _write_cells_inputs(tmp_path, corrupt_axes=None):
-    paths, expected = _write_inputs(tmp_path)
+def _write_cells_inputs(tmp_path, corrupt_axes=None, world=_world):
+    paths, expected = _write_inputs(tmp_path, world=world)
     ids, a = _axes()
     if corrupt_axes is not None:
         corrupt_axes(a)
@@ -691,3 +691,191 @@ def test_x9_the_cells_summary_line_the_default_output_path_and_its_override(tmp_
     overridden = tmp_path / "override" / "result.json"
     _main_cells(tmp_path / "b", monkeypatch, "--out", str(overridden))
     assert json.loads(overridden.read_text(encoding="utf-8"))["relations"]["n_edges"] == 5
+
+
+# sha256 of the files the code at base commit d8c6f3c writes for _dyadic_world in union and cells modes, environment
+# fixed
+BASE_COMMIT_UNION_OUTPUT_SHA256 = "55a0361bf8a2a80c3a744d9c65744a6feb7b445322061e0d984b6efc40ba2834"
+BASE_COMMIT_CELLS_OUTPUT_SHA256 = "becb5406ba93824da3a653bab99b808af7bc93ef18df4136c1a780d757a19436"
+
+
+def test_x10_the_union_mode_output_is_byte_identical_to_the_base_commit(tmp_path, monkeypatch):
+    monkeypatch.delenv("TRAIANUS_EPSILON_EDGE", raising=False)
+    monkeypatch.setattr(reg, "environment", lambda: {"fixed": True})
+    out = _main(tmp_path, monkeypatch, _dyadic_world, "--relations", "union")
+    assert hashlib.sha256(out.read_bytes()).hexdigest() == BASE_COMMIT_UNION_OUTPUT_SHA256
+
+
+def test_x11_the_cells_mode_output_is_byte_identical_to_the_base_commit(tmp_path, monkeypatch):
+    monkeypatch.setattr(reg, "environment", lambda: {"fixed": True})
+    (embeddings, labels, axes), expected = _write_cells_inputs(tmp_path, world=_dyadic_world)
+    out = tmp_path / "out" / "result.json"
+    reg.run(embeddings, labels, expected, out, "cells", axes)
+    assert hashlib.sha256(out.read_bytes()).hexdigest() == BASE_COMMIT_CELLS_OUTPUT_SHA256
+
+
+# Cells median mode (delegation contract relational-graph-cells-median) ----------------------------
+
+MEDIAN_CELLS_KEYS = {"partition", "axes_digest", "per_axis", "tree_edges", "added_links", "added_link_distances"}
+MEDIAN_CELL_KEYS = {"axis", "size", "median_c", "tree_weights", "within_cell_relations"}
+NEAREST_KEYS = {"definition", "distance", "other_cell", "outside_tree", "per_axis", "notes"}
+
+
+def _median_world():
+    """Plane rows and the axes +x, +y, -x, -y. Cell 0 holds rows 0, 2, 4, 6, 7 at (20, y), y = 0, 1, 3, 7, 15: its
+    tree is 0-2, 2-4, 4-6, 6-7 (1, 2, 4, 8), median_c = (2 + 4) / 2 = 3, and its relations are 0-2, 2-4 and 0-4 (3,
+    at median_c) but not 4-6 (4). Cell 1 holds row 1 at (0, 30) alone; cell 2 holds rows 3, 5 at (-20, 0), (-20, 2),
+    median_c 2; cell 3 is empty. The global tree is 0-2, 2-4, 4-6, 6-7, 3-5, 1-7 (25) and 1-5 (sqrt 1184), so 4-6,
+    6-7, 1-7 and 1-5 are the added links. Integer coordinates: every distance is a correctly rounded root."""
+    v = np.array([[20, 0], [0, 30], [20, 1], [-20, 0], [20, 3], [-20, 2], [20, 7], [20, 15]], dtype=float)
+    a = np.array([[1, 0], [0, 1], [-1, 0], [0, -1]], dtype=float)
+    parts = ("I", "I", "I", "II", "II", "II", "III", "III")
+    return v, (["x", "y", "-x", "-y"], a), [{"label": f"m{i}", "part": part} for i, part in enumerate(parts)]
+
+
+def test_cells_median_t1_per_cell_median_thresholds_and_the_union_with_the_global_tree_on_a_known_world():
+    v, (ids, a), labels = _median_world()
+    d = reg.pairwise_distances(v)
+    cells = reg.axis_cells(v, a)
+    assert cells.tolist() == [0, 1, 0, 2, 0, 2, 0, 0]
+    assert reg.median_threshold([1.0, 2.0, 4.0, 8.0]) == 3.0
+    trees, within, cross = reg.cell_graph(d, cells, len(a), reg.median_threshold)
+    assert trees == [[(0, 2, 1.0), (2, 4, 2.0), (4, 6, 4.0), (6, 7, 8.0)], [], [(3, 5, 2.0)], []]
+    assert within == [(0, 2, 1.0), (0, 4, 3.0), (2, 4, 2.0), (3, 5, 2.0)]
+    assert cross == [(1, 5, math.sqrt(1184.0)), (1, 7, 25.0)]
+    result = reg.explore(v, labels, None, axes=(ids, a), median=True)
+    relations = result["relations"]
+    assert "median" in relations["source"] and relations["near_epsilon"] is None
+    assert relations["n_edges"] == 8
+    assert result["components"]["sizes"] == [8]
+    degrees = result["degrees"]
+    assert (degrees["isolated"], degrees["min"], degrees["max"], degrees["mean"]) == (0, 1, 3, 2.0)
+    assert result["reading_order"] == {"consecutive_row_edges": 1, "cross_part_edges": 5}
+    assert result["pairwise_distances"]["share_within_epsilon"] is None
+    assert "mst" not in result and "union" not in result
+    block = result["cells"]
+    assert set(block) == MEDIAN_CELLS_KEYS - {"axes_digest"}
+    assert "median_c" in block["partition"]
+    per_axis = block["per_axis"]
+    assert [c["axis"] for c in per_axis] == ids
+    assert [c["size"] for c in per_axis] == [5, 1, 2, 0]
+    assert [c["median_c"] for c in per_axis] == [3.0, None, 2.0, None]
+    assert [c["within_cell_relations"] for c in per_axis] == [3, 0, 1, 0]
+    assert per_axis[0]["tree_weights"] == {"count": 4, "0": 1.0, "0.25": 1.75, "0.5": 3.0, "0.75": 5.0, "1": 8.0}
+    assert per_axis[1]["tree_weights"] == {"count": 0, **dict.fromkeys(QUANTILE_KEYS)}
+    for cell in per_axis:
+        assert set(cell) == MEDIAN_CELL_KEYS
+    assert (block["tree_edges"], block["added_links"]) == (7, 4)
+    added = [4.0, 8.0, 25.0, math.sqrt(1184.0)]
+    assert block["added_link_distances"]["count"] == 4
+    for q in QUANTILE_KEYS:
+        assert block["added_link_distances"][q] == pytest.approx(float(np.quantile(added, float(q))), abs=1e-12)
+    assert reg.explore(v, labels, None, axes=(ids, a))["cells"]["per_axis"][0]["epsilon_c"] == 8.0
+
+
+def test_cells_median_t2_nearest_neighbours_with_ties_cells_order_and_edges_outside_the_tree():
+    d = np.array([[0.0, 3.0, 2.0, 1.0], [3.0, 0.0, 2.0, 2.0], [2.0, 2.0, 0.0, 2.0], [1.0, 2.0, 2.0, 0.0]])
+    tree = reg.minimum_spanning_tree(d)
+    assert tree == [(0, 2, 2.0), (0, 3, 1.0), (1, 3, 2.0)]
+    nearest, distance = reg.nearest_neighbours(d)
+    assert nearest.tolist() == [3, 2, 0, 0]
+    assert distance.tolist() == [1.0, 2.0, 2.0, 1.0]
+    labels = [{"label": f"t{i}", "part": part} for i, part in enumerate(("I", "I", "II", "II"))]
+    block = reg.nearest_neighbour_figures(d, tree, np.array([0, 1, 0, 0]), ["a", "b", "c"], labels)
+    assert set(block) == NEAREST_KEYS
+    assert "minimum spanning tree" in block["definition"]
+    assert block["outside_tree"] == 1
+    assert block["other_cell"] == {"count": 1, "share": 0.25}
+    assert block["distance"] == {"count": 4, "0": 1.0, "0.25": 1.0, "0.5": 1.5, "0.75": 2.0, "1": 2.0}
+    per_axis = block["per_axis"]
+    assert [c["axis"] for c in per_axis] == ["a", "b", "c"]
+    assert [c["other_cell"] for c in per_axis] == [
+        {"count": 0, "share": 0.0}, {"count": 1, "share": 1.0}, {"count": 0, "share": None},
+    ]
+    assert per_axis[0]["distance"] == {"count": 3, "0": 1.0, "0.25": 1.0, "0.5": 1.0, "0.75": 1.5, "1": 2.0}
+    assert per_axis[2]["distance"] == {"count": 0, **dict.fromkeys(QUANTILE_KEYS)}
+    notes = block["notes"]
+    assert [(note["row"], note["neighbour"]["row"]) for note in notes] == [(1, 2), (2, 0), (0, 3), (3, 0)]
+    assert [note["same_cell"] for note in notes] == [False, True, True, True]
+    assert notes[0] == {
+        "row": 1, "label": "t1", "part": "I", "axis": "b",
+        "neighbour": {"row": 2, "label": "t2", "part": "II", "axis": "a"},
+        "distance": 2.0, "same_cell": False,
+    }
+    assert reg.nearest_neighbours(np.zeros((1, 1)))[0].tolist() == []
+
+
+def test_cells_median_t2_the_nearest_neighbours_of_a_known_world():
+    v, (ids, a), labels = _median_world()
+    block = reg.explore(v, labels, None, axes=(ids, a), median=True)["nearest_neighbours"]
+    notes = block["notes"]
+    assert [(note["row"], note["neighbour"]["row"]) for note in notes] == [
+        (1, 7), (7, 6), (6, 4), (3, 5), (4, 2), (5, 3), (0, 2), (2, 0),
+    ]
+    assert [note["distance"] for note in notes] == [25.0, 8.0, 4.0, 2.0, 2.0, 2.0, 1.0, 1.0]
+    assert notes[0]["axis"] == "y" and notes[0]["neighbour"]["axis"] == "x" and not notes[0]["same_cell"]
+    assert all(note["same_cell"] for note in notes[1:])
+    assert block["other_cell"] == {"count": 1, "share": 1 / 8}
+    assert [c["other_cell"]["count"] for c in block["per_axis"]] == [0, 1, 0, 0]
+    assert [c["distance"]["count"] for c in block["per_axis"]] == [5, 1, 2, 0]
+    assert block["outside_tree"] == 0
+
+
+def test_cells_median_t3_the_cells_median_file_is_sorted_finite_json_with_every_section(tmp_path, monkeypatch):
+    monkeypatch.setenv("TRAIANUS_EPSILON_EDGE", "0.8")
+    (embeddings, labels, axes), expected = _write_cells_inputs(tmp_path)
+    out = tmp_path / "out" / "relational_graph_exploration_cells_median.json"
+    returned = reg.run(embeddings, labels, expected, out, "cells_median", axes)
+    raw = out.read_bytes()
+    text = raw.decode("utf-8")
+    loaded = json.loads(text)
+    assert loaded == returned
+    assert text == json.dumps(loaded, sort_keys=True, indent=2, allow_nan=False) + "\n"
+    assert b"\r" not in raw and "NaN" not in text and "Infinity" not in text
+    assert loaded["kind"] == "exploration" and loaded["epsilon"] is None and loaded["n"] == 6
+    assert loaded["digests"] == {
+        "embeddings.npy": expected[embeddings], "labels.json": expected[labels], "nsm_axes_8.json": expected[axes],
+    }
+    for section, keys in FIGURES.items():
+        assert set(keys) <= set(loaded[section]), section
+    assert loaded["relations"]["near_epsilon"] is None and "median" in loaded["relations"]["source"]
+    assert loaded["components"]["sizes"] == [6]
+    cells = loaded["cells"]
+    assert set(cells) == MEDIAN_CELLS_KEYS
+    assert cells["axes_digest"] == expected[axes]
+    assert [c["axis"] for c in cells["per_axis"]] == [f"ax{k}" for k in range(8)]
+    for cell in cells["per_axis"]:
+        assert set(cell) == MEDIAN_CELL_KEYS
+        assert set(cell["tree_weights"]) == {"count", *QUANTILE_KEYS}
+    assert cells["tree_edges"] == 5
+    assert set(cells["added_link_distances"]) == {"count", *QUANTILE_KEYS}
+    nearest = loaded["nearest_neighbours"]
+    assert set(nearest) == NEAREST_KEYS
+    assert set(nearest["distance"]) == {"count", *QUANTILE_KEYS} and nearest["distance"]["count"] == 6
+    assert len(nearest["per_axis"]) == 8 and len(nearest["notes"]) == 6
+
+
+def test_x12_the_cells_median_summary_line_the_default_output_path_and_its_override(tmp_path, monkeypatch, capsys):
+    assert "cells_median" in reg.MODES
+    assert reg.RESULT_CELLS_MEDIAN == reg.REPO_ROOT / "data" / "refapp" / "relational_graph_exploration_cells_median.json"
+    default = tmp_path / "default" / "relational_graph_exploration_cells_median.json"
+    monkeypatch.setattr(reg, "RESULT_CELLS_MEDIAN", default)
+    monkeypatch.setattr(reg, "RESULT_CELLS", tmp_path / "cells" / "unused.json")
+    tmp_path.joinpath("a").mkdir()
+    (embeddings, labels, axes), expected = _write_cells_inputs(tmp_path / "a")
+    monkeypatch.setattr(reg, "EMBEDDINGS", embeddings)
+    monkeypatch.setattr(reg, "LABELS", labels)
+    monkeypatch.setattr(reg, "AXES", axes)
+    monkeypatch.setattr(reg, "EXPECTED_DIGESTS", {p: expected[p] for p in (embeddings, labels)})
+    monkeypatch.setattr(reg, "AXES_DIGEST", expected[axes])
+    reg.main(["--relations", "cells_median"])
+    loaded = json.loads(default.read_text(encoding="utf-8"))
+    assert loaded["epsilon"] is None and not (tmp_path / "cells").exists()
+    line = capsys.readouterr().out
+    assert line == (
+        f"relational graph: n=6 relations=cells_median edges={loaded['relations']['n_edges']} "
+        f"added_links={loaded['cells']['added_links']} components={loaded['components']['count']} -> {default}\n"
+    )
+    overridden = tmp_path / "override" / "result.json"
+    reg.main(["--relations", "cells_median", "--out", str(overridden)])
+    assert json.loads(overridden.read_text(encoding="utf-8")) == loaded
