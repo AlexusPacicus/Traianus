@@ -15,6 +15,7 @@ import pytest
 from tools.experiments import k6_colour_predictability as k6
 from tools.experiments import relational_graph_exploration as reg
 from tools.experiments import zoom_three_point as zoom
+from traianus.config import resolve_epsilon_edge
 from traianus.geometry.observables import compute_epsilon_edges
 
 D = 384
@@ -122,8 +123,8 @@ def test_t3_relations_equal_compute_epsilon_edges_on_random_unit_vectors():
 # T4: inputs refused on a single bit flip, nothing written -----------------------------------------
 
 
-def _write_inputs(tmp_path, corrupt=None):
-    v, labels = _world()
+def _write_inputs(tmp_path, corrupt=None, world=_world):
+    v, labels = world()
     v32 = v.astype(np.float32)
     if corrupt is not None:
         corrupt(v32, labels)
@@ -245,3 +246,158 @@ def test_t6_consecutive_row_and_cross_part_edges_on_hand_built_labels():
     v, labels = _world()
     reading = reg.explore(v, labels, 0.8)["reading_order"]
     assert reading == {"consecutive_row_edges": 1, "cross_part_edges": 2}
+
+
+# Minimum spanning tree mode (delegation contract relational-graph-mst) ----------------------------
+
+
+def _arc():
+    """Rows at angles 0, 0.3, 0.7, 1.5 on plane (0, 1): the tree is the path 0-1-2-3."""
+    v = np.array([_on_circle(0, angle) for angle in (0.0, 0.3, 0.7, 1.5)])
+    labels = [{"label": f"a{i}", "part": part} for i, part in enumerate(("I", "I", "II", "II"))]
+    return v, labels
+
+
+def _dyadic_world():
+    """Rows with coordinates in {0, 0.25, -0.25}: each distance is the correctly rounded root of an exact sum,
+    so the written bytes are the same on every platform. Rows 0-3 (sign flips {}, {0}, {0, 1}, {0, 1, 2, 3}
+    on dims 0-15) are joined at 0.8 by 0-1, 0-2, 1-2, 2-3; rows 4-5 (flips 8-12, 8-13) by 4-5; row 6
+    (dims 16-31) is isolated."""
+
+    def row(start, flips):
+        x = np.zeros(D)
+        x[start:start + 16] = 0.25
+        x[list(flips)] = -0.25
+        return x
+
+    v = np.array([row(0, ()), row(0, (0,)), row(0, (0, 1)), row(0, (0, 1, 2, 3)),
+                  row(0, range(8, 13)), row(0, range(8, 14)), row(16, ())])
+    parts = ("I", "I", "II", "II", "II", "III", "III")
+    return v, [{"label": f"q{i}", "part": part} for i, part in enumerate(parts)]
+
+
+def _main(tmp_path, monkeypatch, world, *argv):
+    tmp_path.mkdir(parents=True, exist_ok=True)
+    paths, expected = _write_inputs(tmp_path, world=world)
+    monkeypatch.setattr(reg, "EMBEDDINGS", paths[0])
+    monkeypatch.setattr(reg, "LABELS", paths[1])
+    monkeypatch.setattr(reg, "EXPECTED_DIGESTS", expected)
+    out = tmp_path / "out" / "result.json"
+    reg.main([*argv, "--out", str(out)])
+    return out
+
+
+def test_mst_t1_prim_gives_the_known_tree_with_a_tie_to_the_lower_index_and_no_edge_for_one_note():
+    square = np.array([[0.0, 0.0], [1.0, 0.0], [0.0, 1.0], [1.0, 1.0], [3.0, 0.0]])
+    tree = reg.minimum_spanning_tree(reg.pairwise_distances(square))
+    assert tree == [(0, 1, 1.0), (0, 2, 1.0), (1, 3, 1.0), (1, 4, 2.0)]
+    assert sum(w for _, _, w in tree) == 5.0
+    assert reg.minimum_spanning_tree(np.zeros((1, 1))) == []
+
+
+def test_x3_the_tree_is_kruskals_on_random_points_without_ties():
+    n = 30
+    d = reg.pairwise_distances(np.random.default_rng(7).standard_normal((n, 5)))
+    root = list(range(n))
+
+    def find(x):
+        while root[x] != x:
+            x = root[x]
+        return x
+
+    expected = []
+    for w, i, j in sorted((d[a, b], a, b) for a in range(n) for b in range(a + 1, n)):
+        if find(i) != find(j):
+            root[find(i)] = find(j)
+            expected.append((i, j, float(w)))
+    assert reg.minimum_spanning_tree(d) == sorted(expected)
+
+
+def test_mst_t2_the_connectivity_threshold_is_the_smallest_epsilon_joining_every_note():
+    rng = np.random.default_rng(20260926)
+    v = rng.standard_normal((40, D))
+    v /= np.linalg.norm(v, axis=1, keepdims=True)
+    names = [f"L{i}" for i in range(len(v))]
+    threshold = reg.explore(v, [{"label": name, "part": "I"} for name in names], None)["mst"]["connectivity_epsilon"]
+    assert len(reg.components(len(v), reg.relations(names, v, threshold))) == 1
+    below = float(np.nextafter(threshold, 0.0))
+    assert len(reg.components(len(v), reg.relations(names, v, below))) > 1
+
+
+def test_mst_t3_the_printed_threshold_round_trips_through_traianus_epsilon_edge(tmp_path, monkeypatch, capsys):
+    out = _main(tmp_path, monkeypatch, _world, "--relations", "mst")
+    reported = json.loads(out.read_text(encoding="utf-8"))["mst"]["connectivity_epsilon"]
+    line = capsys.readouterr().out
+    assert "relations=mst " in line
+    printed = line.split("connectivity_epsilon=")[1].split()[0]
+    assert printed == repr(reported)
+    monkeypatch.setenv("TRAIANUS_EPSILON_EDGE", printed)
+    assert resolve_epsilon_edge() == reported
+
+
+def test_mst_t4_the_tree_mode_figures_on_a_known_tree():
+    v, labels = _arc()
+    result = reg.explore(v, labels, None)
+    steps = [_chord(0.3), _chord(0.4), _chord(0.8)]
+    paths = [steps[0], steps[0] + steps[1], sum(steps), steps[1], steps[1] + steps[2], steps[2]]
+    relations = result["relations"]
+    assert "minimum spanning tree" in relations["source"]
+    assert relations["n_edges"] == 3 and relations["near_epsilon"] is None
+    assert result["components"]["sizes"] == [4]
+    degrees = result["degrees"]
+    assert degrees["mean"] * 4 == 2 * 3
+    assert (degrees["isolated"], degrees["min"], degrees["max"]) == (0, 1, 2)
+    rel = result["relational_distances"]
+    assert rel["connected_pairs"] == 6
+    for q in ("0", "0.25", "0.5", "0.75", "1"):
+        assert rel["distance"][q] == pytest.approx(float(np.quantile(paths, float(q))), abs=1e-12)
+    assert rel["largest_component_diameter"] == pytest.approx(sum(steps), abs=1e-12)
+    assert rel["hops"]["1"] == 3
+    assert result["pairwise_distances"]["share_within_epsilon"] is None
+    mst = result["mst"]
+    tree = reg.minimum_spanning_tree(reg.pairwise_distances(v))
+    assert mst["connectivity_epsilon"] == max(w for _, _, w in tree)
+    assert mst["connectivity_epsilon"] == pytest.approx(steps[2], abs=1e-12)
+    assert mst["total_weight"] == pytest.approx(sum(steps), abs=1e-12)
+    for q in ("0", "0.25", "0.5", "0.75", "1"):
+        assert mst["weights"][q] == pytest.approx(float(np.quantile(steps, float(q))), abs=1e-12)
+    assert result["reading_order"] == {"consecutive_row_edges": 3, "cross_part_edges": 1}
+
+
+def test_mst_t4_the_tree_mode_file_is_sorted_finite_json_with_every_figure(tmp_path, monkeypatch):
+    monkeypatch.setenv("TRAIANUS_EPSILON_EDGE", "0.1")
+    paths, expected = _write_inputs(tmp_path)
+    out = tmp_path / "out" / "relational_graph_exploration.json"
+    returned = reg.run(*paths, expected, out, "mst")
+    text = out.read_text(encoding="utf-8")
+    loaded = json.loads(text)
+    assert loaded == returned
+    assert text == json.dumps(loaded, sort_keys=True, indent=2, allow_nan=False) + "\n"
+    assert "NaN" not in text and "Infinity" not in text
+    assert loaded["epsilon"] is None and loaded["pairwise_distances"]["share_within_epsilon"] is None
+    assert loaded["relations"]["n_edges"] == 5 and loaded["components"]["sizes"] == [6]
+    for section, keys in FIGURES.items():
+        assert set(keys) <= set(loaded[section]), section
+    assert set(loaded["mst"]) == {"connectivity_epsilon", "total_weight", "weights"}
+    assert set(loaded["mst"]["weights"]) == {"count", "0", "0.25", "0.5", "0.75", "1"}
+    assert loaded["mst"]["weights"]["count"] == 5
+
+
+# sha256 of the file the code at base commit 620270f writes for _dyadic_world, environment fixed
+BASE_COMMIT_OUTPUT_SHA256 = "de1e4970bad6f48d48dd0d88f9e8d8f9c84d85060e557456b580afdb4f94f356"
+
+
+def test_mst_t5_the_default_output_is_byte_identical_to_the_base_commit(tmp_path, monkeypatch):
+    monkeypatch.delenv("TRAIANUS_EPSILON_EDGE", raising=False)
+    monkeypatch.setattr(reg, "environment", lambda: {"fixed": True})
+    out = _main(tmp_path, monkeypatch, _dyadic_world)
+    assert hashlib.sha256(out.read_bytes()).hexdigest() == BASE_COMMIT_OUTPUT_SHA256
+
+
+def test_x4_relations_epsilon_writes_the_default_bytes_and_the_summary_names_the_mode(tmp_path, monkeypatch, capsys):
+    monkeypatch.delenv("TRAIANUS_EPSILON_EDGE", raising=False)
+    monkeypatch.setattr(reg, "environment", lambda: {"fixed": True})
+    default = _main(tmp_path / "default", monkeypatch, _dyadic_world).read_bytes()
+    explicit = _main(tmp_path / "explicit", monkeypatch, _dyadic_world, "--relations", "epsilon").read_bytes()
+    assert explicit == default
+    assert capsys.readouterr().out.count("relations=epsilon ") == 2

@@ -5,12 +5,15 @@ docs/methodology/instrument-audit/contracts.md section 0. The relations are the 
 epsilon-relations, computed by traianus.geometry.observables.compute_epsilon_edges with
 epsilon = traianus.config.resolve_epsilon_edge(); the relational distance of two notes is the length of
 the shortest path between them along those relations, each relation counted by its unrounded L2 length.
+With --relations mst (delegation contract relational-graph-mst) the relations are instead the minimum spanning
+tree of the complete graph over the same binary64 L2 distances, and its longest edge is reported as the
+connectivity threshold, the smallest epsilon at which the epsilon-relations join every note.
 Descriptive: it tests no hypothesis and decides nothing.
 
 Refuses to run, writing nothing, unless both input digests match the Z script's pins.
 
 Usage:
-    python3 tools/experiments/relational_graph_exploration.py [--out PATH]
+    python3 tools/experiments/relational_graph_exploration.py [--relations {epsilon,mst}] [--out PATH]
 """
 
 import os
@@ -44,6 +47,8 @@ Edge = tuple[int, int, float]
 EMBEDDINGS = REPO_ROOT / ".data" / "spinoza_frozen" / "embeddings.npy"
 LABELS = REPO_ROOT / ".data" / "spinoza_frozen" / "labels.json"
 RESULT = REPO_ROOT / "data" / "refapp" / "relational_graph_exploration.json"
+RESULT_MST = REPO_ROOT / "data" / "refapp" / "relational_graph_exploration_mst.json"
+MODES = ("epsilon", "mst")
 EXPECTED_DIGESTS = {
     EMBEDDINGS: "eafb0e97172830f2404e96fa08d74bf6cccc0b6cbe84d47b790a476603e7d8d1",
     LABELS: "1d60699353d810f089730c6203ee28f9c416e3004b60781bc965cec284097f4f",
@@ -54,6 +59,11 @@ PAIRWISE_QUANTILES = (0.01, 0.05, 0.25, 0.5)
 THREAD_VARS = ("OMP_NUM_THREADS", "OPENBLAS_NUM_THREADS", "VECLIB_MAXIMUM_THREADS")
 STATEMENT = "Descriptive exploration of the relation graph: it tests no hypothesis and decides nothing."
 MANUAL_RELATIONS = "absent: manual relations exist only in an engine database, not in the frozen artefact"
+EPSILON_SOURCE = "traianus.geometry.observables.compute_epsilon_edges"
+MST_SOURCE = (
+    "minimum spanning tree (Prim, from row 0, ties to the lower row index) of the complete graph over the "
+    "binary64 L2 distances of pairwise_distances"
+)
 NEAR_STATEMENT = (
     "pairs whose binary64 L2 distance lies within the tolerance of epsilon (compute_epsilon_edges reports "
     "distances to 6 decimals); the engine normalises in binary32 (contracts.md section 0, Engine path) and "
@@ -127,6 +137,27 @@ def pairwise_distances(v: Array) -> Array:
     return d
 
 
+def minimum_spanning_tree(d: Array) -> list[Edge]:
+    """Prim's algorithm from row 0 over the complete graph weighted by d, in O(n^2). Ties go to the lower row
+    index, both for the next row joined and for the tree row it joins through. Edges (i, j, weight), i < j,
+    sorted; none for a single row."""
+    n = len(d)
+    joined = np.zeros(n, dtype=bool)
+    joined[0] = True
+    best = d[0].copy()
+    parent = np.zeros(n, dtype=np.intp)
+    edges = []
+    for _ in range(n - 1):
+        j = int(np.argmin(np.where(joined, np.inf, best)))
+        joined[j] = True
+        i = int(parent[j])
+        edges.append((min(i, j), max(i, j), float(best[j])))
+        closer = ~joined & ((d[j] < best) | ((d[j] == best) & (j < parent)))
+        best[closer] = d[j][closer]
+        parent[closer] = j
+    return sorted(edges)
+
+
 def components(n: int, edges: Sequence[Edge]) -> list[list[int]]:
     """Connected components as ascending row lists, largest first, ties by first row."""
     adjacency: list[list[int]] = [[] for _ in range(n)]
@@ -189,17 +220,38 @@ def _summary(values: NDArray[Any]) -> dict[str, Any]:
     return {"count": len(values), **_quantiles(values, QUANTILES)}
 
 
-def explore(v: Array, labels: Sequence[Mapping[str, str]], epsilon: float) -> dict[str, Any]:
+def _near_epsilon(direct: Array, adjacent: NDArray[np.bool_], epsilon: float) -> dict[str, Any]:
+    near = np.abs(direct - epsilon) <= NEAR_EPSILON
+    return {
+        "tolerance": NEAR_EPSILON,
+        "pairs": int(np.count_nonzero(near)),
+        "edges": int(np.count_nonzero(near & adjacent)),
+        "statement": NEAR_STATEMENT,
+    }
+
+
+def _tree_figures(edges: Sequence[Edge]) -> dict[str, Any]:
+    weights = [w for _, _, w in edges]
+    return {
+        "connectivity_epsilon": max(weights) if weights else None,
+        "total_weight": math.fsum(weights),
+        "weights": _summary(np.array(weights)),
+    }
+
+
+def explore(v: Array, labels: Sequence[Mapping[str, str]], epsilon: float | None) -> dict[str, Any]:
+    """The figures of the relation graph: the epsilon-relations at epsilon, or the minimum spanning tree
+    when epsilon is None."""
     n = len(v)
     names = [item["label"] for item in labels]
     parts = [item["part"] for item in labels]
-    edges = relations(names, v, epsilon)
+    d = pairwise_distances(v)
+    edges = minimum_spanning_tree(d) if epsilon is None else relations(names, v, epsilon)
     adjacent = np.zeros((n, n), dtype=bool)
     for i, j, _ in edges:
         adjacent[i, j] = adjacent[j, i] = True
     upper = np.triu_indices(n, 1)
-    direct = pairwise_distances(v)[upper]
-    near = np.abs(direct - epsilon) <= NEAR_EPSILON
+    direct = d[upper]
     degree = adjacent.sum(axis=1)
     found = components(n, edges)
     w, hops = relational_distances(n, edges)
@@ -210,17 +262,12 @@ def explore(v: Array, labels: Sequence[Mapping[str, str]], epsilon: float) -> di
     reachable = np.isfinite(w).sum(axis=1) - 1
     farthest = np.where(np.isfinite(w), w, -np.inf).max(axis=1)
     largest = found[0]
-    return {
+    result = {
         "relations": {
-            "source": "traianus.geometry.observables.compute_epsilon_edges",
+            "source": MST_SOURCE if epsilon is None else EPSILON_SOURCE,
             "manual": MANUAL_RELATIONS,
             "n_edges": len(edges),
-            "near_epsilon": {
-                "tolerance": NEAR_EPSILON,
-                "pairs": int(np.count_nonzero(near)),
-                "edges": int(np.count_nonzero(near & adjacent[upper])),
-                "statement": NEAR_STATEMENT,
-            },
+            "near_epsilon": None if epsilon is None else _near_epsilon(direct, adjacent[upper], epsilon),
         },
         "degrees": {
             "isolated": int(np.count_nonzero(degree == 0)),
@@ -251,7 +298,8 @@ def explore(v: Array, labels: Sequence[Mapping[str, str]], epsilon: float) -> di
             "pairs": len(direct),
             "quantiles": _quantiles(direct, PAIRWISE_QUANTILES),
             "share_within_epsilon": (
-                float(np.count_nonzero(direct <= epsilon)) / len(direct) if len(direct) else None
+                float(np.count_nonzero(direct <= epsilon)) / len(direct)
+                if epsilon is not None and len(direct) else None
             ),
         },
         "reading_order": {
@@ -259,6 +307,9 @@ def explore(v: Array, labels: Sequence[Mapping[str, str]], epsilon: float) -> di
             "cross_part_edges": sum(1 for i, j, _ in edges if parts[i] != parts[j]),
         },
     }
+    if epsilon is None:
+        result["mst"] = _tree_figures(edges)
+    return result
 
 
 # Run ---------------------------------------------------------------------------------------------
@@ -296,15 +347,20 @@ def _write(result: Mapping[str, Any], out_path: Path) -> dict[str, Any]:
     return loaded
 
 
-def run(embeddings: Path, labels: Path, expected: Mapping[Path, str], out_path: Path) -> dict[str, Any]:
-    """Digests, null elimination, then the figures; any refusal raises before anything is written."""
+def run(
+    embeddings: Path, labels: Path, expected: Mapping[Path, str], out_path: Path, mode: str = "epsilon"
+) -> dict[str, Any]:
+    """Digests, null elimination, then the figures of the mode's relations (MODES); any refusal raises before
+    anything is written. In mst mode epsilon is null: TRAIANUS_EPSILON_EDGE is not read."""
+    if mode not in MODES:
+        raise ValueError(f"relations mode {mode!r} not in {MODES}")
     embeddings, labels = Path(embeddings), Path(labels)
     raw = k6.check_digests(expected)
     v32, label_list = load_inputs(raw[embeddings], raw[labels])
     validate_inputs(v32, label_list)
     v64 = v32.astype("<f8")
     v = np.array([row / np.sqrt(row @ row) for row in v64])
-    epsilon = resolve_epsilon_edge()
+    epsilon = resolve_epsilon_edge() if mode == "epsilon" else None
     result = {
         "kind": "exploration",
         "statement": STATEMENT,
@@ -319,11 +375,23 @@ def run(embeddings: Path, labels: Path, expected: Mapping[Path, str], out_path: 
 
 def main(argv: Sequence[str] | None = None) -> None:
     parser = argparse.ArgumentParser(description="Relational graph exploration of the engine's relations.")
-    parser.add_argument("--out", type=Path, default=RESULT, help=f"result path (default: {RESULT})")
-    out_path: Path = parser.parse_args(argv).out
-    result = run(EMBEDDINGS, LABELS, EXPECTED_DIGESTS, out_path)
+    parser.add_argument(
+        "--relations", choices=MODES, default="epsilon",
+        help="epsilon: the engine's epsilon-relations (default); mst: the minimum spanning tree of the L2 distances",
+    )
+    parser.add_argument(
+        "--out", type=Path, default=None, help=f"result path (default: {RESULT}, in mst mode {RESULT_MST})"
+    )
+    args = parser.parse_args(argv)
+    mode: str = args.relations
+    out_path: Path = args.out or (RESULT if mode == "epsilon" else RESULT_MST)
+    result = run(EMBEDDINGS, LABELS, EXPECTED_DIGESTS, out_path, mode)
+    threshold = (
+        f"epsilon={result['epsilon']}" if mode == "epsilon"
+        else f"connectivity_epsilon={result['mst']['connectivity_epsilon']!r}"
+    )
     print(
-        f"relational graph: n={result['n']} epsilon={result['epsilon']} "
+        f"relational graph: n={result['n']} relations={mode} {threshold} "
         f"edges={result['relations']['n_edges']} components={result['components']['count']} -> {out_path}"
     )
 
