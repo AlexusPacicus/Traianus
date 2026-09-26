@@ -1,0 +1,555 @@
+{
+  "continuation_candidates": {
+    "PART2_MIND_P13_ESC_01_C06": {
+      "after_footnote": "3",
+      "part": "PART2_MIND",
+      "text": "What this nature is, I am not able here to explain, nor is it necessary for the proof of what I advance, that I should do so. I will only say generally, that in proportion as any given body is more fitted than others for doing many actions or receiving many impressions at once, so also is the mind, of which it is the object, more fitted than others for forming many simultaneous perceptions; and the more the actions of the body depend on itself alone, and the fewer other bodies concur with it in action, the more fitted is the mind of which it is the object for distinct comprehension."
+    },
+    "PART2_MIND_P13_ESC_01_C07": {
+      "after_footnote": "3",
+      "part": "PART2_MIND",
+      "text": "We may thus recognize the superiority of one mind over others, and may further see the cause, why we have only a very confused knowledge of our body, and also many kindred questions, which I will, in the following propositions, deduce from what has been advanced."
+    },
+    "PART2_MIND_P13_ESC_01_C08": {
+      "after_footnote": "3",
+      "part": "PART2_MIND",
+      "text": "Wherefore I have thought it worth while to explain and prove more strictly my present statements."
+    },
+    "PART2_MIND_P13_ESC_01_C09": {
+      "after_footnote": "3",
+      "part": "PART2_MIND",
+      "text": "In order to do so, I must premise a few propositions concerning the nature of bodies."
+    },
+    "PART2_MIND_P40_DEMO_01_C21": {
+      "after_footnote": "4",
+      "part": "PART2_MIND",
+      "text": "Besides these two kinds of knowledge, there is, as I will hereafter show, a third kind of knowledge, which we will call intuition."
+    },
+    "PART2_MIND_P40_DEMO_01_C22": {
+      "after_footnote": "4",
+      "part": "PART2_MIND",
+      "text": "This kind of knowledge proceeds from an adequate idea of the absolute essence of certain attributes of God to the adequate knowledge of the essence of things. I will illustrate all three kinds of knowledge by a single example."
+    },
+    "PART2_MIND_P40_DEMO_01_C23": {
+      "after_footnote": "4",
+      "part": "PART2_MIND",
+      "text": "Three numbers are given for finding a fourth, which shall be to the third as the second is to the first."
+    },
+    "PART2_MIND_P40_DEMO_01_C24": {
+      "after_footnote": "4",
+      "part": "PART2_MIND",
+      "text": "Tradesmen without hesitation multiply the second by the third, and divide the product by the first; either because they have not forgotten the rule which they received from a master without any proof, or because they have often made trial of it with simple numbers, or by virtue of the proof of the nineteenth proposition of the seventh book of Euclid, namely, in virtue of the general property of proportionals."
+    },
+    "PART2_MIND_P40_DEMO_01_C25": {
+      "after_footnote": "4",
+      "part": "PART2_MIND",
+      "text": "But with very simple numbers there is no need of this."
+    },
+    "PART2_MIND_P40_DEMO_01_C26": {
+      "after_footnote": "4",
+      "part": "PART2_MIND",
+      "text": "For instance, one, two, three, being given, everyone can see that the fourth proportional is six; and this is much clearer, because we infer the fourth number from an intuitive grasping of the ratio, which the first bears to the second."
+    },
+    "PART3_AFFECTS_P31_COR_01_C03": {
+      "after_footnote": "9",
+      "part": "PART3_AFFECTS",
+      "text": "Ferreus est, si quis, quod sinit alter, amat.\""
+    },
+    "PART3_AFFECTS_P51_ESC_01_C06": {
+      "after_footnote": "10",
+      "part": "PART3_AFFECTS",
+      "text": "Lastly, from this inconstancy in the nature of human judgment, inasmuch as a man often judges things solely by his emotions, and inasmuch as the things which he believes cause pleasure or pain, and therefore endeavours to promote or prevent, are often purely imaginary, not to speak of the uncertainty of things alluded to in III. xxviii.; we may readily conceive that a man may be at one time affected with pleasure, and at another with pain, accompanied by the idea of himself as cause."
+    },
+    "PART3_AFFECTS_P51_ESC_01_C07": {
+      "after_footnote": "10",
+      "part": "PART3_AFFECTS",
+      "text": "Thus we can easily understand what are Repentance and Self--complacency."
+    },
+    "PART3_AFFECTS_P51_ESC_01_C08": {
+      "after_footnote": "10",
+      "part": "PART3_AFFECTS",
+      "text": "Repentance is pain, accompanied by the idea of one's self as cause;"
+    },
+    "PART3_AFFECTS_P51_ESC_01_C09": {
+      "after_footnote": "10",
+      "part": "PART3_AFFECTS",
+      "text": "Self--complacency is pleasure, accompanied by the idea of one's self as cause, and these emotions are most intense because men believe themselves to be free (III. xlix.)."
+    },
+    "PART4_BONDAGE_P17_ESC_01_C04": {
+      "after_footnote": "12",
+      "part": "PART4_BONDAGE",
+      "text": "The power of reason over the emotions I have settled to treat separately."
+    },
+    "PART4_BONDAGE_P37_DEMO_01_C12": {
+      "after_footnote": "13",
+      "part": "PART4_BONDAGE",
+      "text": "The rational quest of what is useful to us further teaches us the necessity of associating ourselves with our fellow men, but not with beasts, or things, whose nature is different from our own; we have the same rights in respect to them as they have in respect to us."
+    },
+    "PART4_BONDAGE_P37_DEMO_01_C13": {
+      "after_footnote": "13",
+      "part": "PART4_BONDAGE",
+      "text": "Nay, as everyone's right is defined by his virtue, or power, men have far greater rights over beasts than beasts have over men."
+    },
+    "PART4_BONDAGE_P37_DEMO_01_C14": {
+      "after_footnote": "13",
+      "part": "PART4_BONDAGE",
+      "text": "Still I do not deny that beasts feel: what I deny is, that we may not consult our own advantage and use them as we please, treating them in the way which best suits us; for their nature is not like ours, and their emotions are naturally different from human emotions (III. lvii. note)."
+    },
+    "PART4_BONDAGE_P37_DEMO_01_C15": {
+      "after_footnote": "13",
+      "part": "PART4_BONDAGE",
+      "text": "It remains for me to explain what I mean by just and unjust, sin and merit."
+    },
+    "PART4_BONDAGE_P37_DEMO_01_C16": {
+      "after_footnote": "13",
+      "part": "PART4_BONDAGE",
+      "text": "On these points see the following note."
+    },
+    "PART4_BONDAGE_P37_DEMO_01_C17": {
+      "after_footnote": "13",
+      "part": "PART4_BONDAGE",
+      "text": "Note II.--In the Appendix to Part I. I undertook to explain praise and blame, merit and sin, justice and injustice."
+    },
+    "PART4_BONDAGE_P37_DEMO_01_C18": {
+      "after_footnote": "13",
+      "part": "PART4_BONDAGE",
+      "text": "Concerning praise and blame I have spoken in III. xxix. note: the time has now come to treat of the remaining terms."
+    },
+    "PART4_BONDAGE_P37_DEMO_01_C19": {
+      "after_footnote": "13",
+      "part": "PART4_BONDAGE",
+      "text": "But I must first say a few words concerning man in the state of nature and in society."
+    },
+    "PART4_BONDAGE_P37_DEMO_01_C20": {
+      "after_footnote": "13",
+      "part": "PART4_BONDAGE",
+      "text": "Every man exists by sovereign natural right, and, consequently, by sovereign natural right performs those actions which follow from the necessity of his own nature; therefore by sovereign natural right every man judges what is good and what is bad, takes care of his own advantage according to his own disposition (IV. xix. and IV. xx.), avenges the wrongs done to him (III. xl. Coroll. ii.), and endeavours to preserve that which he loves and to destroy that which he hates (III. xxviii.)."
+    },
+    "PART4_BONDAGE_P37_DEMO_01_C21": {
+      "after_footnote": "13",
+      "part": "PART4_BONDAGE",
+      "text": "Now, if men lived under the guidance of reason, everyone would remain in possession of this his right, without any injury being done to his neighbour (IV. xxxv. Coroll. i.)."
+    },
+    "PART4_BONDAGE_P37_DEMO_01_C22": {
+      "after_footnote": "13",
+      "part": "PART4_BONDAGE",
+      "text": "But seeing that they are a prey to their emotions, which far surpass human power or virtue (IV. vi.), they are often drawn in different directions, and being at variance one with another (IV. xxxiii. xxxiv.), stand in need of mutual help (IV. xxxv. note)."
+    },
+    "PART4_BONDAGE_P37_DEMO_01_C23": {
+      "after_footnote": "13",
+      "part": "PART4_BONDAGE",
+      "text": "Wherefore, in order that men may live together in harmony, and may aid one another, it is necessary that they should forego their natural right, and, for the sake of security, refrain from all actions which can injure their fellow--men."
+    },
+    "PART4_BONDAGE_P37_DEMO_01_C24": {
+      "after_footnote": "13",
+      "part": "PART4_BONDAGE",
+      "text": "The way in which this end can be obtained, so that men who are necessarily a prey to their emotions (IV. iv. Coroll.), inconstant, and diverse, should be able to render each other mutually secure, and feel mutual trust, is evident from IV. vii. and III. xxxix. It is there shown, that an emotion can only be restrained by an emotion stronger than, and contrary to itself, and that men avoid inflicting injury through fear of incurring a greater injury themselves."
+    },
+    "PART4_BONDAGE_P37_DEMO_01_C25": {
+      "after_footnote": "13",
+      "part": "PART4_BONDAGE",
+      "text": "On this law society can be established, so long as it keeps in its own hand the right, possessed by everyone, of avenging injury, and pronouncing on good and evil; and provided it also possesses the power to lay down a general rule of conduct, and to pass laws sanctioned, not by reason, which is powerless in restraining emotion, but by threats (IV. xvii. note)."
+    },
+    "PART4_BONDAGE_P37_DEMO_01_C26": {
+      "after_footnote": "13",
+      "part": "PART4_BONDAGE",
+      "text": "Such a society established with laws and the power of preserving itself is called a State, while those who live under its protection are called citizens."
+    },
+    "PART4_BONDAGE_P37_DEMO_01_C27": {
+      "after_footnote": "13",
+      "part": "PART4_BONDAGE",
+      "text": "We may readily understand that there is in the state of nature nothing, which by universal consent is pronounced good or bad; for in the state of nature everyone thinks solely of his own advantage, and according to his disposition, with reference only to his individual advantage, decides what is good or bad, being bound by no law to anyone besides himself."
+    },
+    "PART4_BONDAGE_P37_DEMO_01_C28": {
+      "after_footnote": "13",
+      "part": "PART4_BONDAGE",
+      "text": "In the state of nature, therefore, sin is inconceivable; it can only exist in a state, where good and evil are pronounced on by common consent, and where everyone is bound to obey the State authority."
+    },
+    "PART4_BONDAGE_P37_DEMO_01_C29": {
+      "after_footnote": "13",
+      "part": "PART4_BONDAGE",
+      "text": "Sin, then, is nothing else but disobedience, which is therefore punished by the right of the State only."
+    },
+    "PART4_BONDAGE_P37_DEMO_01_C30": {
+      "after_footnote": "13",
+      "part": "PART4_BONDAGE",
+      "text": "Obedience, on the other hand, is set down as merit, inasmuch as a man is thought worthy of merit, if he takes delight in the advantages which a State provides."
+    },
+    "PART4_BONDAGE_P37_DEMO_01_C31": {
+      "after_footnote": "13",
+      "part": "PART4_BONDAGE",
+      "text": "Again, in the state of nature, no one is by common consent master of anything, nor is there anything in nature, which can be said to belong to one man rather than another: all things are common to all."
+    },
+    "PART4_BONDAGE_P37_DEMO_01_C32": {
+      "after_footnote": "13",
+      "part": "PART4_BONDAGE",
+      "text": "Hence, in the state of nature, we can conceive no wish to render to every man his own, or to deprive a man of that which belongs to him; in other words, there is nothing in the state of nature answering to justice and injustice."
+    },
+    "PART4_BONDAGE_P37_DEMO_01_C33": {
+      "after_footnote": "13",
+      "part": "PART4_BONDAGE",
+      "text": "Such ideas are only possible in a social state, when it is decreed by common consent what belongs to one man and what to another."
+    },
+    "PART4_BONDAGE_P37_DEMO_01_C34": {
+      "after_footnote": "13",
+      "part": "PART4_BONDAGE",
+      "text": "From all these considerations it is evident, that justice and injustice, sin and merit, are extrinsic ideas, and not attributes which display the nature of the mind."
+    },
+    "PART4_BONDAGE_P37_DEMO_01_C35": {
+      "after_footnote": "13",
+      "part": "PART4_BONDAGE",
+      "text": "But I have said enough."
+    }
+  },
+  "counts": {
+    "PART1_GOD": {
+      "continuation_candidates": 0,
+      "footnote_blocks": 1,
+      "marked": 1,
+      "mixed": 1,
+      "pure": 0,
+      "unmatched": 0
+    },
+    "PART2_MIND": {
+      "continuation_candidates": 10,
+      "footnote_blocks": 3,
+      "marked": 4,
+      "mixed": 3,
+      "pure": 1,
+      "unmatched": 0
+    },
+    "PART3_AFFECTS": {
+      "continuation_candidates": 5,
+      "footnote_blocks": 7,
+      "marked": 9,
+      "mixed": 3,
+      "pure": 6,
+      "unmatched": 0
+    },
+    "PART4_BONDAGE": {
+      "continuation_candidates": 25,
+      "footnote_blocks": 4,
+      "marked": 7,
+      "mixed": 4,
+      "pure": 3,
+      "unmatched": 0
+    },
+    "PART5_POWER": {
+      "continuation_candidates": 0,
+      "footnote_blocks": 2,
+      "marked": 4,
+      "mixed": 3,
+      "pure": 1,
+      "unmatched": 0
+    },
+    "total": {
+      "continuation_candidates": 40,
+      "footnote_blocks": 17,
+      "marked": 25,
+      "mixed": 14,
+      "pure": 11,
+      "unmatched": 0
+    }
+  },
+  "footnote_blocks": [
+    {
+      "footnote": "1",
+      "labels": [
+        "PART1_GOD_DEF_05"
+      ],
+      "part": "PART1_GOD",
+      "text": "[1] \"Affectiones\""
+    },
+    {
+      "footnote": "2",
+      "labels": [
+        "PART2_MIND_P10_PROP"
+      ],
+      "part": "PART2_MIND",
+      "text": "[2] \"Forma\""
+    },
+    {
+      "footnote": "3",
+      "labels": [
+        "PART2_MIND_P13_ESC_01_C05"
+      ],
+      "part": "PART2_MIND",
+      "text": "[3] \"Animata\""
+    },
+    {
+      "footnote": "4",
+      "labels": [
+        "PART2_MIND_P40_DEMO_01_C19",
+        "PART2_MIND_P40_DEMO_01_C20"
+      ],
+      "part": "PART2_MIND",
+      "text": "[4] A Baconian phrase. Nov. Org. Aph. 100. [Pollock, p. 126, n.]"
+    },
+    {
+      "footnote": "5",
+      "labels": [
+        "PART3_AFFECTS_P18_DEMO_01_C15"
+      ],
+      "part": "PART3_AFFECTS",
+      "text": "[5] Conscientiæ morsus--thus rendered by Mr. Pollock."
+    },
+    {
+      "footnote": "6",
+      "labels": [
+        "PART3_AFFECTS_P29_PROP_C02"
+      ],
+      "part": "PART3_AFFECTS",
+      "text": "[6] By \"men\" in this and the following propositions, I mean men whom we regard without any particular emotion."
+    },
+    {
+      "footnote": "7",
+      "labels": [
+        "PART3_AFFECTS_P30_ESC_01_C04",
+        "PART3_AFFECTS_P30_ESC_01_C05"
+      ],
+      "part": "PART3_AFFECTS",
+      "text": "[7] So Van Vloten and Bruder. The Dutch version and Camerer read, \"an internal cause.\" \"Honor\" = Gloria."
+    },
+    {
+      "footnote": "8",
+      "labels": [
+        "PART3_AFFECTS_P30_ESC_01_C06"
+      ],
+      "part": "PART3_AFFECTS",
+      "text": "[8] See previous endnote."
+    },
+    {
+      "footnote": "9",
+      "labels": [
+        "PART3_AFFECTS_P31_COR_01_C01",
+        "PART3_AFFECTS_P31_COR_01_C02"
+      ],
+      "part": "PART3_AFFECTS",
+      "text": "[9] Ovid, \"Amores,\" II. xix. 4,5. Spinoza transposes the verses."
+    },
+    {
+      "footnote": "10",
+      "labels": [
+        "PART3_AFFECTS_P51_ESC_01_C05"
+      ],
+      "part": "PART3_AFFECTS",
+      "text": "[10] This is possible, though the human mind is part of the divine intellect, as I have shown in II. xiii. note."
+    },
+    {
+      "footnote": "11",
+      "labels": [
+        "PART3_AFFECTS_DEFEMO_30"
+      ],
+      "part": "PART3_AFFECTS",
+      "text": "[11] Gloria."
+    },
+    {
+      "footnote": "12",
+      "labels": [
+        "PART4_BONDAGE_P17_ESC_01_C02",
+        "PART4_BONDAGE_P17_ESC_01_C03"
+      ],
+      "part": "PART4_BONDAGE",
+      "text": "[12] Ov. Met. vii.20, \"Video meliora proboque, Deteriora sequor.\""
+    },
+    {
+      "footnote": "13",
+      "labels": [
+        "PART4_BONDAGE_P37_DEMO_01_C11"
+      ],
+      "part": "PART4_BONDAGE",
+      "text": "[13] Honestas"
+    },
+    {
+      "footnote": "14",
+      "labels": [
+        "PART4_BONDAGE_P53_DEMO_01_C06",
+        "PART4_BONDAGE_P53_DEMO_01_C07"
+      ],
+      "part": "PART4_BONDAGE",
+      "text": "[14] Land reads: \"Quod ipsius agendi potentia juvatur\"--which I have translated above. He suggests as alternative readings to 'quod', 'quo' (= whereby) and 'quodque' (= and that)."
+    },
+    {
+      "footnote": "15",
+      "labels": [
+        "PART4_BONDAGE_P66_PROP_C01",
+        "PART4_BONDAGE_P66_PROP_C02"
+      ],
+      "part": "PART4_BONDAGE",
+      "text": "[15] \"Maltim praesens minus prae majori futuro.\" (Van Vloten). Bruder reads: \"Malum praesens minus, quod causa est faturi alicujus mali.\" The last word of the latter is an obvious misprint, and is corrected by the Dutch translator into \"majoris boni.\" (Pollock, p. 268, note.)"
+    },
+    {
+      "footnote": "16",
+      "labels": [
+        "PART5_POWER_P10_ESC_01_C16",
+        "PART5_POWER_P10_ESC_01_C17"
+      ],
+      "part": "PART5_POWER",
+      "text": "[16] Continuo. Rendered \"constantly\" by Mr. Pollock on the ground that the classical meaning of the word does not suit the context."
+    },
+    {
+      "footnote": "17",
+      "labels": [
+        "PART5_POWER_P20_ESC_01_C03",
+        "PART5_POWER_P20_ESC_01_C04"
+      ],
+      "part": "PART5_POWER",
+      "text": "[17] Affectiones. Camerer reads affectus----emotions."
+    }
+  ],
+  "marked": {
+    "PART1_GOD_DEF_05": {
+      "coverage": 0.10833333333333334,
+      "footnote": "1",
+      "part": "PART1_GOD",
+      "pure": false
+    },
+    "PART2_MIND_P10_PROP": {
+      "coverage": 0.058333333333333334,
+      "footnote": "2",
+      "part": "PART2_MIND",
+      "pure": false
+    },
+    "PART2_MIND_P13_ESC_01_C05": {
+      "coverage": 0.022727272727272728,
+      "footnote": "3",
+      "part": "PART2_MIND",
+      "pure": false
+    },
+    "PART2_MIND_P40_DEMO_01_C19": {
+      "coverage": 1.0,
+      "footnote": "4",
+      "part": "PART2_MIND",
+      "pure": true
+    },
+    "PART2_MIND_P40_DEMO_01_C20": {
+      "coverage": 0.05714285714285714,
+      "footnote": "4",
+      "part": "PART2_MIND",
+      "pure": false
+    },
+    "PART3_AFFECTS_DEFEMO_30": {
+      "coverage": 0.07142857142857142,
+      "footnote": "11",
+      "part": "PART3_AFFECTS",
+      "pure": false
+    },
+    "PART3_AFFECTS_P18_DEMO_01_C15": {
+      "coverage": 1.0,
+      "footnote": "5",
+      "part": "PART3_AFFECTS",
+      "pure": true
+    },
+    "PART3_AFFECTS_P29_PROP_C02": {
+      "coverage": 1.0,
+      "footnote": "6",
+      "part": "PART3_AFFECTS",
+      "pure": true
+    },
+    "PART3_AFFECTS_P30_ESC_01_C04": {
+      "coverage": 1.0,
+      "footnote": "7",
+      "part": "PART3_AFFECTS",
+      "pure": true
+    },
+    "PART3_AFFECTS_P30_ESC_01_C05": {
+      "coverage": 1.0,
+      "footnote": "7",
+      "part": "PART3_AFFECTS",
+      "pure": true
+    },
+    "PART3_AFFECTS_P30_ESC_01_C06": {
+      "coverage": 1.0,
+      "footnote": "8",
+      "part": "PART3_AFFECTS",
+      "pure": true
+    },
+    "PART3_AFFECTS_P31_COR_01_C01": {
+      "coverage": 0.08833922261484099,
+      "footnote": "9",
+      "part": "PART3_AFFECTS",
+      "pure": false
+    },
+    "PART3_AFFECTS_P31_COR_01_C02": {
+      "coverage": 0.40298507462686567,
+      "footnote": "9",
+      "part": "PART3_AFFECTS",
+      "pure": false
+    },
+    "PART3_AFFECTS_P51_ESC_01_C05": {
+      "coverage": 1.0,
+      "footnote": "10",
+      "part": "PART3_AFFECTS",
+      "pure": true
+    },
+    "PART4_BONDAGE_P17_ESC_01_C02": {
+      "coverage": 0.027522935779816515,
+      "footnote": "12",
+      "part": "PART4_BONDAGE",
+      "pure": false
+    },
+    "PART4_BONDAGE_P17_ESC_01_C03": {
+      "coverage": 0.09560229445506692,
+      "footnote": "12",
+      "part": "PART4_BONDAGE",
+      "pure": false
+    },
+    "PART4_BONDAGE_P37_DEMO_01_C11": {
+      "coverage": 0.041666666666666664,
+      "footnote": "13",
+      "part": "PART4_BONDAGE",
+      "pure": false
+    },
+    "PART4_BONDAGE_P53_DEMO_01_C06": {
+      "coverage": 1.0,
+      "footnote": "14",
+      "part": "PART4_BONDAGE",
+      "pure": true
+    },
+    "PART4_BONDAGE_P53_DEMO_01_C07": {
+      "coverage": 1.0,
+      "footnote": "14",
+      "part": "PART4_BONDAGE",
+      "pure": true
+    },
+    "PART4_BONDAGE_P66_PROP_C01": {
+      "coverage": 0.228310502283105,
+      "footnote": "15",
+      "part": "PART4_BONDAGE",
+      "pure": false
+    },
+    "PART4_BONDAGE_P66_PROP_C02": {
+      "coverage": 1.0,
+      "footnote": "15",
+      "part": "PART4_BONDAGE",
+      "pure": true
+    },
+    "PART5_POWER_P10_ESC_01_C16": {
+      "coverage": 0.04568527918781726,
+      "footnote": "16",
+      "part": "PART5_POWER",
+      "pure": false
+    },
+    "PART5_POWER_P10_ESC_01_C17": {
+      "coverage": 1.0,
+      "footnote": "16",
+      "part": "PART5_POWER",
+      "pure": true
+    },
+    "PART5_POWER_P20_ESC_01_C03": {
+      "coverage": 0.022944550669216062,
+      "footnote": "17",
+      "part": "PART5_POWER",
+      "pure": false
+    },
+    "PART5_POWER_P20_ESC_01_C04": {
+      "coverage": 0.22758620689655173,
+      "footnote": "17",
+      "part": "PART5_POWER",
+      "pure": false
+    }
+  },
+  "rule": "A footnote block is a source paragraph block (blank-line separated, whitespace-normalised, within a part's builder boundaries, markers intact) whose raw text starts with '[N] '. Its sentences, obtained by stripping the marker and calling the builder's split_sentences, are matched as substrings, in reading order, against the part's frozen manifest chunks (a forward-only cursor, also advanced by every ordinary block in between, prevents matching an earlier occurrence of the same text). Blocks that immediately follow a footnote block, up to the next block that is a section header, an inline marker (DEFINITION/AXIOM/LEMMA/POSTULATE/PROP./Proof.--/Corollary.--/Note.--), a roman-numbered list item, or another footnote marker, are reported as continuation candidates and are never marked.",
+  "source_sha256": "647f0227f3700b5d221a004fc545568c879f6f204e952f1cf0c24672676c2a60",
+  "unmatched": []
+}
