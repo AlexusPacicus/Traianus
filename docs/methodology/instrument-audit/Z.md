@@ -1073,3 +1073,9 @@ Reviewed by:               instrument-auditor (blind subagent, review package bu
   states without the search. Aside, as exploration: the display keeps little of the 384-d
   neighbourhoods in either arm (score 0.049, 0.038, 0.022 at start, middle, end). The full
   reading and the open decisions are in RefApp-01's ZOOM.md.
+- **Correction to the reading** (the author, 2026-09-26). The aside does not hold as written: Z's
+  score averages over every note in view and every scale, most weight on K = 1, corrects for
+  chance and counts the neighbours a view cuts off, so it is not comparable with R4, where the
+  anchor note's perspective keeps 0.81–0.89 of its 15 nearest neighbours; a low Z score does not
+  show a poor display. The zoom's purpose, restated by the author, is relational depth from a
+  chosen note, which Z did not measure (ZOOM.md, "Correction and the zoom's purpose").
