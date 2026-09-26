@@ -1059,3 +1059,17 @@ Reviewed by:               instrument-auditor (blind subagent, review package bu
   Counts: 0 excluded, 0 failed searches, iterations = 1 for all 1,110 searches, no middle cell
   differing between the arms, 32 end states not scored per arm (30 of them degenerate), 0
   margins below 2ρ. Smallest positive d = 0.0443.
+- **Reading** (the author, 2026-09-26; after the result's commit, from its reported figures).
+  Z1 is formally inconclusive — the rule has no equivalence margin — and in practice the two arms
+  are the same zoom on this corpus: the friction is almost flat. √f at the middle lies in
+  [1.00008, 1.0021], and τ_seg(A, B) exceeds d by 0.058% (median; at most 0.29%), so m moves from
+  m₀ by 0.016% of d (median; at most 0.057%), τ₃/τ₂ − 1 is −4.8e-8 (median), every search takes
+  one step, no middle cell differs, and each D_q lies within ±5.6e-4 (24 exactly 0); any
+  difference is below 0.01% of the middle score. This does not test the author's postulate, only
+  that its operational form, f = 1 + Var of the axis projections, is nearly Euclidean here; nor
+  does it refute better neighbourhoods where the friction varies appreciably. Z2 confirms
+  keyframes plus interpolation against per-step recomputation within 100 ms (compute only, this
+  machine), not three points against two: given Z1, a two-point zoom with keyframes gives the same
+  states without the search. Aside, as exploration: the display keeps little of the 384-d
+  neighbourhoods in either arm (score 0.049, 0.038, 0.022 at start, middle, end). The full
+  reading and the open decisions are in RefApp-01's ZOOM.md.
