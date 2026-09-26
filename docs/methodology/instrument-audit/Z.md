@@ -1046,3 +1046,16 @@ Reviewed by:               instrument-auditor (blind subagent, review package bu
   no Z2 decision is used. Validity: if either run's `valid` is false, no decision is used and the
   failed conditions are reported. A defect found after the first run is a new version, reviewed
   again, and both versions' results are reported. The result's commit states results only.
+- **First run** (2026-09-26, after the run plan's commit `afc606e`): two runs of the script at
+  `afc606e` (sha256 57323bb5…3330), 2 min 31 s and 2 min 34 s; run 1 wrote
+  `data/refapp/Z_result.json`, run 2 `.data/z_run2.json`. Both valid, every condition passed;
+  null_world passed (smallest relative display gap 8.06e-8). The two files, parsed as JSON, are
+  equal outside `z2`. Z1: n = 1,110, D̄ = 7.22e-7, inconclusive at every L (interval at L = 1
+  [−1.34e-6, 2.97e-6], at L = 50 [−1.07e-6, 2.50e-6]); quadrature: the same decision at every L,
+  0 targets changed; identity passed with 0 ties; permutation AUC 1.81e-4 within ±3.61e-3. Mean
+  middle score 0.0381141 (three-point) and 0.0381134 (two-point); start 0.0493387 and end
+  0.0219928 in both. Z2: run 1 median Δ = −912,375.5 ns, ready p95 = 47,905,091 ns; run 2
+  −920,062.5 ns and 48,647,505 ns; confirmed in both runs at every L, so Z2's decision is used.
+  Counts: 0 excluded, 0 failed searches, iterations = 1 for all 1,110 searches, no middle cell
+  differing between the arms, 32 end states not scored per arm (30 of them degenerate), 0
+  margins below 2ρ. Smallest positive d = 0.0443.
