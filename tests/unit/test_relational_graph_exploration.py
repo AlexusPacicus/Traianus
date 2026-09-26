@@ -879,3 +879,172 @@ def test_x12_the_cells_median_summary_line_the_default_output_path_and_its_overr
     overridden = tmp_path / "override" / "result.json"
     reg.main(["--relations", "cells_median", "--out", str(overridden)])
     assert json.loads(overridden.read_text(encoding="utf-8")) == loaded
+
+
+# sha256 of the file the code at base commit 08144b0 writes for _dyadic_world in cells_median mode, environment fixed
+BASE_COMMIT_CELLS_MEDIAN_OUTPUT_SHA256 = "dc8c788e1a2a58afea2b1aab301b012c796efe916146f55ffc418dce57a18a5a"
+
+
+def test_x13_the_cells_median_mode_output_is_byte_identical_to_the_base_commit(tmp_path, monkeypatch):
+    monkeypatch.setattr(reg, "environment", lambda: {"fixed": True})
+    (embeddings, labels, axes), expected = _write_cells_inputs(tmp_path, world=_dyadic_world)
+    out = tmp_path / "out" / "result.json"
+    reg.run(embeddings, labels, expected, out, "cells_median", axes)
+    assert hashlib.sha256(out.read_bytes()).hexdigest() == BASE_COMMIT_CELLS_MEDIAN_OUTPUT_SHA256
+
+
+# Cells open mode (delegation contract relational-graph-cells-open) --------------------------------
+
+OPEN_CELLS_KEYS = {
+    "partition", "axes_digest", "per_axis", "tree_edges", "within_cell_relations", "cross_cell_relations",
+    "added_links", "added_link_distances",
+}
+OPEN_CELL_KEYS = {"axis", "size", "t_c", "touching_tree_weights", "within_cell_relations", "cross_cell_relations"}
+LOSS_KEYS = {"definition", "cross_cell_pairs", "dropped", "dropped_distances", "notes_with_dropped"}
+
+
+def _open_world():
+    """Rows on the line y = 9.5 at x = 0, 5, 8, 9 (cell y) and 10, 11, 15, 22, 30 (cell x), axes +x, +y, -x, -y:
+    every distance is the integer gap in x. The global tree is the path 0-1-...-8 (5, 3, 1, 1, 1, 4, 7, 8), whose
+    edge 3-4 (1) crosses the cells. The tree edges touching cell y weigh 5, 3, 1, 1 (t_c 2), those touching cell x
+    1, 1, 4, 7, 8 (t_c 4); cells -x and -y are empty. The cells' own trees weigh 5, 3, 1 (median_c 3) and 1, 4, 7, 8
+    (median_c 5.5)."""
+    v = np.array([[x, 9.5] for x in (0, 5, 8, 9, 10, 11, 15, 22, 30)], dtype=float)
+    a = np.array([[1, 0], [0, 1], [-1, 0], [0, -1]], dtype=float)
+    parts = ("I", "I", "I", "II", "II", "II", "III", "III", "III")
+    return v, (["x", "y", "-x", "-y"], a), [{"label": f"o{i}", "part": part} for i, part in enumerate(parts)]
+
+
+def test_cells_open_t1_each_threshold_is_the_median_of_the_global_tree_edges_touching_the_cell():
+    v, (ids, a), labels = _open_world()
+    d = reg.pairwise_distances(v)
+    cells = reg.axis_cells(v, a)
+    assert cells.tolist() == [1, 1, 1, 1, 0, 0, 0, 0, 0]
+    tree = reg.minimum_spanning_tree(d)
+    assert [w for _, _, w in tree] == [5.0, 3.0, 1.0, 1.0, 1.0, 4.0, 7.0, 8.0]
+    touching = reg.touching_tree_weights(tree, cells, len(a))
+    assert [sorted(w) for w in touching] == [[1.0, 1.0, 4.0, 7.0, 8.0], [1.0, 1.0, 3.0, 5.0], [], []]
+    per_axis = reg.explore(v, labels, None, axes=(ids, a), open_cells=True)["cells"]["per_axis"]
+    assert [c["axis"] for c in per_axis] == ids
+    assert [c["size"] for c in per_axis] == [5, 4, 0, 0]
+    assert [c["t_c"] for c in per_axis] == [4.0, 2.0, None, None]
+    assert per_axis[0]["touching_tree_weights"] == {
+        "count": 5, "0": 1.0, "0.25": 1.0, "0.5": 4.0, "0.75": 7.0, "1": 8.0,
+    }
+    assert per_axis[1]["touching_tree_weights"] == {
+        "count": 4, "0": 1.0, "0.25": 1.0, "0.5": 2.0, "0.75": 3.5, "1": 5.0,
+    }
+    assert per_axis[2]["touching_tree_weights"] == {"count": 0, **dict.fromkeys(QUANTILE_KEYS)}
+    for cell in per_axis:
+        assert set(cell) == OPEN_CELL_KEYS
+    median = reg.explore(v, labels, None, axes=(ids, a), median=True)["cells"]["per_axis"]
+    assert [c["median_c"] for c in median] == [5.5, 3.0, None, None]
+
+
+def test_cells_open_t2_pairs_within_the_smaller_threshold_of_their_cells_joined_with_the_global_tree():
+    v, (ids, a), labels = _open_world()
+    d = reg.pairwise_distances(v)
+    cells = reg.axis_cells(v, a)
+    related = reg.open_relations(d, cells, [4.0, 2.0, None, None])
+    assert related == [(2, 3, 1.0), (2, 4, 2.0), (3, 4, 1.0), (3, 5, 2.0), (4, 5, 1.0), (5, 6, 4.0)]
+    assert reg.open_relations(d, cells, [4.0, None, None, None]) == [(4, 5, 1.0), (5, 6, 4.0)]
+    result = reg.explore(v, labels, None, axes=(ids, a), open_cells=True)
+    relations = result["relations"]
+    assert "t_c" in relations["source"] and relations["near_epsilon"] is None
+    assert relations["n_edges"] == 10
+    assert result["components"]["sizes"] == [9]
+    degrees = result["degrees"]
+    assert (degrees["isolated"], degrees["min"], degrees["max"], degrees["mean"]) == (0, 1, 3, 20 / 9)
+    assert result["reading_order"] == {"consecutive_row_edges": 8, "cross_part_edges": 3}
+    assert result["pairwise_distances"]["share_within_epsilon"] is None
+    assert "mst" not in result and "union" not in result
+    block = result["cells"]
+    assert set(block) == OPEN_CELLS_KEYS - {"axes_digest"}
+    assert "t_c" in block["partition"]
+    assert [c["within_cell_relations"] for c in block["per_axis"]] == [2, 1, 0, 0]
+    assert [c["cross_cell_relations"] for c in block["per_axis"]] == [3, 3, 0, 0]
+    assert (block["within_cell_relations"], block["cross_cell_relations"]) == (3, 3)
+    assert (block["tree_edges"], block["added_links"]) == (8, 4)
+    assert block["added_link_distances"] == {"count": 4, "0": 3.0, "0.25": 4.5, "0.5": 6.0, "0.75": 7.25, "1": 8.0}
+
+
+def test_cells_open_t3_the_cross_cell_pairs_cells_median_drops():
+    v, (ids, a), labels = _open_world()
+    d = reg.pairwise_distances(v)
+    cells = reg.axis_cells(v, a)
+    tree = reg.minimum_spanning_tree(d)
+    loss = reg.cells_median_loss(d, cells, [5.5, 3.0, None, None], tree)
+    assert set(loss) == LOSS_KEYS
+    assert "median_c" in loss["definition"]
+    assert loss["cross_cell_pairs"] == 20
+    assert loss["dropped"] == {"count": 3, "share": 3 / 20}
+    assert loss["dropped_distances"] == {"count": 3, "0": 2.0, "0.25": 2.0, "0.5": 2.0, "0.75": 2.5, "1": 3.0}
+    assert loss["notes_with_dropped"] == 4
+    assert reg.cells_median_loss(d, cells, [5.5, None, None, None], tree)["dropped"] == {"count": 0, "share": 0.0}
+    assert reg.explore(v, labels, None, axes=(ids, a), open_cells=True)["cells_median_loss"] == loss
+
+
+def test_cells_open_t4_the_cells_open_file_is_sorted_finite_json_with_every_section(tmp_path, monkeypatch):
+    monkeypatch.setenv("TRAIANUS_EPSILON_EDGE", "0.8")
+    (embeddings, labels, axes), expected = _write_cells_inputs(tmp_path)
+    out = tmp_path / "out" / "relational_graph_exploration_cells_open.json"
+    returned = reg.run(embeddings, labels, expected, out, "cells_open", axes)
+    raw = out.read_bytes()
+    text = raw.decode("utf-8")
+    loaded = json.loads(text)
+    assert loaded == returned
+    assert text == json.dumps(loaded, sort_keys=True, indent=2, allow_nan=False) + "\n"
+    assert b"\r" not in raw and "NaN" not in text and "Infinity" not in text
+    assert loaded["kind"] == "exploration" and loaded["epsilon"] is None and loaded["n"] == 6
+    assert loaded["digests"] == {
+        "embeddings.npy": expected[embeddings], "labels.json": expected[labels], "nsm_axes_8.json": expected[axes],
+    }
+    median = reg.run(embeddings, labels, expected, tmp_path / "median.json", "cells_median", axes)
+    assert set(loaded) == set(median) | {"cells_median_loss"}
+    for section, keys in FIGURES.items():
+        assert set(keys) <= set(loaded[section]), section
+    assert loaded["relations"]["near_epsilon"] is None and "t_c" in loaded["relations"]["source"]
+    assert loaded["components"]["sizes"] == [6]
+    cells = loaded["cells"]
+    assert set(cells) == OPEN_CELLS_KEYS
+    assert cells["axes_digest"] == expected[axes]
+    assert [c["axis"] for c in cells["per_axis"]] == [f"ax{k}" for k in range(8)]
+    for cell in cells["per_axis"]:
+        assert set(cell) == OPEN_CELL_KEYS
+        assert set(cell["touching_tree_weights"]) == {"count", *QUANTILE_KEYS}
+    assert cells["tree_edges"] == 5
+    assert set(cells["added_link_distances"]) == {"count", *QUANTILE_KEYS}
+    nearest = loaded["nearest_neighbours"]
+    assert set(nearest) == NEAREST_KEYS and len(nearest["notes"]) == 6
+    loss = loaded["cells_median_loss"]
+    assert set(loss) == LOSS_KEYS
+    assert set(loss["dropped"]) == {"count", "share"}
+    assert set(loss["dropped_distances"]) == {"count", *QUANTILE_KEYS}
+
+
+def test_x14_the_cells_open_summary_line_the_default_output_path_and_its_override(tmp_path, monkeypatch, capsys):
+    assert "cells_open" in reg.MODES
+    assert reg.RESULT_CELLS_OPEN == reg.REPO_ROOT / "data" / "refapp" / "relational_graph_exploration_cells_open.json"
+    default = tmp_path / "default" / "relational_graph_exploration_cells_open.json"
+    monkeypatch.setattr(reg, "RESULT_CELLS_OPEN", default)
+    monkeypatch.setattr(reg, "RESULT_CELLS_MEDIAN", tmp_path / "median" / "unused.json")
+    tmp_path.joinpath("a").mkdir()
+    (embeddings, labels, axes), expected = _write_cells_inputs(tmp_path / "a")
+    monkeypatch.setattr(reg, "EMBEDDINGS", embeddings)
+    monkeypatch.setattr(reg, "LABELS", labels)
+    monkeypatch.setattr(reg, "AXES", axes)
+    monkeypatch.setattr(reg, "EXPECTED_DIGESTS", {p: expected[p] for p in (embeddings, labels)})
+    monkeypatch.setattr(reg, "AXES_DIGEST", expected[axes])
+    reg.main(["--relations", "cells_open"])
+    loaded = json.loads(default.read_text(encoding="utf-8"))
+    assert loaded["epsilon"] is None and not (tmp_path / "median").exists()
+    line = capsys.readouterr().out
+    cells = loaded["cells"]
+    assert line == (
+        f"relational graph: n=6 relations=cells_open edges={loaded['relations']['n_edges']} "
+        f"cross_cell_relations={cells['cross_cell_relations']} added_links={cells['added_links']} "
+        f"components={loaded['components']['count']} -> {default}\n"
+    )
+    overridden = tmp_path / "override" / "result.json"
+    reg.main(["--relations", "cells_open", "--out", str(overridden)])
+    assert json.loads(overridden.read_text(encoding="utf-8")) == loaded

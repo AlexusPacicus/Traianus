@@ -17,14 +17,18 @@ tree between different cells.
 With --relations cells_median (delegation contract relational-graph-cells-median) each cell's threshold median_c is
 the median of its own tree's edge weights, and the within-cell relations are joined with every edge of the global
 tree; each note's nearest neighbour is reported as well, with its axis cell.
+With --relations cells_open (delegation contract relational-graph-cells-open) each cell's threshold t_c is the median
+of the global tree's edge weights with an end in the cell, two notes in any cells are related within the smaller
+threshold of their cells, the relations are joined with every edge of the global tree, and the cross-cell pairs
+cells_median drops though both its cells' median_c admit them are counted.
 Descriptive: it tests no hypothesis and decides nothing.
 
 Refuses to run, writing nothing, unless every input digest (two files, three in the cells modes with the axes)
 matches the Z script's pins.
 
 Usage:
-    python3 tools/experiments/relational_graph_exploration.py [--relations {epsilon,mst,union,cells,cells_median}]
-        [--out PATH]
+    python3 tools/experiments/relational_graph_exploration.py
+        [--relations {epsilon,mst,union,cells,cells_median,cells_open}] [--out PATH]
 """
 
 import os
@@ -63,8 +67,9 @@ RESULT_MST = REPO_ROOT / "data" / "refapp" / "relational_graph_exploration_mst.j
 RESULT_UNION = REPO_ROOT / "data" / "refapp" / "relational_graph_exploration_union.json"
 RESULT_CELLS = REPO_ROOT / "data" / "refapp" / "relational_graph_exploration_cells.json"
 RESULT_CELLS_MEDIAN = REPO_ROOT / "data" / "refapp" / "relational_graph_exploration_cells_median.json"
+RESULT_CELLS_OPEN = REPO_ROOT / "data" / "refapp" / "relational_graph_exploration_cells_open.json"
 AXES = REPO_ROOT / "tests" / "fixtures" / "nsm_axes_8.json"
-CELL_MODES = ("cells", "cells_median")
+CELL_MODES = ("cells", "cells_median", "cells_open")
 MODES = ("epsilon", "mst", "union", *CELL_MODES)
 EXPECTED_DIGESTS = {
     EMBEDDINGS: "eafb0e97172830f2404e96fa08d74bf6cccc0b6cbe84d47b790a476603e7d8d1",
@@ -97,6 +102,18 @@ CELLS_MEDIAN_SOURCE = (
     "distance of pairwise_distances is <= that cell's median_c, numpy.median of the edge weights of the minimum "
     f"spanning tree of the cell's rows) and every edge of the {MST_SOURCE}; a pair appears once, weighted by its "
     "distance of pairwise_distances"
+)
+CELLS_OPEN_SOURCE = (
+    "union, on unordered row pairs, of the open relations (the pairs, in one axis cell or in two, whose binary64 L2 "
+    "distance of pairwise_distances is <= min(t_c) of their cells, t_c numpy.median of the weights of the edges of "
+    f"the {MST_SOURCE} with an end in the cell, an edge between two cells counted once for each; a null t_c admits no "
+    "pair) and every edge of that tree; a pair appears once, weighted by its distance of pairwise_distances"
+)
+LOSS_DEFINITION = (
+    "the cross-cell pairs cells_median drops: pairs of rows in different axis cells whose distance of "
+    "pairwise_distances is <= min(median_c) of their cells (a null median_c admits no pair) and which are not edges "
+    "of the minimum spanning tree; dropped.share is their share of all cross-cell pairs; notes_with_dropped counts "
+    "the rows with at least one"
 )
 AXIS_CELLS = (
     "axis cells: each row in the cell of argmax_k <v, a_hat_k>, a_hat_k = a_k / ||a_k|| in binary64, ties to the "
@@ -238,6 +255,30 @@ def cell_graph(
             )
     cross = [(i, j, w) for i, j, w in minimum_spanning_tree(d) if cells[i] != cells[j]]
     return trees, sorted(within), cross
+
+
+def touching_tree_weights(tree: Sequence[Edge], cells: NDArray[np.intp], n_cells: int) -> list[list[float]]:
+    """Per cell, in axis order, the weights of the tree edges with an end in the cell; an edge between two cells
+    counts once for each, an edge inside a cell once."""
+    weights: list[list[float]] = [[] for _ in range(n_cells)]
+    for i, j, w in tree:
+        for k in sorted({int(cells[i]), int(cells[j])}):
+            weights[k].append(w)
+    return weights
+
+
+def _pair_thresholds(cells: NDArray[np.intp], thresholds: Sequence[float | None]) -> Array:
+    """The smaller threshold of the two rows' cells, for every row pair; -inf where either is null."""
+    t = np.array([-np.inf if c is None else c for c in thresholds])[cells]
+    pairs: Array = np.minimum.outer(t, t)
+    return pairs
+
+
+def open_relations(d: Array, cells: NDArray[np.intp], thresholds: Sequence[float | None]) -> list[Edge]:
+    """Every pair, in one cell or in two, at distance <= the smaller threshold of its cells (a null threshold admits
+    none). Edges (i, j, weight), i < j, sorted."""
+    rows, cols = np.nonzero(np.triu(d <= _pair_thresholds(cells, thresholds), 1))
+    return [(int(i), int(j), float(d[i, j])) for i, j in zip(rows, cols, strict=True)]
 
 
 def components(n: int, edges: Sequence[Edge]) -> list[list[int]]:
@@ -409,32 +450,87 @@ def _adjacency(n: int, edges: Sequence[Edge]) -> NDArray[np.bool_]:
     return adjacent
 
 
+def _open_cell_figures(
+    axis_ids: Sequence[str], cells: NDArray[np.intp], touching: Sequence[Sequence[float]],
+    thresholds: Sequence[float | None], related: Sequence[Edge], tree: Sequence[Edge],
+) -> dict[str, Any]:
+    ends = np.array([(cells[i], cells[j]) for i, j, _ in related], dtype=np.intp).reshape(-1, 2)
+    same = ends[:, 0] == ends[:, 1]
+    added = _added_links(related, tree)
+    return {
+        "partition": f"{AXIS_CELLS}; t_c is null for a cell touched by no tree edge",
+        "per_axis": [
+            {
+                "axis": axis_id,
+                "size": int(np.count_nonzero(cells == k)),
+                "t_c": t_c,
+                "touching_tree_weights": _summary(np.array(weights)),
+                "within_cell_relations": int(np.count_nonzero(same & (ends[:, 0] == k))),
+                "cross_cell_relations": int(np.count_nonzero(~same & (ends == k).any(axis=1))),
+            }
+            for k, (axis_id, weights, t_c) in enumerate(zip(axis_ids, touching, thresholds, strict=True))
+        ],
+        "tree_edges": len(tree),
+        "within_cell_relations": int(np.count_nonzero(same)),
+        "cross_cell_relations": int(np.count_nonzero(~same)),
+        "added_links": len(added),
+        "added_link_distances": _summary(np.array([w for _, _, w in added])),
+    }
+
+
+def cells_median_loss(
+    d: Array, cells: NDArray[np.intp], medians: Sequence[float | None], tree: Sequence[Edge],
+) -> dict[str, Any]:
+    """The cross-cell pairs within the smaller median_c of their cells that are not tree edges: the pairs cells_median
+    drops though both its cells' thresholds admit them."""
+    n = len(d)
+    cross = np.triu(cells[:, None] != cells[None, :], 1)
+    dropped = cross & (d <= _pair_thresholds(cells, medians)) & ~_adjacency(n, tree)
+    rows, cols = np.nonzero(dropped)
+    return {
+        "definition": LOSS_DEFINITION,
+        "cross_cell_pairs": int(np.count_nonzero(cross)),
+        "dropped": _share(dropped[cross]),
+        "dropped_distances": _summary(d[dropped]),
+        "notes_with_dropped": len({*rows.tolist(), *cols.tolist()}),
+    }
+
+
 def explore(
     v: Array, labels: Sequence[Mapping[str, str]], epsilon: float | None, union: bool = False,
-    axes: tuple[Sequence[str], Array] | None = None, median: bool = False,
+    axes: tuple[Sequence[str], Array] | None = None, median: bool = False, open_cells: bool = False,
 ) -> dict[str, Any]:
     """The figures of the relation graph: the epsilon-relations at epsilon, the minimum spanning tree when
     epsilon is None, or with union the union of both, whose near_epsilon counts the epsilon-relations only.
     With axes (ids, raw vectors) and epsilon None, the per-cell relations of cell_graph and a cells block; with
     median as well, each cell's threshold is median_c, its relations are joined with the whole tree, and a
-    nearest_neighbours block is added."""
+    nearest_neighbours block is added. With open_cells instead of median, each cell's threshold is t_c, the open
+    relations are joined with the whole tree, and nearest_neighbours and cells_median_loss blocks are added."""
     if axes is not None and (epsilon is not None or union):
         raise ValueError("cells relations take no epsilon and no union")
     if median and axes is None:
         raise ValueError("median relations are cells relations and need the axes")
+    if open_cells and (axes is None or median):
+        raise ValueError("open relations are cells relations, need the axes and exclude median")
     n = len(v)
     names = [item["label"] for item in labels]
     parts = [item["part"] for item in labels]
     d = pairwise_distances(v)
     epsilon_edges = [] if epsilon is None else relations(names, v, epsilon)
     tree_mode = epsilon is None and axes is None
-    tree = minimum_spanning_tree(d) if tree_mode or union or median else []
-    threshold: Callable[[Sequence[float]], float] = median_threshold if median else max
+    tree = minimum_spanning_tree(d) if tree_mode or union or median or open_cells else []
+    threshold: Callable[[Sequence[float]], float] = median_threshold if median or open_cells else max
     key = "median_c" if median else "epsilon_c"
     if axes is not None:
         cells = axis_cells(v, axes[1])
         trees, within, cross = cell_graph(d, cells, len(axes[1]), threshold)
-        edges = union_edges(within, tree if median else cross, d)
+        if open_cells:
+            touching = touching_tree_weights(tree, cells, len(axes[1]))
+            thresholds = [median_threshold(weights) if weights else None for weights in touching]
+            related = open_relations(d, cells, thresholds)
+            edges = union_edges(related, tree, d)
+        else:
+            edges = union_edges(within, tree if median else cross, d)
     elif union:
         edges = union_edges(epsilon_edges, tree, d)
     else:
@@ -455,7 +551,8 @@ def explore(
     result = {
         "relations": {
             "source": (
-                CELLS_MEDIAN_SOURCE if median else CELLS_SOURCE if axes is not None else UNION_SOURCE if union
+                CELLS_OPEN_SOURCE if open_cells else CELLS_MEDIAN_SOURCE if median
+                else CELLS_SOURCE if axes is not None else UNION_SOURCE if union
                 else MST_SOURCE if epsilon is None else EPSILON_SOURCE
             ),
             "manual": MANUAL_RELATIONS,
@@ -507,7 +604,12 @@ def explore(
         result["mst"] = _tree_figures(tree)
     if union:
         result["union"] = _union_figures(epsilon_edges, tree)
-    if axes is not None:
+    if axes is not None and open_cells:
+        medians = [median_threshold([w for _, _, w in own]) if own else None for own in trees]
+        result["cells"] = _open_cell_figures(axes[0], cells, touching, thresholds, related, tree)
+        result["cells_median_loss"] = cells_median_loss(d, cells, medians, tree)
+        result["nearest_neighbours"] = nearest_neighbour_figures(d, tree, cells, axes[0], labels)
+    elif axes is not None:
         block = _cell_figures(axes[0], cells, trees, within, threshold, key)
         if median:
             added = _added_links(within, tree)
@@ -592,7 +694,10 @@ def run(
         "epsilon": epsilon,
         "n": len(v),
         "environment": environment(),
-        **explore(v, label_list, epsilon, union=mode == "union", axes=cell_axes, median=mode == "cells_median"),
+        **explore(
+            v, label_list, epsilon, union=mode == "union", axes=cell_axes, median=mode == "cells_median",
+            open_cells=mode == "cells_open",
+        ),
     }
     if axes_path is not None:
         result["cells"]["axes_digest"] = expected[axes_path]
@@ -607,14 +712,16 @@ def main(argv: Sequence[str] | None = None) -> None:
             "epsilon: the engine's epsilon-relations (default); mst: the minimum spanning tree of the L2 distances; "
             "union: the epsilon-relations joined with that tree; cells: per axis cell the pairs within its own "
             "connectivity threshold, the cells joined by that tree; cells_median: per axis cell the pairs within the "
-            "median edge of its own tree, joined with the whole tree"
+            "median edge of its own tree, joined with the whole tree; cells_open: every pair within the smaller of its "
+            "cells' medians of the tree edges touching each cell, joined with the whole tree"
         ),
     )
     parser.add_argument(
         "--out", type=Path, default=None,
         help=(
             f"result path (default: {RESULT}, in mst mode {RESULT_MST}, in union mode {RESULT_UNION}, "
-            f"in cells mode {RESULT_CELLS}, in cells_median mode {RESULT_CELLS_MEDIAN})"
+            f"in cells mode {RESULT_CELLS}, in cells_median mode {RESULT_CELLS_MEDIAN}, "
+            f"in cells_open mode {RESULT_CELLS_OPEN})"
         ),
     )
     args = parser.parse_args(argv)
@@ -622,7 +729,7 @@ def main(argv: Sequence[str] | None = None) -> None:
     cells = mode in CELL_MODES
     out_path: Path = args.out or {
         "epsilon": RESULT, "mst": RESULT_MST, "union": RESULT_UNION, "cells": RESULT_CELLS,
-        "cells_median": RESULT_CELLS_MEDIAN,
+        "cells_median": RESULT_CELLS_MEDIAN, "cells_open": RESULT_CELLS_OPEN,
     }[mode]
     expected = {**EXPECTED_DIGESTS, AXES: AXES_DIGEST} if cells else EXPECTED_DIGESTS
     result = run(EMBEDDINGS, LABELS, expected, out_path, mode, AXES if cells else None)
@@ -636,6 +743,11 @@ def main(argv: Sequence[str] | None = None) -> None:
         added = f" added_links={result['union']['added_links']}"
     elif mode == "cells_median":
         added = f" added_links={result['cells']['added_links']}"
+    elif mode == "cells_open":
+        added = (
+            f" cross_cell_relations={result['cells']['cross_cell_relations']}"
+            f" added_links={result['cells']['added_links']}"
+        )
     elif cells:
         added = f" cross_cell_links={result['cells']['cross_cell_links']['count']}"
     else:
