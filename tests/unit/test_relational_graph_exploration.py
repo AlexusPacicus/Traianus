@@ -508,3 +508,186 @@ def test_union_t4_the_summary_line_and_the_default_output_path(tmp_path, monkeyp
     assert line == f"relational graph: n=6 relations=union epsilon=0.8 edges=6 added_links=2 components=1 -> {default}\n"
     overridden = _main(tmp_path / "override", monkeypatch, _union_world, "--relations", "union")
     assert json.loads(overridden.read_text(encoding="utf-8"))["relations"]["n_edges"] == 6
+
+
+# Cells mode (delegation contract relational-graph-cells) ------------------------------------------
+
+CELL_KEYS = {"axis", "size", "epsilon_c", "tree_weights", "within_cell_relations"}
+
+
+def _axes(scale=(1.0, 0.5, 3.0, 2.0, 1.0, 1.0, 1.0, 1.0)):
+    """Axis k = scale_k e_k: eight axes of unequal norms whose normalised form is exactly e_k."""
+    a = np.zeros((8, D))
+    for k, s in enumerate(scale):
+        a[k, k] = s
+    return [f"ax{k}" for k in range(8)], a
+
+
+def _cells_world():
+    """Plane rows and the axes +x, +y, -x, -y. Cell 0 holds rows 0, 2, 4, 6 at (10, 0), (10, 1), (10, 3), (10, 7):
+    its tree is 0-2, 2-4, 4-6 (1, 2, 4), and at epsilon_c = 4 its relations add 0-4 (3) but not 2-6 (6) or 0-6 (7).
+    Cell 1 holds rows 1, 5 at (0, 20), (2, 20), epsilon_c 2; cell 2 holds row 3 at (-10, 0) alone; cell 3 is empty.
+    The global tree joins the cells by 5-6 (sqrt 233) and 0-3 (20); the nearest pair of cells 1 and 2, 1-3
+    (sqrt 500), is not a tree edge. Integer coordinates: every distance is a correctly rounded root."""
+    v = np.array([[10, 0], [0, 20], [10, 1], [-10, 0], [10, 3], [2, 20], [10, 7]], dtype=float)
+    a = np.array([[1, 0], [0, 1], [-1, 0], [0, -1]], dtype=float)
+    labels = [{"label": f"c{i}", "part": part} for i, part in enumerate(("I", "I", "I", "II", "II", "II", "III"))]
+    return v, (["x", "y", "-x", "-y"], a), labels
+
+
+def _write_cells_inputs(tmp_path, corrupt_axes=None):
+    paths, expected = _write_inputs(tmp_path)
+    ids, a = _axes()
+    if corrupt_axes is not None:
+        corrupt_axes(a)
+    axes = tmp_path / "nsm_axes_8.json"
+    axes.write_text(json.dumps([{"id": i, "vector": row.tolist()} for i, row in zip(ids, a)]), encoding="utf-8")
+    return (*paths, axes), {**expected, axes: hashlib.sha256(axes.read_bytes()).hexdigest()}
+
+
+def test_cells_t1_each_note_goes_to_its_normalised_dominant_axis_and_a_tie_to_the_lower_index():
+    _, a = _axes((1.0, 0.5, 3.0, 10.0, 1.0, 1.0, 1.0, 2.0))
+    s = math.sqrt(0.5)
+    notes = np.zeros((5, D))
+    notes[0, 0] = 1.0
+    notes[1, [1, 2]] = s
+    notes[2, [3, 4]] = (0.6, 0.8)
+    notes[3, 7] = 1.0
+    notes[4, [5, 6]] = s
+    assert reg.axis_cells(notes, a).tolist() == [0, 1, 4, 7, 5]
+    raw = np.argmax(notes @ a.T, axis=1).tolist()
+    assert (raw[1], raw[2]) == (2, 3)
+
+
+def test_x6_axis_cells_are_the_z_scripts_attractor_of_the_normalised_axes():
+    rng = np.random.default_rng(20260926)
+    v = rng.standard_normal((60, D))
+    a = rng.standard_normal((8, D)) * rng.uniform(0.1, 10.0, (8, 1))
+    a_hat = np.array([a_k / np.sqrt(a_k @ a_k) for a_k in a])
+    assert np.array_equal(reg.axis_cells(v, a), zoom.attractor(v @ a_hat.T))
+
+
+def test_x7_the_pinned_axes_file_and_digest_are_the_z_scripts():
+    assert reg.AXES == zoom.AXES
+    assert reg.AXES_DIGEST == zoom.EXPECTED_DIGESTS[zoom.AXES]
+
+
+def test_cells_t2_per_cell_thresholds_within_cell_relations_and_cross_cell_tree_links_on_a_known_world():
+    v, (ids, a), labels = _cells_world()
+    d = reg.pairwise_distances(v)
+    cells = reg.axis_cells(v, a)
+    assert cells.tolist() == [0, 1, 0, 2, 0, 1, 0]
+    trees, within, cross = reg.cell_graph(d, cells, len(a))
+    assert trees == [[(0, 2, 1.0), (2, 4, 2.0), (4, 6, 4.0)], [(1, 5, 2.0)], [], []]
+    assert within == [(0, 2, 1.0), (0, 4, 3.0), (1, 5, 2.0), (2, 4, 2.0), (4, 6, 4.0)]
+    assert cross == [(0, 3, 20.0), (5, 6, math.sqrt(233.0))]
+    result = reg.explore(v, labels, None, axes=(ids, a))
+    relations = result["relations"]
+    assert "cell" in relations["source"] and relations["near_epsilon"] is None
+    assert relations["n_edges"] == 7
+    assert result["components"]["sizes"] == [7] and result["degrees"]["isolated"] == 0
+    assert result["pairwise_distances"]["share_within_epsilon"] is None
+    block = result["cells"]
+    per_axis = block["per_axis"]
+    assert [c["axis"] for c in per_axis] == ids
+    assert [c["size"] for c in per_axis] == [4, 2, 1, 0]
+    assert [c["epsilon_c"] for c in per_axis] == [4.0, 2.0, None, None]
+    assert [c["within_cell_relations"] for c in per_axis] == [4, 1, 0, 0]
+    assert per_axis[0]["tree_weights"] == {"count": 3, "0": 1.0, "0.25": 1.5, "0.5": 2.0, "0.75": 3.0, "1": 4.0}
+    assert per_axis[1]["tree_weights"] == {"count": 1, "0": 2.0, "0.25": 2.0, "0.5": 2.0, "0.75": 2.0, "1": 2.0}
+    assert per_axis[2]["tree_weights"] == {"count": 0, **dict.fromkeys(QUANTILE_KEYS)}
+    links = block["cross_cell_links"]
+    assert links["count"] == 2
+    assert (links["0"], links["1"]) == (math.sqrt(233.0), 20.0)
+
+
+def test_cells_t3_a_single_bit_flip_in_the_axes_file_is_refused_and_nothing_is_written(tmp_path):
+    (embeddings, labels, axes), expected = _write_cells_inputs(tmp_path)
+    reg.run(embeddings, labels, expected, tmp_path / "intact.json", "cells", axes)
+    assert (tmp_path / "intact.json").exists()
+    out = tmp_path / "out" / "relational_graph_exploration_cells.json"
+    rng = np.random.default_rng(3)
+    size = axes.stat().st_size
+    for pos in sorted({0, size - 1, int(rng.integers(0, size)), int(rng.integers(0, size))}):
+        original = axes.read_bytes()
+        _flip_file_bit(axes, pos, int(rng.integers(0, 8)))
+        with pytest.raises(k6.IntegrityError, match=axes.name):
+            reg.run(embeddings, labels, expected, out, "cells", axes)
+        axes.write_bytes(original)
+    assert not out.parent.exists()
+
+
+@pytest.mark.parametrize(
+    ("corrupt", "message"),
+    [
+        pytest.param(lambda a: a.__setitem__(3, 0.0), "axis ax3: zero norm", id="zero-norm"),
+        pytest.param(lambda a: a.__setitem__((5, 9), np.inf), "axis ax5: non-finite", id="inf"),
+    ],
+)
+def test_x8_cells_mode_refuses_null_axes_and_an_unpinned_axes_file_writing_nothing(tmp_path, corrupt, message):
+    (embeddings, labels, axes), expected = _write_cells_inputs(tmp_path, corrupt)
+    out = tmp_path / "out" / "relational_graph_exploration_cells.json"
+    with pytest.raises(ValueError, match=message):
+        reg.run(embeddings, labels, expected, out, "cells", axes)
+    unpinned = {p: digest for p, digest in expected.items() if p != axes}
+    with pytest.raises(ValueError, match="axes"):
+        reg.run(embeddings, labels, unpinned, out, "cells", axes)
+    with pytest.raises(ValueError, match="axes"):
+        reg.run(embeddings, labels, expected, out, "cells")
+    assert not out.parent.exists()
+
+
+def test_cells_t4_the_cells_mode_file_is_sorted_finite_json_with_every_section(tmp_path, monkeypatch):
+    monkeypatch.setenv("TRAIANUS_EPSILON_EDGE", "0.8")
+    (embeddings, labels, axes), expected = _write_cells_inputs(tmp_path)
+    out = tmp_path / "out" / "relational_graph_exploration_cells.json"
+    returned = reg.run(embeddings, labels, expected, out, "cells", axes)
+    raw = out.read_bytes()
+    text = raw.decode("utf-8")
+    loaded = json.loads(text)
+    assert loaded == returned
+    assert text == json.dumps(loaded, sort_keys=True, indent=2, allow_nan=False) + "\n"
+    assert b"\r" not in raw and "NaN" not in text and "Infinity" not in text
+    assert loaded["kind"] == "exploration" and loaded["epsilon"] is None and loaded["n"] == 6
+    assert loaded["digests"] == {
+        "embeddings.npy": expected[embeddings], "labels.json": expected[labels], "nsm_axes_8.json": expected[axes],
+    }
+    for section, keys in FIGURES.items():
+        assert set(keys) <= set(loaded[section]), section
+    assert loaded["relations"]["near_epsilon"] is None and "cell" in loaded["relations"]["source"]
+    assert loaded["pairwise_distances"]["share_within_epsilon"] is None
+    assert loaded["components"]["sizes"] == [6]
+    cells = loaded["cells"]
+    assert set(cells) == {"partition", "axes_digest", "per_axis", "cross_cell_links"}
+    assert cells["axes_digest"] == expected[axes]
+    assert [c["axis"] for c in cells["per_axis"]] == [f"ax{k}" for k in range(8)]
+    assert [c["size"] for c in cells["per_axis"]] == [2, 1, 2, 0, 1, 0, 0, 0]
+    for cell in cells["per_axis"]:
+        assert set(cell) == CELL_KEYS
+        assert set(cell["tree_weights"]) == {"count", *QUANTILE_KEYS}
+    assert set(cells["cross_cell_links"]) == {"count", *QUANTILE_KEYS}
+
+
+def _main_cells(tmp_path, monkeypatch, *argv):
+    tmp_path.mkdir(parents=True, exist_ok=True)
+    (embeddings, labels, axes), expected = _write_cells_inputs(tmp_path)
+    monkeypatch.setattr(reg, "EMBEDDINGS", embeddings)
+    monkeypatch.setattr(reg, "LABELS", labels)
+    monkeypatch.setattr(reg, "AXES", axes)
+    monkeypatch.setattr(reg, "EXPECTED_DIGESTS", {p: expected[p] for p in (embeddings, labels)})
+    monkeypatch.setattr(reg, "AXES_DIGEST", expected[axes])
+    reg.main(["--relations", "cells", *argv])
+
+
+def test_x9_the_cells_summary_line_the_default_output_path_and_its_override(tmp_path, monkeypatch, capsys):
+    assert "cells" in reg.MODES
+    assert reg.RESULT_CELLS == reg.REPO_ROOT / "data" / "refapp" / "relational_graph_exploration_cells.json"
+    default = tmp_path / "default" / "relational_graph_exploration_cells.json"
+    monkeypatch.setattr(reg, "RESULT_CELLS", default)
+    _main_cells(tmp_path / "a", monkeypatch)
+    assert json.loads(default.read_text(encoding="utf-8"))["cells"]["cross_cell_links"]["count"] == 3
+    line = capsys.readouterr().out
+    assert line == f"relational graph: n=6 relations=cells edges=5 cross_cell_links=3 components=1 -> {default}\n"
+    overridden = tmp_path / "override" / "result.json"
+    _main_cells(tmp_path / "b", monkeypatch, "--out", str(overridden))
+    assert json.loads(overridden.read_text(encoding="utf-8"))["relations"]["n_edges"] == 5
