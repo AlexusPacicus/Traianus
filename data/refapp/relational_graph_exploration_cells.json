@@ -1,0 +1,309 @@
+{
+  "cells": {
+    "axes_digest": "b14e5d6700d1a7478a357ca26f0f38f5240f97a42daad45722d21f1c3f964e35",
+    "cross_cell_links": {
+      "0": 0.26742738383842696,
+      "0.25": 0.7178370119443269,
+      "0.5": 0.7951460580212024,
+      "0.75": 0.8668970293969864,
+      "1": 1.2120718459155013,
+      "count": 1242
+    },
+    "partition": "axis cells: each row in the cell of argmax_k <v, a_hat_k>, a_hat_k = a_k / ||a_k|| in binary64, ties to the lower axis index (the Z script's attractor); epsilon_c is null for a cell of fewer than two rows",
+    "per_axis": [
+      {
+        "axis": "AXIS_1",
+        "epsilon_c": 1.2166867500255787,
+        "size": 651,
+        "tree_weights": {
+          "0": 0.2514884742782364,
+          "0.25": 0.7163157853346873,
+          "0.5": 0.7953441871048745,
+          "0.75": 0.8693934561254761,
+          "1": 1.2166867500255787,
+          "count": 650
+        },
+        "within_cell_relations": 120111
+      },
+      {
+        "axis": "AXIS_2",
+        "epsilon_c": 1.144073146862392,
+        "size": 454,
+        "tree_weights": {
+          "0": 0.0,
+          "0.25": 0.7334915574382281,
+          "0.5": 0.8211504180276377,
+          "0.75": 0.9039220456017255,
+          "1": 1.144073146862392,
+          "count": 453
+        },
+        "within_cell_relations": 32688
+      },
+      {
+        "axis": "AXIS_3",
+        "epsilon_c": 1.2230922413468204,
+        "size": 459,
+        "tree_weights": {
+          "0": 0.0,
+          "0.25": 0.7801399994572931,
+          "0.5": 0.8771135036037168,
+          "0.75": 0.9504801773724805,
+          "1": 1.2230922413468204,
+          "count": 458
+        },
+        "within_cell_relations": 39198
+      },
+      {
+        "axis": "AXIS_4",
+        "epsilon_c": 1.1183219022355664,
+        "size": 139,
+        "tree_weights": {
+          "0": 0.4735919652860834,
+          "0.25": 0.8024013657422493,
+          "0.5": 0.8794670930713637,
+          "0.75": 0.9322204305556199,
+          "1": 1.1183219022355664,
+          "count": 138
+        },
+        "within_cell_relations": 2759
+      },
+      {
+        "axis": "AXIS_5",
+        "epsilon_c": 1.2655750538001918,
+        "size": 40,
+        "tree_weights": {
+          "0": 0.0,
+          "0.25": 0.8431120677322728,
+          "0.5": 1.0136538092691414,
+          "0.75": 1.0908114047560786,
+          "1": 1.2655750538001918,
+          "count": 39
+        },
+        "within_cell_relations": 369
+      },
+      {
+        "axis": "AXIS_6",
+        "epsilon_c": 1.1506259166519883,
+        "size": 154,
+        "tree_weights": {
+          "0": 0.0,
+          "0.25": 0.7457695551974329,
+          "0.5": 0.8355228014966173,
+          "0.75": 0.94178564196262,
+          "1": 1.1506259166519883,
+          "count": 153
+        },
+        "within_cell_relations": 3569
+      },
+      {
+        "axis": "AXIS_7",
+        "epsilon_c": 1.1200277666090013,
+        "size": 227,
+        "tree_weights": {
+          "0": 0.42779210313862454,
+          "0.25": 0.7915518634410341,
+          "0.5": 0.8608857670654303,
+          "0.75": 0.9476098829117893,
+          "1": 1.1200277666090013,
+          "count": 226
+        },
+        "within_cell_relations": 5633
+      },
+      {
+        "axis": "AXIS_8",
+        "epsilon_c": 1.1994240907666531,
+        "size": 97,
+        "tree_weights": {
+          "0": 0.4475090554123316,
+          "0.25": 0.8640696091943384,
+          "0.5": 0.9310041455167976,
+          "0.75": 1.002194165739864,
+          "1": 1.1994240907666531,
+          "count": 96
+        },
+        "within_cell_relations": 1965
+      }
+    ]
+  },
+  "components": {
+    "count": 1,
+    "largest": {
+      "share": 1.0,
+      "size": 2221
+    },
+    "sizes": [
+      2221
+    ]
+  },
+  "degrees": {
+    "0.25": 58.0,
+    "0.5": 155.0,
+    "0.75": 279.0,
+    "isolated": 0,
+    "max": 608,
+    "mean": 186.88338586222423,
+    "min": 2
+  },
+  "digests": {
+    "embeddings.npy": "eafb0e97172830f2404e96fa08d74bf6cccc0b6cbe84d47b790a476603e7d8d1",
+    "labels.json": "1d60699353d810f089730c6203ee28f9c416e3004b60781bc965cec284097f4f",
+    "nsm_axes_8.json": "b14e5d6700d1a7478a357ca26f0f38f5240f97a42daad45722d21f1c3f964e35"
+  },
+  "environment": {
+    "numpy": "2.4.1",
+    "numpy_config": {
+      "Build Dependencies": {
+        "blas": {
+          "detection method": "system",
+          "found": true,
+          "include directory": "unknown",
+          "lib directory": "unknown",
+          "name": "accelerate",
+          "openblas configuration": "unknown",
+          "pc file directory": "unknown",
+          "version": "unknown"
+        },
+        "lapack": {
+          "detection method": "system",
+          "found": true,
+          "include directory": "unknown",
+          "lib directory": "unknown",
+          "name": "accelerate",
+          "openblas configuration": "unknown",
+          "pc file directory": "unknown",
+          "version": "unknown"
+        }
+      },
+      "Compilers": {
+        "c": {
+          "commands": "cc",
+          "linker": "ld64",
+          "name": "clang",
+          "version": "15.0.0"
+        },
+        "c++": {
+          "commands": "c++",
+          "linker": "ld64",
+          "name": "clang",
+          "version": "15.0.0"
+        },
+        "cython": {
+          "commands": "cython",
+          "linker": "cython",
+          "name": "cython",
+          "version": "3.2.4"
+        }
+      },
+      "Machine Information": {
+        "build": {
+          "cpu": "aarch64",
+          "endian": "little",
+          "family": "aarch64",
+          "system": "darwin"
+        },
+        "host": {
+          "cpu": "aarch64",
+          "endian": "little",
+          "family": "aarch64",
+          "system": "darwin"
+        }
+      },
+      "Python Information": {
+        "path": "/private/var/folders/pr/_3h4tm913_l56k6hrhpm89z00000gn/T/build-env-9ze0nkjb/bin/python",
+        "version": "3.11"
+      },
+      "SIMD Extensions": {
+        "baseline": [
+          "NEON",
+          "NEON_FP16",
+          "NEON_VFPV4",
+          "ASIMD"
+        ],
+        "found": [
+          "ASIMDHP",
+          "ASIMDDP"
+        ],
+        "not found": [
+          "ASIMDFHM"
+        ]
+      }
+    },
+    "platform": "macOS-15.6-arm64-arm-64bit",
+    "python": "3.11.6",
+    "threads": {
+      "OMP_NUM_THREADS": "1",
+      "OPENBLAS_NUM_THREADS": "1",
+      "VECLIB_MAXIMUM_THREADS": "1"
+    }
+  },
+  "epsilon": null,
+  "kind": "exploration",
+  "n": 2221,
+  "pairwise_distances": {
+    "pairs": 2465310,
+    "quantiles": {
+      "0.01": 0.9343436268691461,
+      "0.05": 1.0394551768352895,
+      "0.25": 1.1628707735135668,
+      "0.5": 1.2346897442164506
+    },
+    "share_within_epsilon": null
+  },
+  "reading_order": {
+    "consecutive_row_edges": 678,
+    "cross_part_edges": 143886
+  },
+  "relational_distances": {
+    "connected_pairs": 2465310,
+    "definition": "relational distance: shortest path along the relations, each weighted by its unrounded L2 distance; defined only within a connected component (infinite, never written, between components); hops: fewest relations on a path, reported as context only",
+    "distance": {
+      "0": 0.0,
+      "0.25": 2.010469375567153,
+      "0.5": 2.626532111080751,
+      "0.75": 2.8567083616315574,
+      "1": 6.138952550818596,
+      "count": 2465310
+    },
+    "eccentricity": {
+      "0": 3.7604515999350534,
+      "0.25": 4.245392205005555,
+      "0.5": 4.6275807481312805,
+      "0.75": 4.892761480682164,
+      "1": 6.138952550818596,
+      "count": 2221
+    },
+    "hops": {
+      "0": 1.0,
+      "0.25": 2.0,
+      "0.5": 3.0,
+      "0.75": 3.0,
+      "1": 6.0,
+      "count": 2465310
+    },
+    "largest_component_diameter": 6.138952550818596,
+    "ratio_to_direct": {
+      "0": 1.0,
+      "0.25": 1.6625495590472792,
+      "0.5": 2.1263434263070815,
+      "0.75": 2.3013156392830787,
+      "1": 4.6229273306620815,
+      "count": 2465294
+    },
+    "ratio_undefined_pairs": 16,
+    "reachable": {
+      "0": 2220.0,
+      "0.25": 2220.0,
+      "0.5": 2220.0,
+      "0.75": 2220.0,
+      "1": 2220.0,
+      "count": 2221
+    }
+  },
+  "relations": {
+    "manual": "absent: manual relations exist only in an engine database, not in the frozen artefact",
+    "n_edges": 207534,
+    "near_epsilon": null,
+    "source": "union, on unordered row pairs, of the within-cell relations (the pairs of one axis cell whose binary64 L2 distance of pairwise_distances is <= that cell's epsilon_c, the longest edge of the minimum spanning tree of the cell's rows) and the edges of the minimum spanning tree (Prim, from row 0, ties to the lower row index) of the complete graph over the binary64 L2 distances of pairwise_distances whose ends lie in different cells; a pair appears once, weighted by its distance of pairwise_distances"
+  },
+  "statement": "Descriptive exploration of the relation graph: it tests no hypothesis and decides nothing."
+}
