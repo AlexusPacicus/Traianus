@@ -1,0 +1,332 @@
+"""Relational graph exploration: degrees, components and relational distances of the engine's relations.
+
+Implements the delegation contract relational-graph-exploration (B1-B8) against
+docs/methodology/instrument-audit/contracts.md section 0. The relations are the engine's automatic
+epsilon-relations, computed by traianus.geometry.observables.compute_epsilon_edges with
+epsilon = traianus.config.resolve_epsilon_edge(); the relational distance of two notes is the length of
+the shortest path between them along those relations, each relation counted by its unrounded L2 length.
+Descriptive: it tests no hypothesis and decides nothing.
+
+Refuses to run, writing nothing, unless both input digests match the Z script's pins.
+
+Usage:
+    python3 tools/experiments/relational_graph_exploration.py [--out PATH]
+"""
+
+import os
+
+for _var in ("OMP_NUM_THREADS", "OPENBLAS_NUM_THREADS", "VECLIB_MAXIMUM_THREADS"):
+    os.environ[_var] = "1"
+
+import argparse
+import io
+import json
+import math
+import platform
+import sys
+from collections.abc import Mapping, Sequence
+from pathlib import Path
+from typing import Any
+
+import numpy as np
+from numpy.typing import NDArray
+
+REPO_ROOT = Path(__file__).resolve().parents[2]
+sys.path.insert(0, str(REPO_ROOT))
+
+from tools.experiments import k6_colour_predictability as k6
+from traianus.config import resolve_epsilon_edge
+from traianus.geometry.observables import compute_epsilon_edges
+
+Array = NDArray[np.float64]
+Edge = tuple[int, int, float]
+
+EMBEDDINGS = REPO_ROOT / ".data" / "spinoza_frozen" / "embeddings.npy"
+LABELS = REPO_ROOT / ".data" / "spinoza_frozen" / "labels.json"
+RESULT = REPO_ROOT / "data" / "refapp" / "relational_graph_exploration.json"
+EXPECTED_DIGESTS = {
+    EMBEDDINGS: "eafb0e97172830f2404e96fa08d74bf6cccc0b6cbe84d47b790a476603e7d8d1",
+    LABELS: "1d60699353d810f089730c6203ee28f9c416e3004b60781bc965cec284097f4f",
+}
+NEAR_EPSILON = 1e-6
+QUANTILES = (0.0, 0.25, 0.5, 0.75, 1.0)
+PAIRWISE_QUANTILES = (0.01, 0.05, 0.25, 0.5)
+THREAD_VARS = ("OMP_NUM_THREADS", "OPENBLAS_NUM_THREADS", "VECLIB_MAXIMUM_THREADS")
+STATEMENT = "Descriptive exploration of the relation graph: it tests no hypothesis and decides nothing."
+MANUAL_RELATIONS = "absent: manual relations exist only in an engine database, not in the frozen artefact"
+NEAR_STATEMENT = (
+    "pairs whose binary64 L2 distance lies within the tolerance of epsilon (compute_epsilon_edges reports "
+    "distances to 6 decimals); the engine normalises in binary32 (contracts.md section 0, Engine path) and "
+    "could decide these pairs otherwise"
+)
+DEFINITION = (
+    "relational distance: shortest path along the relations, each weighted by its unrounded L2 distance; "
+    "defined only within a connected component (infinite, never written, between components); "
+    "hops: fewest relations on a path, reported as context only"
+)
+
+
+# Inputs (contracts.md section 0) -----------------------------------------------------------------
+
+
+def load_inputs(embeddings: bytes, labels: bytes) -> tuple[NDArray[np.float32], list[Any]]:
+    v32 = np.load(io.BytesIO(embeddings), allow_pickle=False)
+    label_list: list[Any] = json.loads(labels.decode("utf-8"))
+    return v32, label_list
+
+
+def validate_inputs(v32: NDArray[Any], labels: list[Any]) -> None:
+    """Null elimination (contracts.md section 0) for the two files used; raises ValueError naming the row or label."""
+    v = np.asarray(v32, dtype=np.float64)
+    if v.ndim != 2 or v.shape[1] != k6.D:
+        raise ValueError(f"embeddings must have shape (n, {k6.D}), got {v.shape}")
+    for i, row in enumerate(v):
+        if not np.all(np.isfinite(row)):
+            raise ValueError(f"row {i}: non-finite value")
+        norm = math.sqrt(float(row @ row))
+        if abs(norm - 1.0) > k6.NORM_TOL:
+            raise ValueError(f"row {i}: norm {norm!r} outside 1 ± {k6.NORM_TOL}")
+    if len(labels) != v.shape[0]:
+        raise ValueError(f"label count {len(labels)} != row count {v.shape[0]}")
+    seen: dict[str, int] = {}
+    for i, item in enumerate(labels):
+        if not isinstance(item, dict):
+            raise ValueError(f"label {i}: not an object")  # noqa: TRY004
+        for key in ("label", "part"):
+            value = item.get(key)
+            if not isinstance(value, str) or value == "":
+                raise ValueError(f"label {i}: {key} is null or empty")
+        if item["label"] in seen:
+            raise ValueError(f"label {i}: duplicate of label {seen[item['label']]}")
+        seen[item["label"]] = i
+
+
+# Graph -------------------------------------------------------------------------------------------
+
+
+def relations(labels: Sequence[str], v: Array, epsilon: float) -> list[Edge]:
+    """The engine's epsilon-relations as (row i, row j, unrounded L2 distance), i < j, sorted.
+
+    The distance is recomputed with compute_epsilon_edges' own expression, which it reports rounded."""
+    row = {label: i for i, label in enumerate(labels)}
+    edges = []
+    for edge in compute_epsilon_edges({label: v[i] for i, label in enumerate(labels)}, epsilon):
+        s, t = row[edge["source"]], row[edge["target"]]
+        edges.append((min(s, t), max(s, t), float(np.linalg.norm(v[s] - v[t]))))
+    return sorted(edges)
+
+
+def pairwise_distances(v: Array) -> Array:
+    """All L2 distances, pair by pair with compute_epsilon_edges' expression, so a pair's distance here
+    and the engine's decision on it come from the same binary64 value."""
+    n = len(v)
+    d = np.zeros((n, n))
+    for i in range(n):
+        for j in range(i + 1, n):
+            d[i, j] = d[j, i] = float(np.linalg.norm(v[i] - v[j]))
+    return d
+
+
+def components(n: int, edges: Sequence[Edge]) -> list[list[int]]:
+    """Connected components as ascending row lists, largest first, ties by first row."""
+    adjacency: list[list[int]] = [[] for _ in range(n)]
+    for i, j, _ in edges:
+        adjacency[i].append(j)
+        adjacency[j].append(i)
+    seen = [False] * n
+    found = []
+    for start in range(n):
+        if seen[start]:
+            continue
+        seen[start] = True
+        stack, members = [start], []
+        while stack:
+            node = stack.pop()
+            members.append(node)
+            for other in adjacency[node]:
+                if not seen[other]:
+                    seen[other] = True
+                    stack.append(other)
+        found.append(sorted(members))
+    return sorted(found, key=lambda c: (-len(c), c[0]))
+
+
+def _floyd_warshall(d: Array) -> Array:
+    d = d.copy()
+    step = np.empty_like(d)
+    for k in range(len(d)):
+        np.add(d[:, k, None], d[k, None, :], out=step)
+        np.minimum(d, step, out=d)
+    return d
+
+
+def relational_distances(n: int, edges: Sequence[Edge]) -> tuple[Array, Array]:
+    """Exact all-pairs shortest paths within each component: weighted by the relations' L2 distances,
+    and in hops (every relation 1, the unweighted BFS distance); infinite between components."""
+    w = np.full((n, n), np.inf)
+    hops = np.full((n, n), np.inf)
+    np.fill_diagonal(w, 0.0)
+    np.fill_diagonal(hops, 0.0)
+    for i, j, dist in edges:
+        w[i, j] = w[j, i] = dist
+        hops[i, j] = hops[j, i] = 1.0
+    for component in components(n, edges):
+        if len(component) > 1:
+            block = np.ix_(component, component)
+            w[block] = _floyd_warshall(w[block])
+            hops[block] = _floyd_warshall(hops[block])
+    return w, hops
+
+
+# Figures -----------------------------------------------------------------------------------------
+
+
+def _quantiles(values: NDArray[Any], qs: Sequence[float]) -> dict[str, float | None]:
+    return {f"{q:g}": float(np.quantile(values, q)) if len(values) else None for q in qs}
+
+
+def _summary(values: NDArray[Any]) -> dict[str, Any]:
+    return {"count": len(values), **_quantiles(values, QUANTILES)}
+
+
+def explore(v: Array, labels: Sequence[Mapping[str, str]], epsilon: float) -> dict[str, Any]:
+    n = len(v)
+    names = [item["label"] for item in labels]
+    parts = [item["part"] for item in labels]
+    edges = relations(names, v, epsilon)
+    adjacent = np.zeros((n, n), dtype=bool)
+    for i, j, _ in edges:
+        adjacent[i, j] = adjacent[j, i] = True
+    upper = np.triu_indices(n, 1)
+    direct = pairwise_distances(v)[upper]
+    near = np.abs(direct - epsilon) <= NEAR_EPSILON
+    degree = adjacent.sum(axis=1)
+    found = components(n, edges)
+    w, hops = relational_distances(n, edges)
+    connected = np.isfinite(w[upper])
+    relational = w[upper][connected]
+    direct_connected = direct[connected]
+    defined = direct_connected > 0.0
+    reachable = np.isfinite(w).sum(axis=1) - 1
+    farthest = np.where(np.isfinite(w), w, -np.inf).max(axis=1)
+    largest = found[0]
+    return {
+        "relations": {
+            "source": "traianus.geometry.observables.compute_epsilon_edges",
+            "manual": MANUAL_RELATIONS,
+            "n_edges": len(edges),
+            "near_epsilon": {
+                "tolerance": NEAR_EPSILON,
+                "pairs": int(np.count_nonzero(near)),
+                "edges": int(np.count_nonzero(near & adjacent[upper])),
+                "statement": NEAR_STATEMENT,
+            },
+        },
+        "degrees": {
+            "isolated": int(np.count_nonzero(degree == 0)),
+            "min": int(degree.min()),
+            **_quantiles(degree, (0.25, 0.5, 0.75)),
+            "mean": float(degree.mean()),
+            "max": int(degree.max()),
+        },
+        "components": {
+            "count": len(found),
+            "sizes": [len(c) for c in found],
+            "largest": {"size": len(largest), "share": len(largest) / n},
+        },
+        "relational_distances": {
+            "definition": DEFINITION,
+            "connected_pairs": int(np.count_nonzero(connected)),
+            "distance": _summary(relational),
+            "eccentricity": _summary(farthest[reachable > 0]),
+            "reachable": _summary(reachable),
+            "largest_component_diameter": (
+                float(w[np.ix_(largest, largest)].max()) if len(largest) > 1 else None
+            ),
+            "hops": _summary(hops[upper][connected]),
+            "ratio_to_direct": _summary(relational[defined] / direct_connected[defined]),
+            "ratio_undefined_pairs": int(np.count_nonzero(~defined)),
+        },
+        "pairwise_distances": {
+            "pairs": len(direct),
+            "quantiles": _quantiles(direct, PAIRWISE_QUANTILES),
+            "share_within_epsilon": (
+                float(np.count_nonzero(direct <= epsilon)) / len(direct) if len(direct) else None
+            ),
+        },
+        "reading_order": {
+            "consecutive_row_edges": sum(1 for i, j, _ in edges if j - i == 1),
+            "cross_part_edges": sum(1 for i, j, _ in edges if parts[i] != parts[j]),
+        },
+    }
+
+
+# Run ---------------------------------------------------------------------------------------------
+
+
+def environment() -> dict[str, Any]:
+    return {
+        "platform": platform.platform(),
+        "python": platform.python_version(),
+        "numpy": np.__version__,
+        "numpy_config": np.show_config(mode="dicts"),
+        "threads": {var: os.environ.get(var) for var in THREAD_VARS},
+    }
+
+
+def _plain(obj: Any) -> Any:
+    if isinstance(obj, dict):
+        return {str(k): _plain(v) for k, v in obj.items()}
+    if isinstance(obj, (list, tuple)):
+        return [_plain(v) for v in obj]
+    if isinstance(obj, np.bool_):
+        return bool(obj)
+    if isinstance(obj, np.integer):
+        return int(obj)
+    if isinstance(obj, np.floating):
+        return float(obj)
+    return obj
+
+
+def _write(result: Mapping[str, Any], out_path: Path) -> dict[str, Any]:
+    text = json.dumps(_plain(result), sort_keys=True, indent=2, allow_nan=False) + "\n"
+    out_path.parent.mkdir(parents=True, exist_ok=True)
+    out_path.write_text(text, encoding="utf-8", newline="\n")
+    loaded: dict[str, Any] = json.loads(text)
+    return loaded
+
+
+def run(embeddings: Path, labels: Path, expected: Mapping[Path, str], out_path: Path) -> dict[str, Any]:
+    """Digests, null elimination, then the figures; any refusal raises before anything is written."""
+    embeddings, labels = Path(embeddings), Path(labels)
+    raw = k6.check_digests(expected)
+    v32, label_list = load_inputs(raw[embeddings], raw[labels])
+    validate_inputs(v32, label_list)
+    v64 = v32.astype("<f8")
+    v = np.array([row / np.sqrt(row @ row) for row in v64])
+    epsilon = resolve_epsilon_edge()
+    result = {
+        "kind": "exploration",
+        "statement": STATEMENT,
+        "digests": {p.name: expected[p] for p in (embeddings, labels)},
+        "epsilon": epsilon,
+        "n": len(v),
+        "environment": environment(),
+        **explore(v, label_list, epsilon),
+    }
+    return _write(result, out_path)
+
+
+def main(argv: Sequence[str] | None = None) -> None:
+    parser = argparse.ArgumentParser(description="Relational graph exploration of the engine's relations.")
+    parser.add_argument("--out", type=Path, default=RESULT, help=f"result path (default: {RESULT})")
+    out_path: Path = parser.parse_args(argv).out
+    result = run(EMBEDDINGS, LABELS, EXPECTED_DIGESTS, out_path)
+    print(
+        f"relational graph: n={result['n']} epsilon={result['epsilon']} "
+        f"edges={result['relations']['n_edges']} components={result['components']['count']} -> {out_path}"
+    )
+
+
+if __name__ == "__main__":
+    main()
