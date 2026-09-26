@@ -401,3 +401,110 @@ def test_x4_relations_epsilon_writes_the_default_bytes_and_the_summary_names_the
     explicit = _main(tmp_path / "explicit", monkeypatch, _dyadic_world, "--relations", "epsilon").read_bytes()
     assert explicit == default
     assert capsys.readouterr().out.count("relations=epsilon ") == 2
+
+
+# sha256 of the file the code at base commit fd24696 writes for _dyadic_world in mst mode, environment fixed
+BASE_COMMIT_MST_OUTPUT_SHA256 = "ed4c641f8fa3307b25447163eea5aa6d09d66a90189e6be0f04115848b561d63"
+
+
+def test_x5_the_mst_mode_output_is_byte_identical_to_the_base_commit(tmp_path, monkeypatch):
+    monkeypatch.delenv("TRAIANUS_EPSILON_EDGE", raising=False)
+    monkeypatch.setattr(reg, "environment", lambda: {"fixed": True})
+    out = _main(tmp_path, monkeypatch, _dyadic_world, "--relations", "mst")
+    assert hashlib.sha256(out.read_bytes()).hexdigest() == BASE_COMMIT_MST_OUTPUT_SHA256
+
+
+# Union mode (delegation contract relational-graph-union) ------------------------------------------
+
+QUANTILE_KEYS = ("0", "0.25", "0.5", "0.75", "1")
+
+
+def _union_world():
+    """Rows at angles 0, 0.3, 0.7, 1.7, 2.05, 3.25 on plane (0, 1). At 0.8 the epsilon-relations are 0-1, 0-2, 1-2
+    and 3-4 (components {0, 1, 2}, {3, 4} and the isolated row 5); the tree is the path 0-1-2-3-4-5, which shares
+    0-1, 1-2 and 3-4 with them and adds 2-3 and 4-5."""
+    v = np.array([_on_circle(0, angle) for angle in (0.0, 0.3, 0.7, 1.7, 2.05, 3.25)])
+    labels = [{"label": f"u{i}", "part": part} for i, part in enumerate(("I", "I", "I", "II", "II", "III"))]
+    return v, labels
+
+
+def test_union_t1_the_union_keeps_every_epsilon_relation_and_adds_only_the_tree_links():
+    v, labels = _union_world()
+    d = reg.pairwise_distances(v)
+    epsilon_edges = reg.relations([item["label"] for item in labels], v, 0.8)
+    tree = reg.minimum_spanning_tree(d)
+    assert [(i, j) for i, j, _ in epsilon_edges] == [(0, 1), (0, 2), (1, 2), (3, 4)]
+    assert [(i, j) for i, j, _ in tree] == [(0, 1), (1, 2), (2, 3), (3, 4), (4, 5)]
+    pairs = [(0, 1), (0, 2), (1, 2), (2, 3), (3, 4), (4, 5)]
+    assert reg.union_edges(epsilon_edges, tree, d) == [(i, j, float(d[i, j])) for i, j in pairs]
+    result = reg.explore(v, labels, 0.8, union=True)
+    assert "union" in result["relations"]["source"]
+    assert result["relations"]["n_edges"] == 6
+    assert result["components"]["sizes"] == [6]
+    assert result["degrees"]["isolated"] == 0
+    union = result["union"]
+    assert (union["epsilon_relations"], union["tree_edges"], union["added_links"]) == (4, 5, 2)
+
+
+def test_union_t2_the_union_block_figures_on_the_known_world():
+    v, labels = _union_world()
+    added = [_chord(1.0), _chord(1.2)]
+    union = reg.explore(v, labels, 0.8, union=True)["union"]
+    assert union["added_link_distances"]["count"] == 2
+    for q in QUANTILE_KEYS:
+        assert union["added_link_distances"][q] == pytest.approx(float(np.quantile(added, float(q))), abs=1e-12)
+    assert union["isolated_reached_only_by_added_links"] == 1
+    bare = reg.explore(v, labels, 0.1, union=True)["union"]
+    assert (bare["epsilon_relations"], bare["tree_edges"], bare["added_links"]) == (0, 5, 5)
+    assert bare["isolated_reached_only_by_added_links"] == 6
+
+
+def test_union_t2_near_epsilon_and_the_tree_block_are_those_of_the_other_modes():
+    v, labels = _union_world()
+    epsilon = _chord(1.0) - 5e-7
+    result = reg.explore(v, labels, epsilon, union=True)
+    near = result["relations"]["near_epsilon"]
+    assert near == reg.explore(v, labels, epsilon)["relations"]["near_epsilon"]
+    assert (near["pairs"], near["edges"]) == (1, 0)
+    assert result["mst"] == reg.explore(v, labels, None)["mst"]
+    assert result["pairwise_distances"]["share_within_epsilon"] == 4 / 15
+
+
+def test_union_t2_the_union_mode_file_is_sorted_finite_json_with_every_section(tmp_path, monkeypatch):
+    monkeypatch.setenv("TRAIANUS_EPSILON_EDGE", "0.8")
+    paths, expected = _write_inputs(tmp_path, world=_union_world)
+    out = tmp_path / "out" / "relational_graph_exploration_union.json"
+    returned = reg.run(*paths, expected, out, "union")
+    raw = out.read_bytes()
+    text = raw.decode("utf-8")
+    loaded = json.loads(text)
+    assert loaded == returned
+    assert text == json.dumps(loaded, sort_keys=True, indent=2, allow_nan=False) + "\n"
+    assert b"\r" not in raw and "NaN" not in text and "Infinity" not in text
+    assert loaded["epsilon"] == resolve_epsilon_edge() == 0.8
+    assert loaded["relations"]["n_edges"] == 6 and loaded["components"]["sizes"] == [6]
+    for section, keys in FIGURES.items():
+        assert set(keys) <= set(loaded[section]), section
+    assert set(loaded["mst"]) == {"connectivity_epsilon", "total_weight", "weights"}
+    assert set(loaded["union"]) == {
+        "epsilon_relations", "tree_edges", "added_links", "added_link_distances",
+        "isolated_reached_only_by_added_links",
+    }
+    assert set(loaded["union"]["added_link_distances"]) == {"count", *QUANTILE_KEYS}
+
+
+def test_union_t4_the_summary_line_and_the_default_output_path(tmp_path, monkeypatch, capsys):
+    assert reg.RESULT_UNION == reg.REPO_ROOT / "data" / "refapp" / "relational_graph_exploration_union.json"
+    monkeypatch.setenv("TRAIANUS_EPSILON_EDGE", "0.8")
+    paths, expected = _write_inputs(tmp_path, world=_union_world)
+    monkeypatch.setattr(reg, "EMBEDDINGS", paths[0])
+    monkeypatch.setattr(reg, "LABELS", paths[1])
+    monkeypatch.setattr(reg, "EXPECTED_DIGESTS", expected)
+    default = tmp_path / "default" / "relational_graph_exploration_union.json"
+    monkeypatch.setattr(reg, "RESULT_UNION", default)
+    reg.main(["--relations", "union"])
+    assert json.loads(default.read_text(encoding="utf-8"))["union"]["added_links"] == 2
+    line = capsys.readouterr().out
+    assert line == f"relational graph: n=6 relations=union epsilon=0.8 edges=6 added_links=2 components=1 -> {default}\n"
+    overridden = _main(tmp_path / "override", monkeypatch, _union_world, "--relations", "union")
+    assert json.loads(overridden.read_text(encoding="utf-8"))["relations"]["n_edges"] == 6
