@@ -1555,3 +1555,77 @@ ambas locales. Z tiene la fase 2 cerrada, su resultado y la lectura del autor.
 1. Decisiones del autor sobre el zoom del cliente.
 2. Integrar las ramas de Z en `main`, con su entrada en el LEDGER, y comprobar el CI en Linux.
 3. Subir refapp-01.
+
+### Cierre (18:44)
+
+**Contexto:** Z tenía su resultado y su lectura. Quedaban la integración en `main` y las
+decisiones abiertas de `ZOOM.md`.
+
+**Se hizo:**
+- **Integración:**
+  - Traianus: LEDGER seq 69 (`3218e64`), merge `35c7620` en `main`, push y CI en verde en Linux.
+  - refapp-01: merge `12136cc` en su `main`, push y CI en verde.
+- **Propósito del zoom corregido (autor).** El zoom no sirve para buscar un punto medio, sino para
+  moverse por continuidad relacional desde la nota que se elija, con una **z relacional**: la
+  profundidad por relaciones.
+  - Definiciones: las relaciones del motor; z como longitud del camino más corto; alcance, la
+    componente conexa.
+  - Se retiró mi observación sobre la pantalla: la puntuación de Z no se puede comparar con la de
+    R4.
+  - Registrado en `ZOOM.md` (rama `docs/relational-z`, `14cabe8`) y en Z.md (`e74517b`).
+- **Exploración del grafo relacional** (`tools/experiments/relational_graph_exploration.py`;
+  resultados en `data/refapp/relational_graph_exploration*.json`), siete variantes:
+  - con ε fijo en 0,8, 809 de las 2221 notas quedan aisladas;
+  - con el ε de Otsu (1,2032) y con el umbral de conectividad (1,2121), todo queda unido a 2–4
+    saltos;
+  - el árbol de expansión mínimo solo da una mediana de 30 saltos;
+  - la unión de ε 0,8 con el árbol da una mediana de 11 saltos;
+  - con umbral por celda de eje hay 207.534 relaciones, porque la nota más alejada de cada celda
+    fija su umbral;
+  - con la mediana de cada celda más el árbol, mediana de 12 saltos;
+  - abriendo las fronteras entre celdas, mediana de 14 saltos y 1129 relaciones entre celdas.
+    Recupera 1511 pares que la variante anterior perdía y que tocaban a 842 notas.
+- **Hallazgos:**
+  - El 54 % de las notas tiene su vecina más próxima en otra celda de eje.
+  - El autor pidió leer el cociente camino ÷ distancia directa como **relación proyectada**, no
+    como coste.
+- **Las notas más alejadas son en su mayoría notas editoriales.** El constructor del corpus borra
+  los `[N]` antes de filtrar los bloques de nota, así que los 17 bloques de nota de la Ética se
+  colaron en los manifiestos. Es el mismo corpus que usaron K6, R4 y Z.
+  - Se marcaron desde la fuente, sin reconstruir el corpus (`082ed26`,
+    `data/spinoza/editorial_marks.json`): 25 etiquetas, 11 puras y 14 mixtas, y 40 continuaciones
+    candidatas.
+  - `PROVENANCE.md` queda corregido.
+- **Delegación:** todo el código lo escribió `engine-implementer` con contratos JSON validados. Los
+  diffs los revisé yo. Mi última ejecución completa de la suite dio 3050 verdes; la del
+  implementador tras el último cambio, 3068. Desde las 15:00 los subagentes
+  usan Sonnet (autor).
+
+**Resultado:**
+- `main` de Traianus en `35c7620` y el de refapp-01 en `12136cc`, subidos y con CI en verde.
+- `feat/relational-graph` en `082ed26` (Traianus) y `docs/relational-z` en `14cabe8` (refapp-01)
+  siguen locales.
+
+**Resuelto de entradas anteriores:**
+- 2026-09-26, próximos pasos 2 y 3: la integración en `main` y la subida de refapp-01, hechas.
+- 2026-09-26, decisión «zoom del cliente»: reformulada. El zoom es relacional; la pregunta pasa a
+  qué grafo usa.
+
+**Sin resolver / decisión pendiente:**
+- **Autor:**
+  - fijar el grafo base del zoom relacional (unión o fronteras abiertas);
+  - revisar las 40 continuaciones candidatas;
+  - decidir si las celdas de eje sirven como primer nivel del zoom.
+- **Comprobar si quitar las 11 notas puras cambia alguna decisión** de K6, R4 o Z, como
+  comprobación etiquetada.
+- **Arreglar el constructor** abriría una época nueva del corpus. Queda para más adelante.
+- **Ruff y mypy de CI no cubren** `tools/experiments/**` ni los tests nuevos, y mypy falla en
+  `mark_editorial_notes.py` por el `PART_CONFIG` sin tipos del constructor.
+- **Un test de latencia de almacenamiento** (`test_concurrent_reads_during_background_write`)
+  falló dos veces bajo carga.
+- **AGENTS 4.3 fija ε = 0,8:** un ε dinámico en `/relations` necesitaría cambiarlo.
+
+**Próximo paso:**
+1. Decidir el grafo base y escribir el paso 1 del zoom relacional en `ZOOM.md`.
+2. Revisar las candidatas editoriales y comprobar su efecto en K6, R4 y Z.
+3. Integrar `feat/relational-graph` y `docs/relational-z`.
