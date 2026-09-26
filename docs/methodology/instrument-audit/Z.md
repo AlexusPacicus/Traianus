@@ -1026,3 +1026,23 @@ Reviewed by:               instrument-auditor (blind subagent, review package bu
   display order is by squared Euclidean distance, stated with the reason. (3) The state counts
   see only existing arms; a search failing inside its first evaluation shows only among the
   failed searches. (4) The docstrings cite the last revision that changed code.
+- **Revision 14 implemented** (2026-09-26) — `instrument-implementer`, `6c51f45`: tests only, the
+  script byte-identical to `83870fa`'s; the other paths of a failed search (a difference point of
+  H at a later iterate; a non-positive slope at the first and at the second later iterate; at
+  z = 0 a non-positive slope or no sign change, with their counts), each shown able to fail by a
+  temporary break of the script, reverted; the full suite passed.
+- **Run plan** (committed before the first run, 2026-09-26; the author). Version run: the script
+  as committed at the commit that holds this entry, byte-identical to the one reviewed in phase
+  2, round 3 (`83870fa`; sha256
+  57323bb53d8f15b7e63b3d9e7d37ee4c7a7dcdc9212918a38d664d2d17853330); no deferred code fix, so no
+  second version. Commands, on this machine, one after the other, with nothing else heavy
+  running: `python3 tools/experiments/zoom_three_point.py` (result to `data/refapp/Z_result.json`),
+  then `python3 tools/experiments/zoom_three_point.py --out .data/z_run2.json`. Each run checks
+  the pin and runs the known world first; the real data are read only if it passes. Equivalence
+  rule: the two files, parsed as JSON, are equal in every key outside the `z2` section — Z1, every
+  control and every count are deterministic — and any difference there means no result is used
+  until it is explained. Z2, whose clock is never deterministic: run 1's Z2 decision is used only
+  if run 2's is the same; if they differ, Z2 is reported as not reproducible on this machine and
+  no Z2 decision is used. Validity: if either run's `valid` is false, no decision is used and the
+  failed conditions are reported. A defect found after the first run is a new version, reviewed
+  again, and both versions' results are reported. The result's commit states results only.
