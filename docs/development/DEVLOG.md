@@ -1486,3 +1486,72 @@ primera ejecución.
    implementador.
 2. Revisión ciega de fase 2.
 3. Primera ejecución.
+
+## 2026-09-26
+
+**Contexto:** Z estaba implementada (`cb421ff`), con empates exactos en el mundo conocido y el
+autor por decidir si arreglarlos antes de la fase 2.
+
+**Se hizo:**
+- **Mundo conocido (revisión 9, código `33a12e3`):** desplazamientos frac(ι²·(√5 − 1)/2). Con los
+  lineales, 6 de los 28 pares quedaban igual de espaciados. Con los cuadráticos no queda ninguno,
+  y el argumento cubre las tres posibles notas del medio, no solo la del medio en ι.
+- **Fase 2, tres rondas ciegas:**
+  - Ronda 1: PASS, 12 no bloqueantes. Se aplicaron en la revisión 10 y en el código `a4e9274`:
+    - la búsqueda cronometrada construye su recta;
+    - al brazo de fotogramas clave se le resta un segundo overhead, por su marca de tiempo;
+    - el pin de K6 se comprueba con hashlib;
+    - se informa la d mínima positiva;
+    - tests de n_scored y de D21 con fricciones aleatorias.
+    El autor eligió declarar la búsqueda fallida y arreglar en código el overhead y el pin.
+  - Ronda 2: CHANGES, 1 bloqueante. El brazo por pasos construía dos veces el estado de nivel 2
+    (61 estados frente a 60), lo que inclinaba Δ a favor de los fotogramas clave. Revisión 12 y
+    código `83870fa`: partición separada del estado y fotograma de t = 1 exactamente en B
+    (elección del autor).
+  - Ronda 3: PASS, 4 no bloqueantes. Se aplicaron sin otra ronda, como en K6 (revisión 14,
+    tests `6c51f45`).
+  - Las revisiones 11 y 13 son solo de redacción: qué punto deja una búsqueda fallida.
+- **Plan de ejecución** en commit antes de ejecutar (`afc606e`): dos ejecuciones, que tienen que
+  ser iguales fuera de `z2`. Z2 solo decide si las dos coinciden (elección del autor).
+- **Primera ejecución** (`2747476`): las dos son válidas e iguales fuera de `z2`.
+  - Z1: no concluyente (D̄ = 7,22·10⁻⁷, n = 1110).
+  - Z2: confirmado en las dos (mediana de Δ −0,91 y −0,92 ms; percentil 95 de ready 47,9 y
+    48,6 ms).
+- **Lectura del autor** (`476ebd6`; refapp-01 `ff067b8`):
+  - En este corpus los dos brazos son el mismo zoom, porque la fricción es casi plana: τ supera
+    la longitud en un 0,058 % mediano.
+  - No pone a prueba el postulado.
+  - Z2 confirma los fotogramas clave frente a recalcular cada fotograma, no tres puntos frente a
+    dos.
+  - Aparte, como exploración: la pantalla 2-D conserva poco del vecindario real, con
+    puntuaciones de 0,049, 0,038 y 0,022 al inicio, en el medio y al final.
+
+**Resultado:** `feat/zoom-impl` en `476ebd6` y `feat/client-oklch-color` (refapp-01) en `ff067b8`,
+ambas locales. Z tiene la fase 2 cerrada, su resultado y la lectura del autor.
+
+**Resuelto de entradas anteriores:**
+- 2026-09-25 (cierre 18:54): la decisión sobre el mundo conocido y los próximos pasos 1–3
+  (arreglo, revisión de fase 2 y primera ejecución) están hechos.
+- 2026-09-25: los 7 no bloqueantes que se aplicaron en la revisión 8 sin ronda quedaron
+  comprobados en la fase 2.
+
+**Sin resolver / decisión pendiente:**
+- **Autor:**
+  - qué zoom usa el cliente: dos puntos con fotogramas clave, o tres puntos;
+  - una fricción que importe sería una hipótesis nueva, a partir de algo medido;
+  - el estudio de la pantalla 2-D, más adelante.
+- **Sin integrar en `main`:** `feat/zoom-record` y `feat/zoom-impl`, que incluyen la regla de
+  metodología `e54261c` y las correcciones de `contracts.md` §0. Refapp-01 sin subir.
+- **Huecos menores:**
+  - ningún test comprueba que una búsqueda fallida que deja m entra en D_q y en Z2 (solo ocurre
+    con valid = false);
+  - el test de D21 siempre da μ = 0, así que el caso |μ| > 1 no se prueba.
+- **Ceguera:** el paquete sigue incluyendo los resultados de K6 y R4, y el revisor ve el índice de
+  memoria. Lo declaró en cada ronda.
+- **Sin tocar desde el 24-09:** el test sin commitear del implementador de K8. Ruff en CI no
+  cubre los scripts de K6 y Z ni sus tests.
+
+**Próximo paso:**
+1. Decisiones del autor sobre el zoom del cliente.
+2. Integrar las ramas de Z en `main`, con su entrada en el LEDGER, y comprobar el CI en Linux.
+3. Subir refapp-01.
