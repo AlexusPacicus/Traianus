@@ -1,6 +1,6 @@
 """TG — tension gate on cross-label relations.
 
-Implements docs/methodology/instrument-audit/TG.md (instrument audit record, revision 3) against
+Implements docs/methodology/instrument-audit/TG.md (instrument audit record, revision 6) against
 docs/methodology/instrument-audit/contracts.md (section 0 data layer, section 5 TG) and
 docs/methodology/instrument-audit/derivations.md (D27, D28, D29).
 
@@ -693,10 +693,14 @@ def measure(
     for k in range(N_AXES):
         n_fit = int(np.count_nonzero(in_zone[fit, k]))
         n_eval = int(np.count_nonzero(in_zone[ev, k]))
-        zone_candidates = zone_kept = zone_marked = zone_vetoed = 0
+        zone_candidates = zone_tree_links = zone_kept = zone_marked = zone_vetoed = 0
         for (i, j), (cz, _own) in candidacy_info.items():
             if k in cz:
                 zone_candidates += 1
+                if (i, j) in variants_data["m_pairs"]:
+                    # TG.md revision 6: a candidate that is an edge of M is never judged.
+                    zone_tree_links += 1
+                    continue
                 info = pair_info[(i, j)]
                 if info["passes"] and not info["vetoed"]:
                     zone_kept += 1
@@ -711,6 +715,7 @@ def measure(
             "tree_edges": tree_edge_counts[k],
             "theta": thetas[k],
             "candidates": zone_candidates,
+            "tree_links": zone_tree_links,
             "kept": zone_kept,
             "marked": zone_marked,
             "vetoed": zone_vetoed,

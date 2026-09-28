@@ -1,6 +1,6 @@
 """Unit tests of tools/experiments/tension_gate.py.
 
-Specification: docs/methodology/instrument-audit/TG.md (revision 3), docs/methodology/instrument-audit/
+Specification: docs/methodology/instrument-audit/TG.md (revision 6), docs/methodology/instrument-audit/
 contracts.md (sections 0 and 5), docs/methodology/instrument-audit/derivations.md (D27, D28, D29).
 Synthetic inputs only: CI has no .data/, and the measurement is never run on the real artefact here.
 """
@@ -439,6 +439,39 @@ def test_variant_j_excludes_relations_touching_eval_notes_or_sharing_a_label():
     assert same_label not in j
 
 
+def test_a_zone_candidate_that_is_an_edge_of_m_is_a_tree_link_never_judged():
+    """TG.md revision 6, Candidates and verdicts: a candidate that is an edge of M is never
+    judged (J never holds an edge of M): it is counted among its zone's candidates and as a
+    tree link, and not as kept, marked or vetoed. Before the fix, measure() raises a KeyError
+    trying to look up pair_info for a zone candidate that was never judged.
+
+    The default corpus never puts two different-label FIT notes in a shared zone (each note is
+    in only its own dominant axis's zone), so no bridge is ever a zone candidate there (only a
+    same-sphere one). Here axis 2 is elevated, to the same value, on exactly two different-label
+    FIT notes and nowhere else: zone 2's only FIT members are then those two, so its threshold is
+    exactly their own distance, trivially satisfying the candidacy inequality -- a genuine zone-2
+    candidate. The same shared, otherwise-unique component also makes the pair each other's
+    nearest match more than either is to any other note (every other pair mismatches on it), so
+    the global MST built from row 0 (Prim's) links them directly too, with no need to force it.
+    """
+    n = 100
+    v = _corpus(n)
+    i, j = 0, 50  # FIT (even rows), dominant axis 0 and axis 1 respectively: different labels
+    v[i, 2] = v[j, 2] = 0.5
+    v[i] = v[i] / np.linalg.norm(v[i])
+    v[j] = v[j] / np.linalg.norm(v[j])
+    a = _axes_matrix()
+    axis_ids = [f"AXIS_{k}" for k in range(N_AXES)]
+    label_items = [{"label": f"L{k}", "part": "P1"} for k in range(n)]
+
+    result = tg.measure(v, a, axis_ids, label_items, tg.EPSILON)
+
+    zone = result["zones"]["per_axis"][2]
+    assert zone["candidates"] >= 1
+    assert zone["tree_links"] >= 1
+    assert (i, j) not in {(p["i"], p["j"]) for p in result["pairs"]}
+
+
 def test_an_existing_relation_with_an_unzoned_end_is_excluded_from_j_in_both_variants(tmp_path, monkeypatch):
     paths, expected = _write_inputs(tmp_path, equal_row=0)
     original_build_variants = tg.build_variants
@@ -484,7 +517,8 @@ def test_a_valid_run_on_a_small_synthetic_corpus_writes_every_key_of_the_output_
     assert len(zones["per_axis"]) == 8
     for zone in zones["per_axis"]:
         assert set(zone) == {
-            "axis", "n_fit", "n_eval", "tree_edges", "theta", "candidates", "kept", "marked", "vetoed",
+            "axis", "n_fit", "n_eval", "tree_edges", "theta", "candidates", "tree_links", "kept",
+            "marked", "vetoed",
         }
 
     for pair in result["pairs"]:
