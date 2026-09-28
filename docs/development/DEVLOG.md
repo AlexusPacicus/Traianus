@@ -1713,3 +1713,40 @@ K6, R4 ni Z.
 **Próximo paso:**
 1. Fusionar `docs/editorial-candidates-reviewed` en `main`.
 2. Decisión del autor sobre el grafo base del zoom relacional.
+
+## 2026-09-28
+
+**Contexto:** quedaba fusionar `docs/editorial-candidates-reviewed` en `main`,
+y sin asentar el gate de la fusión de `feat/relational-graph` (PR #88,
+2026-09-26): el cierre de las 18:44 de ese día describe el trabajo en rama,
+pero el PR se fusionó después (19:51) y su gate nunca quedó registrado.
+
+**Se hizo:**
+- Fusión de `docs/editorial-candidates-reviewed` en `main` (`merge --no-ff`,
+  `75191d7`): un solo fichero (`PROVENANCE.md`). Suite completa verde antes y
+  después (3092 passed, 1 skipped, 5 deselected); subida y CI en verde en
+  Linux (5m58s, run `36404750000`).
+- Asiento retroactivo del gate de PR #88 (`feat/relational-graph` → `main`,
+  `5f7fca9`, 2026-09-26 19:51): CI en verde en Linux, 5m22s (run
+  `36260773100`, confirmado ahora vía `gh run list`). El veredicto — siete
+  variantes del grafo relacional, 17 bloques de nota editorial encontrados y
+  marcados — ya estaba en el cierre de las 18:44 del 2026-09-26; solo faltaba
+  registrar que la fusión pasó su gate.
+
+**Resultado:** `main` de Traianus en `75191d7`, subido, CI verde.
+`PROVENANCE.md` refleja la lectura de las candidatas editoriales. El gate de
+PR #88 queda asentado retroactivamente.
+
+**Resuelto de entradas anteriores:**
+- 2026-09-27, próximo paso 1 (fusionar `docs/editorial-candidates-reviewed`):
+  hecho.
+- 2026-09-26 (cierre 18:44): gate de la fusión de PR #88, pendiente de
+  asentar, asentado.
+
+**Sin resolver / decisión pendiente:**
+- El grafo base del zoom relacional sigue sin decidir (autor).
+- `docs/relational-bridges/` (otro agente) sigue sin commitear en el árbol de
+  trabajo.
+
+**Próximo paso:**
+1. Decisión del autor sobre el grafo base del zoom relacional.
