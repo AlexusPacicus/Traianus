@@ -247,6 +247,9 @@ Reviewed by:               Claude Sonnet 5 (instrument-audit, blind subagent), 2
                            Claude Sonnet 5 (instrument-audit, blind subagent), 2026-09-28, phase 2,
                            round 1, record at b90882a (revision 4), script and tests at 71d1942:
                            PASS; 0 blocking, 3 non-blocking.
+                           Claude Sonnet 5 (instrument-audit, blind subagent), 2026-09-28, phase 2,
+                           round 2, record at f8e78fd (revision 6), script and tests at 17352dc:
+                           PASS; 0 blocking, 2 non-blocking.
 ```
 
 ## Review history
@@ -313,3 +316,25 @@ Reviewed by:               Claude Sonnet 5 (instrument-audit, blind subagent), 2
   candidates and as a tree link, never as kept, marked or vetoed; contracts.md §5 gains the
   zone field tree_links. The code is fixed against this revision, and phase 2 reviews it again
   (round 2).
+- **Phase 2, round 2** — Claude Sonnet 5 (`instrument-audit`, blind subagent), 2026-09-28, record
+  at `f8e78fd` (revision 6), script and tests at `17352dc`: **PASS**, 0 blocking, 2
+  non-blocking. Every read of a per-pair verdict traced: the fix is necessary and sufficient,
+  and no other read can reach a pair that was not judged; round 1's three items resolved.
+  Non-blocking, declared and not applied, so that the run is the reviewed script: (1) the pairs
+  output reads a pair's candidacy with a default (candidacy_info.get) that cannot be reached,
+  since every judged pair has an entry; (2) a candidate through its own sphere (no shared zone)
+  that is an edge of M is, like a zone candidate, never judged, but is counted nowhere: there is
+  no own-sphere tally, so nothing reports it.
+- **Run plan** (committed before the first run, 2026-09-28). Version run: the script as committed
+  at `17352dc`, sha256 `4c195d483e926590007625c258a2352bd3a6639ba6bd857434bc04286db887e5`, the
+  one reviewed in phase 2 round 2; no deferred code fix, so one version. Preconditions:
+  TRAIANUS_EPSILON_EDGE unset; the working copy's script, tests and pinned modules equal
+  `17352dc`. Commands: `python3 tools/experiments/tension_gate.py` (result to
+  `data/refapp/TG_result.json`), then once more with `--out .data/tg_run2.json`. Equivalence
+  rule: the two files are byte-identical (sha256; TG measures no time, so nothing in the result
+  is expected to vary on one machine); if they differ, no result is used until the difference is
+  explained. Validity: if the result says `valid` is false, no result is used and the failed
+  condition is reported. The result is committed alone, with a "First run" entry here that
+  states figures without reading them; the reading is the author's, in the question's document.
+  A defect found in the script after the first run is a new version, reviewed again, and both
+  versions' results are reported.
