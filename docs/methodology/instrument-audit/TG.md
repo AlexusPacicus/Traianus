@@ -3,10 +3,10 @@
 The question, hypothesis and refuters live in `docs/relational-bridges/RELATIONAL_BRIDGES.md` §22,
 which a blind reviewer never opens (definitions.md, Not allowed).
 
-## Instrument audit record (revision 2)
+## Instrument audit record (revision 3)
 
 ```
-Instrument audit — TG, relations kept by a tension gate and the spiral they open (revision 2)
+Instrument audit — TG, relations kept by a tension gate and the spiral they open (revision 3)
 
 Scope: two existing relation graphs on the frozen corpus (union, open borders), each taken
   without the gate, with it, and with a blind draw in its place. The gate judges relations between
@@ -40,7 +40,8 @@ Symbols, each with one meaning here. A blanket disclaimer, not a claim that mean
     unit u ∈ ℝ⁸; u_1…u_1000 the blind reference; κ_ij the cut; ρ_i an end's cone radius; σ the
     foot parameter of a note on the edge;
   graphs — G⁰ a variant without the gate, G⁺ with it, G^b with the blind draw; M the variant's
-    minimum-spanning-tree edges (all notes); J the judged relations, K ⊆ J the kept ones;
+    minimum-spanning-tree edges (all notes); J the judged relations, K ⊆ J the kept ones; n_J
+    the number of unique pairs judged over both variants' J;
     |E| a graph's relation count, β = 2|E|/2221 its budget;
   statistic — q an EVAL note; h_q(n) the fewest relations from q to n in a graph (its turn);
     C_q(t) = |{n ∈ R(q) : h_q(n) ≤ t}|; H the horizon; A_q = Σ_{t=1..H} C_q(t); D_q = A_q(G⁺) −
@@ -55,7 +56,9 @@ Script: tools/experiments/tension_gate.py; unit tests: tests/unit/test_tension_g
   pairwise_distances, minimum_spanning_tree, union_edges, axis_cells, median_threshold,
   touching_tree_weights, open_relations and cell_graph from
   tools/experiments/relational_graph_exploration.py, pinned by sha256 =
-  627aa8e95a844b0aec290a41c48b9a0bf6890db25b5240b5730c366a56d2e7dc (the file at db12b60). Each pin
+  627aa8e95a844b0aec290a41c48b9a0bf6890db25b5240b5730c366a56d2e7dc (the file at db12b60); and
+  traianus/geometry/observables.py, whose compute_epsilon_edges relations() calls, pinned by
+  sha256 = 54385042f771fc6b2a383e52e312287b2b82030f378212f7e06bd19f16f94c0f. Each pin
   hashes the file the module was loaded from (module.__file__) with hashlib, not through the
   module's own check_digests, and refuses to run on a mismatch. Declared limits: the pin checks
   the file on disk, not the bytes the interpreter loaded; importing a module runs its top-level
@@ -79,8 +82,9 @@ Axis coordinates: c(v) = (⟨v, â_1⟩, …, ⟨v, â_8⟩). Label lab(i) = arg
   lower k (axis_cells). Distances: pairwise_distances, one binary64 value per pair, the engine's
   expression.
 Zones (FIT): i ∈ Z_k iff c_{i,k} > (1/8) Σ_k′ c_{i,k′} (strict). The zone of lab(i) holds i unless
-  its eight components are equal, which leaves i in no zone (counted, reported; such a note is
-  never a judged end). Z_k's tree: minimum_spanning_tree over the FIT notes of Z_k (Prim from the
+  its eight components are equal, which leaves i in no zone (counted, reported). Such a note is
+  never an end of a pair in J — neither a relation the variant has nor a candidate, in any zone
+  or in its own sphere — and its relations stay as the variant has them. Z_k's tree: minimum_spanning_tree over the FIT notes of Z_k (Prim from the
   zone's lowest row, ties to the lower row). θ_k = median_threshold of that tree's edge lengths
   (numpy.median). A zone with fewer than 2 FIT notes has no tree and no threshold and admits no
   candidate (counted).
@@ -117,9 +121,11 @@ Candidates and verdicts: shared = Zn(i) ∩ Zn(j). If shared is not empty, the b
   candidacy differs between zones. One verdict per zone, counted per zone: candidates, kept,
   marked, vetoed.
 Variants (all 2,221 notes, built with the imported functions, unchanged from the exploration):
-  union — relations(labels, v, 0.8) ∪ M, by union_edges; open borders — open_relations(d, cells,
-  t) ∪ M, cells = axis_cells, t_k = median_threshold of touching_tree_weights(M, cells, 8)[k];
-  M = minimum_spanning_tree(d) over all notes. Dense per-cell reference (budget only): the
+  union — relations(labels, v, 0.8) ∪ M; open borders — open_relations(d, cells, t) ∪ M; both
+  unions by union_edges. cells = axis_cells; t_k = median_threshold of
+  touching_tree_weights(M, cells, 8)[k], null for a cell no tree edge touches, and a null t_k
+  admits no pair (open_relations); a cell with a note always has such an edge, since M spans
+  every note. M = minimum_spanning_tree(d) over all notes. Dense per-cell reference (budget only): the
   within-cell relations of cell_graph(d, cells, 8) (threshold = the longest edge) ∪ its cross-cell
   tree edges.
 Three graphs per variant (the only difference between them is the set of judged relations):
@@ -164,22 +170,24 @@ Rule, per variant and scope:
   iff (1), (2) and (3) hold for both variants; it is refuted iff any of them is refuted in either
   variant; otherwise inconclusive. An inconclusive zone triggers the fixed descent (outside this
   record). Single bridges are kept or discarded by the cut, once; they are never inconclusive.
-Controls (each can fail; a failure makes the run invalid and no result is used):
-  exchangeable direction — for every pair in J, e_ij(w_ij) with w_ij an independent uniform
-    direction (Draws) is compared with κ_ij; the fraction below the cut must lie within
-    12/1001 ± 4·√((12/1001)(989/1001)/|J|). A correct cut falls outside with probability ≈ 6e-5
+Controls (each fails on a code error; a failure makes the run invalid and no result is used):
+  exchangeable direction — for each of the n_J unique pairs judged over both variants, once,
+    e_ij(w_ij) with w_ij an independent uniform direction (Draws) is compared with κ_ij; the
+    fraction below the cut must lie within 12/1001 ± 4·√((12/1001)(989/1001)/n_J). A correct cut falls outside with probability ≈ 6e-5
     (two-sided normal tail at 4 s.d.), so a failure points at the code.
   ceiling — the graph whose relations join each EVAL q to every note of R(q): every h_q(n) = 1,
     so Σ_{n∈R(q)} h_q(n) = 15 for every q; the breadth-first search and the sum must return it
     exactly.
-  connectivity — G⁰, G⁺ and G^b are one component each (else an h is undefined).
+  connectivity — G⁰, G⁺ and G^b are one component each (else an h is undefined). A code check,
+    not an empirical one: M spans every note and J never holds an edge of M, so M ⊆ G⁰, G⁺, G^b
+    by construction; it can fail only if the code builds a graph otherwise.
   equal budget — |G^b| = |G⁺| for each variant. A code check, not an empirical one: it is an
     identity of the construction (both graphs are variant ∖ J plus |K| members of J), so it can
     fail only if the code builds them otherwise.
 Draws: rng = numpy.random.default_rng(20260918) (PCG64), used in this order and nowhere else:
-  g = rng.standard_normal((1000, 8)) (the blind reference); then, for the pairs of J over both
-  variants, each pair once, in ascending (i, j), w = rng.standard_normal((number of pairs, 8)),
-  row by pair (the exchangeable-direction control); then, for union and then open borders,
+  g = rng.standard_normal((1000, 8)) (the blind reference); then, for the n_J unique pairs judged
+  over both variants, each once, in ascending (i, j), w = rng.standard_normal((n_J, 8)), row by
+  pair (the exchangeable-direction control); then, for union and then open borders,
   rng.choice(|J|, |K|, replace=False) indexing that variant's J in ascending (i, j) (the blind
   draw, one fixed draw per variant); then, for union and then open borders, for D̄ and then D̄′,
   for the global scope and then the zones in axis order, for each valid L ascending and b = 1…10,000,
@@ -240,4 +248,9 @@ Reviewed by:               Claude Sonnet 5 (instrument-audit, blind subagent), 2
   also performs the open-borders union with M: say so. (4) The open-borders threshold t_k has no
   stated null case. (5) "Never a judged end" for a note with eight equal components is ambiguous
   between the zone tallies and candidacy altogether. (6) compute_epsilon_edges
-  (traianus/geometry/observables.py), which relations() calls, is not pinned.
+  (traianus/geometry/observables.py), which relations() calls, is not pinned. Addressed in
+  revision 3, design unchanged: the six items; for (5) the author chose that such a note is never
+  an end of a pair in J.
+- **Phase 1 closed** (the author, 2026-09-28) on revision 3, after two PASS rounds on one design,
+  without a third round: revision 3 only applies round 2's non-blocking items, which phase 2
+  checks against the code.

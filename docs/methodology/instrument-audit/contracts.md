@@ -320,7 +320,9 @@ Input    V (§0, after §0 Conversions); FIT = rows 0, 2, 4, … (1,111); EVAL =
              validate_inputs, IntegrityError;
            tools/experiments/relational_graph_exploration.py — relations, pairwise_distances,
              minimum_spanning_tree, union_edges, axis_cells, median_threshold,
-             touching_tree_weights, open_relations, cell_graph.
+             touching_tree_weights, open_relations, cell_graph;
+           traianus/geometry/observables.py — not called directly: relations() calls its
+             compute_epsilon_edges.
          Limits declared in TG.md (the file on disk, not the loaded bytecode; top-level code runs
          on import; §0's one-read rule cannot apply to an imported module).
          Epsilon: resolve_epsilon_edge() (traianus/config.py) must return 0.8.
@@ -334,7 +336,8 @@ Order    import and pin checks → epsilon check → read the three artefacts (�
          controls → breadth-first turns from every EVAL note in every graph → D_q, D′_q → block
          bootstrap per variant, statistic, scope and valid L → rules and decisions → write.
 Output   data/refapp/TG_result.json (§0 Results format; null, never NaN) with:
-         digests — the two pinned modules always; the three artefacts when read (null otherwise);
+         digests — the three pinned modules always; the three artefacts when read (null
+           otherwise);
          environment — §0 Determinism, plus the thread variables as set and epsilon;
          valid; first_failed_condition (null when valid); failed_conditions and
          conditions_checked (identifiers, in check order);
@@ -351,7 +354,8 @@ Output   data/refapp/TG_result.json (§0 Results format; null, never NaN) with:
          dense_reference — relations, beta;
          decision — global and per zone: "holds", "refuted", "inconclusive" or "pending" (null
            when valid = false);
-         controls — exchangeable_direction {n, fraction, band}, ceiling {passed},
+         controls — exchangeable_direction {n_j (pooled unique pairs), fraction, band},
+           ceiling {passed},
            connectivity {per variant and graph}, equal_budget {per variant};
          reported — every figure in TG.md's Reported line not already above, under the same
            names in snake case.
