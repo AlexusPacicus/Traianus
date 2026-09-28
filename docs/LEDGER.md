@@ -2275,3 +2275,67 @@
   continuation candidates (`75191d7`).
 
 * **Status:** `Consolidated`.
+
+### seq 71 — 2026-09-27 — Editorial pure-exclusion check: the 11 pure footnote chunks do not change K6, R4 or Z's decision
+
+* **Context:** seq 70 marked 25 labels of the frozen corpus as editorial footnote text, 11 of
+  them pure (the whole chunk is footnote text). The author asked whether removing those 11
+  chunks changes K6's selected colour channels, R4's `r4_holds`, or Z's `z1`/`z2` decisions.
+
+* **Decision (the author):** a labelled exploration (`METHODOLOGY.md` "Explore"): no audit
+  record, no blind review, never enters the registry. The runner and its comparison rule — which
+  fields decide, which are reported only — are fixed in a validated `DelegationContract` before
+  any result exists.
+
+* **Δ merged (`explore/editorial-pure-exclusion` → `main`, `4fef732`):**
+  `tools/experiments/editorial_pure_exclusion.py` and its tests (`4e31690`) — `pure_labels`,
+  `filter_corpus`, a null control on the unfiltered corpus, and `compare_k6`/`compare_r4`/
+  `compare_z` over the fields each instrument's own record treats as deciding; the run's outputs
+  in `data/refapp/editorial_pure_exclusion/*.json` (`5966e6d`).
+
+* **Result (exploration, no decision):** control usable — K6 and R4 on the unfiltered corpus
+  reproduce the committed `K6_result.json`/`R4_result.json` outside `environment`. With the 11
+  pure chunks removed (2,221 → 2,210 notes): K6 selects the same two channels (`lambda_3`, `a_8`)
+  in the same order; R4 keeps `r4_holds = true` (margin −0.0059 → −0.0465, more slack); Z keeps
+  Z1 inconclusive and Z2 confirmed, reproducible across the two filtered runs. No decision
+  changes.
+
+* **How it was built:** delegated to `engine-implementer` on Sonnet from a validated
+  `DelegationContract`. The executing agent reviewed the diff and ran the check on the real
+  frozen corpus itself; the implementer never touches real data (AGENTS 6.1).
+
+* **Declared gap:** if the filtered K6 run were itself invalid, `out_dir/k6.json` would already
+  be on disk when the R4 call failed reading it, so B8's "nothing written to `out_dir`" promise
+  would not hold for that path. Not triggered in this run (the filtered K6 run was valid); no
+  test covers it.
+
+* **Gate:** `pytest tests/` → 3092 passed / 1 skipped / 5 deselected, before and after the merge.
+  `ruff` and `mypy` clean on the two new files, run manually (outside CI's `tools/experiments/**`
+  scope — known gap, seq 70). Linux: CI on the merge `4fef732` green, 6m5s (run `36327359101`).
+
+* **Status:** `Consolidated`.
+
+### seq 72 — 2026-09-28 — The 40 continuation candidates read: 39 are Spinoza's text, 1 is Elwes's note
+
+* **Context:** seq 70 also listed 40 blocks that follow a footnote without its own `[N]` marker
+  as `continuation_candidates`, left unmarked, for the author to confirm or reject.
+
+* **Decision (the author):** read as Spinoza's own text, 39 of the 40 — Gutenberg places each
+  footnote inline, right after the paragraph that cites it, so what follows is ordinary main
+  text. The one exception, `PART3_AFFECTS_P31_COR_01_C03` (the second line of the Ovid verse
+  under footnote 9), is Elwes's note text, not Spinoza's; left unmarked in the manifest and
+  declared, rather than reworking the corpus builder for one line.
+
+* **Δ merged (`docs/editorial-candidates-reviewed` → `main`, `75191d7`):** a
+  `data/spinoza/PROVENANCE.md` correction (`8318f60`) recording the reading above against
+  `editorial_marks.json`'s `continuation_candidates`. No code, no reprocessing of the corpus or
+  its manifests.
+
+* **How it was built:** a documentation decision, made directly by the executing agent (no
+  code, no delegation).
+
+* **Gate:** `pytest tests/` → 3092 passed / 1 skipped / 5 deselected, before and after the merge.
+  `PROVENANCE.md` is not a governed path (AGENTS 6.2): no `EXECUTE_SAFE` gate applies. Linux: CI
+  on the merge `75191d7` green, 5m58s (run `36404750000`).
+
+* **Status:** `Consolidated`.
