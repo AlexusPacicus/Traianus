@@ -413,6 +413,16 @@ nueva.
    la referencia cuando su tensión queda por debajo de casi todas ellas. Las
    esferas de origen no entran en el esfuerzo; entran en el giro, fuera de esta
    pieza.
+
+   **Enmienda a las definiciones 3 y 4 (autor, 2026-09-28).** La tensión a lo
+   largo del puente y a lo largo de cada dirección de la referencia ciega se
+   mide sobre la esfera del puente sin sus dos extremos, con el baricentro de
+   esas notas. La separación de los propios extremos cae entera a lo largo del
+   puente y nunca a lo largo de una dirección ciega: medirla sería medirse a sí
+   mismo, el mismo principio por el que la calibración del motor excluye la
+   autoproyección. Lo que queda a lo largo del puente es cómo se reparten sus
+   vecinos reales, que es lo que la puerta lee. La esfera del puente, con sus
+   extremos, sigue definiendo el túnel y las notas ajenas.
 5. **Dónde se juzga un puente.** En cada zona que contenga a sus dos extremos,
    con un veredicto por zona: si una zona lo mantiene, entra en la
    reconstrucción de esa zona (apartado 6), y cada caso se cuenta por zona, sin

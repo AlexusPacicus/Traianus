@@ -265,6 +265,28 @@ D26 A world where the benchmark's middle is the answer. With S and E as in D21, 
     likewise for m → B; node by node √f does not rise, and the leg's length drops by
     ‖m − A‖ − ξ = h²/(‖m − A‖ + ξ) (likewise for the other leg); with Σ_i w_i √f ≥ 1 on the
     projected leg, each drop bounds that leg's share of the gap.
+
+D27 P(a value exchangeable with 1,000 null values is below the 12th smallest) = 12/1001
+    ≈ 0.011988 (D8's mirror, for a statistic where smaller passes).
+    Conditions: the 1,001 values are exchangeable. With ties, under randomised tie-breaking,
+    P(strictly below) ≤ 12/1001.
+    Proof: its rank among the 1,001, counted from the smallest, is uniform on 1…1001; it is below
+    the 12th smallest null value iff at most 11 null values are below it, i.e. its rank is ≤ 12:
+    12 of 1,001 ranks.
+
+D28 The sum of a cumulative neighbour count over turns is fixed by the neighbours' turns. For a
+    note q, a finite set R of notes, turns h(n) ∈ {1, …, H} for n ∈ R, and
+    C(t) = |{n ∈ R : h(n) ≤ t}|: Σ_{t=1..H} C(t) = |R|(H + 1) − Σ_{n∈R} h(n). Hence, for two
+    graphs with the same R and a common H bounding every turn in both, the difference of the
+    sums is Σ h(n) in the second minus Σ h(n) in the first, whatever H.
+    Conditions: every h(n) is finite, 1 ≤ h(n) ≤ H (every n reachable, q ∉ R).
+    Proof: Σ_{t=1..H} C(t) = Σ_{n∈R} Σ_{t=1..H} [h(n) ≤ t] = Σ_{n∈R} (H − h(n) + 1).
+
+D29 The tension of a sphere along a direction is a quadratic form. For points c_x ∈ ℝ⁸, x ∈ S,
+    their mean p and T = ½ Σ_{x∈S} (c_x − p)(c_x − p)ᵀ: ½ Σ_{x∈S} ⟨c_x − p, u⟩² = uᵀTu for
+    every u ∈ ℝ⁸, and it is the same for u and −u.
+    Conditions: none (S finite, non-empty).
+    Proof: ⟨c_x − p, u⟩² = uᵀ(c_x − p)(c_x − p)ᵀu; sum and halve; (−u)ᵀT(−u) = uᵀTu.
 ```
 
 D18 is not used by Z since its revision 3 (the three-point route became two straight legs); it
@@ -272,7 +294,7 @@ stays as verified. D22 is not used by Z since its revision 5 (the search keeps e
 E = 0, so there is no merit function); it stays as verified.
 
 Used by: K6 (D2, D4, D6, D7, D8, D11), R4 (D2, D5, D6, D9, D10), Z (D5, D17, D19, D20, D21, D23,
-D24, D25, D26).
+D24, D25, D26), TG (D27, D28, D29).
 
 ## En palabras
 
@@ -327,6 +349,13 @@ D24, D25, D26).
 - **D26** Si el inicio está en la diagonal y el final se aparta de ella en perpendicular, ningún
   punto medio mejora el de la ruta recta: es el mundo sintético donde la respuesta se sabe de
   antemano.
+- **D27** La simétrica de D8: si el puente fuera una dirección más de las ciegas, quedaría por
+  debajo de la 12.ª de mil con probabilidad 12 entre 1.001.
+- **D28** Sumar, vuelta a vuelta, cuántas vecinas reales ya han aparecido es lo mismo que restar
+  sus vueltas a una cantidad fija: la diferencia entre dos grafos solo depende de a cuántas
+  relaciones quedan las vecinas, no del horizonte elegido.
+- **D29** La tensión de una esfera a lo largo de una dirección se calcula con una sola matriz
+  de 8 × 8, y no cambia si la dirección se da la vuelta.
 
 Verified by the `instrument-auditor` subagent (maths only), 2026-09-18, at `e2f6d70`: D9 defect
 (count vs. fraction) and missing conditions in D1, D2, D4, D6, D7, D10; D11, D12, the D8 tie form

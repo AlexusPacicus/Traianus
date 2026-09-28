@@ -829,3 +829,90 @@ def test_d26_breaks_off_the_diagonal(rng):
     g = _g(line, R64)
     assert g(z) < point.s
     assert not _close(g(z), g(-z))
+
+
+# D27 --------------------------------------------------------------------------------------------
+
+
+def _below_probability(n, r):
+    """Exact P(a value exchangeable with n null values is below the r-th smallest null)."""
+    hits = total = 0
+    for perm in itertools.permutations(range(n + 1)):
+        candidate, nulls = perm[0], sorted(perm[1:])
+        hits += candidate < nulls[r - 1]
+        total += 1
+    return Fraction(hits, total)
+
+
+def test_d27_tail_formula_by_exhaustive_enumeration():
+    for n in range(1, 7):
+        for r in range(1, n + 1):
+            assert _below_probability(n, r) == Fraction(r, n + 1)
+
+
+def test_d27_instance_used_by_tg():
+    assert Fraction(12, 1001) == Fraction(12, 1000 + 1)
+
+
+def test_d27_breaks_at_the_13th_smallest():
+    assert Fraction(13, 1001) != Fraction(12, 1001)
+
+
+# D28 --------------------------------------------------------------------------------------------
+
+
+def _cumulative_sum(h, horizon):
+    return sum(int(np.count_nonzero(h <= t)) for t in range(1, horizon + 1))
+
+
+def test_d28_cumulative_neighbour_sum_matches_the_closed_form(rng):
+    for _ in range(TRIALS):
+        horizon = int(rng.integers(1, 20))
+        size = int(rng.integers(1, 15))
+        h = rng.integers(1, horizon + 1, size=size)
+        assert _cumulative_sum(h, horizon) == size * (horizon + 1) - int(h.sum())
+
+
+def test_d28_difference_of_sums_does_not_depend_on_the_horizon(rng):
+    for _ in range(TRIALS):
+        size = int(rng.integers(1, 15))
+        h1 = rng.integers(1, 6, size=size)
+        h2 = rng.integers(1, 6, size=size)
+        for horizon in (5, 8, 12):
+            diff = _cumulative_sum(h2, horizon) - _cumulative_sum(h1, horizon)
+            assert diff == int(h1.sum()) - int(h2.sum())
+
+
+def test_d28_breaks_when_a_turn_exceeds_the_horizon():
+    horizon = 5
+    h = np.array([1, 2, horizon + 3])
+    assert _cumulative_sum(h, horizon) != len(h) * (horizon + 1) - int(h.sum())
+
+
+# D29 --------------------------------------------------------------------------------------------
+
+
+def _tension(points):
+    p = points.mean(axis=0)
+    diffs = points - p
+    return p, 0.5 * diffs.T @ diffs
+
+
+def test_d29_tension_is_a_quadratic_form(rng):
+    for _ in range(TRIALS):
+        m = int(rng.integers(1, 12))
+        points = rng.standard_normal((m, 8))
+        p, T = _tension(points)
+        u = _unit(rng.standard_normal(8))
+        lhs = 0.5 * sum(float(np.dot(x - p, u)) ** 2 for x in points)
+        assert _close(lhs, float(u @ T @ u))
+        assert _close(float(u @ T @ u), float((-u) @ T @ (-u)))
+
+
+def test_d29_breaks_with_the_wrong_mean(rng):
+    points = rng.standard_normal((6, 8))
+    _, T = _tension(points)
+    wrong_p = points.mean(axis=0) + 1.0
+    u = _unit(rng.standard_normal(8))
+    lhs = 0.5 * sum(float(np.dot(x - wrong_p, u)) ** 2 for x in points)
+    assert not _close(lhs, float(u @ T @ u))

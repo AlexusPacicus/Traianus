@@ -1,0 +1,355 @@
+# TG — tension gate on cross-label relations
+
+The question, hypothesis and refuters live in `docs/relational-bridges/RELATIONAL_BRIDGES.md` §22,
+which a blind reviewer never opens (definitions.md, Not allowed).
+
+## Instrument audit record (revision 6)
+
+```
+Instrument audit — TG, relations kept by a tension gate and the spiral they open (revision 6)
+
+Scope: two existing relation graphs on the frozen corpus (union, open borders), each taken
+  without the gate, with it, and with a blind draw in its place. The gate judges relations between
+  notes with different labels by the tension of their joint neighbourhood along the relation's own
+  direction, against blind random directions. Measured: for every EVAL note, how few relations
+  separate it from its real neighbours (the spiral's turns), and each graph's relations per note.
+  Not measured: display, colour, the rotation, the double way, the fusion order, the descent below
+  the zones, the compass (none is part of this gate).
+Words: each term below is the frozen glossary word of the question's document, in English:
+  note (nota), axis (eje), affinity (afinidad), axis coordinates (coordenadas de eje), label
+  (etiqueta), zone (zona), distance and length (distancia, longitud: the same quantity), real
+  neighbours (vecinos reales), sphere (esfera), barycentre (baricentro), tension (tensión), bridge
+  (puente), bridge sphere (esfera del puente), effort (esfuerzo), minimum spanning tree and its
+  edges (árbol mínimo, enlaces mínimos), threshold (umbral), candidate (candidato), keep
+  (mantener), cut (corte), blind reference (referencia ciega), tunnel and cone (túnel, cono),
+  foreign note (nota ajena), marked bridge (puente marcado), split a neighbourhood (partir un
+  vecindario), inconclusive (no concluyente), pending (pendiente), turn (vuelta), budget
+  (presupuesto), blind draw (sorteo ciego), grid (parrilla), block length (tramo), interval
+  (intervalo), FIT and EVAL notes (notas de ajuste, apartadas).
+Symbols, each with one meaning here. A blanket disclaimer, not a claim that meanings differ: of
+  definitions.md's symbols (v, a_k, â_k, c₁, c_A, c_B, ĉ₁, P⊥, v_dipole, δ, u⊥, r, λ, λ_k, d_esc,
+  x, y) this record uses only v (as v_i) and â_k, with their meaning there, and none of the
+  others; it does not use contracts.md's V; contracts.md §0's d = 384 is written 384:
+  notes — v_i a note's 384-d vector, i, j, n, x note indices (0-based rows); c(v) ∈ ℝ⁸ its axis
+    coordinates, c_i = c(v_i), c_{i,k} its k-th component, k only ever indexing axes;
+    dist(i, j) = ‖v_i − v_j‖; lab(i) a note's label; Zn(i) the set of zones a note is in;
+    N(i) its real neighbours (FIT), R(q) an EVAL note's real neighbours (EVAL);
+  gate — Z_k the zone of axis k (its FIT notes), θ_k its threshold; S_ij the bridge sphere of
+    i, j, S°_ij = S_ij ∖ {i, j} the same without its two ends, p°_ij the barycentre and T°_ij the
+    tension matrix of S°_ij; b_ij the bridge's direction; e_ij(u) the tension of S°_ij along a
+    unit u ∈ ℝ⁸; u_1…u_1000 the blind reference; κ_ij the cut; ρ_i an end's cone radius; σ the
+    foot parameter of a note on the edge;
+  graphs — G⁰ a variant without the gate, G⁺ with it, G^b with the blind draw; M the variant's
+    minimum-spanning-tree edges (all notes); J the judged relations, K ⊆ J the kept ones; n_J
+    the number of unique pairs judged over both variants' J;
+    |E| a graph's relation count, β = 2|E|/2221 its budget;
+  statistic — q an EVAL note; h_q(n) the fewest relations from q to n in a graph (its turn);
+    C_q(t) = |{n ∈ R(q) : h_q(n) ≤ t}|; H the horizon; A_q = Σ_{t=1..H} C_q(t); D_q = A_q(G⁺) −
+    A_q(G⁰), D′_q = A_q(G⁺) − A_q(G^b); D̄, D̄′ their means; L a block length, B = 10,000
+    resamples, b a resample's index (never a direction).
+Script: tools/experiments/tension_gate.py; unit tests: tests/unit/test_tension_gate.py; the tests of
+  D27, D28 and D29 in tests/unit/test_audit_derivations.py. The script sets OMP_NUM_THREADS =
+  OPENBLAS_NUM_THREADS = VECLIB_MAXIMUM_THREADS = 1 itself, before its first numpy import. It
+  imports, and does not copy: check_digests, load_inputs, validate_inputs and IntegrityError from
+  tools/experiments/k6_colour_predictability.py, pinned by sha256 =
+  6289c596792154f6bb799606265c68719c6b8c7ae8b69084116dfb23c77876d2; relations,
+  pairwise_distances, minimum_spanning_tree, union_edges, axis_cells, median_threshold,
+  touching_tree_weights, open_relations and cell_graph from
+  tools/experiments/relational_graph_exploration.py, pinned by sha256 =
+  627aa8e95a844b0aec290a41c48b9a0bf6890db25b5240b5730c366a56d2e7dc (the file at db12b60); and
+  traianus/geometry/observables.py, whose compute_epsilon_edges relations() calls, pinned by
+  sha256 = 54385042f771fc6b2a383e52e312287b2b82030f378212f7e06bd19f16f94c0f. Each pin
+  hashes the file the module was loaded from (module.__file__) with hashlib, not through the
+  module's own check_digests, and refuses to run on a mismatch. Declared limits: the pin checks
+  the file on disk, not the bytes the interpreter loaded; importing a module runs its top-level
+  code. The engine's epsilon comes from resolve_epsilon_edge() in traianus/config.py; the script
+  refuses to run unless it returns 0.8 (the variable TRAIANUS_EPSILON_EDGE would change it).
+  The script's and its tests' docstrings cite the last revision of this record that the code was
+  written against (revision 6); a revision that changes only wording leaves them.
+  Contract: contracts.md §5. Result: data/refapp/TG_result.json, committed; --out writes the same
+  result elsewhere, not committed.
+Data: definitions.md (2,221 vectors, 8-axis basis). The script refuses to run, writing nothing,
+  unless sha256(embeddings.npy) =
+  eafb0e97172830f2404e96fa08d74bf6cccc0b6cbe84d47b790a476603e7d8d1, sha256(labels.json) =
+  1d60699353d810f089730c6203ee28f9c416e3004b60781bc965cec284097f4f and
+  sha256(tests/fixtures/nsm_axes_8.json) =
+  b14e5d6700d1a7478a357ca26f0f38f5240f97a42daad45722d21f1c3f964e35 hold (contracts.md §0,
+  Artefacts), and unless validate_inputs accepts the inputs (contracts.md §0, Integrity).
+  Conversions as contracts.md §0: rows cast to float64 and renormalised;
+  â_k = a_k / ‖a_k‖. FIT = even rows (1,111), EVAL = odd rows (1,110), as R4 and Z. Everything
+  the gate uses to judge — zones, trees, thresholds, real neighbours, spheres, tunnels, efforts —
+  comes from FIT notes only; every judged relation joins two FIT notes; the statistic is taken on
+  EVAL notes only.
+Axis coordinates: c(v) = (⟨v, â_1⟩, …, ⟨v, â_8⟩). Label lab(i) = argmax_k c_{i,k}, ties to the
+  lower k (axis_cells). Distances: pairwise_distances, one binary64 value per pair, the engine's
+  expression.
+Zones (FIT): i ∈ Z_k iff c_{i,k} > (1/8) Σ_k′ c_{i,k′} (strict). The zone of lab(i) holds i unless
+  its eight components are equal, which leaves i in no zone (counted, reported). Such a note is
+  never an end of a pair in J — neither a relation the variant has nor a candidate, in any zone
+  or in its own sphere — and its relations stay as the variant has them. Z_k's tree: minimum_spanning_tree over the FIT notes of Z_k (Prim from the
+  zone's lowest row, ties to the lower row). θ_k = median_threshold of that tree's edge lengths
+  (numpy.median). A zone with fewer than 2 FIT notes has no tree and no threshold and admits no
+  candidate (counted).
+Real neighbours: N(i) = the 15 FIT notes nearest to FIT note i by dist, i excluded, ties to the
+  lower row. R(q) = the 15 EVAL notes nearest to EVAL note q among the other 1,109 EVAL notes, q
+  excluded, ties to the lower row. 15 is the number an earlier record fixed and was reviewed
+  with; it is not chosen here.
+Bridge: a pair of FIT notes with lab(i) ≠ lab(j). Its sphere S_ij = {i, j} ∪ N(i) ∪ N(j), a note
+  in both counted once (at most 32 notes); S_ij defines the tunnel below. The effort is measured
+  on S°_ij = S_ij ∖ {i, j} (between 14 and 30 notes: j may be in N(i) and i in N(j)), so that the
+  ends' own separation, which lies wholly along b_ij and along no blind direction, does not
+  enter — no note is measured against itself, as the engine's threshold calibration excludes
+  self-projection. p°_ij = mean of c over S°_ij; T°_ij = ½ Σ_{x∈S°_ij} (c_x − p°_ij)(c_x − p°_ij)ᵀ
+  (8 × 8).
+Effort: e_ij(u) = ½ Σ_{x∈S°_ij} ⟨c_x − p°_ij, u⟩² = uᵀ T°_ij u for unit u (D29).
+  b_ij = (c_j − c_i)/‖c_j − c_i‖; c_i ≠ c_j because the labels differ, so b_ij exists (its sign
+  does not matter: e_ij(u) = e_ij(−u)). The effort is e_ij(b_ij).
+Blind reference and cut: u_m = g_m / ‖g_m‖, g_m the m-th row of the draw below (uniform on the
+  unit sphere of ℝ⁸, never looking at notes or text). κ_ij = the 12th smallest of
+  e_ij(u_1), …, e_ij(u_1000) (index 11 of the ascending sort). Passes the cut iff
+  e_ij(b_ij) < κ_ij (strict). If b_ij were exchangeable with the u_m, it would pass with
+  probability 12/1001 (D27, the mirror of K6's D8).
+Tunnel (384-d, FIT): ρ_i = dist(i, the 15th of N(i)). For a FIT note x ∉ S_ij,
+  σ = ⟨v_x − v_i, v_j − v_i⟩ / ‖v_j − v_i‖²; x is inside the cone iff 0 ≤ σ ≤ 1 and
+  ‖v_x − v_i − σ(v_j − v_i)‖ ≤ (1 − σ)ρ_i + σρ_j. Foreign notes of the bridge: the FIT notes
+  inside the cone and not in S_ij. The bridge is marked iff it has one or more (their number
+  reported). It is vetoed iff some foreign note x has neither i nor j in N(x) (x kept its
+  neighbours apart from the bridge, and the bridge crosses it).
+Candidates and verdicts: shared = Zn(i) ∩ Zn(j). If shared is not empty, the bridge is a candidate
+  in zone k ∈ shared iff dist(i, j) ≤ θ_k; if shared is empty, it is a candidate iff
+  dist(i, j) ≤ min(θ_lab(i), θ_lab(j)) (its own sphere), and not a candidate if either threshold
+  is missing (a zone without a threshold admits no candidate). A candidate is kept in a zone (or in its
+  own sphere) iff it passes the cut and is not vetoed. The effort, the cut and the tunnel depend
+  only on the two ends: each is computed once per pair, whatever the number of zones; only
+  candidacy differs between zones. One verdict per zone, counted per zone: candidates, kept,
+  marked, vetoed. A candidate that is an edge of M is never judged (J never holds an edge of M):
+  it is counted among its zone's candidates and as a tree link, and not as kept, marked or
+  vetoed (the author, 2026-09-28).
+Variants (all 2,221 notes, built with the imported functions, unchanged from the exploration):
+  union — relations(labels, v, 0.8) ∪ M; open borders — open_relations(d, cells, t) ∪ M; both
+  unions by union_edges. cells = axis_cells; t_k = median_threshold of
+  touching_tree_weights(M, cells, 8)[k], null for a cell no tree edge touches, and a null t_k
+  admits no pair (open_relations); a cell with a note always has such an edge, since M spans
+  every note. M = minimum_spanning_tree(d) over all notes. Dense per-cell reference (budget only): the
+  within-cell relations of cell_graph(d, cells, 8) (threshold = the longest edge) ∪ its cross-cell
+  tree edges.
+Three graphs per variant (the only difference between them is the set of judged relations):
+  J = the variant's relations joining two FIT notes with different labels that are not in M,
+    together with every candidate pair not already a relation of the variant (the relations the
+    variant already has are judged by the cut and the tunnel alone; added pairs must also be
+    candidates in some zone or in their own sphere).
+  K = the members of J kept: a relation the variant already has iff it passes the cut and is not
+    vetoed; an added pair iff it is kept in at least one zone, or in its own sphere.
+  G⁰ = the variant as it is. G⁺ = (variant ∖ J) ∪ K. G^b = (variant ∖ J) ∪ K^b, K^b = |K| members
+  of J drawn without replacement (Draws). M ⊆ G⁰, G⁺, G^b, so all three are connected; relations
+  touching an EVAL note or joining two notes with the same label are never in J.
+Statistic: for each EVAL q and each graph, h_q(n) by breadth-first search over all 2,221 notes;
+  C_q(t) and A_q = Σ_{t=1..H} C_q(t), H = the largest turn any EVAL note has in any of the
+  variant's three graphs (the eccentricity maximum; reported). By D28, A_q = 15(H + 1) −
+  Σ_{n∈R(q)} h_q(n), so D_q = Σ h_q(n)(G⁰) − Σ h_q(n)(G⁺) and D′_q likewise: the differences do
+  not depend on H. D̄ = mean of D_q over the EVAL notes in scope, D̄′ likewise.
+Scopes: global (all 1,110 EVAL notes) and each zone k (the EVAL notes q with c_{q,k} > the mean of
+  their own eight components; a note may be in several zones; zones are not mixed).
+Dependence and interval: EVAL alternates chunks of a sequential text, so nearby notes share
+  neighbourhoods and their D_q are correlated. No single block length is derived; the decision
+  runs over the grid {1, 2, 5, 10, 20, 50} (L = 1 is independence). For a scope with n notes and
+  each L, the scope's EVAL notes in row order are cut into n_blocks = ⌈n/L⌉ contiguous blocks
+  (the last may be shorter); L is valid iff n_blocks ≥ 20, a declared minimum (with fewer
+  resampling units the bootstrap distribution of a block mean takes few distinct shapes and
+  percentile intervals tend to undercover); an invalid L does not decide. For b = 1…10,000,
+  K_b = n_blocks block indices drawn uniformly with replacement (Draws), and D̄_b = the mean of
+  D_q over the notes of the blocks in K_b, a block drawn twice counting twice; interval =
+  [sorted(D̄_b)[249], sorted(D̄_b)[9749]] (the 250th and 9,750th of 10,000). The same for D̄′.
+  B = 10,000: the rank of a 2.5% or 97.5% quantile has Monte Carlo s.d. √(B·0.025·0.975) ≈ 16
+  ranks, which the reported neighbours 233/265 and 9733/9765 show.
+Rule, per variant and scope:
+  (1) more neighbours per turn at no larger budget: if at some valid L the interval of D̄ contains
+      0, inconclusive; if at every valid L it lies above 0 and β(G⁺) ≤ β(G⁰), holds; otherwise
+      refuted.
+  (2) budget below the dense per-cell reference: refuted iff β(G⁺) ≥ β(dense); else holds.
+      β is a property of a whole graph and does not depend on the scope, so (2) has one outcome
+      per variant, the same in every scope.
+  (3) better than the blind draw: as (1) with D̄′, without the budget clause (G^b has |G⁺|
+      relations by construction).
+  A scope with no valid L is pending (no decision, not filled by hand); the number of valid L
+  depends only on the scope's notes, so it is the same in both variants. Within one variant, a
+  scope's decision is pending if (1) or (3) is pending (they are pending together); else refuted if any of (1), (2), (3) is
+  refuted; else holds if all three hold; else inconclusive. Across the two variants (the
+  decision): pending if either is pending; else refuted if either is refuted; else holds if both
+  hold; else inconclusive — so the gate holds for a scope iff (1), (2) and (3) hold for both
+  variants, and is refuted iff any of them is refuted in either. An inconclusive zone triggers
+  the fixed descent (outside this record). Single bridges are kept or discarded by the cut, once;
+  they are never inconclusive. When a control fails, every decision is null: the two-variant
+  decision and, per variant and scope, the outcomes of (1), (2), (3) and the scope's decision.
+Controls (each fails on a code error; a failure makes the run invalid and no result is used):
+  exchangeable direction — for each of the n_J unique pairs judged over both variants, once,
+    e_ij(w_ij) with w_ij an independent uniform direction (Draws) is compared with κ_ij; the
+    fraction below the cut must lie within 12/1001 ± 4·√((12/1001)(989/1001)/n_J). A correct cut falls outside with probability ≈ 6e-5
+    (two-sided normal tail at 4 s.d.), so a failure points at the code.
+  ceiling — the graph whose relations join each EVAL q to every note of R(q): every h_q(n) = 1,
+    so Σ_{n∈R(q)} h_q(n) = 15 for every q; the breadth-first search and the sum must return it
+    exactly.
+  connectivity — G⁰, G⁺ and G^b are one component each (else an h is undefined). A code check,
+    not an empirical one: M spans every note and J never holds an edge of M, so M ⊆ G⁰, G⁺, G^b
+    by construction; it can fail only if the code builds a graph otherwise.
+  equal budget — |G^b| = |G⁺| for each variant. A code check, not an empirical one: it is an
+    identity of the construction (both graphs are variant ∖ J plus |K| members of J), so it can
+    fail only if the code builds them otherwise.
+Draws: rng = numpy.random.Generator(numpy.random.PCG64(20260918)), as contracts.md §0 writes it
+  (the same stream as numpy.random.default_rng(20260918)), used in this order and nowhere else:
+  g = rng.standard_normal((1000, 8)) (the blind reference); then, for the n_J unique pairs judged
+  over both variants, each once, in ascending (i, j), w = rng.standard_normal((n_J, 8)), row by
+  pair (the exchangeable-direction control); then, for union and then open borders,
+  rng.choice(|J|, |K|, replace=False) indexing that variant's J in ascending (i, j) (the blind
+  draw, one fixed draw per variant); then, for union and then open borders, for D̄ and then D̄′,
+  for the global scope and then the zones in axis order, for each valid L ascending and b = 1…10,000,
+  rng.integers(0, n_blocks, n_blocks).
+Reported, not deciding: |J|, |K|, the kept fraction; per zone, candidates, tree links, kept,
+  marked and vetoed;
+  foreign-note counts; H; β of every graph and of the dense reference; the number of zones per
+  FIT note; θ_k per zone; notes in no zone; every L of the grid with its block count, the
+  interval and sorted(D̄_b) at 233/265 and 9733/9765 for a valid L (to show a decision does not
+  hinge on Monte Carlo noise), both null for an invalid L, which draws nothing. Relation counts
+  and β are those of the graphs as built (their adjacency), not of the sets they were built
+  from. Scopes, zones and labels are named by the axis ids of tests/fixtures/nsm_axes_8.json;
+  what the record orders (zones per axis, each variant's scopes) is written as JSON lists,
+  since contracts.md §0's Results format sorts object keys. β's denominator is the corpus's
+  2,221 rows, fixed.
+Test hook: measure() takes an optional observer, None in every run, that the unit tests use to
+  record the order of the bootstrap draws; it reads nothing and changes nothing.
+Unit tests (committed with the script, reviewed in phase 2; they can fail): D27, D28, D29 on
+  random inputs; the cone membership on hand-built points (inside, on the surface, beyond each
+  end); zone membership and label ties; N(i) and R(q) exclude the note itself and break ties by
+  row; the cut is strict; the three graphs differ only in J; the draw order and the first
+  components of g from seed 20260918 pinned; the controls fail on injected faults; the inputs are
+  validated before use (contracts.md §0, Integrity).
+
+Same thing in every arm?   G⁰, G⁺ and G^b share every relation outside J, the same notes, the
+                           same breadth-first search and the same R(q); G⁺ and G^b differ only in
+                           which members of J they keep, and keep the same number.
+Leakage?                   The gate reads FIT notes only; the statistic reads EVAL notes only, with
+                           their truth R(q) among EVAL notes. Declared: the variants' own relations
+                           (epsilon, open-border thresholds, the tree M) are built over all notes,
+                           EVAL included, but they are the same in every arm.
+Comparable arms?           Valid only if the four controls pass. The ends are left out of the
+                           effort (Bridge), so the construction adds no tension along b_ij by
+                           itself. Declared: b_ij still depends on the ends, and each end's real
+                           neighbours lie near it, so b_ij is not exchangeable with the blind
+                           directions whenever the neighbours carry information; 12/1001 (D27) is
+                           the pass rate of a direction that carries none, which the
+                           exchangeable-direction control checks, not a bound for real bridges.
+Text matches code?         Checked at review (phase 2).
+Reviewed by:               Claude Sonnet 5 (instrument-audit, blind subagent), 2026-09-28, phase 1,
+                           record at 4c0fa17 (revision 1): PASS; 0 blocking, 5 non-blocking.
+                           Claude Sonnet 5 (instrument-audit, blind subagent), 2026-09-28, phase 1,
+                           round 2 on this design, record at b804fb0 (revision 2): PASS; 0
+                           blocking, 6 non-blocking.
+                           Claude Sonnet 5 (instrument-audit, blind subagent), 2026-09-28, phase 2,
+                           round 1, record at b90882a (revision 4), script and tests at 71d1942:
+                           PASS; 0 blocking, 3 non-blocking.
+                           Claude Sonnet 5 (instrument-audit, blind subagent), 2026-09-28, phase 2,
+                           round 2, record at f8e78fd (revision 6), script and tests at 17352dc:
+                           PASS; 0 blocking, 2 non-blocking.
+```
+
+## Review history
+
+- **Revision 1** — Claude Sonnet 5 (`instrument-audit`, blind subagent), 2026-09-28, phase 1, round
+  1 on this design, record at `4c0fa17`, package built after `fb9b6a2` (the builder's denylist
+  gained `docs/relational-bridges/`; a first package built before that fix held the question's
+  document and was discarded unread): **PASS**, 0 blocking, 5 non-blocking. (1) The Symbols line
+  disclaims symbols this record never uses, and â_k here is definitions.md's: say it is a blanket
+  disclaimer. (2) "Z's Data line", "R4's" interval and "R4's permutation control" point at records
+  a blind reviewer cannot open: state the digests and the resampling here. (3) No contracts.md
+  section for TG yet; needed before any code. (4) The equal-budget control is an identity of the
+  construction, a code check rather than an empirical one: say so. (5) Rule (2) does not depend on
+  the scope: say so. Addressed in revision 2, design unchanged: the five items (the digests and
+  the block bootstrap now stated in full here; contracts.md §5 written), and, found by the
+  executing agent, traianus/config.py cited by path (a dotted module name does not enter a
+  review package).
+- **Revision 2** — Claude Sonnet 5 (`instrument-audit`, blind subagent), 2026-09-28, phase 1,
+  round 2 on this design, record at `b804fb0`, with contracts.md §5: **PASS**, 0 blocking, 6
+  non-blocking. (1) The connectivity control is, like equal budget, an identity of the
+  construction (M ⊆ every graph): say so. (2) |J| in the exchangeable-direction control is the
+  pooled count of unique pairs over both variants, not one variant's: say so. (3) union_edges
+  also performs the open-borders union with M: say so. (4) The open-borders threshold t_k has no
+  stated null case. (5) "Never a judged end" for a note with eight equal components is ambiguous
+  between the zone tallies and candidacy altogether. (6) compute_epsilon_edges
+  (traianus/geometry/observables.py), which relations() calls, is not pinned. Addressed in
+  revision 3, design unchanged: the six items; for (5) the author chose that such a note is never
+  an end of a pair in J.
+- **Phase 1 closed** (the author, 2026-09-28) on revision 3, after two PASS rounds on one design,
+  without a third round: revision 3 only applies round 2's non-blocking items, which phase 2
+  checks against the code.
+- **Implementation** — `instrument-implementer` (Claude Sonnet 5), 2026-09-28: script, unit tests
+  and the D27–D29 tests committed test-first in `d57966d`; the executing agent's review of the
+  diff found four places where the code departed from revision 3 (the bootstrap's draw order,
+  equal budget checked on the sets rather than the graphs, relations with an unzoned end let into
+  J, per-variant decisions left filled when a control fails), fixed test-first in `71d1942`.
+  Declared: to pin the first values of the seed's stream, the implementer ran an uncommitted
+  file outside the repository through pytest, which AGENTS 2.5 does not allow without the
+  author's approval; the pinned values are checked by the committed test itself.
+- **Revision 4** (2026-09-28), wording only, no design or code change: the choices the
+  implementation had to make where revision 3 was silent, written down — the per-variant and
+  two-variant combination of the rules, pending first; every decision null when a control
+  fails; a pair with no shared zone is not a candidate when either label zone has no threshold;
+  invalid L reported with a null interval and no draw; counts and β from the graphs as built;
+  axis ids as names; ordered collections as JSON lists; β's fixed denominator; the test hook;
+  the docstring convention.
+- **Phase 2, round 1** — Claude Sonnet 5 (`instrument-audit`, blind subagent), 2026-09-28, record
+  at `b90882a` (revision 4), script and tests at `71d1942`: **PASS**, 0 blocking, 3
+  non-blocking. Every record line mapped to code; no unmapped code beyond the declared test hook;
+  the seven failure patterns checked. (1) contracts.md §5's exchangeable_direction field list
+  omits `passed`, which the code writes as for the other controls. (2) "Relations touching an
+  EVAL note or joining two notes with the same label are never in J" holds by construction but
+  has no direct test. (3) The Draws line writes default_rng(20260918), contracts.md §0 and the
+  code Generator(PCG64(20260918)): the same stream, different notation.
+- **Revision 5** (2026-09-28), wording only, no design or code change: round 1's items (1) and
+  (3) applied (`passed` in contracts.md §5's field list; the Draws line in contracts.md §0's
+  notation); item (2) becomes a test, with the script unchanged. No further round, as for K6 and
+  Z (the author).
+- **Revision 6** (2026-09-28), changes code: while showing that the new test of item (2) can fail,
+  the implementer found that the per-zone count reads a verdict for every candidate, while a
+  candidate that is an edge of M is never judged, so the script would stop with a KeyError on
+  any corpus where such a candidate exists (the synthetic test corpus has none; the frozen
+  corpus almost surely has). The author chose to count such a candidate among its zone's
+  candidates and as a tree link, never as kept, marked or vetoed; contracts.md §5 gains the
+  zone field tree_links. The code is fixed against this revision, and phase 2 reviews it again
+  (round 2).
+- **Phase 2, round 2** — Claude Sonnet 5 (`instrument-audit`, blind subagent), 2026-09-28, record
+  at `f8e78fd` (revision 6), script and tests at `17352dc`: **PASS**, 0 blocking, 2
+  non-blocking. Every read of a per-pair verdict traced: the fix is necessary and sufficient,
+  and no other read can reach a pair that was not judged; round 1's three items resolved.
+  Non-blocking, declared and not applied, so that the run is the reviewed script: (1) the pairs
+  output reads a pair's candidacy with a default (candidacy_info.get) that cannot be reached,
+  since every judged pair has an entry; (2) a candidate through its own sphere (no shared zone)
+  that is an edge of M is, like a zone candidate, never judged, but is counted nowhere: there is
+  no own-sphere tally, so nothing reports it.
+- **Run plan** (committed before the first run, 2026-09-28). Version run: the script as committed
+  at `17352dc`, sha256 `4c195d483e926590007625c258a2352bd3a6639ba6bd857434bc04286db887e5`, the
+  one reviewed in phase 2 round 2; no deferred code fix, so one version. Preconditions:
+  TRAIANUS_EPSILON_EDGE unset; the working copy's script, tests and pinned modules equal
+  `17352dc`. Commands: `python3 tools/experiments/tension_gate.py` (result to
+  `data/refapp/TG_result.json`), then once more with `--out .data/tg_run2.json`. Equivalence
+  rule: the two files are byte-identical (sha256; TG measures no time, so nothing in the result
+  is expected to vary on one machine); if they differ, no result is used until the difference is
+  explained. Validity: if the result says `valid` is false, no result is used and the failed
+  condition is reported. The result is committed alone, with a "First run" entry here that
+  states figures without reading them; the reading is the author's, in the question's document.
+  A defect found in the script after the first run is a new version, reviewed again, and both
+  versions' results are reported.
+- **First run** (2026-09-28, after the run plan's commit `9f7d2ae`): the script at `17352dc`
+  (sha256 checked before the runs) ran twice, 51.9 s and 49.7 s, and wrote byte-identical files,
+  sha256 `90937ce2d738386342aced1a25d01811181f6252b687d1705fde704229a03efc`, committed as
+  `data/refapp/TG_result.json`. Valid: the four controls passed (exchangeable direction: 1.52% of
+  n_J = 787 pairs below the cut, band [−0.35%, 2.75%]; ceiling; connectivity; equal budget).
+  Zones: no FIT note in no zone; one in 1 zone, the rest in 2 to 6; θ_k from 0.828 to 0.916.
+  Judged: 787 pairs, the same 787 in both variants; 0 pass the cut (effort over cut from 1.08 to
+  12.69, median 3.96); 783 marked, 754 vetoed; K = 0 in both variants. Per zone: candidates 113
+  to 448, tree links 19 to 122, kept 0. G⁺ is the variant without J: union 4,123 → 3,898
+  relations (β 3.71 → 3.51), open borders 3,349 → 3,232 (β 3.02 → 2.91); G^b equals G⁺, since
+  K^b is empty; dense reference 207,534 relations, β 186.9. Horizon H: 37 (union), 45 (open
+  borders). Global D̄: −2.78 (union), −2.30 (open borders), the interval's upper bound below 0 at
+  every L (from −2.46 to −1.99, and from −2.10 to −1.85); D̄′ = 0, interval [0, 0]. Every scope
+  of both variants: rule 1 refuted, rule 2 holds, rule 3 inconclusive; the decision is refuted
+  globally and in all eight zones.
