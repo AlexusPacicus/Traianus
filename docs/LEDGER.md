@@ -2218,3 +2218,60 @@
   The Linux confirmation is the CI run on `main` after the push.
 
 * **Status:** `Consolidated`.
+
+### seq 70 — 2026-09-26 — Relational graph exploration and editorial footnote marks merged into `main` (PR #88)
+
+* **Context:** the author restated the continuous zoom's purpose (RefApp-01 `ZOOM.md`, "Correction
+  and the zoom's purpose"): to move by relational continuity from a chosen note, with a relational
+  z, the depth by relations. Before any hypothesis, a labelled exploration of the relation graph
+  on the frozen corpus (2,221 notes).
+
+* **Decisions (the author):** relations are the engine's (`/relations`: epsilon-adjacency in 384-d
+  plus manual ones); z is the length of the shortest path along relations; reach is the connected
+  component. Epsilon drawn from the data rather than fixed; per-cell thresholds applied across
+  cells with the minimum of the two; the path / direct-distance ratio read as projected relation,
+  not as a cost; the far notes marked from the source, not rebuilt.
+
+* **Δ merged (PR #88, `5f7fca9`):** `tools/experiments/relational_graph_exploration.py` and its
+  tests, with modes epsilon, mst, union, cells, cells_median and cells_open (`142afa5`,
+  `865868c`, `31dcd46`, `64ef032`, `5d6e806`, `db12b60`); results in
+  `data/refapp/relational_graph_exploration*.json` and `epsilon_knee_spinoza_full.json`
+  (`620270f`, `fd24696`, `53c7b9b`, `d8c6f3c`, `08144b0`, `0afd3d2`);
+  `tools/experiments/tooling/mark_editorial_notes.py` and its tests (`77f7168`, `0b20f4a`);
+  `data/spinoza/editorial_marks.json` and a `PROVENANCE.md` section (`082ed26`); the Z reading
+  corrected (`e74517b`); the DEVLOG closing entry of 2026-09-26 (`7225d0d`). Nothing under
+  `traianus/` changes.
+
+* **Result (exploration, no decision):** seven relation graphs.
+  - Epsilon 0.8: 3,195 relations, 809 notes isolated.
+  - Otsu epsilon 1.2032 and the connectivity threshold 1.2121: 37.9% and 41.2% of pairs related,
+    at most 3 and 4 hops.
+  - Minimum spanning tree: hops median 30, projected relation median 16.7.
+  - Epsilon 0.8 joined with the tree: one component, hops median 11.
+  - Connectivity threshold per axis cell: 207,534 relations; each cell's farthest note fixes its
+    threshold.
+  - Median of each cell's own tree, joined with the global tree: hops median 12.
+  - Open borders (median of the tree edges touching the cell, the minimum across cells), joined
+    with the tree: 3,349 relations, 1,129 across cells, hops median 14; it recovers 1,511
+    cross-cell pairs the previous variant dropped, touching 842 notes.
+  - 54% of notes have their nearest neighbour in another axis cell.
+  - The farthest notes are largely editorial. The corpus builder deletes every `[N]` marker before
+    its footnote-block filter, so all 17 footnote blocks of PG#3800 inside the parts entered the
+    manifests, the frozen corpus K6, R4 and Z used. Marked, not rebuilt: 25 labels (11 pure,
+    14 mixed) and 40 continuation candidates.
+
+* **How it was built:** every code change delegated to `engine-implementer` from validated
+  `DelegationContract`s, the last two on Sonnet. The executing agent reviewed each diff, ran the
+  explorations and committed the results as results only.
+
+* **Gate:** `pytest tests/` on the branch: 3050 passed, run by the executing agent before the
+  coverage change; 3068 passed, run by the implementer after it, with the mark tool's 18 tests
+  re-run by the executing agent. The mark tool fails `mypy` through the builder's untyped
+  `PART_CONFIG`; CI's ruff and mypy do not cover `tools/experiments/**` (known gap). Linux: CI
+  on the merge `5f7fca9` green (run `36260773100`), recorded retroactively on 2026-09-28
+  (DEVLOG).
+
+* **Follow-ups (their own work):** the pure-exclusion check (`4fef732`) and the reading of the
+  continuation candidates (`75191d7`).
+
+* **Status:** `Consolidated`.
