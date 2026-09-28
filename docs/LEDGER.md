@@ -2339,3 +2339,42 @@
   on the merge `75191d7` green, 5m58s (run `36404750000`).
 
 * **Status:** `Consolidated`.
+
+### seq 73 — 2026-09-28 — The tension gate composed in words: `RELATIONAL_BRIDGES.md` §22 merged into `main`
+
+* **Context:** `docs/relational-bridges/RELATIONAL_BRIDGES.md` (`b1d98ed`) fixed in words how a
+  relation between notes of different zones is judged, with several pieces (tension gate,
+  rotation, double way and rescue, fusion order, spiral, descent, threshold variant, compass).
+  Before any audit record, step 1 and exact definitions were missing, and the document
+  contradicted itself in places.
+
+* **Decisions (the author):** open only the tension gate; the other pieces wait until it has run.
+  Contract tone and a frozen glossary of the author's and the records' words. Ten definitions:
+  a note is in the zone of every axis whose affinity exceeds its own mean of eight; real
+  neighbours are the 15 nearest FIT notes (R4's number); the effort is the tension of the bridge
+  sphere along the bridge's own direction in axis coordinates, against 1,000 blind random
+  directions (seed 20260918), kept below the 12th smallest (12/1001 by chance, K6's cut
+  mirrored); a zone's threshold is the median length of its own minimum-spanning-tree edges and
+  makes a pair a candidate; a tunnel between the ends vetoes a bridge only when it crosses a
+  foreign note that keeps its neighbours apart from both ends. Step 1: union and open borders,
+  each with and without the gate, measured on R4 and Z's EVAL notes (bridges judged among FIT
+  notes only); three refuters (no more real neighbours per turn at no larger budget; a budget
+  reaching the dense per-cell variant's; kept relations no better than one fixed blind draw
+  among the same candidates); both variants must hold.
+
+* **Δ merged (`docs/relational-bridges-consistency` → `main`, `28f0b2a`):** stale
+  self-contradictions removed (`df93cd3`); §22 (`28478bf`, `b74fad3`), with the author's own
+  edits to it and a paragraph of the author in §9 on edges inherited across levels. No code.
+
+* **Declared:** §9's new paragraph clashes with §16 ("sin heredar decisiones") and §17 ("nunca
+  del run en curso"), outside the gate's scope; §21's traceability claim is not met by the
+  sections; with one blind draw, the third refuter depends on that draw.
+
+* **How it was built:** documentation decisions in chat, drafted by the executing agent and edited
+  by the author directly; no delegation.
+
+* **Gate:** `pytest tests/` → 3092 passed / 1 skipped / 5 deselected at `28478bf`; `b74fad3`
+  changes one line of a file no test reads. Not a governed path (AGENTS 6.2). Linux: CI on the
+  merge `28f0b2a` green, 10m23s (run `36442524949`).
+
+* **Status:** `Consolidated`.
