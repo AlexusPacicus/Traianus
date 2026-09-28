@@ -342,7 +342,8 @@ Output   data/refapp/TG_result.json (§0 Results format; null, never NaN) with:
          valid; first_failed_condition (null when valid); failed_conditions and
          conditions_checked (identifiers, in check order);
          zones — per axis in order: n_fit, n_eval, tree_edges, theta (null without a tree),
-           candidates, kept, marked, vetoed; notes_in_no_zone; zones_per_fit_note (a histogram);
+           candidates, tree_links (candidates that are edges of M, never judged), kept, marked,
+           vetoed; notes_in_no_zone; zones_per_fit_note (a histogram);
          pairs — one entry per judged pair in ascending (i, j): i, j, lab_i, lab_j, dist,
            n_sphere_without_ends, effort, cut, passes, foreign, vetoed, candidate_zones,
            kept_zones, own_sphere (candidate there or null), in_variants;

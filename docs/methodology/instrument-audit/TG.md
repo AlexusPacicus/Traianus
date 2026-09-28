@@ -3,10 +3,10 @@
 The question, hypothesis and refuters live in `docs/relational-bridges/RELATIONAL_BRIDGES.md` §22,
 which a blind reviewer never opens (definitions.md, Not allowed).
 
-## Instrument audit record (revision 5)
+## Instrument audit record (revision 6)
 
 ```
-Instrument audit — TG, relations kept by a tension gate and the spiral they open (revision 5)
+Instrument audit — TG, relations kept by a tension gate and the spiral they open (revision 6)
 
 Scope: two existing relation graphs on the frozen corpus (union, open borders), each taken
   without the gate, with it, and with a blind draw in its place. The gate judges relations between
@@ -65,7 +65,7 @@ Script: tools/experiments/tension_gate.py; unit tests: tests/unit/test_tension_g
   code. The engine's epsilon comes from resolve_epsilon_edge() in traianus/config.py; the script
   refuses to run unless it returns 0.8 (the variable TRAIANUS_EPSILON_EDGE would change it).
   The script's and its tests' docstrings cite the last revision of this record that the code was
-  written against (revision 3); a revision that changes only wording leaves them.
+  written against (revision 6); a revision that changes only wording leaves them.
   Contract: contracts.md §5. Result: data/refapp/TG_result.json, committed; --out writes the same
   result elsewhere, not committed.
 Data: definitions.md (2,221 vectors, 8-axis basis). The script refuses to run, writing nothing,
@@ -122,7 +122,9 @@ Candidates and verdicts: shared = Zn(i) ∩ Zn(j). If shared is not empty, the b
   own sphere) iff it passes the cut and is not vetoed. The effort, the cut and the tunnel depend
   only on the two ends: each is computed once per pair, whatever the number of zones; only
   candidacy differs between zones. One verdict per zone, counted per zone: candidates, kept,
-  marked, vetoed.
+  marked, vetoed. A candidate that is an edge of M is never judged (J never holds an edge of M):
+  it is counted among its zone's candidates and as a tree link, and not as kept, marked or
+  vetoed (the author, 2026-09-28).
 Variants (all 2,221 notes, built with the imported functions, unchanged from the exploration):
   union — relations(labels, v, 0.8) ∪ M; open borders — open_relations(d, cells, t) ∪ M; both
   unions by union_edges. cells = axis_cells; t_k = median_threshold of
@@ -202,7 +204,8 @@ Draws: rng = numpy.random.Generator(numpy.random.PCG64(20260918)), as contracts.
   draw, one fixed draw per variant); then, for union and then open borders, for D̄ and then D̄′,
   for the global scope and then the zones in axis order, for each valid L ascending and b = 1…10,000,
   rng.integers(0, n_blocks, n_blocks).
-Reported, not deciding: |J|, |K|, the kept fraction; per zone, candidates, kept, marked and vetoed;
+Reported, not deciding: |J|, |K|, the kept fraction; per zone, candidates, tree links, kept,
+  marked and vetoed;
   foreign-note counts; H; β of every graph and of the dense reference; the number of zones per
   FIT note; θ_k per zone; notes in no zone; every L of the grid with its block count, the
   interval and sorted(D̄_b) at 233/265 and 9733/9765 for a valid L (to show a decision does not
@@ -302,3 +305,11 @@ Reviewed by:               Claude Sonnet 5 (instrument-audit, blind subagent), 2
   (3) applied (`passed` in contracts.md §5's field list; the Draws line in contracts.md §0's
   notation); item (2) becomes a test, with the script unchanged. No further round, as for K6 and
   Z (the author).
+- **Revision 6** (2026-09-28), changes code: while showing that the new test of item (2) can fail,
+  the implementer found that the per-zone count reads a verdict for every candidate, while a
+  candidate that is an edge of M is never judged, so the script would stop with a KeyError on
+  any corpus where such a candidate exists (the synthetic test corpus has none; the frozen
+  corpus almost surely has). The author chose to count such a candidate among its zone's
+  candidates and as a tree link, never as kept, marked or vetoed; contracts.md §5 gains the
+  zone field tree_links. The code is fixed against this revision, and phase 2 reviews it again
+  (round 2).
