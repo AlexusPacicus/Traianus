@@ -28,5 +28,6 @@ Allowed reading   this file; derivations.md; contracts.md; the
                   record file under review; the files and lines cited in them.
 Not allowed       frontend/POC.md; any other record's review history; docs/adrs/ADR-026-*;
                   traianus/geometry/spatial_observables.py (its docstring states prior results);
-                  data/spinoza/telemetry/; docs/LEDGER.md; any manuscript.
+                  data/spinoza/telemetry/; docs/LEDGER.md; docs/relational-bridges/ (TG's
+                  question); any manuscript.
 ```
