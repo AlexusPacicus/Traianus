@@ -355,7 +355,7 @@ Output   data/refapp/TG_result.json (§0 Results format; null, never NaN) with:
          dense_reference — relations, beta;
          decision — global and per zone: "holds", "refuted", "inconclusive" or "pending" (null
            when valid = false);
-         controls — exchangeable_direction {n_j (pooled unique pairs), fraction, band},
+         controls — exchangeable_direction {n_j (pooled unique pairs), fraction, band, passed},
            ceiling {passed},
            connectivity {per variant and graph}, equal_budget {per variant};
          reported — every figure in TG.md's Reported line not already above, under the same

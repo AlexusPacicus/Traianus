@@ -3,10 +3,10 @@
 The question, hypothesis and refuters live in `docs/relational-bridges/RELATIONAL_BRIDGES.md` §22,
 which a blind reviewer never opens (definitions.md, Not allowed).
 
-## Instrument audit record (revision 4)
+## Instrument audit record (revision 5)
 
 ```
-Instrument audit — TG, relations kept by a tension gate and the spiral they open (revision 4)
+Instrument audit — TG, relations kept by a tension gate and the spiral they open (revision 5)
 
 Scope: two existing relation graphs on the frozen corpus (union, open borders), each taken
   without the gate, with it, and with a blind draw in its place. The gate judges relations between
@@ -193,7 +193,8 @@ Controls (each fails on a code error; a failure makes the run invalid and no res
   equal budget — |G^b| = |G⁺| for each variant. A code check, not an empirical one: it is an
     identity of the construction (both graphs are variant ∖ J plus |K| members of J), so it can
     fail only if the code builds them otherwise.
-Draws: rng = numpy.random.default_rng(20260918) (PCG64), used in this order and nowhere else:
+Draws: rng = numpy.random.Generator(numpy.random.PCG64(20260918)), as contracts.md §0 writes it
+  (the same stream as numpy.random.default_rng(20260918)), used in this order and nowhere else:
   g = rng.standard_normal((1000, 8)) (the blind reference); then, for the n_J unique pairs judged
   over both variants, each once, in ascending (i, j), w = rng.standard_normal((n_J, 8)), row by
   pair (the exchangeable-direction control); then, for union and then open borders,
@@ -297,3 +298,7 @@ Reviewed by:               Claude Sonnet 5 (instrument-audit, blind subagent), 2
   EVAL note or joining two notes with the same label are never in J" holds by construction but
   has no direct test. (3) The Draws line writes default_rng(20260918), contracts.md §0 and the
   code Generator(PCG64(20260918)): the same stream, different notation.
+- **Revision 5** (2026-09-28), wording only, no design or code change: round 1's items (1) and
+  (3) applied (`passed` in contracts.md §5's field list; the Draws line in contracts.md §0's
+  notation); item (2) becomes a test, with the script unchanged. No further round, as for K6 and
+  Z (the author).
