@@ -5,17 +5,17 @@
 > relacional en main. Todo lo apuntado como futuro queda marcado y sin desarrollar.
 >
 > **Versión uno congelada el 2026-09-27 y ampliada por piezas validadas
-> después.** Solo se reabre por el veredicto editorial pendiente: si quitar
-> las notas puras mueve alguna decisión cerrada, se apunta aquí sin reabrir
-> piezas.
+> después.** El veredicto editorial ya está medido: quitar las notas puras no
+> mueve ninguna decisión cerrada, y queda apuntado en el apartado 14 sin
+> reabrir piezas.
 
 ## 1. Propósito y límites
 
 Este documento fija una sola pieza: cómo se juzga una relación entre notas de
 zonas distintas tratándola como su propia esfera de vecindario. No cambia el
 motor, no cambia pruebas, no crea redes. Sirve para decidir después qué grafo
-usa la vista general y el zoom relacional. La variante que sumaría mínimos de
-puentes ya validados queda apuntada pero sin desarrollar.
+usa la vista general y el zoom relacional. La variante que suma mínimos de
+puentes ya validados se desarrolla en el apartado 17.
 
 ## 2. Reparto con todos los ejes
 
@@ -48,7 +48,7 @@ que se acorta trayendo vecinos reales cerca. Se descarta cuando solo une a
 costa de dispersar lo que cada zona conservaba, apretando de lado. Como imagen
 de ayuda, sin valor de ley, usamos la de acortar frente a dispersar.
 
-## 6. Listón dinámico de cada zona
+## 6. Umbral dinámico de cada zona
 
 El umbral que decide no es un número puesto a mano para todo. Nace de cada zona
 a partir de sus enlaces mínimos, los más baratos que ya la conectan por sí
@@ -84,15 +84,25 @@ concluyente y no se rellena a mano. Eso dispara el trabajo dentro de cada zona
 por separado: primero en la celda gruesa de eje, y si hace falta en la celda
 fina que el zoom ya define, siempre con partición comprometida de antemano y
 nunca recortando a gusto. Cada nivel calcula su propio umbral y sus propias
-direcciones. Un tercer nivel más fino queda apuntado pero sin abrir.
+direcciones. El tercer nivel, más fino, se fija en el apartado 16.
+
+Las aristas que cruzan desde niveles superiores se heredan en la zona marcadas
+con su nivel de origen: cuentan para que nadie quede aislado, pero no ponen el
+umbral de la zona ni entran en su esfuerzo. La pérdida se mide como la parte de
+aristas incidentes que viene de arriba; si una zona vive casi toda de
+heredadas, su veredicto se declara débil. Y al revés: lo validado en un
+subespacio pequeño escala hacia arriba de forma asíncrona, marcado con su nivel
+de origen, sin cambiar umbrales ajenos. Con herencia hacia abajo y escalado
+hacia arriba, ninguna relación validada se pierde y ningún nivel contamina a
+otro.
 
 ## 10. Red única y familia para probar
 
 Se mantiene una candidata única y escasa para la vista general junto a la
 familia de variantes sobre el mismo corpus congelado. La de tensión es la única
 que decide con la medida nueva; las demás solo informan para comparar. El orden
-de fusión del resto y la elección final entre red única y familia quedan como
-desarrollo futuro.
+de fusión, y cómo conviven la candidata única y la familia, se fijan en el
+apartado 12.
 
 ## 11. Lo que dicen los avances ya medidos
 
@@ -118,8 +128,8 @@ comparar con la de vecindario por tener distinta base.
 El constructor del corpus dejó pasar bloques editoriales de notas al pie dentro
 de los manifiestos: más de una decena de bloques, unas veinticinco etiquetas
 entre puras y mixtas, y unas cuarenta continuaciones candidatas. Están marcados
-desde la fuente sin reconstruir el corpus. Queda pendiente comprobar si quitar
-las notas puras cambia alguna decisión de los estudios cerrados.
+desde la fuente sin reconstruir el corpus. Quitar las once notas puras no
+cambia ninguna decisión de los tres estudios cerrados.
 
 ## 12. Orden de fusión con dirección primero
 
@@ -189,7 +199,7 @@ abre cada vuelta y cuándo se para, de modo que ninguna nota quede fuera de
 alcance y cada vuelta aporte rumbos nuevos en vez de repetir los mismos.
 
 De las siete variantes medidas vale la que deje abrir esa espiral entera y
-legible: conectada de punta a punta, escasa por vuelta, con cada tramo venido
+legible: conectada de punta a punta, escasa por vuelta, con cada relación venida
 de una esfera validada que guarda su esfuerzo y su giro. El umbral heredado con
 sus cientos de islas no abre entera. Las densas que unen a pocos saltos no se
 dejan leer. El árbol solo alarga los caminos. El denso por celda no sirve para
@@ -204,13 +214,13 @@ la dirección calculada antes de decidir, y solo se abre donde la acumulada
 sigue baja y el rumbo nuevo se aparta de los ya abiertos. El cociente entre
 camino y distancia directa se lee como relación proyectada, no como coste.
 
-Lo medido lleva dentro las notas editoriales marcadas desde la fuente, casi
-todas resueltas como texto propio salvo una ajena dejada sin marcar por
-decisión del autor. Queda pendiente comprobar si quitar las puras mueve alguna
-decisión cerrada. Veredicto ya medido en rama propia e integrado en main: al
-quitar las once notas puras, las decisiones de los tres estudios cerrados no
-cambian. Y una cosa es esta espiral para mostrar y otra el gobierno
-del motor, cuyo valor heredado no se toca.
+Lo medido lleva dentro las notas editoriales marcadas desde la fuente. De las
+cuarenta continuaciones candidatas, todas menos una resultaron texto propio; la
+ajena, el segundo verso de Ovidio, queda sin marcar por decisión del autor.
+Veredicto ya medido en rama propia e integrado en main: al quitar las once
+notas puras, las decisiones de los tres estudios cerrados no cambian. Y una
+cosa es esta espiral para mostrar y otra el gobierno del motor, cuyo valor
+heredado no se toca.
 
 ## 15. Entrada neutra y apertura por la celda
 
@@ -298,8 +308,8 @@ existentes, cada uno con su historial de revisiones. La espiral consume sin
 decidir y no pide registro. La brújula lleva registro propio como herramienta
 agnóstica a la carga con salida a otros ámbitos, no solo como pieza de aquí.
 Cada registro pide su propia sección de contrato, una por pieza, registrada
-antes de escribir herramienta. En metodología quedan para después de este
-chat el lenguaje más natural con sus mejoras y los contratos nuevos.
+antes de escribir herramienta. Las reglas para componer en palabras ya están
+en metodología; los contratos nuevos llegan con cada registro.
 
 ## 20. Apuntado pero no desarrollado
 
@@ -311,3 +321,182 @@ Cada apartado apunta a particiones, resultados y registros ya congelados en este
 repositorio y en el cliente, para comprobar sin ejecutar que lo escrito coincide
 con lo medido. Un cambio de umbral en el camino de observación necesitaría
 revisar la regla de adyacencia fijada en la constitución.
+
+## 22. Puerta de tensión: glosario y definiciones
+
+Decisión del autor (2026-09-28): se abre solo la puerta de tensión. La brújula,
+el giro, la doble vía y su rescate, la variante del umbral, el orden de fusión
+y la bajada a subespacio esperan a que la puerta haya corrido. Este apartado
+fija en palabras lo que medirá su registro. El registro, su contrato y sus
+rondas ciegas vienen después del paso 1.
+
+### Glosario congelado
+
+Solo se usan estas palabras, con este sentido.
+
+- **Nota**: uno de los 2.221 vectores del corpus congelado, de 384 dimensiones
+  y norma uno, sin filtrar.
+- **Eje**: uno de los ocho ejes geodésicos de la época vigente,
+  PROSTHETIC_NSM_V1.
+- **Afinidad** de una nota con un eje: su proyección sobre el eje normalizado.
+- **Coordenadas de eje** de una nota: sus ocho afinidades.
+- **Etiqueta** de una nota: el eje con mayor afinidad. Solo cuenta y ordena.
+- **Zona** de un eje: definición 1.
+- **Distancia** entre dos notas: la euclídea en las 384 dimensiones, la de las
+  relaciones del motor. La **longitud** de una relación o de un enlace es la
+  distancia entre sus dos notas; «longitud» no se usa para otra cosa.
+- **Notas de ajuste**: las 1.111 de índice par. **Apartadas**: las 1.110 de
+  índice impar, las de evaluación de R4 y Z; no juzgan ningún puente.
+- **Vecinos reales** de una nota: definición 2.
+- **Esfera**: un conjunto de notas que se miran juntas.
+- **Baricentro** de una esfera: la media de las coordenadas de eje de sus notas.
+- **Tensión** de una nota en una esfera: la mitad del cuadrado de lo que la nota
+  se aparta del baricentro, en coordenadas de eje. La tensión de la esfera es la
+  suma de las de sus notas.
+- **Tensión a lo largo de una dirección**: la mitad de la suma, sobre las notas
+  de la esfera, del cuadrado de lo que cada una se aparta del baricentro en esa
+  dirección.
+- **Puente**: una pareja de notas con etiquetas distintas.
+- **Esfera del puente**: definición 3.
+- **Esfuerzo** de un puente: definición 4.
+- **Árbol mínimo** de un conjunto de notas: el que las une a todas con la menor
+  suma de distancias. Sus aristas son los **enlaces mínimos**.
+- **Umbral** de una zona: definición 6.
+- **Candidato**: un puente cuya distancia no supera el umbral con que se juzga
+  (definición 6).
+- **Mantener** un puente: definición 7. **Corte**: la dirección de la
+  referencia ciega por debajo de la cual se mantiene un puente (definición 7).
+- **Túnel**, **nota ajena**, **puente marcado** y **partir un vecindario**:
+  definiciones 8 y 9. **Cono**: el cuerpo del túnel (definición 9).
+- **Referencia ciega**: direcciones en coordenadas de eje sacadas al azar, todas
+  con la misma probabilidad, fijadas de antemano con semilla escrita, sin mirar
+  vecinos ni texto (apartado 7).
+- **No concluyente**: el resultado que se declara y no se rellena a mano
+  (apartado 9).
+- **Vuelta** k de la espiral abierta desde una nota: las notas a las que se
+  llega desde ella con k relaciones y no con menos (apartado 14).
+- **Presupuesto** de una variante: sus relaciones por nota, el grado medio: el
+  doble de sus relaciones entre el número de notas.
+- **Sorteo ciego**: paso 1.
+- **Parrilla**: los tramos 1, 2, 5, 10, 20 y 50, heredados de R4 y Z.
+- **Tramo**: el tamaño de bloque del remuestreo; las apartadas se cortan en
+  bloques contiguos de ese número de notas, por orden de índice.
+- **Intervalo**: el del 95% del remuestreo heredado de R4: 10.000 remuestreos
+  por tramo, del 250.º al 9.750.º de menor a mayor.
+
+Fuera del glosario: «listón», «red» para el zoom, «carga» y toda abreviatura
+nueva.
+
+### Definiciones (autor, 2026-09-28)
+
+1. **Zona de un eje.** Una nota está a la vista en la zona de un eje cuando su
+   afinidad con ese eje supera la media de sus ocho afinidades. La zona de su
+   etiqueta la contiene siempre, salvo que sus ocho afinidades sean iguales.
+   Una nota puede estar en varias zonas. Cada zona tiene su propio árbol mínimo
+   sobre sus notas. No se sabe de antemano en cuántas zonas cae cada nota; si
+   las zonas salen grandes, sus umbrales se acercan al del corpus entero.
+2. **Vecinos reales de una nota.** Los puentes se juzgan solo entre las notas
+   de ajuste; el paso 1 se mide en las apartadas. Para juzgar un puente, los
+   vecinos reales de una nota son sus 15 notas de ajuste más cercanas por
+   distancia, sin contarse a sí misma; los empates, por el índice menor. El 15
+   es el número de R4, ya fijado y revisado: no se elige uno nuevo. Todo lo que
+   la puerta usa para juzgar —zonas, árboles, umbrales, esferas y túneles— sale
+   solo de las notas de ajuste.
+3. **Esfera del puente.** Los dos extremos y los vecinos reales de ambos. Una
+   nota vecina de los dos extremos cuenta una vez. Tiene como mucho 32 notas.
+4. **Esfuerzo de un puente.** La tensión de la esfera del puente a lo largo de
+   la dirección del propio puente, la que va de un extremo al otro en
+   coordenadas de eje; el sentido no cuenta. Como las etiquetas de los extremos
+   son distintas, sus coordenadas de eje también lo son, y la dirección existe
+   siempre. El esfuerzo se compara con la tensión de la misma esfera a lo largo
+   de cada dirección de la referencia ciega: el puente pide menos esfuerzo que
+   la referencia cuando su tensión queda por debajo de casi todas ellas. Las
+   esferas de origen no entran en el esfuerzo; entran en el giro, fuera de esta
+   pieza.
+5. **Dónde se juzga un puente.** En cada zona que contenga a sus dos extremos,
+   con un veredicto por zona: si una zona lo mantiene, entra en la
+   reconstrucción de esa zona (apartado 6), y cada caso se cuenta por zona, sin
+   mezclar (apartado 13). Si no comparten ninguna, en la esfera del propio
+   puente, con el menor de los umbrales de las zonas de sus dos etiquetas.
+6. **Umbral de una zona.** La mediana de las longitudes de los enlaces mínimos
+   de su propio árbol. Es una longitud. Un puente es candidato en una zona
+   cuando su distancia no supera el umbral de la zona; si no comparte zona,
+   cuando no supera el menor de los umbrales de las zonas de sus dos etiquetas.
+   La mediana y no el máximo: en las celdas por eje ya medidas, el máximo lo
+   fijaba la nota más lejana de cada celda.
+7. **Qué mantiene un puente.** Un candidato se mantiene cuando su esfuerzo queda
+   por debajo de casi todas las direcciones de la referencia ciega. La longitud
+   dice quién es candidato; la tensión decide. **Casi todas** son mil
+   direcciones con la semilla heredada de K6 y R4, 20260918, y el corte es la
+   12.ª de menor a mayor: el puente se mantiene si pide menos que todas salvo
+   once. Es la
+   simétrica del color ya revisado, que exige más que todas salvo once: si la
+   dirección del puente fuera una más de las ciegas, pasaría con probabilidad
+   12 entre 1.001. El esfuerzo y el túnel de un puente dependen solo de sus
+   extremos: se calculan una vez como mucho, y lo que cambia de una zona a otra
+   es si el puente es candidato.
+8. **Control del túnel.** Dentro de una zona compartida, el esfuerzo se mide con
+   la esfera del puente completa. La esfera del túnel es un control de
+   interferencia: si el túnel trae notas ajenas, se cuentan y el puente queda
+   marcado. El control solo veta si el puente parte vecindarios que por
+   separado se conservaban.
+9. **Túnel.** El corredor entre los dos extremos: la arista que los une como
+   eje, su punto medio como baricentro perpendicular entre ambas, y en cada
+   punto de la arista una circunferencia trazada desde el centro de la arista.
+   Cada extremo abre su cono según su propia esfera, con su propio radio; el
+   túnel reconstruye el cono con la diferencia de radios, pasando del radio de
+   un extremo al del otro a lo largo de la arista, sin promediar ni igualar a
+   cilindro. El radio de un extremo es su distancia a su decimoquinto vecino
+   real. Una nota está dentro del cono cuando su pie sobre la arista cae entre
+   los dos extremos y su distancia a la arista no supera el radio en ese punto;
+   más allá de los extremos, fuera. **Nota ajena**: la que cae dentro de ese
+   cono reconstruido sin pertenecer a la esfera del puente. **Partir un
+   vecindario**: que el puente atraviese notas ajenas que por separado
+   conservaban a sus vecinas; entonces veta. Una nota ajena conservaba a sus
+   vecinas por separado cuando ninguno de los dos extremos está entre sus
+   vecinos reales. El puente sin zona compartida tiene el mismo control del túnel: el
+   túnel se define por los extremos, no por la zona.
+10. **No concluyente.** La decisión global y la de cada zona solo valen si el
+   intervalo queda fuera del cero en todos los tramos válidos de la parrilla
+   heredada de vecindario y zoom. Un tramo es válido si corta las apartadas que
+   se juzgan en al menos 20 bloques; los demás no deciden. Si en algún tramo
+   válido el intervalo toca el cero, no concluyente, y no se rellena a mano.
+   Una zona, o el global, sin ningún tramo válido queda pendiente sin forzar.
+   Lo no concluyente por zona dispara la bajada ya fijada. Los
+   puentes sueltos no son concluyentes ni no: se mantienen o se descartan por
+   el corte, una vez como mucho.
+
+### Paso 1 (autor, 2026-09-28)
+
+La unión y las fronteras abiertas con puerta de tensión abren la espiral mejor
+que sin ella: más vecinas reales conservadas por vuelta con menos relaciones
+por nota, sobre notas apartadas que no juzgaron ningún puente. Cada variante
+contra sí misma con y sin puerta, mismo corpus, mismas apartadas, mismos
+conteos por zona. Las dos variantes cumplen o no hay decisión; no basta una.
+
+Con puerta, la variante filtra sus relaciones entre etiquetas por esfuerzo,
+conserva los enlaces mínimos que garantizan la conexión y suma los puentes que
+la puerta mantiene. Las relaciones de la variante que tocan una apartada no se
+juzgan y se quedan como están. Con sorteo ciego, lo que la puerta mantiene se
+sustituye por pares sacados al azar entre los mismos candidatos de ajuste,
+tantos como mantiene la puerta, con la semilla 20260918.
+
+Las vecinas reales de una apartada son sus 15 apartadas más cercanas por
+distancia, entre las otras 1.109; los empates, por el índice menor, como en
+R4. Por cada apartada y cada vuelta se cuenta cuántas de ellas aparecen en las
+vueltas hasta esa incluida. El número de la apartada es la suma de esa cuenta
+acumulada, vuelta a vuelta, hasta la vuelta más alta que tenga cualquier
+apartada en la variante, sin puerta, con puerta o con sorteo ciego; pasada su
+última vuelta, cada cuenta sigue con su valor final. No se elige ninguna
+vuelta. La diferencia es con puerta menos sin puerta, promediada por apartada,
+y su intervalo sale del remuestreo heredado. Junto a ella, el presupuesto de
+cada variante con y sin puerta.
+
+Refutadores: si con puerta no conserva más vecinas por vuelta con igual o
+menor presupuesto, cae; si necesita tantas relaciones por nota como la variante
+densa por celda, cae; si lo mantenido coincide con un sorteo ciego de pares
+dentro del mismo presupuesto, cae.
+
+### Por fijar
+
+- Nada pendiente: un solo sorteo fijo por variante, sin paradas intermedias.
