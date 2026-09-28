@@ -240,6 +240,9 @@ Reviewed by:               Claude Sonnet 5 (instrument-audit, blind subagent), 2
                            Claude Sonnet 5 (instrument-audit, blind subagent), 2026-09-28, phase 1,
                            round 2 on this design, record at b804fb0 (revision 2): PASS; 0
                            blocking, 6 non-blocking.
+                           Claude Sonnet 5 (instrument-audit, blind subagent), 2026-09-28, phase 2,
+                           round 1, record at b90882a (revision 4), script and tests at 71d1942:
+                           PASS; 0 blocking, 3 non-blocking.
 ```
 
 ## Review history
@@ -286,3 +289,11 @@ Reviewed by:               Claude Sonnet 5 (instrument-audit, blind subagent), 2
   invalid L reported with a null interval and no draw; counts and β from the graphs as built;
   axis ids as names; ordered collections as JSON lists; β's fixed denominator; the test hook;
   the docstring convention.
+- **Phase 2, round 1** — Claude Sonnet 5 (`instrument-audit`, blind subagent), 2026-09-28, record
+  at `b90882a` (revision 4), script and tests at `71d1942`: **PASS**, 0 blocking, 3
+  non-blocking. Every record line mapped to code; no unmapped code beyond the declared test hook;
+  the seven failure patterns checked. (1) contracts.md §5's exchangeable_direction field list
+  omits `passed`, which the code writes as for the other controls. (2) "Relations touching an
+  EVAL note or joining two notes with the same label are never in J" holds by construction but
+  has no direct test. (3) The Draws line writes default_rng(20260918), contracts.md §0 and the
+  code Generator(PCG64(20260918)): the same stream, different notation.
