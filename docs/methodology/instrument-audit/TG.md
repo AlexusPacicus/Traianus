@@ -338,3 +338,18 @@ Reviewed by:               Claude Sonnet 5 (instrument-audit, blind subagent), 2
   states figures without reading them; the reading is the author's, in the question's document.
   A defect found in the script after the first run is a new version, reviewed again, and both
   versions' results are reported.
+- **First run** (2026-09-28, after the run plan's commit `9f7d2ae`): the script at `17352dc`
+  (sha256 checked before the runs) ran twice, 51.9 s and 49.7 s, and wrote byte-identical files,
+  sha256 `90937ce2d738386342aced1a25d01811181f6252b687d1705fde704229a03efc`, committed as
+  `data/refapp/TG_result.json`. Valid: the four controls passed (exchangeable direction: 1.52% of
+  n_J = 787 pairs below the cut, band [−0.35%, 2.75%]; ceiling; connectivity; equal budget).
+  Zones: no FIT note in no zone; one in 1 zone, the rest in 2 to 6; θ_k from 0.828 to 0.916.
+  Judged: 787 pairs, the same 787 in both variants; 0 pass the cut (effort over cut from 1.08 to
+  12.69, median 3.96); 783 marked, 754 vetoed; K = 0 in both variants. Per zone: candidates 113
+  to 448, tree links 19 to 122, kept 0. G⁺ is the variant without J: union 4,123 → 3,898
+  relations (β 3.71 → 3.51), open borders 3,349 → 3,232 (β 3.02 → 2.91); G^b equals G⁺, since
+  K^b is empty; dense reference 207,534 relations, β 186.9. Horizon H: 37 (union), 45 (open
+  borders). Global D̄: −2.78 (union), −2.30 (open borders), the interval's upper bound below 0 at
+  every L (from −2.46 to −1.99, and from −2.10 to −1.85); D̄′ = 0, interval [0, 0]. Every scope
+  of both variants: rule 1 refuted, rule 2 holds, rule 3 inconclusive; the decision is refuted
+  globally and in all eight zones.
