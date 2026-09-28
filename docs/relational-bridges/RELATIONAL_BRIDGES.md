@@ -499,4 +499,4 @@ dentro del mismo presupuesto, cae.
 
 ### Por fijar
 
-- Cuántos sorteos ciegos se hacen por variante.
+- Nada pendiente: un solo sorteo fijo por variante, sin paradas intermedias.
