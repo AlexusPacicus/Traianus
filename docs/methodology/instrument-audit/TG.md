@@ -3,10 +3,10 @@
 The question, hypothesis and refuters live in `docs/relational-bridges/RELATIONAL_BRIDGES.md` §22,
 which a blind reviewer never opens (definitions.md, Not allowed).
 
-## Instrument audit record (revision 1)
+## Instrument audit record (revision 2)
 
 ```
-Instrument audit — TG, relations kept by a tension gate and the spiral they open (revision 1)
+Instrument audit — TG, relations kept by a tension gate and the spiral they open (revision 2)
 
 Scope: two existing relation graphs on the frozen corpus (union, open borders), each taken
   without the gate, with it, and with a blind draw in its place. The gate judges relations between
@@ -26,9 +26,10 @@ Words: each term below is the frozen glossary word of the question's document, i
   vecindario), inconclusive (no concluyente), pending (pendiente), turn (vuelta), budget
   (presupuesto), blind draw (sorteo ciego), grid (parrilla), block length (tramo), interval
   (intervalo), FIT and EVAL notes (notas de ajuste, apartadas).
-Symbols, each with one meaning here and none of definitions.md's (v, a_k, â_k, c₁, c_A, c_B, ĉ₁,
-  P⊥, v_dipole, δ, u⊥, r, λ, λ_k, d_esc, x, y) or contracts.md's V; contracts.md §0's d = 384 is
-  written 384:
+Symbols, each with one meaning here. A blanket disclaimer, not a claim that meanings differ: of
+  definitions.md's symbols (v, a_k, â_k, c₁, c_A, c_B, ĉ₁, P⊥, v_dipole, δ, u⊥, r, λ, λ_k, d_esc,
+  x, y) this record uses only v (as v_i) and â_k, with their meaning there, and none of the
+  others; it does not use contracts.md's V; contracts.md §0's d = 384 is written 384:
   notes — v_i a note's 384-d vector, i, j, n, x note indices (0-based rows); c(v) ∈ ℝ⁸ its axis
     coordinates, c_i = c(v_i), c_{i,k} its k-th component, k only ever indexing axes;
     dist(i, j) = ‖v_i − v_j‖; lab(i) a note's label; Zn(i) the set of zones a note is in;
@@ -50,19 +51,26 @@ Script: tools/experiments/tension_gate.py; unit tests: tests/unit/test_tension_g
   OPENBLAS_NUM_THREADS = VECLIB_MAXIMUM_THREADS = 1 itself, before its first numpy import. It
   imports, and does not copy: check_digests, load_inputs, validate_inputs and IntegrityError from
   tools/experiments/k6_colour_predictability.py, pinned by sha256 =
-  6289c596792154f6bb799606265c68719c6b8c7ae8b69084116dfb23c77876d2 as Z pins it; relations,
+  6289c596792154f6bb799606265c68719c6b8c7ae8b69084116dfb23c77876d2; relations,
   pairwise_distances, minimum_spanning_tree, union_edges, axis_cells, median_threshold,
   touching_tree_weights, open_relations and cell_graph from
   tools/experiments/relational_graph_exploration.py, pinned by sha256 =
   627aa8e95a844b0aec290a41c48b9a0bf6890db25b5240b5730c366a56d2e7dc (the file at db12b60). Each pin
-  hashes the file the module was loaded from with hashlib and refuses to run on a mismatch, with
-  Z's declared limits (the file on disk, not the loaded bytes; top-level code runs on import).
-  The engine's epsilon comes from traianus.config.resolve_epsilon_edge(); the script refuses to
-  run unless it returns 0.8 (the variable TRAIANUS_EPSILON_EDGE would change it). Result:
-  data/refapp/TG_result.json, committed; --out writes the same result elsewhere, not committed.
+  hashes the file the module was loaded from (module.__file__) with hashlib, not through the
+  module's own check_digests, and refuses to run on a mismatch. Declared limits: the pin checks
+  the file on disk, not the bytes the interpreter loaded; importing a module runs its top-level
+  code. The engine's epsilon comes from resolve_epsilon_edge() in traianus/config.py; the script
+  refuses to run unless it returns 0.8 (the variable TRAIANUS_EPSILON_EDGE would change it).
+  Contract: contracts.md §5. Result: data/refapp/TG_result.json, committed; --out writes the same
+  result elsewhere, not committed.
 Data: definitions.md (2,221 vectors, 8-axis basis). The script refuses to run, writing nothing,
-  unless the three sha256 digests Z's Data line names hold and validate_inputs accepts the inputs
-  (contracts.md §0). Conversions as contracts.md §0: rows cast to float64 and renormalised;
+  unless sha256(embeddings.npy) =
+  eafb0e97172830f2404e96fa08d74bf6cccc0b6cbe84d47b790a476603e7d8d1, sha256(labels.json) =
+  1d60699353d810f089730c6203ee28f9c416e3004b60781bc965cec284097f4f and
+  sha256(tests/fixtures/nsm_axes_8.json) =
+  b14e5d6700d1a7478a357ca26f0f38f5240f97a42daad45722d21f1c3f964e35 hold (contracts.md §0,
+  Artefacts), and unless validate_inputs accepts the inputs (contracts.md §0, Integrity).
+  Conversions as contracts.md §0: rows cast to float64 and renormalised;
   â_k = a_k / ‖a_k‖. FIT = even rows (1,111), EVAL = odd rows (1,110), as R4 and Z. Everything
   the gate uses to judge — zones, trees, thresholds, real neighbours, spheres, tunnels, efforts —
   comes from FIT notes only; every judged relation joins two FIT notes; the statistic is taken on
@@ -78,7 +86,8 @@ Zones (FIT): i ∈ Z_k iff c_{i,k} > (1/8) Σ_k′ c_{i,k′} (strict). The zone
   candidate (counted).
 Real neighbours: N(i) = the 15 FIT notes nearest to FIT note i by dist, i excluded, ties to the
   lower row. R(q) = the 15 EVAL notes nearest to EVAL note q among the other 1,109 EVAL notes, q
-  excluded, ties to the lower row (R4's truth). 15 is R4's number, not chosen here.
+  excluded, ties to the lower row. 15 is the number an earlier record fixed and was reviewed
+  with; it is not chosen here.
 Bridge: a pair of FIT notes with lab(i) ≠ lab(j). Its sphere S_ij = {i, j} ∪ N(i) ∪ N(j), a note
   in both counted once (at most 32 notes); S_ij defines the tunnel below. The effort is measured
   on S°_ij = S_ij ∖ {i, j} (between 14 and 30 notes: j may be in N(i) and i in N(j)), so that the
@@ -130,16 +139,25 @@ Statistic: for each EVAL q and each graph, h_q(n) by breadth-first search over a
   not depend on H. D̄ = mean of D_q over the EVAL notes in scope, D̄′ likewise.
 Scopes: global (all 1,110 EVAL notes) and each zone k (the EVAL notes q with c_{q,k} > the mean of
   their own eight components; a note may be in several zones; zones are not mixed).
-Dependence and interval (R4's): for a scope with n notes and each L in the grid {1, 2, 5, 10, 20,
-  50}, the scope's EVAL notes in row order are cut into ⌈n/L⌉ contiguous blocks (the last may be
-  shorter); L is valid iff ⌈n/L⌉ ≥ 20; an invalid L does not decide. For b = 1…10,000 the blocks
-  are resampled with replacement (with multiplicity) and D̄_b computed; interval =
-  [sorted(D̄_b)[249], sorted(D̄_b)[9749]]. The same for D̄′.
+Dependence and interval: EVAL alternates chunks of a sequential text, so nearby notes share
+  neighbourhoods and their D_q are correlated. No single block length is derived; the decision
+  runs over the grid {1, 2, 5, 10, 20, 50} (L = 1 is independence). For a scope with n notes and
+  each L, the scope's EVAL notes in row order are cut into n_blocks = ⌈n/L⌉ contiguous blocks
+  (the last may be shorter); L is valid iff n_blocks ≥ 20, a declared minimum (with fewer
+  resampling units the bootstrap distribution of a block mean takes few distinct shapes and
+  percentile intervals tend to undercover); an invalid L does not decide. For b = 1…10,000,
+  K_b = n_blocks block indices drawn uniformly with replacement (Draws), and D̄_b = the mean of
+  D_q over the notes of the blocks in K_b, a block drawn twice counting twice; interval =
+  [sorted(D̄_b)[249], sorted(D̄_b)[9749]] (the 250th and 9,750th of 10,000). The same for D̄′.
+  B = 10,000: the rank of a 2.5% or 97.5% quantile has Monte Carlo s.d. √(B·0.025·0.975) ≈ 16
+  ranks, which the reported neighbours 233/265 and 9733/9765 show.
 Rule, per variant and scope:
   (1) more neighbours per turn at no larger budget: if at some valid L the interval of D̄ contains
       0, inconclusive; if at every valid L it lies above 0 and β(G⁺) ≤ β(G⁰), holds; otherwise
       refuted.
   (2) budget below the dense per-cell reference: refuted iff β(G⁺) ≥ β(dense); else holds.
+      β is a property of a whole graph and does not depend on the scope, so (2) has one outcome
+      per variant, the same in every scope.
   (3) better than the blind draw: as (1) with D̄′, without the budget clause (G^b has |G⁺|
       relations by construction).
   A scope with no valid L is pending (no decision, not filled by hand). The gate holds for a scope
@@ -150,12 +168,14 @@ Controls (each can fail; a failure makes the run invalid and no result is used):
   exchangeable direction — for every pair in J, e_ij(w_ij) with w_ij an independent uniform
     direction (Draws) is compared with κ_ij; the fraction below the cut must lie within
     12/1001 ± 4·√((12/1001)(989/1001)/|J|). A correct cut falls outside with probability ≈ 6e-5
-    (normal tail at 4 s.d., as R4's permutation control).
+    (two-sided normal tail at 4 s.d.), so a failure points at the code.
   ceiling — the graph whose relations join each EVAL q to every note of R(q): every h_q(n) = 1,
     so Σ_{n∈R(q)} h_q(n) = 15 for every q; the breadth-first search and the sum must return it
     exactly.
   connectivity — G⁰, G⁺ and G^b are one component each (else an h is undefined).
-  equal budget — |G^b| = |G⁺| for each variant.
+  equal budget — |G^b| = |G⁺| for each variant. A code check, not an empirical one: it is an
+    identity of the construction (both graphs are variant ∖ J plus |K| members of J), so it can
+    fail only if the code builds them otherwise.
 Draws: rng = numpy.random.default_rng(20260918) (PCG64), used in this order and nowhere else:
   g = rng.standard_normal((1000, 8)) (the blind reference); then, for the pairs of J over both
   variants, each pair once, in ascending (i, j), w = rng.standard_normal((number of pairs, 8)),
@@ -205,4 +225,7 @@ Reviewed by:               Claude Sonnet 5 (instrument-audit, blind subagent), 2
   a blind reviewer cannot open: state the digests and the resampling here. (3) No contracts.md
   section for TG yet; needed before any code. (4) The equal-budget control is an identity of the
   construction, a code check rather than an empirical one: say so. (5) Rule (2) does not depend on
-  the scope: say so.
+  the scope: say so. Addressed in revision 2, design unchanged: the five items (the digests and
+  the block bootstrap now stated in full here; contracts.md §5 written), and, found by the
+  executing agent, traianus/config.py cited by path (a dotted module name does not enter a
+  review package).

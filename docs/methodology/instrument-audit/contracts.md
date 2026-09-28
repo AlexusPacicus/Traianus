@@ -308,3 +308,78 @@ información, y compara las dos rutas con un remuestreo por bloques. Z2 mide el 
 las dos maneras de producir los fotogramas. El resultado guarda por nota la búsqueda, los márgenes y
 las esferas de incertidumbre, y dice qué condición falló si alguna falla; entonces no decide nada. La
 semilla es propia (20260924), y la del mundo sintético otra (20260925).
+
+## 5. TG — tension gate on cross-label relations
+
+```
+Input    V (§0, after §0 Conversions); FIT = rows 0, 2, 4, … (1,111); EVAL = rows 1, 3, 5, …
+         (1,110). A (§0), used as â_1 … â_8. No consumed result.
+         Pinned code, imported (not copied), each file (module.__file__) hashed with hashlib after
+         the import and the run refused unless its sha256 equals TG.md's:
+           tools/experiments/k6_colour_predictability.py — check_digests, load_inputs,
+             validate_inputs, IntegrityError;
+           tools/experiments/relational_graph_exploration.py — relations, pairwise_distances,
+             minimum_spanning_tree, union_edges, axis_cells, median_threshold,
+             touching_tree_weights, open_relations, cell_graph.
+         Limits declared in TG.md (the file on disk, not the loaded bytecode; top-level code runs
+         on import; §0's one-read rule cannot apply to an imported module).
+         Epsilon: resolve_epsilon_edge() (traianus/config.py) must return 0.8.
+         Seed: §0 Random numbers, 20260918, PCG64; draws in TG.md's order, nowhere else.
+Order    import and pin checks → epsilon check → read the three artefacts (§0: one read, sha256,
+         parse the same bytes) → validate_inputs → distances (pairwise_distances, all 2,221 rows)
+         → axis coordinates, labels, zones, zone trees and thresholds (FIT) → real neighbours
+         (N over FIT, R over EVAL) → the two variants and the dense reference → J per variant →
+         per judged pair, once: sphere without ends, effort, the 1,000 blind efforts and the
+         cut, tunnel and veto → candidacy and verdicts per zone → K, G⁺ and G^b per variant →
+         controls → breadth-first turns from every EVAL note in every graph → D_q, D′_q → block
+         bootstrap per variant, statistic, scope and valid L → rules and decisions → write.
+Output   data/refapp/TG_result.json (§0 Results format; null, never NaN) with:
+         digests — the two pinned modules always; the three artefacts when read (null otherwise);
+         environment — §0 Determinism, plus the thread variables as set and epsilon;
+         valid; first_failed_condition (null when valid); failed_conditions and
+         conditions_checked (identifiers, in check order);
+         zones — per axis in order: n_fit, n_eval, tree_edges, theta (null without a tree),
+           candidates, kept, marked, vetoed; notes_in_no_zone; zones_per_fit_note (a histogram);
+         pairs — one entry per judged pair in ascending (i, j): i, j, lab_i, lab_j, dist,
+           n_sphere_without_ends, effort, cut, passes, foreign, vetoed, candidate_zones,
+           kept_zones, own_sphere (candidate there or null), in_variants;
+         variants — per variant ("union", "open_borders"): relations and beta of G⁰, G⁺ and G^b,
+           j_size, k_size, horizon, and per scope ("global", then the axis ids in order) n and,
+           for d_bar and d_bar_prime, per L of the grid {valid, n_blocks, mean, interval [rank
+           249, rank 9749], ranks 233, 265, 9733, 9765}, and the outcomes of rules 1, 2, 3 and
+           the scope's decision;
+         dense_reference — relations, beta;
+         decision — global and per zone: "holds", "refuted", "inconclusive" or "pending" (null
+           when valid = false);
+         controls — exchangeable_direction {n, fraction, band}, ceiling {passed},
+           connectivity {per variant and graph}, equal_budget {per variant};
+         reported — every figure in TG.md's Reported line not already above, under the same
+           names in snake case.
+         Identifiers, in check order: exchangeable_direction, ceiling, connectivity,
+         equal_budget.
+Function (every definition in TG.md; shortcuts D27, D28, D29)
+  c(v) = (⟨v, â_k⟩)_{k=1…8}; lab = argmax, ties to the lower k.
+  zones:   i ∈ Z_k iff c_{i,k} > mean of c_i (strict); θ_k = numpy.median of Z_k's tree edges.
+  pair:    S° = N(i) ∪ N(j) ∖ {i, j}; T° = ½ Σ (c − p°)(c − p°)ᵀ; effort = bᵀT°b (D29);
+           cut = np.sort(uᵀT°u over the 1,000 u)[11]; passes iff effort < cut (D27).
+  tunnel:  ρ = distance to the 15th of N; cone membership and veto as TG.md.
+  graphs:  G⁰ the variant; G⁺ = (variant ∖ J) ∪ K; G^b = (variant ∖ J) ∪ K^b.
+  turns:   breadth-first search over all 2,221 rows; D_q, D′_q as sums of turns (D28).
+  rules:   TG.md's Rule line; bootstrap as its Dependence and interval line.
+Threads  The TG script sets OMP_NUM_THREADS = OPENBLAS_NUM_THREADS = VECLIB_MAXIMUM_THREADS = 1
+         itself, before its own first numpy import.
+Refusal  A pin mismatch, an epsilon other than 0.8, a digest mismatch or a validate_inputs
+         rejection writes no result. A failed control writes the result with valid = false and
+         every decision null.
+```
+
+En palabras: TG juzga las relaciones entre notas de etiquetas distintas con una puerta de
+tensión. Para cada pareja de notas de ajuste, mide cuánto se estiran sus vecinas reales, sin los
+dos extremos, a lo largo de la dirección que une las dos notas, y lo compara con mil direcciones al
+azar: la pareja pasa si pide menos que todas salvo once. Un túnel entre las dos notas veta la
+pareja si atraviesa una nota ajena que conserva a sus vecinas sin ninguno de los dos extremos. Con
+lo que la puerta mantiene se construyen, para la unión y para las fronteras abiertas, tres grafos:
+sin puerta, con puerta y con un sorteo ciego del mismo tamaño. En cada uno se cuenta a cuántas
+relaciones quedan de cada apartada sus quince vecinas reales, y se compara con un remuestreo por
+bloques. Si falla un control, el resultado se escribe como no válido y no decide nada. La semilla
+es la de §0, 20260918.
