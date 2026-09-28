@@ -57,3 +57,15 @@ The deterministic test(s) / audit harness that will mark the spec GREEN.
 - Do not advance a spec from Draft to Normative without a GREEN verification.
 - Golden rule: neurons propose, rules dispose — every SPEC mutation passes the
   boundary-validator gates.
+
+## Composing in words (mirror of METHODOLOGY.md)
+
+A words-only document may precede the audit record. Seven rules (distilled
+2026-09-27 → 28, mirrored by hand in both skill trees):
+1. Freeze the glossary before redacting.
+2. Agree the tone with a three-sentence sample.
+3. Replay prior agreements before every piece.
+4. Re-read frozen records and contracts before proposing.
+5. Batch words-only edits; verify once at the end.
+6. Branch awareness with concurrent agents.
+7. A ledger entry on freeze, by whoever ran the gates.

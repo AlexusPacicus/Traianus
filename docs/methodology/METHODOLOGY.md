@@ -70,6 +70,22 @@ the function between them, and the data layer at bit level (formats, dtypes, byt
 casts, random streams, where bitwise reproducibility holds and where only a tolerance does), with
 a plain-language translation. Code is reviewed against the contract.
 
+**Composing in words (before the record).** A words-only document may precede the audit record,
+to fix in plain language what is measured and how it is decided, with no code. Seven rules,
+distilled from the relational-bridges session (2026-09-27 → 28):
+1. Freeze the glossary before redacting: the author's words plus the records' words; abbreviations
+   invented mid-session are renamed or dropped on request.
+2. Agree the tone with a three-sentence sample before the first full piece.
+3. Replay the prior agreements, one line each, before drafting every piece.
+4. Re-read the frozen records and contracts before proposing; a proposal that prejudges the
+   candidates or forgets a fixed decision is returned, not patched.
+5. Batch words-only edits and verify once at the end (one hermetic suite run), instead of one
+   run per edit.
+6. Branch awareness with concurrent agents: check the branch at the start of each turn, never
+   touch another agent's files, report what is theirs untouched.
+7. A ledger entry on freeze: pieces close in chat, but the freeze is recorded in `docs/LEDGER.md`
+   only by whoever ran the gates being recorded.
+
 **Mathematical contract.** Every record states its input and output exactly; every shortcut it
 takes (a simplified form standing for a full one) is an equality with its conditions and proof in
 a derivations file, and each equality becomes a unit test in phase 2. A shortcut without its
