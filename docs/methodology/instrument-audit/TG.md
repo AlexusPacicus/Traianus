@@ -190,9 +190,19 @@ Comparable arms?           Valid only if the four controls pass. The ends are le
                            the pass rate of a direction that carries none, which the
                            exchangeable-direction control checks, not a bound for real bridges.
 Text matches code?         Checked at review (phase 2).
-Reviewed by:               —
+Reviewed by:               Claude Sonnet 5 (instrument-audit, blind subagent), 2026-09-28, phase 1,
+                           record at 4c0fa17 (revision 1): PASS; 0 blocking, 5 non-blocking.
 ```
 
 ## Review history
 
-(none yet)
+- **Revision 1** — Claude Sonnet 5 (`instrument-audit`, blind subagent), 2026-09-28, phase 1, round
+  1 on this design, record at `4c0fa17`, package built after `fb9b6a2` (the builder's denylist
+  gained `docs/relational-bridges/`; a first package built before that fix held the question's
+  document and was discarded unread): **PASS**, 0 blocking, 5 non-blocking. (1) The Symbols line
+  disclaims symbols this record never uses, and â_k here is definitions.md's: say it is a blanket
+  disclaimer. (2) "Z's Data line", "R4's" interval and "R4's permutation control" point at records
+  a blind reviewer cannot open: state the digests and the resampling here. (3) No contracts.md
+  section for TG yet; needed before any code. (4) The equal-budget control is an identity of the
+  construction, a code check rather than an empirical one: say so. (5) Rule (2) does not depend on
+  the scope: say so.
