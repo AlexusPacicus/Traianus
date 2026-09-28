@@ -1630,6 +1630,45 @@ decisiones abiertas de `ZOOM.md`.
 2. Revisar las candidatas editoriales y comprobar su efecto en K6, R4 y Z.
 3. Integrar `feat/relational-graph` y `docs/relational-z`.
 
+### 2026-09-27 — Documento en palabras: puentes entre celdas, espiral y brújula
+
+**Contexto:** el grafo relacional quedó integrado en `main` (PR #88) y la
+comprobación editorial también (`4fef732`: quitar las 11 puras no cambia K6,
+R4 ni Z). Faltaba fijar en palabras qué se mide y cómo se decide, sin código.
+
+**Se hizo (chat de documentación y análisis, sin tocar código ni pruebas):**
+- Nuevo dominio `docs/relational-bridges/RELATIONAL_BRIDGES.md`: un solo
+  primario en carpeta propia, lenguaje natural sin fórmulas, congelado como
+  versión uno y ampliado por piezas validadas después.
+- Piezas cerradas: esfera propia del puente con reparto en todos los ejes;
+  bajada a subespacio en tres peldaños; tensión como medida que decide frente
+  a referencia ciega; orden de fusión con dirección primero y solo donde la
+  acumulada es menor; cierre de la doble vía con direcciones y tensión por
+  separado y desacuerdos guardados para rescate en combinación; espiral de
+  apertura del zoom con entrada neutra por el baricentro; tercer nivel con su
+  propio umbral; variante del umbral con puentes validados; brújula de dos
+  direcciones opuestas con nota neutra que iguala cargas.
+- Correcciones del autor aplicadas: no es red sino espiral; reparto con todos
+  los ejes; fusión entre hiperesferas; `listón` revertido a `umbral` en todo el
+  documento; tercer nivel completado con no concluyente en todos los tamaños de
+  bloque y derivación escrita antes del run.
+- Veredicto editorial apuntado en el documento sin reabrir piezas.
+
+**Resultado:** suite hermética `3092 passed, 1 skipped, 5 deselected` en verde
+tras cada edición solo-doc. El documento queda sin pendientes salvo futuros
+runs ciegos.
+
+**Resuelto de entradas anteriores:**
+- 2026-09-26, grafo base, candidatas editoriales e integración de ramas: hecho
+  por el otro agente e integrado en `main`.
+- 2026-09-26, celdas como primer nivel: fijado como puerta con entrada neutra.
+
+**Sin resolver / decisión pendiente:**
+- Pasar la primera pieza a registro de instrumento con refutadores y rondas
+  ciegas antes de escribir herramienta.
+- Ruff y mypy de CI siguen sin cubrir `tools/experiments/**`.
+- El test de latencia de almacenamiento sigue intermitente bajo carga.
+
 ### Cierre (21:53)
 
 **Contexto:** tras el cierre de las 18:44, quedaban sin fusionar `docs/relational-z`
