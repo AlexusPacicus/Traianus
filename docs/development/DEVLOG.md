@@ -1789,3 +1789,69 @@ PR #88 queda asentado retroactivamente.
 
 **Próximo paso:**
 1. Decisión del autor sobre el grafo base del zoom relacional.
+
+### Cierre (23:35)
+
+**Contexto:** tras la entrada de la mañana, otra sesión dejó en `main` el
+documento en palabras de los puentes relacionales (`b1d98ed`), los asientos
+70–72 del LEDGER y las reglas de componer en palabras (`fe7f8f8`). Quedaba
+decidir si era momento de auditar: faltaban el paso 1 y definiciones exactas.
+
+**Se hizo:**
+- Documento en palabras: contradicciones internas corregidas (`df93cd3`). El
+  autor abre solo la puerta de tensión; glosario congelado, diez definiciones y
+  paso 1 con refutadores en el §22 (`28478bf`, `b74fad3`, con ediciones directas
+  del autor). Fusión `28f0b2a`, LEDGER 73 (`f96a8fa`), CI verde.
+- Registro TG (`docs/methodology/instrument-audit/TG.md`), revisiones 1 a 6, con
+  `contracts.md` §5, derivaciones D27–D29 y la regla `tg` del registro de
+  contratos (`71e554d`). Enmienda del autor: el esfuerzo se mide sin los dos
+  extremos, que si no se miden a sí mismos a lo largo del puente (`fb5fcf6`).
+- El primer paquete ciego incluía el documento de la pregunta: la lista de
+  rutas denegadas del constructor estaba escrita a mano y no seguía a
+  `definitions.md`. Corregida, con un test que lee todo el bloque (`fb9b6a2`).
+- Fase 1: dos rondas ciegas PASS, cerrada por el autor sin tercera. Fase 2:
+  ronda 1 PASS (3 no bloqueantes), ronda 2 PASS (2 no bloqueantes, declarados
+  sin tocar el código).
+- Script y tests por `instrument-implementer` (`d57966d`). La revisión del diff
+  encontró cuatro desviaciones del registro (orden de los sorteos del
+  remuestreo, presupuesto igual sobre conjuntos y no sobre grafos, notas sin
+  zona dentro de J, decisiones no anuladas con un control fallido), corregidas
+  (`71d1942`). Al probar un test nuevo salió un `KeyError` en el recuento por
+  zona para los candidatos que son aristas del árbol mínimo: invisible en el
+  corpus sintético, casi seguro en el real. Revisión 6 y arreglo (`f8e78fd`,
+  `17352dc`).
+- El implementador ejecutó un fichero Python sin commitear a través de pytest
+  para fijar valores de la semilla: incumple AGENTS 2.5; declarado en el
+  historial del registro.
+- Plan de run commiteado antes de ejecutar (`9f7d2ae`); primera ejecución
+  (`ffda506`).
+
+**Resultado:** TG válido y reproducible: dos ejecuciones idénticas byte a byte
+y los cuatro controles verdes. 787 pares juzgados, 0 pasan el corte, 754
+vetados por el túnel, 0 mantenidos en las dos variantes; decisión refutada en
+global y en las ocho zonas. Fusión en `main` (`0d99f95`), suite completa verde
+(3134 passed, 1 skipped, 5 deselected), subida; CI en curso al cerrar (run
+`36486556457`).
+
+**Resuelto de entradas anteriores:**
+- 2026-09-27 (documento en palabras): pasar la primera pieza a registro con
+  refutadores y rondas ciegas: hecho y ejecutado.
+- 2026-09-28, próximo paso 1 (grafo base del zoom relacional): la puerta que
+  debía decidirlo sale refutada; el autor elige abrir la espiral sin puerta y
+  seguir con los subespacios.
+
+**Sin resolver / decisión pendiente:**
+- Unión o fronteras abiertas como base de la espiral (autor).
+- Bajada a subespacios: con las definiciones actuales daría el mismo cero,
+  porque esfuerzo, corte y túnel dependen solo de los extremos; hay que fijar
+  qué cambia en cada nivel. Y es una reformulación declarada: TG salió
+  refutada, no no concluyente, que es lo que dispara la bajada.
+- La lectura del autor de la primera ejecución queda fuera del documento, por
+  decisión suya.
+- Cambios ajenos sin commitear: `docs/INDEX.md`, `docs/roadmap/NEXT_RESEARCH.md`
+  y `docs/specifications/ULPIA_V2_ZERO_COPY_MVP.md`.
+- Ruff y mypy de CI siguen sin cubrir `tools/experiments/**`.
+
+**Próximo paso:**
+1. LEDGER 74 de la fusión de TG, con el run de CI.
+2. Definiciones en palabras de la bajada a subespacios.
