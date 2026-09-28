@@ -2378,3 +2378,49 @@
   merge `28f0b2a` green, 10m23s (run `36442524949`).
 
 * **Status:** `Consolidated`.
+
+### seq 74 — 2026-09-28 — TG merged into `main`: the tension gate's record, contract, script, first run (refuted)
+
+* **Context:** seq 73 fixed the tension gate in words (`RELATIONAL_BRIDGES.md` §22). The TG
+  instrument audit record turned it into a measurement: for every pair of FIT notes with
+  different labels, the tension of their joint real neighbourhood, without the two ends, along
+  the pair's own direction in axis coordinates, against 1,000 blind directions, with a tunnel
+  veto; judged on R4 and Z's EVAL notes by the spiral's turns, for the union and the open-borders
+  graphs with and without the gate and against a blind draw.
+
+* **Decisions (the author):** the record's name TG; the effort without the bridge's two ends
+  (a dated amendment to §22, `fb5fcf6`); relations a variant already has judged by the cut and
+  the tunnel alone; the variant's global minimum spanning tree never touched; a note with eight
+  equal affinities never an end of a judged pair; phase 1 closed after two PASS rounds; a
+  candidate that is a tree edge counted as a tree link, never judged (revision 6); after the
+  run, the spiral opens without the gate and the descent to subspaces comes next.
+
+* **Δ merged (`feat/tension-gate-record` → `main`, `0d99f95`):**
+  `docs/methodology/instrument-audit/TG.md` (revisions 1–6, review history, run plan, first
+  run); `contracts.md` §5; derivations D27–D29 and their tests; `definitions.md` closes
+  `docs/relational-bridges/` to blind reviewers, and the review-package builder's denylist
+  follows it (`fb9b6a2`); contract registry rule `tg` (`71e554d`);
+  `tools/experiments/tension_gate.py` and `tests/unit/test_tension_gate.py` (`d57966d`,
+  `71d1942`, `456eda9`, `17352dc`); `data/refapp/TG_result.json` (`ffda506`). Nothing under
+  `traianus/` changes.
+
+* **Result (recorded, not re-read here):** valid, two runs byte-identical, the four controls
+  passed. 787 pairs judged, 0 pass the cut, 754 vetoed, none kept in either variant; the
+  decision is refuted globally and in all eight zones.
+
+* **Declared:** the implementer ran an uncommitted Python file through pytest to pin the seed's
+  first values, which AGENTS 2.5 does not allow without the author's approval (recorded in TG's
+  history). Phase 2 round 2's two non-blocking items are declared, not applied. CI's ruff and
+  mypy do not cover `tools/experiments/**` (known gap).
+
+* **How it was built:** the record, contract and derivations by the executing agent; the
+  denylist fix and the registry rule by `engine-implementer` (Sonnet) from validated
+  `DelegationContract`s; script and tests by `instrument-implementer` (Sonnet). Four blind
+  reviews by `instrument-auditor` (Sonnet), two per phase. Every diff reviewed and the full
+  suite re-run by the executing agent; both runs made by the executing agent.
+
+* **Gate:** `pytest tests/` → 3134 passed / 1 skipped / 5 deselected on `main` after the merge.
+  `EXECUTE_SAFE` receipts for every governed test file edited. Linux: CI on the merge `0d99f95`
+  green, 6m14s (run `36486556457`).
+
+* **Status:** `Consolidated`.
