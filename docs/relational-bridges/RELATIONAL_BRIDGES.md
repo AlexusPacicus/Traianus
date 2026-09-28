@@ -5,17 +5,17 @@
 > relacional en main. Todo lo apuntado como futuro queda marcado y sin desarrollar.
 >
 > **Versión uno congelada el 2026-09-27 y ampliada por piezas validadas
-> después.** Solo se reabre por el veredicto editorial pendiente: si quitar
-> las notas puras mueve alguna decisión cerrada, se apunta aquí sin reabrir
-> piezas.
+> después.** El veredicto editorial ya está medido: quitar las notas puras no
+> mueve ninguna decisión cerrada, y queda apuntado en el apartado 14 sin
+> reabrir piezas.
 
 ## 1. Propósito y límites
 
 Este documento fija una sola pieza: cómo se juzga una relación entre notas de
 zonas distintas tratándola como su propia esfera de vecindario. No cambia el
 motor, no cambia pruebas, no crea redes. Sirve para decidir después qué grafo
-usa la vista general y el zoom relacional. La variante que sumaría mínimos de
-puentes ya validados queda apuntada pero sin desarrollar.
+usa la vista general y el zoom relacional. La variante que suma mínimos de
+puentes ya validados se desarrolla en el apartado 17.
 
 ## 2. Reparto con todos los ejes
 
@@ -48,7 +48,7 @@ que se acorta trayendo vecinos reales cerca. Se descarta cuando solo une a
 costa de dispersar lo que cada zona conservaba, apretando de lado. Como imagen
 de ayuda, sin valor de ley, usamos la de acortar frente a dispersar.
 
-## 6. Listón dinámico de cada zona
+## 6. Umbral dinámico de cada zona
 
 El umbral que decide no es un número puesto a mano para todo. Nace de cada zona
 a partir de sus enlaces mínimos, los más baratos que ya la conectan por sí
@@ -84,15 +84,15 @@ concluyente y no se rellena a mano. Eso dispara el trabajo dentro de cada zona
 por separado: primero en la celda gruesa de eje, y si hace falta en la celda
 fina que el zoom ya define, siempre con partición comprometida de antemano y
 nunca recortando a gusto. Cada nivel calcula su propio umbral y sus propias
-direcciones. Un tercer nivel más fino queda apuntado pero sin abrir.
+direcciones. El tercer nivel, más fino, se fija en el apartado 16.
 
 ## 10. Red única y familia para probar
 
 Se mantiene una candidata única y escasa para la vista general junto a la
 familia de variantes sobre el mismo corpus congelado. La de tensión es la única
 que decide con la medida nueva; las demás solo informan para comparar. El orden
-de fusión del resto y la elección final entre red única y familia quedan como
-desarrollo futuro.
+de fusión, y cómo conviven la candidata única y la familia, se fijan en el
+apartado 12.
 
 ## 11. Lo que dicen los avances ya medidos
 
@@ -118,8 +118,8 @@ comparar con la de vecindario por tener distinta base.
 El constructor del corpus dejó pasar bloques editoriales de notas al pie dentro
 de los manifiestos: más de una decena de bloques, unas veinticinco etiquetas
 entre puras y mixtas, y unas cuarenta continuaciones candidatas. Están marcados
-desde la fuente sin reconstruir el corpus. Queda pendiente comprobar si quitar
-las notas puras cambia alguna decisión de los estudios cerrados.
+desde la fuente sin reconstruir el corpus. Quitar las once notas puras no
+cambia ninguna decisión de los tres estudios cerrados.
 
 ## 12. Orden de fusión con dirección primero
 
@@ -204,13 +204,13 @@ la dirección calculada antes de decidir, y solo se abre donde la acumulada
 sigue baja y el rumbo nuevo se aparta de los ya abiertos. El cociente entre
 camino y distancia directa se lee como relación proyectada, no como coste.
 
-Lo medido lleva dentro las notas editoriales marcadas desde la fuente, casi
-todas resueltas como texto propio salvo una ajena dejada sin marcar por
-decisión del autor. Queda pendiente comprobar si quitar las puras mueve alguna
-decisión cerrada. Veredicto ya medido en rama propia e integrado en main: al
-quitar las once notas puras, las decisiones de los tres estudios cerrados no
-cambian. Y una cosa es esta espiral para mostrar y otra el gobierno
-del motor, cuyo valor heredado no se toca.
+Lo medido lleva dentro las notas editoriales marcadas desde la fuente. De las
+cuarenta continuaciones candidatas, todas menos una resultaron texto propio; la
+ajena, el segundo verso de Ovidio, queda sin marcar por decisión del autor.
+Veredicto ya medido en rama propia e integrado en main: al quitar las once
+notas puras, las decisiones de los tres estudios cerrados no cambian. Y una
+cosa es esta espiral para mostrar y otra el gobierno del motor, cuyo valor
+heredado no se toca.
 
 ## 15. Entrada neutra y apertura por la celda
 
@@ -298,8 +298,8 @@ existentes, cada uno con su historial de revisiones. La espiral consume sin
 decidir y no pide registro. La brújula lleva registro propio como herramienta
 agnóstica a la carga con salida a otros ámbitos, no solo como pieza de aquí.
 Cada registro pide su propia sección de contrato, una por pieza, registrada
-antes de escribir herramienta. En metodología quedan para después de este
-chat el lenguaje más natural con sus mejoras y los contratos nuevos.
+antes de escribir herramienta. Las reglas para componer en palabras ya están
+en metodología; los contratos nuevos llegan con cada registro.
 
 ## 20. Apuntado pero no desarrollado
 
