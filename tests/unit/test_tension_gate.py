@@ -421,6 +421,24 @@ def test_variant_j_excludes_a_bridge_with_an_unzoned_end_even_if_already_a_relat
     assert (0, 1) in j
 
 
+def test_variant_j_excludes_relations_touching_eval_notes_or_sharing_a_label():
+    """TG.md: relations touching an EVAL note or joining two notes with the same label are never
+    in J. variant_j's own filters guard the 'already a relation' arm; the candidates argument
+    (which in the real pipeline only ever holds bridges() output, itself filtered by label) never
+    adds such pairs either, so offering them there too must not change the outcome."""
+    fit_set = {0, 2, 3}
+    lab = np.array([0, 1, 0, 1])  # row 1 is EVAL (not in fit_set); rows 0 and 2 share label 0
+    zoned = np.array([True, True, True, True])
+    m_pairs: set = set()
+    eval_touching = (0, 1)  # one end (1) is not a FIT note
+    same_label = (0, 2)  # both FIT, same label
+    variant_pairs = {eval_touching, same_label}
+    candidate_pairs = {eval_touching, same_label}  # even offered as candidates too
+    j = tg.variant_j(variant_pairs, m_pairs, candidate_pairs, fit_set, lab, zoned)
+    assert eval_touching not in j
+    assert same_label not in j
+
+
 def test_an_existing_relation_with_an_unzoned_end_is_excluded_from_j_in_both_variants(tmp_path, monkeypatch):
     paths, expected = _write_inputs(tmp_path, equal_row=0)
     original_build_variants = tg.build_variants
@@ -475,6 +493,10 @@ def test_a_valid_run_on_a_small_synthetic_corpus_writes_every_key_of_the_output_
             "foreign", "vetoed", "candidate_zones", "kept_zones", "own_sphere", "in_variants",
         }
         assert pair["i"] < pair["j"]
+        # TG.md: relations touching an EVAL note or joining two notes with the same label are
+        # never in J -- FIT = even rows (contracts.md section 5, Input).
+        assert pair["i"] % 2 == 0 and pair["j"] % 2 == 0
+        assert pair["lab_i"] != pair["lab_j"]
 
     assert set(result["variants"]) == {"union", "open_borders"}
     for variant in result["variants"].values():
