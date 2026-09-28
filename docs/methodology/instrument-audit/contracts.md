@@ -349,8 +349,9 @@ Output   data/refapp/TG_result.json (§0 Results format; null, never NaN) with:
          variants — per variant ("union", "open_borders"): relations and beta of G⁰, G⁺ and G^b,
            j_size, k_size, horizon, and per scope ("global", then the axis ids in order) n and,
            for d_bar and d_bar_prime, per L of the grid {valid, n_blocks, mean, interval [rank
-           249, rank 9749], ranks 233, 265, 9733, 9765}, and the outcomes of rules 1, 2, 3 and
-           the scope's decision;
+           249, rank 9749], ranks 233, 265, 9733, 9765; interval and ranks null for an invalid
+           L}, and the outcomes of rules 1, 2, 3 and the scope's decision (null when
+           valid = false); relations and beta counted on the graphs as built;
          dense_reference — relations, beta;
          decision — global and per zone: "holds", "refuted", "inconclusive" or "pending" (null
            when valid = false);

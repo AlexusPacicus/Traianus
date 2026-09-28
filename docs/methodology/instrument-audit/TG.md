@@ -3,10 +3,10 @@
 The question, hypothesis and refuters live in `docs/relational-bridges/RELATIONAL_BRIDGES.md` §22,
 which a blind reviewer never opens (definitions.md, Not allowed).
 
-## Instrument audit record (revision 3)
+## Instrument audit record (revision 4)
 
 ```
-Instrument audit — TG, relations kept by a tension gate and the spiral they open (revision 3)
+Instrument audit — TG, relations kept by a tension gate and the spiral they open (revision 4)
 
 Scope: two existing relation graphs on the frozen corpus (union, open borders), each taken
   without the gate, with it, and with a blind draw in its place. The gate judges relations between
@@ -64,6 +64,8 @@ Script: tools/experiments/tension_gate.py; unit tests: tests/unit/test_tension_g
   the file on disk, not the bytes the interpreter loaded; importing a module runs its top-level
   code. The engine's epsilon comes from resolve_epsilon_edge() in traianus/config.py; the script
   refuses to run unless it returns 0.8 (the variable TRAIANUS_EPSILON_EDGE would change it).
+  The script's and its tests' docstrings cite the last revision of this record that the code was
+  written against (revision 3); a revision that changes only wording leaves them.
   Contract: contracts.md §5. Result: data/refapp/TG_result.json, committed; --out writes the same
   result elsewhere, not committed.
 Data: definitions.md (2,221 vectors, 8-axis basis). The script refuses to run, writing nothing,
@@ -115,7 +117,8 @@ Tunnel (384-d, FIT): ρ_i = dist(i, the 15th of N(i)). For a FIT note x ∉ S_ij
   neighbours apart from the bridge, and the bridge crosses it).
 Candidates and verdicts: shared = Zn(i) ∩ Zn(j). If shared is not empty, the bridge is a candidate
   in zone k ∈ shared iff dist(i, j) ≤ θ_k; if shared is empty, it is a candidate iff
-  dist(i, j) ≤ min(θ_lab(i), θ_lab(j)) (its own sphere). A candidate is kept in a zone (or in its
+  dist(i, j) ≤ min(θ_lab(i), θ_lab(j)) (its own sphere), and not a candidate if either threshold
+  is missing (a zone without a threshold admits no candidate). A candidate is kept in a zone (or in its
   own sphere) iff it passes the cut and is not vetoed. The effort, the cut and the tunnel depend
   only on the two ends: each is computed once per pair, whatever the number of zones; only
   candidacy differs between zones. One verdict per zone, counted per zone: candidates, kept,
@@ -166,10 +169,16 @@ Rule, per variant and scope:
       per variant, the same in every scope.
   (3) better than the blind draw: as (1) with D̄′, without the budget clause (G^b has |G⁺|
       relations by construction).
-  A scope with no valid L is pending (no decision, not filled by hand). The gate holds for a scope
-  iff (1), (2) and (3) hold for both variants; it is refuted iff any of them is refuted in either
-  variant; otherwise inconclusive. An inconclusive zone triggers the fixed descent (outside this
-  record). Single bridges are kept or discarded by the cut, once; they are never inconclusive.
+  A scope with no valid L is pending (no decision, not filled by hand); the number of valid L
+  depends only on the scope's notes, so it is the same in both variants. Within one variant, a
+  scope's decision is pending if (1) or (3) is pending (they are pending together); else refuted if any of (1), (2), (3) is
+  refuted; else holds if all three hold; else inconclusive. Across the two variants (the
+  decision): pending if either is pending; else refuted if either is refuted; else holds if both
+  hold; else inconclusive — so the gate holds for a scope iff (1), (2) and (3) hold for both
+  variants, and is refuted iff any of them is refuted in either. An inconclusive zone triggers
+  the fixed descent (outside this record). Single bridges are kept or discarded by the cut, once;
+  they are never inconclusive. When a control fails, every decision is null: the two-variant
+  decision and, per variant and scope, the outcomes of (1), (2), (3) and the scope's decision.
 Controls (each fails on a code error; a failure makes the run invalid and no result is used):
   exchangeable direction — for each of the n_J unique pairs judged over both variants, once,
     e_ij(w_ij) with w_ij an independent uniform direction (Draws) is compared with κ_ij; the
@@ -194,8 +203,16 @@ Draws: rng = numpy.random.default_rng(20260918) (PCG64), used in this order and 
   rng.integers(0, n_blocks, n_blocks).
 Reported, not deciding: |J|, |K|, the kept fraction; per zone, candidates, kept, marked and vetoed;
   foreign-note counts; H; β of every graph and of the dense reference; the number of zones per
-  FIT note; θ_k per zone; notes in no zone; the interval at every L, valid or not; sorted(D̄_b)
-  at 233/265 and 9733/9765 to show a decision does not hinge on Monte Carlo noise.
+  FIT note; θ_k per zone; notes in no zone; every L of the grid with its block count, the
+  interval and sorted(D̄_b) at 233/265 and 9733/9765 for a valid L (to show a decision does not
+  hinge on Monte Carlo noise), both null for an invalid L, which draws nothing. Relation counts
+  and β are those of the graphs as built (their adjacency), not of the sets they were built
+  from. Scopes, zones and labels are named by the axis ids of tests/fixtures/nsm_axes_8.json;
+  what the record orders (zones per axis, each variant's scopes) is written as JSON lists,
+  since contracts.md §0's Results format sorts object keys. β's denominator is the corpus's
+  2,221 rows, fixed.
+Test hook: measure() takes an optional observer, None in every run, that the unit tests use to
+  record the order of the bootstrap draws; it reads nothing and changes nothing.
 Unit tests (committed with the script, reviewed in phase 2; they can fail): D27, D28, D29 on
   random inputs; the cone membership on hand-built points (inside, on the surface, beyond each
   end); zone membership and label ties; N(i) and R(q) exclude the note itself and break ties by
@@ -254,3 +271,18 @@ Reviewed by:               Claude Sonnet 5 (instrument-audit, blind subagent), 2
 - **Phase 1 closed** (the author, 2026-09-28) on revision 3, after two PASS rounds on one design,
   without a third round: revision 3 only applies round 2's non-blocking items, which phase 2
   checks against the code.
+- **Implementation** — `instrument-implementer` (Claude Sonnet 5), 2026-09-28: script, unit tests
+  and the D27–D29 tests committed test-first in `d57966d`; the executing agent's review of the
+  diff found four places where the code departed from revision 3 (the bootstrap's draw order,
+  equal budget checked on the sets rather than the graphs, relations with an unzoned end let into
+  J, per-variant decisions left filled when a control fails), fixed test-first in `71d1942`.
+  Declared: to pin the first values of the seed's stream, the implementer ran an uncommitted
+  file outside the repository through pytest, which AGENTS 2.5 does not allow without the
+  author's approval; the pinned values are checked by the committed test itself.
+- **Revision 4** (2026-09-28), wording only, no design or code change: the choices the
+  implementation had to make where revision 3 was silent, written down — the per-variant and
+  two-variant combination of the rules, pending first; every decision null when a control
+  fails; a pair with no shared zone is not a candidate when either label zone has no threshold;
+  invalid L reported with a null interval and no draw; counts and β from the graphs as built;
+  axis ids as names; ordered collections as JSON lists; β's fixed denominator; the test hook;
+  the docstring convention.
