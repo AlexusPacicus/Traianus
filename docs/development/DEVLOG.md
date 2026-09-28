@@ -1629,3 +1629,87 @@ decisiones abiertas de `ZOOM.md`.
 1. Decidir el grafo base y escribir el paso 1 del zoom relacional en `ZOOM.md`.
 2. Revisar las candidatas editoriales y comprobar su efecto en K6, R4 y Z.
 3. Integrar `feat/relational-graph` y `docs/relational-z`.
+
+### Cierre (21:53)
+
+**Contexto:** tras el cierre de las 18:44, quedaban sin fusionar `docs/relational-z`
+(refapp-01) y sin revisar las 40 continuaciones candidatas de
+`editorial_marks.json`.
+
+**Se hizo:**
+- Fusión de `docs/relational-z` en el `main` de refapp-01 (`merge --no-ff`,
+  `e3fcc8f`), subida y CI en verde.
+- Revisión de las 40 continuaciones candidatas: 39 son texto de Spinoza (la
+  nota va inline en Gutenberg, justo después del párrafo que la cita, así que
+  lo que sigue es texto normal); 1, `PART3_AFFECTS_P31_COR_01_C03` (el segundo
+  verso de Ovidio), es texto de la nota de Elwes. Decisión del autor: dejarla
+  sin marcar, declarada en `PROVENANCE.md` (`8318f60`, rama
+  `docs/editorial-candidates-reviewed`).
+
+**Resultado:** refapp-01 `main` en `e3fcc8f`, subido, CI verde.
+`docs/editorial-candidates-reviewed` queda local, sin fusionar en el `main`
+de Traianus.
+
+**Resuelto de entradas anteriores:**
+- 2026-09-26 (cierre 18:54), próximo paso 3 (integrar `docs/relational-z`):
+  hecho en refapp-01.
+- 2026-09-26 (cierre 18:44), pendiente "revisar las 40 continuaciones
+  candidatas": hecho, con la decisión del autor arriba.
+
+**Sin resolver / decisión pendiente:**
+- `docs/editorial-candidates-reviewed` (`8318f60`) no llegó a fusionarse en el
+  `main` de Traianus: `PROVENANCE.md` en `main` sigue sin la lectura de las
+  candidatas.
+
+**Próximo paso:**
+1. Fusionar `docs/editorial-candidates-reviewed` en `main`.
+2. Comprobar si quitar las 11 notas puras cambia alguna decisión de K6, R4 o
+   Z, como comprobación etiquetada.
+3. Decisión del autor sobre el grafo base del zoom relacional.
+
+## 2026-09-27
+
+**Contexto:** quedaba comprobar si las 11 notas puras de
+`editorial_marks.json` cambian alguna decisión de K6, R4 o Z.
+
+**Se hizo:**
+- Contrato de delegación (JSON estricto, `tools/audit/delegation_contract.py`)
+  para una comprobación etiquetada (sin registro, sin revisión ciega): un
+  runner que reejecuta K6, R4 y Z sobre el corpus sin las 11 notas puras, con
+  la regla de comparación fijada en el contrato antes de cualquier resultado.
+- `engine-implementer` construyó `tools/experiments/editorial_pure_exclusion.py`
+  y sus tests en `explore/editorial-pure-exclusion` (`4e31690`): comparación
+  por los campos que decide cada instrumento, sin umbrales inventados, con un
+  control nulo sobre el corpus sin filtrar. Diff revisado; suite completa
+  verde tras el commit.
+- Ejecución real (`5966e6d`): control usable (K6 y R4 sin filtrar reproducen
+  bit a bit lo commiteado, fuera de `environment`). Con las 11 notas puras
+  fuera (2221 → 2210): K6 mantiene los mismos dos canales seleccionados en el
+  mismo orden; R4 sigue con `r4_holds=true` (margen más holgado, de −0,0059 a
+  −0,0465); Z sigue con Z1 inconcluso y Z2 confirmado, reproducible en las dos
+  ejecuciones filtradas. Ninguna decisión cambia.
+- Fusión de `explore/editorial-pure-exclusion` en `main` (`merge --no-ff`,
+  `4fef732`); suite completa verde antes y después; subida y CI en verde en
+  Linux (6m5s).
+- Hueco declarado en el código, no disparado en este run: si el K6 filtrado
+  fuera inválido, `out_dir/k6.json` ya estaría escrito cuando `r4.run`
+  fallara, rompiendo la promesa de "nada se escribe" del punto B8 del
+  contrato; ningún test lo cubre.
+
+**Resultado:** `main` de Traianus en `4fef732`, subido, CI verde. La
+comprobación etiquetada queda cerrada: las 11 notas puras no deciden nada en
+K6, R4 ni Z.
+
+**Resuelto de entradas anteriores:**
+- 2026-09-26 (cierre 21:53), próximo paso 2 (efecto de las 11 notas puras en
+  K6, R4 y Z): hecho.
+
+**Sin resolver / decisión pendiente:**
+- `docs/editorial-candidates-reviewed` (`8318f60`) sigue sin fusionar en
+  `main` (ver cierre 21:53 del 2026-09-26).
+- El grafo base del zoom relacional sigue sin decidir (autor).
+- El hueco de B8 en `editorial_pure_exclusion.py` descrito arriba.
+
+**Próximo paso:**
+1. Fusionar `docs/editorial-candidates-reviewed` en `main`.
+2. Decisión del autor sobre el grafo base del zoom relacional.
