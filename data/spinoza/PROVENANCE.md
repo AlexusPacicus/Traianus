@@ -50,7 +50,7 @@ left as they are; the chunks are marked instead:
 
 | File | Derived by | Notes |
 |---|---|---|
-| `editorial_marks.json` | `tools/experiments/tooling/mark_editorial_notes.py` | For every footnote block of PG#3800 inside the parts, the manifest labels whose chunk contains its sentences: 25 labels, 11 **pure** (the whole chunk is footnote text) and 14 **mixed** (Spinoza's text with a footnote residue fused in, coverage 2–40%). Blocks that continue a footnote without a marker (e.g. Latin verse) are listed as `continuation_candidates` (40), not marked, for the author to confirm or reject. |
+| `editorial_marks.json` | `tools/experiments/tooling/mark_editorial_notes.py` | For every footnote block of PG#3800 inside the parts, the manifest labels whose chunk contains its sentences: 25 labels, 11 **pure** (the whole chunk is footnote text) and 14 **mixed** (Spinoza's text with a footnote residue fused in, coverage 2–40%). Blocks that continue a footnote without a marker (e.g. Latin verse) are listed as `continuation_candidates` (40) and not marked. Read 2026-09-26: 39 are Spinoza's own text (Gutenberg places each note inline after the paragraph that cites it, so what follows is main text); 1, `PART3_AFFECTS_P31_COR_01_C03` (the second Ovid verse, `Ferreus est, si quis, quod sinit alter, amat."`), is Elwes's note text. The author decided to leave it unmarked: that chunk stays in the manifest as corpus text and is declared here. |
 
 ## History / superseded sources
 
