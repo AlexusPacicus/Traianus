@@ -212,6 +212,9 @@ Comparable arms?           Valid only if the four controls pass. The ends are le
 Text matches code?         Checked at review (phase 2).
 Reviewed by:               Claude Sonnet 5 (instrument-audit, blind subagent), 2026-09-28, phase 1,
                            record at 4c0fa17 (revision 1): PASS; 0 blocking, 5 non-blocking.
+                           Claude Sonnet 5 (instrument-audit, blind subagent), 2026-09-28, phase 1,
+                           round 2 on this design, record at b804fb0 (revision 2): PASS; 0
+                           blocking, 6 non-blocking.
 ```
 
 ## Review history
@@ -229,3 +232,12 @@ Reviewed by:               Claude Sonnet 5 (instrument-audit, blind subagent), 2
   the block bootstrap now stated in full here; contracts.md §5 written), and, found by the
   executing agent, traianus/config.py cited by path (a dotted module name does not enter a
   review package).
+- **Revision 2** — Claude Sonnet 5 (`instrument-audit`, blind subagent), 2026-09-28, phase 1,
+  round 2 on this design, record at `b804fb0`, with contracts.md §5: **PASS**, 0 blocking, 6
+  non-blocking. (1) The connectivity control is, like equal budget, an identity of the
+  construction (M ⊆ every graph): say so. (2) |J| in the exchangeable-direction control is the
+  pooled count of unique pairs over both variants, not one variant's: say so. (3) union_edges
+  also performs the open-borders union with M: say so. (4) The open-borders threshold t_k has no
+  stated null case. (5) "Never a judged end" for a note with eight equal components is ambiguous
+  between the zone tallies and candidacy altogether. (6) compute_epsilon_edges
+  (traianus/geometry/observables.py), which relations() calls, is not pinned.
