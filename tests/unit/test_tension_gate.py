@@ -43,6 +43,14 @@ def _corpus(n, equal_row=None):
     return v
 
 
+def _measure_inputs(n=44, equal_row=None):
+    v = _corpus(n, equal_row=equal_row)
+    a = _axes_matrix()
+    axis_ids = [f"AXIS_{k}" for k in range(N_AXES)]
+    label_items = [{"label": f"L{i}", "part": "P1"} for i in range(n)]
+    return v, a, axis_ids, label_items
+
+
 def _write_inputs(tmp_path, n=44, equal_row=None, corrupt=None):
     v = _corpus(n, equal_row=equal_row)
     v32 = v.astype(np.float32)
@@ -305,6 +313,34 @@ def test_the_blind_reference_is_drawn_before_any_other_random_call_in_measure():
     assert all(first_g < pos for pos in later_calls)
 
 
+def test_bootstrap_draws_follow_the_records_order_variant_then_statistic_then_scope_then_length():
+    """Draws: for union then open borders, for D-bar then D-bar-prime, for global then the zones in
+    axis order, for each valid L ascending. A scope-before-statistic bug (or the reverse) produces
+    calls out of step with this nesting, which the monotone check below catches."""
+    v, a, axis_ids, label_items = _measure_inputs(n=100)
+    calls = []
+    tg.measure(
+        v, a, axis_ids, label_items, tg.EPSILON,
+        _on_draw=lambda variant, stat, scope, length: calls.append((variant, stat, scope, length)),
+    )
+    expected_scopes = ["global", *axis_ids]
+    expected = [
+        (variant, stat, scope, length)
+        for variant in tg.VARIANTS
+        for stat in ("d_bar", "d_bar_prime")
+        for scope in expected_scopes
+        for length in tg.GRID
+    ]
+    expected_index = {tag: idx for idx, tag in enumerate(expected)}
+    positions = [expected_index[c] for c in calls]
+    assert len(calls) > 0
+    assert positions == sorted(positions)
+    # the corpus is built so at least two scopes (global and one zone) have a valid L, so a
+    # scope-before-statistic bug and a statistic-before-scope order are actually distinguishable.
+    scopes_drawn = {tag[2] for tag in calls}
+    assert len(scopes_drawn) >= 2
+
+
 # Controls ----------------------------------------------------------------------------------------------
 
 
@@ -328,6 +364,35 @@ def test_each_control_fails_on_an_injected_fault_and_invalidates_every_decision(
     assert name in result["failed_conditions"]
     assert result["controls"][name]["passed"] is False
     assert all(v is None for v in result["decision"].values())
+    for variant_block in result["variants"].values():
+        for scope in variant_block["scopes"]:
+            assert scope["rule_1"] is None
+            assert scope["rule_2"] is None
+            assert scope["rule_3"] is None
+            assert scope["decision"] is None
+
+
+def test_equal_budget_control_fails_when_the_blind_graph_itself_is_built_wrong(tmp_path, monkeypatch):
+    """|G^b| = |G+| must be checked on the built graphs, not by re-deriving relation counts from K
+    and K^b: a bug in build_graph (not in the blind draw) must still be caught."""
+    original_build_graph = tg.build_graph
+    calls = {"n": 0}
+
+    def fake_build_graph(n, base, j_pairs, kept_pairs):
+        calls["n"] += 1
+        adj = original_build_graph(n, base, j_pairs, kept_pairs)
+        if calls["n"] % 3 == 0:  # g0, g_plus, g_blind in order: the third call is g_blind
+            free = next(x for x in range(n) if x not in adj[0] and x != 0)
+            adj[0].add(free)
+            adj[free].add(0)
+        return adj
+
+    monkeypatch.setattr(tg, "build_graph", fake_build_graph)
+    paths, expected = _write_inputs(tmp_path)
+    out = tmp_path / "out" / "TG_result.json"
+    result = _run(paths, expected, out)
+    assert result["controls"]["equal_budget"]["passed"] is False
+    assert "equal_budget" in result["failed_conditions"]
 
 
 # A note with no zone is never an end of a judged pair ----------------------------------------------------
@@ -339,6 +404,43 @@ def test_a_note_with_eight_equal_affinities_is_never_an_end_of_a_pair_in_j(tmp_p
     result = _run(paths, expected, out)
     for pair in result["pairs"]:
         assert pair["i"] != 0 and pair["j"] != 0
+
+
+def test_variant_j_excludes_a_bridge_with_an_unzoned_end_even_if_already_a_relation():
+    """TG.md, Zones: such a note is never an end of a pair in J -- neither a relation the variant
+    has nor a candidate. variant_j's 'already a relation' arm must filter on zoned too, not just
+    bridges()'s candidate arm."""
+    fit_set = {0, 1, 2, 3}
+    lab = np.array([0, 1, 0, 1])
+    zoned = np.array([True, True, False, True])  # note 2 has no zone
+    m_pairs: set = set()
+    variant_pairs = {(0, 1), (2, 3)}  # (2, 3) is an existing cross-label FIT-FIT relation, not in M
+    candidate_pairs: set = set()
+    j = tg.variant_j(variant_pairs, m_pairs, candidate_pairs, fit_set, lab, zoned)
+    assert (2, 3) not in j
+    assert (0, 1) in j
+
+
+def test_an_existing_relation_with_an_unzoned_end_is_excluded_from_j_in_both_variants(tmp_path, monkeypatch):
+    paths, expected = _write_inputs(tmp_path, equal_row=0)
+    original_build_variants = tg.build_variants
+    forced: dict = {}
+
+    def fake_build_variants(v, d, label_items, lab, epsilon):
+        data = original_build_variants(v, d, label_items, lab, epsilon)
+        other = next(i for i in range(len(lab)) if i % 2 == 0 and i != 0 and lab[i] != lab[0])
+        pair = (0, other) if 0 < other else (other, 0)
+        forced["pair"] = pair
+        for name in ("union", "open_borders"):
+            data[name] = data[name] | {pair}
+        data["m_pairs"] = data["m_pairs"] - {pair}
+        return data
+
+    monkeypatch.setattr(tg, "build_variants", fake_build_variants)
+    out = tmp_path / "out" / "TG_result.json"
+    result = _run(paths, expected, out)
+    judged_pairs = {(p["i"], p["j"]) for p in result["pairs"]}
+    assert forced["pair"] not in judged_pairs
 
 
 # A valid run writes every key of the output format -------------------------------------------------------

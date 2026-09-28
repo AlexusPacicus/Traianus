@@ -31,7 +31,7 @@ import math
 import platform
 import sys
 from collections import deque
-from collections.abc import Mapping, Sequence
+from collections.abc import Callable, Mapping, Sequence
 from pathlib import Path
 from typing import Any, cast
 
@@ -305,11 +305,14 @@ def build_variants(
 
 def variant_j(
     variant_pairs: set[Pair], m_pairs: set[Pair], candidate_pairs: set[Pair],
-    fit_set: set[int], lab: NDArray[np.intp],
+    fit_set: set[int], lab: NDArray[np.intp], zoned: NDArray[np.bool_],
 ) -> set[Pair]:
+    """TG.md, Zones: a note in no zone is never an end of a pair in J -- neither a relation the
+    variant has (excluded here) nor a candidate (bridges() already excludes it from candidacy)."""
     already = {
         (i, j) for (i, j) in variant_pairs
         if i in fit_set and j in fit_set and lab[i] != lab[j] and (i, j) not in m_pairs
+        and zoned[i] and zoned[j]
     }
     added = candidate_pairs - variant_pairs
     return already | added
@@ -325,6 +328,11 @@ def build_graph(
         adj[i].add(j)
         adj[j].add(i)
     return adj
+
+
+def count_edges(adj: list[set[int]]) -> int:
+    """The graph's own relation count, from the adjacency it was actually built with."""
+    return sum(len(neighbours) for neighbours in adj) // 2
 
 
 def beta(edges_count: int) -> float:
@@ -402,8 +410,9 @@ def ceiling_control(eval_notes: Sequence[int], neighbours_eval: Mapping[int, lis
     return True
 
 
-def check_equal_budget(kept_pairs: set[Pair], kb_pairs: set[Pair]) -> bool:
-    return len(kept_pairs) == len(kb_pairs)
+def check_equal_budget(g_plus_edges: int, g_blind_edges: int) -> bool:
+    """|G^b| = |G+|, on the graphs as actually built (TG.md, Controls)."""
+    return g_plus_edges == g_blind_edges
 
 
 def exchangeable_control(
@@ -432,6 +441,7 @@ def exchangeable_control(
 
 def measure(
     v: Array, a: Array, axis_ids: Sequence[str], label_items: Sequence[Mapping[str, str]], epsilon: float,
+    _on_draw: Callable[[str, str, str, int], None] | None = None,
 ) -> dict[str, Any]:
     n = len(v)
     fit_raw, ev_raw = k6.split_fit_eval(n)
@@ -460,7 +470,9 @@ def measure(
             candidate_pairs.add((i, j))
 
     j_by_variant = {
-        name: variant_j(variants_data[name], variants_data["m_pairs"], candidate_pairs, fit_set, lab)
+        name: variant_j(
+            variants_data[name], variants_data["m_pairs"], candidate_pairs, fit_set, lab, zoned,
+        )
         for name in VARIANTS
     }
     judged = sorted(set().union(*j_by_variant.values()))
@@ -497,16 +509,17 @@ def measure(
         g_blind_adj = build_graph(n, base, j_pairs, kb)
         graphs[name] = {"g0": g0_adj, "g_plus": g_plus_adj, "g_blind": g_blind_adj}
         edge_counts[name] = {
-            "g0": len(base),
-            "g_plus": len((base - j_pairs) | kept),
-            "g_blind": len((base - j_pairs) | kb),
+            "g0": count_edges(g0_adj),
+            "g_plus": count_edges(g_plus_adj),
+            "g_blind": count_edges(g_blind_adj),
         }
 
     connectivity = {
         name: {graph: is_connected(adj) for graph, adj in graphs[name].items()} for name in VARIANTS
     }
     equal_budget = {
-        name: check_equal_budget(kept_by_variant[name], kb_by_variant[name]) for name in VARIANTS
+        name: check_equal_budget(edge_counts[name]["g_plus"], edge_counts[name]["g_blind"])
+        for name in VARIANTS
     }
     ceiling_ok = ceiling_control(sorted(eval_set), neighbours_eval, n)
 
@@ -555,37 +568,54 @@ def measure(
         beta_g0 = beta(edge_counts[name]["g0"])
         beta_plus = beta(edge_counts[name]["g_plus"])
         rule_2 = "refuted" if beta_plus >= beta_dense else "holds"
-        scopes_out = []
+
+        # Precompute the scope value arrays and means (no draws): D28 makes A_q's dependence on
+        # H disappear, so D_q/D'_q sums are already known before any bootstrap resampling.
+        n_by_scope: dict[str, int] = {}
+        values_by_stat_scope: dict[str, dict[str, Array]] = {"d_bar": {}, "d_bar_prime": {}}
+        mean_by_stat_scope: dict[str, dict[str, float | None]] = {"d_bar": {}, "d_bar_prime": {}}
         for scope_name, notes in scope_order:
             n_scope = len(notes)
+            n_by_scope[scope_name] = n_scope
             values_d = np.array([d_by_variant[name][q] for q in notes], dtype=np.float64)
             values_dp = np.array([dprime_by_variant[name][q] for q in notes], dtype=np.float64)
-            mean_d = float(values_d.mean()) if n_scope else None
-            mean_dp = float(values_dp.mean()) if n_scope else None
-            per_l_d: dict[str, Any] = {}
-            per_l_dp: dict[str, Any] = {}
-            for length in GRID:
-                nb_ = n_blocks_for(n_scope, length) if n_scope else 0
-                is_valid = n_scope > 0 and nb_ >= MIN_BLOCKS
-                if is_valid:
-                    draws_d = bootstrap_means(rng, values_d, length)
-                    rec_d = interval_record(draws_d)
-                    per_l_d[str(length)] = {"valid": True, "n_blocks": nb_, "mean": mean_d, **rec_d}
-                else:
-                    per_l_d[str(length)] = {
-                        "valid": False, "n_blocks": nb_, "mean": mean_d, "interval": None, "ranks": None,
-                    }
-            for length in GRID:
-                nb_ = n_blocks_for(n_scope, length) if n_scope else 0
-                is_valid = n_scope > 0 and nb_ >= MIN_BLOCKS
-                if is_valid:
-                    draws_dp = bootstrap_means(rng, values_dp, length)
-                    rec_dp = interval_record(draws_dp)
-                    per_l_dp[str(length)] = {"valid": True, "n_blocks": nb_, "mean": mean_dp, **rec_dp}
-                else:
-                    per_l_dp[str(length)] = {
-                        "valid": False, "n_blocks": nb_, "mean": mean_dp, "interval": None, "ranks": None,
-                    }
+            values_by_stat_scope["d_bar"][scope_name] = values_d
+            values_by_stat_scope["d_bar_prime"][scope_name] = values_dp
+            mean_by_stat_scope["d_bar"][scope_name] = float(values_d.mean()) if n_scope else None
+            mean_by_stat_scope["d_bar_prime"][scope_name] = float(values_dp.mean()) if n_scope else None
+
+        # Draws (TG.md): for this variant, for D-bar then D-bar-prime, for global then the zones
+        # in axis order, for each valid L ascending, b = 1..10,000.
+        per_l_by_stat_scope: dict[str, dict[str, dict[str, Any]]] = {"d_bar": {}, "d_bar_prime": {}}
+        for stat_name in ("d_bar", "d_bar_prime"):
+            for scope_name, _notes in scope_order:
+                n_scope = n_by_scope[scope_name]
+                values = values_by_stat_scope[stat_name][scope_name]
+                mean_value = mean_by_stat_scope[stat_name][scope_name]
+                per_l: dict[str, Any] = {}
+                for length in GRID:
+                    nb_ = n_blocks_for(n_scope, length) if n_scope else 0
+                    is_valid = n_scope > 0 and nb_ >= MIN_BLOCKS
+                    if is_valid:
+                        if _on_draw is not None:
+                            _on_draw(name, stat_name, scope_name, length)
+                        draws = bootstrap_means(rng, values, length)
+                        rec = interval_record(draws)
+                        per_l[str(length)] = {"valid": True, "n_blocks": nb_, "mean": mean_value, **rec}
+                    else:
+                        per_l[str(length)] = {
+                            "valid": False, "n_blocks": nb_, "mean": mean_value,
+                            "interval": None, "ranks": None,
+                        }
+                per_l_by_stat_scope[stat_name][scope_name] = per_l
+
+        scopes_out = []
+        for scope_name, notes in scope_order:
+            n_scope = n_by_scope[scope_name]
+            mean_d = mean_by_stat_scope["d_bar"][scope_name]
+            mean_dp = mean_by_stat_scope["d_bar_prime"][scope_name]
+            per_l_d = per_l_by_stat_scope["d_bar"][scope_name]
+            per_l_dp = per_l_by_stat_scope["d_bar_prime"][scope_name]
 
             valid_d = [per_l_d[str(length)] for length in GRID if per_l_d[str(length)]["valid"]]
             valid_dp = [per_l_dp[str(length)] for length in GRID if per_l_dp[str(length)]["valid"]]
@@ -655,6 +685,9 @@ def measure(
 
     if not valid:
         decision = dict.fromkeys(decision)
+        for variant_block in variants_out.values():
+            for scope in variant_block["scopes"]:
+                scope["rule_1"] = scope["rule_2"] = scope["rule_3"] = scope["decision"] = None
 
     zones_out = []
     for k in range(N_AXES):
