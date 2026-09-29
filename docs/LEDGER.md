@@ -2533,3 +2533,21 @@
   Only the typo "tiende el necesita" was corrected, to "tiende o necesita". Documentation only.
 
 * **Status:** `Consolidated`.
+
+### seq 79 — 2026-09-29 — The author's reading replaced
+
+* **Context:** seq 78 wrote the author's dictated reading before the executing agent had given
+  its opinion; the author asked for that opinion first. The agent pointed out several problems.
+  The relations restore proximity the space already has; they do not discover new space. What
+  helps is jumps, not smooth continuity. Direction mattered no more than the shortcut did. The
+  tension is quadratic and does not see a direction's sense. The low sign was adopted after the
+  results.
+
+* **Decision (the author):** replace the reading with the agent's wording.
+
+* **Δ (`main`):** `docs/relational-bridges/RELATIONAL_BRIDGES.md` §23 "Lectura del autor" now says
+  two things. Cross-label relations help the spiral by shortening paths (the shortcut; tension
+  adds nothing to it). A declared, unmeasured hypothesis on low-effort directions and symmetry,
+  with its limits. The first wording stays in history (`c557579`). Documentation only.
+
+* **Status:** `Consolidated`.

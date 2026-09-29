@@ -533,9 +533,12 @@ variante del umbral, orden de fusión y bajada a subespacio— quedan sin abrir.
 
 ### Lectura del autor (2026-09-29)
 
-1. Las relaciones entre etiquetas ayudan a la espiral porque hacen que
-   descubramos el espacio y por dónde trazar la espiral de forma que la
-   continuidad tenga menor fricción.
-2. La dirección es hacia dónde tiende o necesita expandirse el espacio para la
-   ortogonalidad y el descubrimiento del espacio; es decir, la dirección indica
-   hacia dónde tiene que expandirse el espacio para mantenerse simétrico.
+Sustituye a la primera redacción del mismo día (commit `c557579`).
+
+1. Las relaciones entre etiquetas ayudan a la espiral porque acortan caminos:
+   unen notas que el espacio ya tiene cerca y que el grafo por celdas dejaba
+   lejos. Lo que sirve es el atajo; la tensión no añade nada a él.
+2. Hipótesis del autor, no medida: la dirección de poco esfuerzo es aquella en
+   la que los vecindarios son finos, y crecer por ahí haría el reparto más
+   simétrico. Los datos no la distinguen del atajo, la tensión no mide el
+   sentido y el signo se adoptó después de ver los resultados.
