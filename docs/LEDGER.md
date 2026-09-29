@@ -2510,3 +2510,17 @@
   `36557427854`).
 
 * **Status:** `Consolidated`.
+
+### seq 77 — 2026-09-29 — The tension gate archived as a selector of bridges (author)
+
+* **Decision (the author):** after seq 74 (TG refuted), seq 75 (pre-check `no_resolution`) and
+  seq 76 (shortcut check `archive`), tension is archived as the criterion for choosing bridges.
+
+* **Δ (`main`):** `docs/relational-bridges/RELATIONAL_BRIDGES.md` §23, dated: the decision and
+  where each figure lives; §22 kept unchanged as a superseded question. The pieces that waited
+  on the gate (compass, turn, double path and its rescue, threshold variant, fusion order,
+  descent to subspaces) stay unopened. No reading of the results is written, by the author's
+  decision. The EVAL notes have not been used since TG's first run. Nothing under `traianus/`,
+  `tools/` or `tests/` changes.
+
+* **Status:** `Consolidated`.

@@ -510,3 +510,23 @@ dentro del mismo presupuesto, cae.
 ### Por fijar
 
 - Nada pendiente: un solo sorteo fijo por variante, sin paradas intermedias.
+
+## 23. Puerta de tensión archivada (autor, 2026-09-29)
+
+Decisión del autor: la tensión queda archivada como criterio para elegir
+puentes. El apartado 22 se conserva tal cual, como pregunta superada.
+
+Lo que llevó a la decisión, con sus cifras en el LEDGER y en `data/refapp/`:
+
+- Registro TG, primera ejecución: refutada en global y en las ocho zonas;
+  ningún puente pasó el corte (LEDGER 74, `TG_result.json`).
+- Comprobación previa, exploración etiquetada solo sobre notas de ajuste:
+  decisión «sin resolución» por la regla fijada antes de ejecutar (LEDGER 75,
+  `TG_precheck_result.json`).
+- Comprobación frente al atajo, misma exploración: la tensión no supera a un
+  orden que solo mira cuántas vueltas separan los extremos sin la relación;
+  decisión «archivar» (LEDGER 76, `TG_shortcut_result.json`).
+
+Las notas apartadas no se han usado desde la primera ejecución de TG. El resto
+de piezas que esperaban a la puerta —brújula, giro, doble vía y su rescate,
+variante del umbral, orden de fusión y bajada a subespacio— quedan sin abrir.
