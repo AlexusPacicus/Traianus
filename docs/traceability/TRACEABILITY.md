@@ -67,7 +67,7 @@ The `path:line` citations in other documents (e.g. REMEDIATION-01) are dated rec
 
 - **En palabras:** cada cambio de un nodo añade una revisión nueva con `seq` creciente; las
   anteriores no se reescriben.
-- **Code:** `traianus/storage/_storage.py:98` — «`PRIMARY KEY (id, seq),`»
+- **Code:** `traianus/storage/_storage.py:99` — «`PRIMARY KEY (id, seq),`»
 - **Test:** `tests/unit/test_substrate.py::test_append_only_revision_log`
 - **Test:** `tests/unit/test_substrate_invariants.py::TestWALAppendOnly::test_operational_replay_is_append_only`
 - **Source:** AGENTS 4.1 · AUDIT H4, key invariant 2
@@ -76,7 +76,7 @@ The `path:line` citations in other documents (e.g. REMEDIATION-01) are dated rec
 
 - **En palabras:** la base de datos solo admite cuatro estados de ciclo de vida
   (`pending_approval`, `incubating`, `consolidated`, `telemetry_error`) y rechaza `archived`.
-- **Code:** `traianus/storage/_storage.py:99` — «`CHECK (lifecycle_state IN ('pending_approval', 'incubating', 'consolidated', 'telemetry_error'))`»
+- **Code:** `traianus/storage/_storage.py:100` — «`CHECK (lifecycle_state IN ('pending_approval', 'incubating', 'consolidated', 'telemetry_error'))`»
 - **Test:** `tests/unit/test_substrate.py::test_lifecycle_check_accepts_valid_states`
 - **Test:** `tests/unit/test_substrate.py::test_lifecycle_check_rejects_archived_state`
 - **Source:** AGENTS 4.2 · AUDIT key invariant 3
@@ -136,7 +136,7 @@ The `path:line` citations in other documents (e.g. REMEDIATION-01) are dated rec
 - **En palabras:** `/ingesta` exige `X-Idempotency-Key` no vacía; una clave repetida devuelve el
   mismo id de ingesta y no encola nada nuevo.
 - **Code:** `traianus/app.py:432` — «`ingestion_id, duplicate = storage.enqueue_ingest(text, x_idempotency_key)`»
-- **Code:** `traianus/storage/_storage.py:485` — «`"VALUES (?, ?) ON CONFLICT(idempotency_key) DO NOTHING",`»
+- **Code:** `traianus/storage/_storage.py:486` — «`"VALUES (?, ?) ON CONFLICT(idempotency_key) DO NOTHING",`»
 - **Test:** `tests/security/test_ingesta_idempotency.py::test_ingesta_rejects_missing_idempotency_key`
 - **Test:** `tests/security/test_ingesta_idempotency.py::test_ingesta_rejects_empty_idempotency_key`
 - **Test:** `tests/security/test_ingesta_idempotency.py::test_ingesta_rejects_whitespace_idempotency_key`
@@ -158,7 +158,7 @@ The `path:line` citations in other documents (e.g. REMEDIATION-01) are dated rec
 - **En palabras:** la adyacencia local usa ε = 0.8 por defecto (distancia L2); `/relations` la
   calcula al leer y `/consolidar` no persiste aristas automáticas.
 - **Code:** `traianus/config.py:8` — «`DEFAULT_EPSILON_EDGE = 0.8`»
-- **Code:** `traianus/app.py:785` — «`for e in storage.rebuild_epsilon_edges(EPSILON_EDGE)`»
+- **Code:** `traianus/app.py:786` — «`for e in storage.rebuild_epsilon_edges(EPSILON_EDGE)`»
 - **Test:** `tests/unit/test_substrate.py::test_epsilon_edges_adjacency`
 - **Test:** `tests/unit/test_substrate.py::test_relations_computes_auto_edges_on_read`
 - **Test:** `tests/unit/test_substrate.py::test_consolidar_does_not_persist_auto_edges`

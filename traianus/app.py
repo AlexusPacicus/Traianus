@@ -781,10 +781,30 @@ async def get_relations():
                 "source": e["source"],
                 "target": e["target"],
                 "state": "auto",
+                "distance": e["distance"],
             }
             for e in storage.rebuild_epsilon_edges(EPSILON_EDGE)
         ]
         return sorted(manual + auto, key=lambda r: r["id"])
+    except Exception as e:
+        raise HTTPException(status_code=500, detail="Internal server error.") from e
+
+@app.get("/relations/tree", dependencies=[Depends(require_token)])
+async def get_relations_tree():
+    try:
+        return sorted(
+            (
+                {
+                    "id": storage.build_edge_id("tree-edge", e["source"], e["target"]),
+                    "source": e["source"],
+                    "target": e["target"],
+                    "state": "tree",
+                    "distance": e["distance"],
+                }
+                for e in storage.rebuild_tree_edges()
+            ),
+            key=lambda r: r["id"],
+        )
     except Exception as e:
         raise HTTPException(status_code=500, detail="Internal server error.") from e
 

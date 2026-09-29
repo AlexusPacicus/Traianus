@@ -20,7 +20,7 @@ BLOCKS = [
 ENDPOINTS_BY_BLOCK: dict[str, list[tuple[str, str]]] = {
     "ingestion": [("post", "/ingesta")],
     "consolidation": [("post", "/nodos/{node_id}/consolidar")],
-    "relations": [("get", "/relations"), ("post", "/relations")],
+    "relations": [("get", "/relations"), ("get", "/relations/tree"), ("post", "/relations")],
     "mutation": [("post", "/mutate/{new_symbol}")],
     "observability": [("get", "/nodos"), ("get", "/telemetry")],
     "bootstrap": [],  # no HTTP surface: covered by helpers/CLI
