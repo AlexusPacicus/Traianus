@@ -2470,3 +2470,43 @@
   `36550312013`).
 
 * **Status:** `Consolidated`.
+
+### seq 76 — 2026-09-29 — TG shortcut check: low tension against a pure graph shortcut (archive)
+
+* **Context:** seq 75 left low effort above random on J in both variants (report only). The
+  executing agent's reading, not measured: the spiral counts turns and rewards relations that
+  are shortcuts in the graph, and low tension may only stand in for that. The author asked for
+  one more check before deciding whether to keep the bridges.
+
+* **Decisions (the author):** a labelled exploration (`METHODOLOGY.md` "Explore"), no blind
+  review, never in the registry. Three arms keep the same k = ⌊|J|/2⌋ relations of the same J,
+  with the same A/B split and EVAL untouched: low effort and random (both exactly the
+  pre-check's kept sets), and a pure shortcut arm that keeps the pairs whose ends are furthest
+  apart in turns in the variant without J (no tension, no distance, no label, no text). If low
+  effort does not beat the shortcut arm in both variants, tension is archived as a selector of
+  bridges; if it does, a TG2 on the EVAL notes is justified. No other control decides. The rule
+  is the script's `RULE`, committed before the run (`2cf2477`).
+
+* **Δ merged (`explore/tension-shortcut` → `main`, `5efffc8`):**
+  `tools/experiments/tension_gate_shortcut.py` and `tests/unit/test_tension_gate_shortcut.py`
+  (`2cf2477`), importing `tension_gate_precheck.py` pinned by sha256;
+  `data/refapp/TG_shortcut_result.json` (`97e7011`). Nothing under `traianus/` changes.
+
+* **Result (exploration, recorded, not read here):** valid, two runs byte-identical (sha256
+  `da41f253…`). `low_over_shortcut` is inconclusive in both variants (union −0.063, open borders
+  −0.092; every valid interval crosses 0), so the decision is `archive`. Report only:
+  `shortcut_over_random` above in both (+0.476, +0.933); `low_over_random` above in both
+  (+0.413, +0.841).
+
+* **Declared:** h takes few values (J's mean 2.50 and 2.24 turns), so 28 of 30 and 50 of 50
+  pairs share their h with another pair and the shortcut arm's order within one h is by index.
+
+* **How it was built:** delegated to `engine-implementer` (Sonnet) from a validated
+  `DelegationContract`. The executing agent reviewed the diff and made both runs.
+
+* **Gate:** `pytest tests/` → 3224 passed / 1 skipped / 5 deselected before the merge. `ruff` and
+  `mypy` clean on the two new files, run by the implementer (outside CI's scope, known gap).
+  `EXECUTE_SAFE` receipts for both new files. Linux: CI on the merge `5efffc8` green, 10m27s (run
+  `36557427854`).
+
+* **Status:** `Consolidated`.
