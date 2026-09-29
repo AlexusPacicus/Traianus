@@ -24,6 +24,7 @@ from contextlib import contextmanager
 import numpy as np
 
 from traianus.core import compute_epsilon_edges
+from traianus.geometry.spanning_tree import compute_minimum_spanning_tree
 
 
 def _active_db_path() -> str:
@@ -728,6 +729,27 @@ def rebuild_epsilon_edges(epsilon: float) -> list[dict]:
         nodes = _current_node_vectors(conn)
     edges = compute_epsilon_edges(nodes, epsilon)
     _EDGE_CACHE = (key, edges)
+    return list(edges)
+
+
+_TREE_CACHE: tuple[tuple[str, int], list[dict]] | None = None
+
+
+def rebuild_tree_edges() -> list[dict]:
+    """Minimum spanning tree of the current nodes (same nodes as E_n). Does not mutate DB.
+
+    Cached under (db path, MAX(rowid) of manifold_nodes), the version
+    rebuild_epsilon_edges uses, in its own cache.
+    """
+    global _TREE_CACHE
+    with get_db_connection() as conn:
+        version = conn.execute("SELECT COALESCE(MAX(rowid), 0) FROM manifold_nodes").fetchone()[0]
+        key = (_active_db_path(), int(version))
+        if _TREE_CACHE is not None and _TREE_CACHE[0] == key:
+            return list(_TREE_CACHE[1])
+        nodes = _current_node_vectors(conn)
+    edges = compute_minimum_spanning_tree(nodes)
+    _TREE_CACHE = (key, edges)
     return list(edges)
 
 

@@ -96,6 +96,40 @@ def test_relations_computes_auto_edges_on_read(client, auth_headers, isolate_db)
     assert "auto-edge-NODE_A-NODE_B" in edges
     assert edges["auto-edge-NODE_A-NODE_B"]["state"] == "auto"
 
+def test_relations_auto_items_carry_distance_and_manual_items_do_not(client, auth_headers, isolate_db):
+    """Automatic ε-relations carry their length, as compute_epsilon_edges returns it; manual items keep their keys."""
+    base = np.asarray(main.get_provider().encode("Nodo común"), dtype=np.float64)
+    nudged = base + 0.1 * np.eye(len(base))[0]
+    vectors = {"NODE_A": base, "NODE_B": nudged / np.linalg.norm(nudged), "NODE_C": base}
+    with sqlite3.connect(isolate_db) as conn:
+        for nid, vec in vectors.items():
+            conn.execute("""
+                INSERT INTO manifold_nodes
+                (id, seq, text, toon_factor, lifecycle_state, action_potential, revision_milestone, vector_blob, projections_json)
+                VALUES (?, ?, ?, ?, ?, ?, ?, ?, ?)
+            """, (nid, 1, f"Nodo {nid}", "▲", "pending_approval", 0.1, 0, serialize_vector(vec), "{}"))
+        conn.commit()
+    manual = client.post(
+        "/relations",
+        json={"source": "NODE_A", "target": "NODE_B", "state": "manual"},
+        headers=auth_headers,
+    )
+    assert manual.status_code == 200
+
+    body = client.get("/relations", headers=auth_headers).json()
+    expected = {
+        storage.build_edge_id("auto-edge", e["source"], e["target"]): e["distance"]
+        for e in storage.compute_epsilon_edges(vectors, main.EPSILON_EDGE)
+    }
+    auto = {r["id"]: r for r in body if r["state"] == "auto"}
+    assert set(auto) == set(expected) and any(d > 0 for d in expected.values())
+    assert {i: r["distance"] for i, r in auto.items()} == expected
+    assert all(set(r) == {"id", "source", "target", "state", "distance"} for r in auto.values())
+    manual_items = [r for r in body if r["state"] == "manual"]
+    assert len(manual_items) == 1
+    assert set(manual_items[0]) == {"id", "source", "target", "state"}
+    assert [r["id"] for r in body] == sorted(r["id"] for r in body)
+
 def test_axes_anchored_to_prosthetic_epoch(isolate_db):
     """SPEC v0.2 §3.1: the 8 geodetic-basis axes are labeled PROSTHETIC_NSM_V1."""
     with sqlite3.connect(isolate_db) as conn:

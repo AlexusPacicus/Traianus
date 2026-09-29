@@ -49,6 +49,7 @@ from traianus.storage._storage import (
     persist_epoch_frame,
     persist_epsilon_edges,
     rebuild_epsilon_edges,
+    rebuild_tree_edges,
 )
 from traianus.storage.sqlite_engine import SQLiteEngine
 
@@ -98,4 +99,5 @@ __all__ = [
     "persist_epoch_frame",
     "persist_epsilon_edges",
     "rebuild_epsilon_edges",
+    "rebuild_tree_edges",
 ]

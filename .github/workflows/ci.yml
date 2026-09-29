@@ -89,6 +89,7 @@ jobs:
             tests/integration/test_polar_ingesta_wiring.py \
             tests/integration/test_polar_projector_block.py \
             tests/integration/test_polar_telemetry_integration.py \
+            tests/integration/test_relations_tree_endpoint.py \
             tests/integration/test_sqlite_engine_block.py \
             tests/integration/test_spatial_observables_endpoint.py \
             tests/integration/test_vector_ingest_idempotency.py \
