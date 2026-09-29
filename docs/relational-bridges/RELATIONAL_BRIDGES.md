@@ -542,3 +542,29 @@ Sustituye a la primera redacción del mismo día (commit `c557579`).
    la que los vecindarios son finos, y crecer por ahí haría el reparto más
    simétrico. Los datos no la distinguen del atajo, la tensión no mide el
    sentido y el signo se adoptó después de ver los resultados.
+
+## 24. Base de la espiral (autor, 2026-09-29)
+
+Resuelve la elección que el apartado 14 dejaba abierta. La base de la espiral
+es la unión: las relaciones del motor a 0,8 más el árbol mínimo. Cada relación
+lleva una marca: dentro de la celda o entre celdas. La espiral usa esa marca
+como dice el apartado 15: se abre primero por la celda de la nota elegida y
+después cruza. La celda ordena la espiral, pero no decide qué relaciones
+existen.
+
+Lo medido antes de decidir (`data/refapp/relational_graph_combined.json`,
+exploración descriptiva, las dos variantes guardadas reproducidas con el
+mismo código):
+
+- La unión tiene 4.123 relaciones y fronteras abiertas 3.349. Comparten 3.343
+  relaciones; fronteras abiertas solo aporta 6 propias. Sus umbrales por celda
+  quedan casi siempre por debajo de 0,8, así que la unión ya las contiene, y la
+  combinación de las dos no se distingue de la unión.
+- En la unión, 1.814 relaciones quedan dentro de una celda y 2.309 unen dos.
+  Todo queda conectado, con 3,7 relaciones por nota y una mediana de 11 saltos
+  entre dos notas.
+- Más de la mitad de las notas tiene su vecina más próxima en otra celda. Por
+  eso la celda sirve como puerta de entrada, pero no como unidad de relación.
+
+Fronteras abiertas queda medida y guardada para comparar, sin papel en la
+espiral.

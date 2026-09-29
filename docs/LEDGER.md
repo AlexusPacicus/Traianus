@@ -2551,3 +2551,32 @@
   with its limits. The first wording stays in history (`c557579`). Documentation only.
 
 * **Status:** `Consolidated`.
+
+### seq 80 — 2026-09-29 — Union and open borders combined, measured; the spiral's base fixed (author)
+
+* **Context:** `RELATIONAL_BRIDGES.md` §14 left open which of the union and open borders is the
+  spiral's base. The author wanted the combination of both, which had never been measured.
+
+* **Δ merged (`explore/relational-graph-combined` → `main`, `645578d`):**
+  `tools/experiments/relational_graph_combined.py` and its tests (`73f1563`), importing
+  `relational_graph_exploration.py` unchanged and pinned by sha256 (editing it would break the TG
+  scripts' pins); `data/refapp/relational_graph_combined.json` (`c1a5b55`). A descriptive
+  exploration: no hypothesis, no rule.
+
+* **Result:** valid, two runs byte-identical (sha256 `96ee2c94…`). The committed union and
+  open-borders figures are reproduced field by field by the same code. Union 4,123 relations,
+  open borders 3,349, combined 4,129. Shared 3,343; open borders adds 6 of its own and union 780.
+  The combined figures equal the union's to the reported precision: one component, 3.72 relations
+  per note, median 11 hops (max 36), half the corpus reached at turn 11. Open borders: 3.02
+  relations per note, median 14 hops (max 45).
+
+* **Decision (the author):** the spiral's base is the union (the engine's relations at 0.8 plus
+  the minimum spanning tree). Each relation is marked within one cell (1,814) or between cells
+  (2,309). The spiral opens through the chosen note's cell first and then crosses (§15). Open
+  borders stays measured for comparison, with no role. Written as `RELATIONAL_BRIDGES.md` §24.
+
+* **Gate:** `pytest tests/` → 3241 passed / 1 skipped / 5 deselected before the merge. `ruff` and
+  `mypy` clean on the two new files, run by the implementer. `EXECUTE_SAFE` receipts for both.
+  Linux: CI on the merge `645578d` green, 7m54s (run `36566723455`).
+
+* **Status:** `Consolidated`.
