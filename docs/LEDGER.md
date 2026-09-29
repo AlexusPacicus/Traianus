@@ -2524,3 +2524,12 @@
   `tools/` or `tests/` changes.
 
 * **Status:** `Consolidated`.
+
+### seq 78 — 2026-09-29 — The author's reading of the tension-gate results
+
+* **Δ (`main`):** `docs/relational-bridges/RELATIONAL_BRIDGES.md` §23 gains "Lectura del autor
+  (2026-09-29)", two points dictated by the author: why cross-label relations help the spiral,
+  and what a bridge's direction indicates. This supersedes seq 77's "no reading is written".
+  Only the typo "tiende el necesita" was corrected, to "tiende o necesita". Documentation only.
+
+* **Status:** `Consolidated`.

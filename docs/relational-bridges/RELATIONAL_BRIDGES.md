@@ -530,3 +530,12 @@ Lo que llevó a la decisión, con sus cifras en el LEDGER y en `data/refapp/`:
 Las notas apartadas no se han usado desde la primera ejecución de TG. El resto
 de piezas que esperaban a la puerta —brújula, giro, doble vía y su rescate,
 variante del umbral, orden de fusión y bajada a subespacio— quedan sin abrir.
+
+### Lectura del autor (2026-09-29)
+
+1. Las relaciones entre etiquetas ayudan a la espiral porque hacen que
+   descubramos el espacio y por dónde trazar la espiral de forma que la
+   continuidad tenga menor fricción.
+2. La dirección es hacia dónde tiende o necesita expandirse el espacio para la
+   ortogonalidad y el descubrimiento del espacio; es decir, la dirección indica
+   hacia dónde tiene que expandirse el espacio para mantenerse simétrico.
