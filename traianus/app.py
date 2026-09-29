@@ -26,6 +26,7 @@ from traianus.geometry.spatial_observables import (
     EPOCH_PROVENANCE,
     EpochFrame,
     derive_spatial_observables,
+    dominant_axis,
     fit_epoch_frame,
 )
 from traianus.governance.gate import evaluate_gate
@@ -825,8 +826,9 @@ def _active_epoch_frame() -> EpochFrame | None:
 async def get_spatial_observables(anchor: str | None = None):
     """Per-node spatial observables in the frozen epoch frame (Ulpia, observational).
 
-    Derives {id, x, y, z, l, c, h} for each current node from its persisted
-    384D vector, the active geodetic basis and the epoch frame. Pure read (no
+    Derives {id, x, y, z, l, c, h, axis} for each current node from its persisted
+    384D vector, the active geodetic basis and the epoch frame; `axis` is the id
+    of the dominant axis (traianus.geometry.spatial_observables). Pure read (no
     writes, no lifecycle mutation) — mirrors /relations (ADR-023/H5). Without a
     frame it answers 409: an overview needs one shared frame.
 
@@ -872,12 +874,17 @@ async def get_spatial_observables(anchor: str | None = None):
                         **derive_spatial_observables(vectors[node_id], basis, frame),
                         "x": float(coords[row, 0]),
                         "y": float(coords[row, 1]),
+                        "axis": dominant_axis(vectors[node_id], basis),
                     }
                     for row, node_id in enumerate(ids)
                 ],
             }
         nodes = [
-            {"id": node_id, **derive_spatial_observables(vector, basis, frame)}
+            {
+                "id": node_id,
+                **derive_spatial_observables(vector, basis, frame),
+                "axis": dominant_axis(vector, basis),
+            }
             for node_id, vector in vectors.items()
         ]
         return {"nodes": sorted(nodes, key=lambda n: n["id"])}
