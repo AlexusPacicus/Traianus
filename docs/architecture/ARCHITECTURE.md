@@ -76,6 +76,7 @@ flowchart TD
     subgraph OC["Observation Contract"]
         H --> I[/nodos GET]
         H --> J[/relations GET → rebuild E_n]
+        H --> T[/relations/tree GET → minimum spanning tree]
         H --> K[/telemetry GET]
     end
 ```

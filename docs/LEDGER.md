@@ -2580,3 +2580,42 @@
   Linux: CI on the merge `645578d` green, 7m54s (run `36566723455`).
 
 * **Status:** `Consolidated`.
+
+### seq 81 — 2026-09-29 — GET /relations/tree: the engine serves the minimum spanning tree; automatic relations carry distance
+
+* **Context:** the spiral's base (seq 80) is the ε-relations plus the minimum spanning tree.
+  `/relations` served only the ε-relations, without length. The client has no 384-D vectors and
+  counts relational depth by length.
+
+* **Decisions (the author):** a sibling endpoint `GET /relations/tree`, leaving `GET /relations`'s
+  shape intact. Both the tree's links and the automatic ε-relations carry `distance`; manual
+  relations are unchanged.
+
+* **Δ merged (`feat/relations-tree` → `main`, `b77dac1`, commit `40ce3b3`):**
+  `traianus/geometry/spanning_tree.py` (`compute_minimum_spanning_tree`, pure: Prim over sorted
+  ids, ties to the lower position, lengths computed and rounded as `compute_epsilon_edges` does);
+  `storage.rebuild_tree_edges()` over the same current nodes as E_n, cached by the same versioning,
+  never writing; `GET /relations/tree` behind the operator token, masking internal errors like
+  `/relations`; `distance` on `/relations`' automatic items. Tests: the tree against an
+  independent Kruskal, tie rules, agreement with E_n on every shared length, the endpoint (nodes
+  with errors and stale revisions excluded, no row written), 401, 500 masking, the cache, route
+  independence. The endpoint is in `tests/helpers/endpoint_registry.py`, and the new integration
+  test is in CI's ruff list. `docs/traceability/TRACEABILITY.md`: four line anchors shifted by
+  one (`check_doc_citations.py --fix`).
+
+* **Declared:**
+  - The first contract placed the function in `traianus/geometry/observables.py`, which the TG
+    instruments pin by sha256. The implementer's first commit broke those pins (16 tests) and was
+    committed red. The executing agent's amendment moved the function to its own module and
+    restored `observables.py` byte-identical (sha256 `54385042…`). The branch was amended into
+    one green commit before the merge.
+  - The boundary validator accepted the new module under `Intent_Class` TEST, because REFACTOR
+    needs a quote from an existing file.
+  - Tree keys come from a vectorised norm, and each emitted length is recomputed per pair. A tie
+    decided at the last floating-point bit could in principle differ between the two.
+
+* **Gate:** `pytest tests/` → 3260 passed / 1 skipped / 5 deselected, and `-m model` → 5 passed,
+  before the merge. `ruff` (CI list) and `mypy traianus/` clean. `EXECUTE_SAFE` receipts for every
+  governed file. Linux: CI on the merge `b77dac1` green, 6m57s (run `36572886380`).
+
+* **Status:** `Consolidated`.
