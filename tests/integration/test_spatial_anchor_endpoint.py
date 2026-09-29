@@ -14,11 +14,14 @@ import pytest
 import traianus.app as main
 from traianus import storage
 from traianus.geometry.perspective import observe, perspective_frame, select_poles
-from traianus.geometry.spatial_observables import derive_spatial_observables
+from traianus.geometry.spatial_observables import (
+    derive_spatial_observables,
+    dominant_axis,
+)
 
 STATES = ("incubating", "pending_approval", "consolidated")
 INSERTION_ORDER = (3, 0, 5, 1, 4, 7, 2, 6)
-NODE_KEYS = {"id", "x", "y", "z", "l", "c", "h"}
+NODE_KEYS = {"id", "x", "y", "z", "l", "c", "h", "axis"}
 
 
 def _vector(k):
@@ -155,7 +158,12 @@ def test_t5_overview_without_anchor_is_unchanged(client, auth_headers, calibrate
     vectors = storage.get_current_node_vectors()
     frame = main._active_epoch_frame()
     assert body == {"nodes": [
-        {"id": i, **derive_spatial_observables(vectors[i], basis, frame)} for i in sorted(vectors)
+        {
+            "id": i,
+            **derive_spatial_observables(vectors[i], basis, frame),
+            "axis": dominant_axis(vectors[i], basis),
+        }
+        for i in sorted(vectors)
     ]}
 
 

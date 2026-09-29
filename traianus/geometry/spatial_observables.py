@@ -55,6 +55,10 @@ def _standardize(value: float, mu: float, sigma: float, k_sigma: float) -> float
 def _unit_axes(basis: dict[str, np.ndarray]) -> dict[str, NDArray[np.float64]]:
     if len(basis) < N_RANKED:
         raise ValueError(f"the epoch frame needs at least {N_RANKED} axes, got {len(basis)}")
+    return _normalised(basis)
+
+
+def _normalised(basis: dict[str, np.ndarray]) -> dict[str, NDArray[np.float64]]:
     unit = {}
     for axis_id, axis in basis.items():
         a = np.asarray(axis, dtype=np.float64)
@@ -71,6 +75,15 @@ def rank_axes(vectors: np.ndarray, basis: dict[str, np.ndarray]) -> tuple[str, .
     unit = _unit_axes(basis)
     means = {axis_id: float(np.mean(v @ a)) for axis_id, a in unit.items()}
     return tuple(sorted(unit, key=lambda axis_id: (-means[axis_id], axis_id)))
+
+
+def dominant_axis(vector: np.ndarray, basis: dict[str, np.ndarray]) -> str:
+    """Id of the axis maximising ⟨v, â_k⟩ over the basis; ties to the lower id in sorted order."""
+    if not basis:
+        raise ValueError("dominant axis of an empty basis")
+    v = np.asarray(vector, dtype=np.float64)
+    score = {axis_id: float(v @ a) for axis_id, a in _normalised(basis).items()}
+    return max(sorted(score), key=score.__getitem__)
 
 
 def _geometry(

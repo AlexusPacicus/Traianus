@@ -28,7 +28,7 @@ The `path:line` citations in other documents (e.g. REMEDIATION-01) are dated rec
 - **En palabras:** el umbral crítico se calcula solo con las proyecciones de cada eje sobre los
   demás; la de un eje sobre sí mismo (siempre 1.0) inflaría la varianza base.
 - **Code:** `traianus/geometry/observables.py:24` — «`for j, other in enumerate(vectors) if j != i`»
-- **Code:** `traianus/app.py:244` — «`return calibrate_critical_threshold(vectors)`»
+- **Code:** `traianus/app.py:245` — «`return calibrate_critical_threshold(vectors)`»
 - **Test:** `tests/unit/test_substrate.py::test_c1_threshold_excludes_self_projection`
 - **Test:** `tests/unit/test_substrate_invariants.py::TestDualKeyC1Gate::test_calibration_deterministic_and_excludes_self_projection`
 - **Source:** AGENTS 3.4 · AUDIT C1, key invariant 1
@@ -47,7 +47,7 @@ The `path:line` citations in other documents (e.g. REMEDIATION-01) are dated rec
 
 - **En palabras:** `/consolidar` exige la llave ética como booleano JSON; si falta, o llega como
   `"true"`, `"yes"` o `1`, responde 422 y no escribe ninguna revisión.
-- **Code:** `traianus/app.py:176` — «`ethical_key: StrictBool = Field(`»
+- **Code:** `traianus/app.py:177` — «`ethical_key: StrictBool = Field(`»
 - **Test:** `tests/integration/test_map_governance.py::TestTwoKeys::test_ethical_key_is_required`
 - **Test:** `tests/integration/test_map_governance.py::TestTwoKeys::test_ethical_key_must_be_a_json_boolean`
 - **Source:** AGENTS 3.5 · LEDGER R3 (`StrictBool`)
@@ -56,7 +56,7 @@ The `path:line` citations in other documents (e.g. REMEDIATION-01) are dated rec
 
 - **En palabras:** `/ingesta/vector` evalúa la puerta con la llave ética en falso, así que un nodo
   recién ingerido queda en incubación aunque pase la llave topológica; solo `/consolidar` consolida.
-- **Code:** `traianus/app.py:560` — «`list(projections.values()), ethical_key=False, threshold=dynamic_threshold`»
+- **Code:** `traianus/app.py:561` — «`list(projections.values()), ethical_key=False, threshold=dynamic_threshold`»
 - **Test:** `tests/unit/test_substrate_invariants.py::TestDualKeyC1Gate::test_ingesta_vector_requires_ethical_key`
 - **Test:** `tests/integration/test_map_governance.py::TestTwoKeys::test_no_other_route_consolidates`
 - **Source:** AGENTS 3.5 · ADR-022
@@ -96,8 +96,8 @@ The `path:line` citations in other documents (e.g. REMEDIATION-01) are dated rec
 
 - **En palabras:** el potencial de acción guardado es la varianza medida, sin escalar, en la
   ingesta vectorial y en la consolidación.
-- **Code:** `traianus/app.py:563` — «`action_potential = float(gate["topological_key"]["variance"])`»
-- **Code:** `traianus/app.py:707` — «`action_pot = float(gate["topological_key"]["variance"])`»
+- **Code:** `traianus/app.py:564` — «`action_potential = float(gate["topological_key"]["variance"])`»
+- **Code:** `traianus/app.py:708` — «`action_pot = float(gate["topological_key"]["variance"])`»
 - **Test:** `tests/unit/test_audit_resolved_claims.py::test_action_potential_is_variance_not_scaled`
 - **Test:** `tests/unit/test_substrate_invariants.py::test_consolidar_action_potential_is_true_variance`
 - **Source:** AUDIT M6 · ADR-005
@@ -108,8 +108,8 @@ The `path:line` citations in other documents (e.g. REMEDIATION-01) are dated rec
 
 - **En palabras:** `/ingesta` acepta solo `Content-Type: text/plain`; cualquier otro tipo recibe
   415.
-- **Code:** `traianus/app.py:131` — «`ALLOWED_INGRESS_TYPES = {"text/plain"}`»
-- **Code:** `traianus/app.py:419` — «`if content_type not in ALLOWED_INGRESS_TYPES:`»
+- **Code:** `traianus/app.py:132` — «`ALLOWED_INGRESS_TYPES = {"text/plain"}`»
+- **Code:** `traianus/app.py:420` — «`if content_type not in ALLOWED_INGRESS_TYPES:`»
 - **Test:** `tests/security/test_security.py::test_zero_trust_ingress_allowlist`
 - **Source:** AGENTS 2.3 · AUDIT H2
 
@@ -117,7 +117,7 @@ The `path:line` citations in other documents (e.g. REMEDIATION-01) are dated rec
 
 - **En palabras:** si el cuerpo de `/ingesta` contiene un byte nulo, en cualquier posición,
   responde 400 antes de decodificar.
-- **Code:** `traianus/app.py:423` — «`if b"\x00" in raw_bytes:`»
+- **Code:** `traianus/app.py:424` — «`if b"\x00" in raw_bytes:`»
 - **Test:** `tests/security/test_security.py::test_ingesta_rejects_null_bytes`
 - **Test:** `tests/security/test_security.py::test_ingesta_rejects_null_byte_at_end`
 - **Source:** AGENTS 2.4
@@ -126,7 +126,7 @@ The `path:line` citations in other documents (e.g. REMEDIATION-01) are dated rec
 
 - **En palabras:** el cuerpo de `/ingesta` se decodifica como UTF-8 estricto; una secuencia
   inválida o sobrelarga responde 400.
-- **Code:** `traianus/app.py:426` — «`text = raw_bytes.decode("utf-8", errors="strict")`»
+- **Code:** `traianus/app.py:427` — «`text = raw_bytes.decode("utf-8", errors="strict")`»
 - **Test:** `tests/security/test_security.py::test_ingesta_rejects_invalid_utf8`
 - **Test:** `tests/security/test_security.py::test_ingesta_rejects_overlong_utf8`
 - **Source:** AGENTS 2.4
@@ -135,7 +135,7 @@ The `path:line` citations in other documents (e.g. REMEDIATION-01) are dated rec
 
 - **En palabras:** `/ingesta` exige `X-Idempotency-Key` no vacía; una clave repetida devuelve el
   mismo id de ingesta y no encola nada nuevo.
-- **Code:** `traianus/app.py:432` — «`ingestion_id, duplicate = storage.enqueue_ingest(text, x_idempotency_key)`»
+- **Code:** `traianus/app.py:433` — «`ingestion_id, duplicate = storage.enqueue_ingest(text, x_idempotency_key)`»
 - **Code:** `traianus/storage/_storage.py:486` — «`"VALUES (?, ?) ON CONFLICT(idempotency_key) DO NOTHING",`»
 - **Test:** `tests/security/test_ingesta_idempotency.py::test_ingesta_rejects_missing_idempotency_key`
 - **Test:** `tests/security/test_ingesta_idempotency.py::test_ingesta_rejects_empty_idempotency_key`
@@ -147,7 +147,7 @@ The `path:line` citations in other documents (e.g. REMEDIATION-01) are dated rec
 
 - **En palabras:** las credenciales CORS solo se permiten a los orígenes enumerados; no hay
   comodín.
-- **Code:** `traianus/app.py:85` — «`ALLOWED_ORIGINS = ["http://localhost:5173", "http://127.0.0.1:5173"]`»
+- **Code:** `traianus/app.py:86` — «`ALLOWED_ORIGINS = ["http://localhost:5173", "http://127.0.0.1:5173"]`»
 - **Test:** `tests/unit/test_audit_resolved_claims.py::test_cors_origins_are_enumerated_no_wildcard`
 - **Source:** AGENTS 2.2 · AUDIT H3
 
@@ -158,7 +158,7 @@ The `path:line` citations in other documents (e.g. REMEDIATION-01) are dated rec
 - **En palabras:** la adyacencia local usa ε = 0.8 por defecto (distancia L2); `/relations` la
   calcula al leer y `/consolidar` no persiste aristas automáticas.
 - **Code:** `traianus/config.py:8` — «`DEFAULT_EPSILON_EDGE = 0.8`»
-- **Code:** `traianus/app.py:786` — «`for e in storage.rebuild_epsilon_edges(EPSILON_EDGE)`»
+- **Code:** `traianus/app.py:787` — «`for e in storage.rebuild_epsilon_edges(EPSILON_EDGE)`»
 - **Test:** `tests/unit/test_substrate.py::test_epsilon_edges_adjacency`
 - **Test:** `tests/unit/test_substrate.py::test_relations_computes_auto_edges_on_read`
 - **Test:** `tests/unit/test_substrate.py::test_consolidar_does_not_persist_auto_edges`
