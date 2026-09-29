@@ -2619,3 +2619,44 @@
   governed file. Linux: CI on the merge `b77dac1` green, 6m57s (run `36572886380`).
 
 * **Status:** `Consolidated`.
+
+### seq 82 — 2026-09-29 — The Ethics' citation graph extracted (exploration)
+
+* **Context:** after tension was archived (§23), the author proposed continuity as the deformation
+  of a route from a to b against the straight edge. The executing agent pointed out that judging
+  it by neighbours kept would condemn it by construction, and proposed an exogenous judge:
+  Spinoza's own citations between parts of the demonstration.
+
+* **Decision (the author):** extract the citation graph first, before any hypothesis or record
+  that uses it. The extraction is a labelled exploration (`METHODOLOGY.md` "Explore"), text only:
+  no embeddings, axes or relations, and no role for the FIT/EVAL split.
+
+* **Δ merged (`explore/citation-graph` → `main`, `0cee47b`):** `tools/experiments/citation_graph.py`
+  and its tests (`b2d0ed0`). The script reads the five frozen manifests and `editorial_marks.json`,
+  each pinned by sha256. An all-or-nothing grammar resolves each citation to the labels of its
+  unit, or lists it as unresolved with its text; pure editorial spans are kept apart.
+  `data/refapp/citation_graph.json` (`35a56aa`).
+
+* **Result:** two runs byte-identical (sha256 `0d779bb4…`).
+  - Spans: 1,063, of which 944 resolved and 119 unresolved, each listed.
+  - Dangling units: 48. They are Part I corollaries: the manifests have no COR labels in Part I,
+    so those corollaries sit inside DEMO chunks.
+  - Edges: 2,125 (2,106 distinct pairs), 1,290 within one part and 835 across parts.
+  - Labels: 1,156 of 2,221 (52 %) are touched. The largest weak component holds 1,017 labels.
+  - Most cited: the note to III.11, then III.7 and III.3.
+  - The executing agent checked 14 systematically sampled resolutions against the text; all 14
+    were correct.
+
+* **Declared:**
+  - Citing a scholium links to every chunk of it (the note to III.11 has 14), which inflates
+    in-degrees.
+  - «Prop. xii., and Coroll. Prop. xiii.» is read as the corollary of xii rather than of xiii.
+  - Forms outside the grammar (e.g. «in Prop. …», «last Prop.» without «the», «the general Def.
+    of the Emotions», «of this part») are unresolved by design.
+  - CI's ruff list does not cover the two new files (known gap for `tools/experiments/**`).
+
+* **Gate:** `pytest tests/` → 3369 passed / 1 skipped / 5 deselected before the merge. `ruff` and
+  `mypy` clean on the two new files, run by the implementer. `EXECUTE_SAFE` for the test file.
+  Linux: CI on the merge `0cee47b` green, 7m46s (run `36581814062`).
+
+* **Status:** `Consolidated`.
