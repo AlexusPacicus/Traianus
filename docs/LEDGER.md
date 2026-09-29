@@ -2424,3 +2424,49 @@
   green, 6m14s (run `36486556457`).
 
 * **Status:** `Consolidated`.
+
+### seq 75 — 2026-09-29 — TG pre-check: tension against distance as an order on J (no_resolution)
+
+* **Context:** seq 74 left TG refuted with K = 0 (no pair passed the cut). Before any TG2 record
+  the author asked one question: does a relation's tension order a variant's cross-label
+  relations better than their 384-D distance, at the same budget, with no cut and no veto?
+
+* **Decisions (the author):** a labelled exploration (`METHODOLOGY.md` "Explore"): no audit
+  record, no blind review, never enters the registry. Four arms (low effort, high effort,
+  distance, random) keep the same k = ⌊|J|/2⌋ relations of J. FIT split in two, A (rows 0 mod 4)
+  judges and B (rows 2 mod 4) is the ground truth; EVAL rows are never used. The hypothesis to
+  confirm or kill: high tension along the bridge marks the good relation. Tension beats distance
+  in neither sense → archive; in exactly one → TG2 with that sign. The executing agent added a
+  positive control, distance must beat random in both variants or the decision is
+  `no_resolution`, and fixed the effort for this check as the tension within each end's own
+  neighbourhood (both ends excluded), ranked against TG's 1,000 blind directions. The rule is
+  the script's `RULE`, committed before the run (`4f4449f`).
+
+* **Δ merged (`explore/tension-order-precheck` → `main`, `3025331`):**
+  `tools/experiments/tension_gate_precheck.py` and `tests/unit/test_tension_gate_precheck.py`
+  (`4f4449f`), importing `tension_gate.py` pinned by sha256; `data/refapp/TG_precheck_result.json`
+  (`7d2e7d7`). Nothing under `traianus/` changes.
+
+* **Result (exploration, recorded, not read here):** valid, two runs byte-identical (sha256
+  `6481f2a9…`). Union: |J| 30, k 15; open borders: |J| 50, k 25. `distance_over_random` is below
+  in the union (mean −4.59) and inconclusive in open borders (+0.09), so the positive control
+  fails and the decision is `no_resolution`. `low_over_distance` is above in both (+5.00, +0.75);
+  `high_over_distance` is below in the union (−0.19) and inconclusive in open borders (+0.05).
+  Report only: `low_over_random` above in both (+0.41, +0.84); `high_over_random` below in the
+  union (−4.77), inconclusive in open borders (+0.14).
+
+* **Declared:** the positive control was the executing agent's addition, not the author's rule.
+  Under the author's rule alone the same figures would read `sign_low`. The committed rule
+  governs. The contract's `context_pack` spec exceeded the 40,000-byte cap; the implementer
+  served the same sources as two packs.
+
+* **How it was built:** delegated to `engine-implementer` (Sonnet) from a validated
+  `DelegationContract`, report validated by `delegation_contract.py report`. The executing agent
+  reviewed the diff and made both runs.
+
+* **Gate:** `pytest tests/` → 3184 passed / 1 skipped / 5 deselected before the merge. `ruff` and
+  `mypy` clean on the two new files, run by the implementer (outside CI's scope, known gap).
+  `EXECUTE_SAFE` receipts for the test file. Linux: CI on the merge `3025331` green, 7m03s (run
+  `36550312013`).
+
+* **Status:** `Consolidated`.
