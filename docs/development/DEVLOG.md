@@ -1855,3 +1855,79 @@ global y en las ocho zonas. Fusión en `main` (`0d99f95`), suite completa verde
 **Próximo paso:**
 1. LEDGER 74 de la fusión de TG, con el run de CI.
 2. Definiciones en palabras de la bajada a subespacios.
+
+## 2026-09-29
+
+**Contexto:** TG había salido refutada (K = 0) y quedaba definir la bajada a
+subespacios. El autor pidió antes analizar si reformular.
+
+**Se hizo:**
+- **Análisis de la refutación.** El esfuerzo de TG mide sobre todo la
+  separación entre los dos vecindarios, que cae entera a lo largo del puente.
+  Con el corte en 12 de 1.001 no podía pasar ningún par. Antes de un TG2 se
+  comprobó si la tensión ordena mejor que otros criterios.
+- **Comprobación previa** (exploración sobre las dos mitades de las notas de
+  ajuste; `4f4449f`, `7d2e7d7`, LEDGER 75).
+  - Poco esfuerzo supera a la distancia en las dos variantes.
+  - La decisión fue `no_resolution` por un control positivo que añadí yo sin
+    medir su premisa: la distancia quedó muy por debajo del azar en la unión.
+    Queda declarado; con la regla del autor habría sido `sign_low`.
+- **Comprobación frente al atajo** (`2cf2477`, `97e7011`, LEDGER 76): poco
+  esfuerzo no supera a un orden solo de grafo (pares más lejanos en vueltas).
+  Resultado: `archive`.
+- **El autor archivó la tensión como selectora de puentes** (§23, LEDGER 77).
+  Su lectura quedó escrita tras corregir una primera redacción (LEDGER 78 y
+  79): las relaciones entre etiquetas ayudan por atajo, y la simetría queda
+  como hipótesis sin medir.
+- **Base de la espiral** (`73f1563`, `c1a5b55`, LEDGER 80). Se midió la
+  combinación de unión y fronteras abiertas: fronteras abiertas solo aporta 6
+  relaciones propias. Decisión del autor: la unión, con cada relación marcada
+  dentro o entre celdas (§24).
+- **Motor.**
+  - `GET /relations/tree` y `distance` en las relaciones automáticas
+    (`40ce3b3`, LEDGER 81).
+  - `axis` en cada nodo de `GET /spatial` (`7f38230`, LEDGER 83).
+  - El primer contrato del árbol tocaba `observables.py`, que TG fija por
+    hash. Una enmienda movió la función a su propio módulo.
+- **Grafo de citas de la Ética** (`b2d0ed0`, `35a56aa`, LEDGER 82): 944 de
+  1.063 citas resueltas y el 52 % de las notas tocadas. Lo propuse como juez
+  externo; el autor lo ve alejado de la línea y queda guardado, sin uso.
+- **Continuidad.** Tras varias formulaciones del autor, en refapp-01
+  `ZOOM.md` quedan escritos:
+  - la ruta es el camino más corto, como diseño;
+  - «contenido conocido recorrido», como hipótesis aparcada;
+  - la continuidad como reparto de carga de una nota por direcciones, y el
+    principio de que nada está en reposo, aparcados para el paso 2.
+- **Paso 1 en el cliente:** la espiral relacional en refapp-01 (dos fases,
+  vueltas por relaciones, z por longitud). `engine-implementer` quedó
+  autorizado una vez fuera de su alcance. Las pruebas manuales T1–T6 contra
+  una copia de la base del R5 pasan (`MANUAL_TESTS.md`, LEDGER 84).
+
+**Resultado:** `main` de Traianus en `c4f7772` y de refapp-01 en `3adb611`,
+subidos, con CI en verde en los dos.
+
+**Resuelto de entradas anteriores:**
+- 2026-09-28 (cierre 23:35), próximo paso 1: el LEDGER 74 se escribió ese
+  mismo día (`29d9ef3`).
+- 2026-09-28 (cierre 23:35), unión o fronteras abiertas: la unión, con marca
+  dentro/entre celdas.
+- 2026-09-28 (cierre 23:35), bajada a subespacios: queda sin abrir al
+  archivarse la tensión (§23).
+- 2026-09-28 (cierre 23:35), lectura del autor fuera del documento: escrita
+  en el §23 (LEDGER 79).
+
+**Sin resolver / decisión pendiente:**
+- **Paso 2 (autor):** mostrar el reparto de carga de la nota elegida. Es
+  descriptivo y no tiene juez.
+- **Límites de la espiral:** carga los datos una vez por sesión, y las
+  relaciones manuales no tienen longitud.
+- **Delegación en refapp-01:** `DelegationContract` no la admite (ni `scope`
+  ni `gates`). Si se repite, habrá que ampliar el esquema o AGENTS 6.1.
+- **Cambios ajenos sin commitear** de otra sesión que trabaja en el mismo
+  árbol: `METHODOLOGY.md`, las skills de spec-first, `docs/INDEX.md`,
+  `NEXT_RESEARCH.md` y `ULPIA_V2_ZERO_COPY_MVP.md`.
+- Ruff y mypy de CI siguen sin cubrir `tools/experiments/**`.
+
+**Próximo paso:**
+1. Decisión del autor sobre el paso 2.
+2. Resolver con la otra sesión sus cambios sin commitear.
