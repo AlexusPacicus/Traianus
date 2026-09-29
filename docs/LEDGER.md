@@ -2660,3 +2660,42 @@
   Linux: CI on the merge `0cee47b` green, 7m46s (run `36581814062`).
 
 * **Status:** `Consolidated`.
+
+### seq 83 — 2026-09-29 — GET /spatial serves each node's dominant axis
+
+* **Context:** the spiral base marks each relation as within one axis cell or between cells
+  (seq 80, §24). A note's cell is its dominant axis. The client has no 384-D vectors or basis, so
+  it cannot compute it.
+
+* **Decisions:**
+  - The author: the engine serves the dominant axis.
+  - The executing agent: the field is named `axis` (the word "cell" is client vocabulary, AGENTS
+    3.2). It appears on every node of `GET /spatial`, in the overview and with `?anchor=`, and is
+    computed on read. Every other key, value and status code is unchanged.
+  - The route itself: in refapp-01 `ZOOM.md`, the shortest path is the design, and "known content
+    traversed" is kept apart as a parked, unmeasured hypothesis (author).
+
+* **Δ merged (`feat/spatial-axis` → `main`, `094b8ca`, commit `7f38230`):**
+  `dominant_axis(vector, basis)` in `traianus/geometry/spatial_observables.py` is a pure function:
+  argmax of ⟨v, â_k⟩ over the normalised axes, ties to the lower id. It agrees row by row with
+  `relational_graph_exploration.axis_cells` on seeded data. `GET /spatial` adds `axis`. The two
+  tests of `tests/integration/test_spatial_anchor_endpoint.py` that pinned the old node shape are
+  updated to the new one; that is a specification change, and every other assertion is kept.
+  `TRACEABILITY.md` anchors are refreshed by `check_doc_citations.py --fix`. `observables.py` is
+  untouched (sha256 `54385042…`).
+
+* **Declared:**
+  - The eight fixture axes are unit-norm to within float32 rounding. On 20,000 seeded vectors,
+    `dominant_axis` and the ingestion-time `dominant_attractor` (unnormalised) never disagreed.
+    They could disagree on a basis that is not unit-norm, or within about 1e-7 of a tie.
+  - The implementer stopped without committing when the two anchor tests fell outside its file
+    list. The amendment added that file.
+  - Another session had uncommitted changes in the same working tree (`METHODOLOGY.md`, the
+    spec-first skills). They were left untouched and out of every commit.
+
+* **Gate:** `pytest tests/` → 3381 passed / 1 skipped / 5 deselected, and `-m model` → 5 passed,
+  before the merge. `mypy traianus/` and ruff on the changed paths are clean. `EXECUTE_SAFE`
+  receipts for every governed file. Linux: CI on the merge `094b8ca` green, 7m41s (run
+  `36589933956`).
+
+* **Status:** `Consolidated`.
