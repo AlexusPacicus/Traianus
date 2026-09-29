@@ -2699,3 +2699,47 @@
   `36589933956`).
 
 * **Status:** `Consolidated`.
+
+### seq 84 — 2026-09-29 — RefApp-01: the relational spiral (step 1), built and checked by hand
+
+* **Context:** the engine serves everything the spiral needs: the tree and relation lengths
+  (seq 81) and each node's dominant axis (seq 83). The route is the shortest path along the base,
+  as a design; "known content traversed" is a parked hypothesis (refapp-01 `ZOOM.md`).
+
+* **Decisions (the author):**
+  - Two phases. Phase 1 opens only through relations within the chosen note's cell; phase 2
+    crosses from what phase 1 reached.
+  - Turns are counted in relations; z is the shortest-path length.
+  - The spiral is a panel next to the map, not a replacement.
+  - `engine-implementer` was authorised once to work in refapp-01. `DelegationContract` cannot
+    express that: its `scope` and `gates` fields carried the nearest values, and the contract
+    stated the real gates (typecheck, build).
+
+* **Δ (refapp-01 `main`, merge `6b4163e`):**
+  - `src/spiral.ts` (`buildBase`, `markEdge`, `openSpiral`, `groupTurns`), pure;
+    `src/components/SpiralPanel.tsx`.
+  - `fetchRelationsStrict` and `fetchRelationsTree` in `src/api.ts`, together in `9065c0c`.
+  - `MANUAL_TESTS.md`: the manual run (`77dc160`).
+  - Nothing in Traianus changes except this entry.
+
+* **Result (manual, the executing agent in the browser, against a copy of the frozen R5 base):**
+  - The base has 4,128 pairs, equal to `jq`.
+  - For `VEC_PART2_MIND_P13_DEMO_01_C02`: 35 turns, K1 = 14, every phase-1 note on q's axis.
+    Turns and z equal an independent search and Dijkstra for all 2,226 notes (difference 0).
+  - Requests: exactly three GETs on the first press, none afterwards.
+  - A failed `/relations` shows the red line (the amendment closed a silent tree-only spiral).
+  - No regression in the checks run.
+
+* **Declared:**
+  - The client has no test runner. The logic was only type-checked and built before the manual
+    run.
+  - The base has no manual relations, so their exclusion is not exercised.
+  - Drag, the hover card and note entry were not re-run.
+  - Spiral data is loaded once per session, so a note entered later is not in the base until a
+    reload.
+  - A selection from the spiral is not recorded in the run log.
+
+* **Gate:** refapp-01 `npm run typecheck` and `npm run build` pass. CI on `6b4163e` green, 24 s
+  (run `36621081983`).
+
+* **Status:** `Consolidated`.
