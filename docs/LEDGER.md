@@ -2826,3 +2826,36 @@
   `AGENTS.md` before their edits. All re-run by the executing agent on `35eb46c`.
 
 * **Status:** `Consolidated`.
+
+### seq 87 — 2026-09-30 — RefApp-01: the legacy ReactFlow layer no longer runs under the WebGL map (5.8 to 60 fps)
+
+* **Context:** the author found the map slow in the pane and in their own browser. Memory pressure
+  on the author's Mac (8 GB, 8.1 GB of swap in use) was relieved first, and the map stayed slow.
+  Measured in the pane: with a legacy ReactFlow layer mounted under the WebGL map, 2,226 DOM nodes
+  with their text and hidden by the map, 5.8 frames per second; with only that layer hidden, 51.
+
+* **Decisions (the author):** do not mount the ReactFlow layer while the WebGL map is mounted (a
+  non-empty token); keep it without a token; keep `@xyflow/react`. One contract per change: this
+  one before the spiral text.
+
+* **Δ (refapp-01 `main`, merge `ac5fe20`):**
+  - `src/layers.ts` (`legacyFlowMounted`, the same condition as the WebGL map's, negated) and
+    `src/layers.test.ts`, 2 tests written red first; `src/components/UlpiaCanvas.tsx` mounts
+    ReactFlow only under that rule and skips building its nodes and edges otherwise (`a28754a`).
+  - `MANUAL_TESTS.md`: the measurement before and after (`86be33d`).
+  - The first contract with `scope: client` (seq 86), validated by `delegation_contract.py`.
+
+* **Result (the executing agent in the pane):** two runs of 40 wheel and pointer steps, 60.0 and
+  60.3 frames per second, median frame 16.7 and 16.9 ms, no long task; 56 DOM elements in the page.
+
+* **Declared:**
+  - The subagent ran one `cd` into ../refapp-01 in a single Bash call, against its definition; the
+    shell's directory reset after the call and no hook was affected.
+  - The screen without a token was not re-run in the browser; its rule is unit-tested and its code
+    path is unchanged.
+  - Only the pane was measured; the author's browser was not.
+
+* **Gate:** refapp-01 `npm test` (12 pass), `npm run typecheck` and `npm run build` pass, re-run by
+  the executing agent; CI on `ac5fe20` green (run `36706885019`).
+
+* **Status:** `Consolidated`.
