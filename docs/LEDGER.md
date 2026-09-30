@@ -2949,3 +2949,29 @@
   the executing agent; CI on `2702b94` green (run `36715045224`).
 
 * **Status:** `Consolidated`.
+
+### seq 91 — 2026-09-30 — RefApp-01: the load split by kind of relation; a spiral without the tree parked
+
+* **Context:** the author asked whether the spiral reaches every note. It does, by construction:
+  the base includes the minimum spanning tree over all 2,226 notes. The author sees the spiral as
+  the support for the load distribution rather than for continuity. The executing agent pointed
+  out that tree relations can join notes far beyond ε, and each relation weighs by the square of
+  its difference in the 8 axes, so one tree relation can dominate the load.
+
+* **Decisions (the author, refapp-01 `ZOOM.md`, `c5ea5cb`, `abb9d11`):** park a spiral over the
+  automatic relations alone, which would stop at the chosen note's component; show in the Load block,
+  for automatic, tree and both, the count of the note's relations and their share of the load.
+
+* **Δ (refapp-01 `main`, merge `faf6827`):** `byKind` in `loadDistribution` (`src/load.ts`), 3 tests
+  red first; two existing tests that compared the whole result gained the field, their other
+  assertions unchanged (the contract had said they would not change, which was not possible); the
+  line in the Load block (`fb719a0`); `MANUAL_TESTS.md`.
+
+* **Result (the executing agent in the pane, on the test note only):** «auto 2 (25.0%) · tree 2
+  (66.6%) · both 1 (8.4%)», equal to an independent computation from the raw answers. One note, a
+  check, not a finding; no aggregate over notes was computed.
+
+* **Gate:** refapp-01 `npm test` (26 pass), `npm run typecheck` and `npm run build` pass, re-run by
+  the executing agent; CI on `faf6827` green (run `36717275240`).
+
+* **Status:** `Consolidated`.
