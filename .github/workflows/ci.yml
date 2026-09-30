@@ -94,6 +94,7 @@ jobs:
             tests/integration/test_spatial_observables_endpoint.py \
             tests/integration/test_vector_ingest_idempotency.py \
             tests/fixtures/polar_fixtures.py \
+            tests/security/test_audit_database.py \
             tests/security/test_config_perimeter.py \
             tests/security/test_contract_context_hook.py \
             tests/security/test_gate_location.py \

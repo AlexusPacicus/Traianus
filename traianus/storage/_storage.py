@@ -152,17 +152,6 @@ CREATE TABLE IF NOT EXISTS spatial_calibration (
 )
 """
 
-AUDIT_LOG_DDL = """
-CREATE TABLE IF NOT EXISTS audit_log (
-    case_id TEXT PRIMARY KEY,
-    timestamp TEXT DEFAULT (datetime('now')),
-    intent_class TEXT,
-    target_file TEXT,
-    decision TEXT NOT NULL,
-    safety_abort TEXT
-)
-"""
-
 
 @contextmanager
 def get_db_connection() -> Iterator[sqlite3.Connection]:
