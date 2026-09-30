@@ -145,7 +145,7 @@ Traianus uses OpenCode as its primary development interface, backed by a local Z
 
 * **AGENTS.md** — root constitution defining agent governance, single-step execution, and the 5 Code Radicals.
 * **opencode.jsonc** — process-level permission matrix (git read-only allowlist; mutations gated).
-* **In-Flight Interception** — agent mutation proposals are intercepted by the local stdio MCP validator (`traianus/security/validator.py`), executing safety, process-execution denylist, and exact UTF-8 byte grounding gates.
+* **In-Flight Interception** — agent mutation proposals are intercepted by the local stdio MCP validator (`tools/boundary_validator/validator.py`), executing safety, process-execution denylist, and exact UTF-8 byte grounding gates.
 
 ---
 
