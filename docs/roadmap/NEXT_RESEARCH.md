@@ -155,11 +155,47 @@ Apuntado 2026-09-28, fuera de scope v1.0.0. Futuro banco de técnicas/fallos tip
 * **Uso:** re-correr la batería ya medida (E_n, `tools/analyze_bridges.py`, puerta de tensión §22, Sammon, rescue) sobre el manifold matemático para ver qué generaliza y dónde falla vs. Spinoza. Sin entrada en registro sin hipótesis + refutadores (`docs/methodology/METHODOLOGY.md` Explore).
 * **Por decidir:** fuentes exactas y dominio público, regla lossless del filtro, etiquetas neutras `MATH_*`.
 
+## Reencuadre (autor, 2026-09-30): F es también el corpus del producto v1
+
+El texto de arriba se conserva como pregunta anterior. F sigue siendo banco, y además es el corpus del primer producto.
+
+* **Uso del producto:** herramienta del autor para traducir sus definiciones matemáticas a lenguaje natural: a qué enunciado del corpus se acercan y qué opciones relacionadas hay. Devuelve enunciados reales con su etiqueta y sus citas, de forma determinista; no genera texto. Primer usuario: el autor, empezando por las definiciones de Polar Projector.
+* **Corpus:** el criterio pasa a ser cubrir el área de las definiciones del autor. Fuentes y licencia, por decidir fuente a fuente.
+* **Fórmulas aparte (autor):** cada vector del corpus es lenguaje natural; las fórmulas viven en una base aparte, en la que el vector o sus combinaciones (p. ej. dos técnicas que dan una nueva, o una derivada) quedan definidos por su fórmula. Es la regla sin pérdida del filtro: un marcador en el texto y la fórmula en su tabla, con el enunciado original reconstruible byte a byte (un test). La base vive en `data/math/` o en el cliente, nunca en `traianus/` (AGENTS §3.2).
+* **Consulta sin escritura (autor):** la definición del autor se observa, no se ingiere. El motor calcula su vector y sus relaciones virtuales (ε 0,8 y la vecina más próxima; sin árbol, que cambiaría al meter el punto) y no escribe nada; el cliente calcula el reparto T centrado en ella, como el bloque «Load». Hace falta un endpoint de observación en `traianus/`, genérico (texto → vector y vecinas), sin conceptos de dominio. Refutador de no interferencia: la base queda byte a byte idéntica antes y después (R2). La tensión puede mostrarse solo como descripción (cuánto tira la carga frente a hacia dónde), sin decidir nada.
+* **Por decidir:** si la entrada es la fórmula (búsqueda fórmula → fórmula en la base aparte, y de ahí a los vectores) o un borrador verbal; si las definiciones que el autor quiera conservar entran como nodos propios, marcados y separados del corpus.
+
+## Línea física aparcada: operaciones como dirección
+
+Aparcada hasta pasar los tres filtros de `docs/methodology/METHODOLOGY.md` (puerta de líneas físicas). Filtros 1 y 2 redactados; el 3, pendiente de verificar las citas.
+
+**1. Hipótesis.** Una operación matemática (derivar, combinar dos técnicas) corresponde a una dirección en el espacio: los desplazamientos X → op(X) están más alineados de lo que dan dos referencias.
+* **Criterio no circular:** qué deriva de qué lo fija la base de fórmulas, no los embeddings ni el corpus.
+* **Nulo del autor:** dirección nula y carga igual a la medida. Cada desplazamiento conserva su longitud medida y su dirección se sortea uniforme en la esfera de 384D.
+* **Control de pares al azar:** desplazamientos entre pares al azar del mismo corpus, con la misma carga.
+* **Regla de decisión (autor, opción b):** una dirección se afirma solo si se superan los dos. La misma regla rige la etiqueta de dirección en la consulta sin escritura.
+* **Refutadores:** alineación no superior al nulo del autor; alineación no superior a la de pares al azar.
+* **Antes del run:** estadístico (candidato: longitud media resultante de los desplazamientos unitarios), número de sorteos y semilla, comprometidos.
+
+**2. Crítica adversarial.**
+* **La combinación como suma no prueba composición.** Con A, B y C unitarios y A ≠ −B, $\cos(C, (A+B)/\|A+B\|) = (C\cdot A + C\cdot B)/\sqrt{2 + 2\,A\cdot B}$: queda fijada por las similitudes por pares, así que «la combinación cae cerca de la derivada» equivale a «la derivada se parece a sus dos padres». Solo la versión como dirección tiene contenido. La igualdad irá a un archivo de derivaciones con su test.
+* **Anisotropía:** en MiniLM dos frases sin relación suelen tener coseno positivo, y cualquier conjunto de desplazamientos puede superar el nulo isótropo. Por eso el control de pares al azar decide.
+* **Rango con pocas relaciones:** con k relaciones, T tiene rango ≤ k y nunca sale isótropo. El nulo son k vectores sorteados con sus longitudes, no $(\mathrm{tr}\,T/d)\,I$.
+* **Plantilla léxica (propuesto, sin decidir):** si op(X) repite X y añade siempre las mismas palabras («la derivada de…»), el desplazamiento puede ser la dirección de esas palabras y no de la operación. Un control candidato: la misma plantilla sobre X ajenos a la operación. Según la regla del autor, no decide salvo que el autor lo decida.
+
+**3. Búsqueda externa.** Citado de memoria, sin verificar: webfetch y websearch están denegados por el perímetro.
+* Desplazamientos como relaciones: Mikolov, Yih y Zweig (2013). Levy y Goldberg (2014) muestran que 3CosAdd se descompone en similitudes, lo mismo que la igualdad del filtro 2. Críticas a la evaluación por analogías: Linzen (2016); Rogers, Drozd y Li (2017).
+* Anisotropía de los embeddings: Mu y Viswanath (2018); Ethayarajh (2019).
+* Uniformidad en la esfera: test de Rayleigh (Mardia y Jupp, *Directional Statistics*).
+* Recuperación matemática, para el producto: Approach0, la búsqueda por fórmula de zbMATH, y buscadores de mathlib en lenguaje natural (Moogle, LeanSearch).
+
 ---
 
 # Research Direction G — Spatial Math Workbench (post-v1.0.0 product)
 
 Apuntado 2026-09-28, fuera de scope v1.0.0. Herramienta cliente de Traianus + Ulpia para hacer matemáticas a nivel espacial: cambiar de plano, bajar a subespacio (gruesa → fina, `RELATIONAL_BRIDGES.md` §9/§15-16), comparar proyecciones sobre el mismo estado congelado. Vive fuera de `traianus/` (cliente, junto a RefApp-01). Usa F como banco: Spinoza + `data/math/` para probar qué vistas generalizan y dónde fallan. Sin hipótesis + refutadores no entra en registro.
+
+**Reencuadre (autor, 2026-09-30):** G es la v2 del producto de F. Pendiente: la bajada a subespacio se disparaba cuando la tensión salía no concluyente (§9), y la tensión como selector quedó archivada el 2026-09-29 (§23). La v2 necesita otro criterio para decidir cuándo bajar.
 
 ---
 

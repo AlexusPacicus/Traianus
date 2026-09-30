@@ -3001,3 +3001,32 @@
   the executing agent; CI on `1e09b6e` green (run `36723725660`).
 
 * **Status:** `Consolidated`.
+
+### seq 93 — 2026-09-30 — Direction F reframed as the corpus of product v1, G as v2; operations as direction parked at the physics gate
+
+* **Context:** the author chose to go independent with Traianus as an open-source product, before the
+  Polar Projector paper, and to move the corpus towards mathematical language. Directions F and G
+  (`6e1aed1`) held it as a contrast bench and a later workbench.
+
+* **Decisions (the author, `docs/roadmap/NEXT_RESEARCH.md`):** F is also the corpus of product v1, a
+  tool for the author to translate their own mathematical definitions into natural language: the
+  nearest corpus statements and related options, real text with label and citations, deterministic,
+  no generation. Formulas live apart, in a base where a vector or its combinations are defined by
+  their formula; the text carries a marker and the original is reconstructible byte for byte. The
+  author's definition is observed, not ingested: an observation endpoint (text to vector and ε
+  neighbours, no tree, no write), with the load T computed by the client. G becomes v2. For
+  operations as direction, the null is the author's: direction null, load equal to the measured
+  one (measured lengths, directions drawn uniform on the 384D sphere); a direction is claimed only
+  if it beats that null and random-pair offsets (option b), in the physics line and in the query
+  view's label.
+
+* **Written with it:** a normalized sum A+B is fixed by pairwise similarities, so combination as a
+  sum tests no composition; only a constant direction has content. Filters 1 and 2 of the physics
+  gate are drafted; filter 3 cites from memory, unverified (webfetch and websearch are denied). A
+  lexical-template control is proposed, undecided. G's descent to a subspace lost its trigger when
+  tension was archived (seq 77).
+
+* **Open:** query input (formula or verbal draft); whether kept definitions become nodes of their
+  own; corpus sources and licences.
+
+* **Status:** `Consolidated` (roadmap text only; no code).
