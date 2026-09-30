@@ -2743,3 +2743,49 @@
   (run `36621081983`).
 
 * **Status:** `Consolidated`.
+
+### seq 85 — 2026-09-30 — RefApp-01: a note's load distribution (step 2, a view), built and checked
+
+* **Context:** step 2 of the relational zoom shows how the chosen note distributes its load over
+  directions in the 8 axis coordinates (refapp-01 `ZOOM.md`, Continuity). The gate for physics lines
+  entered `METHODOLOGY.md` the same day (`fd9dc73`).
+
+* **Decisions (the author):**
+  - Step 2 is a view, not a physics line: it asserts nothing and has no judge. A pattern read from
+    it passes the gate for physics lines first.
+  - T is centred on the chosen note q, over q's direct relations in the spiral base:
+    T = ½ Σ_{j∈R(q)} (c_j − c_q)(c_j − c_q)ᵀ, c the `projections_json` of `GET /nodos`.
+  - Shown: the total load and, for T's min(|R(q)|, 8) largest eigenvalues, each share and its three
+    axes of largest absolute weight, with signs.
+  - Tests with Node's own `node --test`, no new dependency; refapp-01 CI moves from Node 20 to 24
+    and runs `npm test`.
+  - `engine-implementer` was authorised once more to work in refapp-01, through the same nearest
+    `scope` and `gates` values as seq 84.
+
+* **Δ (refapp-01 `main`, merge `1a30d09`):**
+  - `src/load.ts` (`axisCoordinates`, `symmetricEigen` by cyclic Jacobi, `loadDistribution`), pure;
+    `src/load.test.ts`, 10 tests written red first; the Load block and the `/nodos` fetch in
+    `src/components/SpiralPanel.tsx` (`e6d27a5`).
+  - `package.json` `test`, `tsconfig.json` excludes the test files, CI on Node 24 (`e6d27a5`).
+  - «1 relation», singular, found in the manual run and fixed by the executing agent (`4b5e312`).
+  - `MANUAL_TESTS.md` and `ZOOM.md` (`ed97980`, `6b9337b`).
+  - Nothing in Traianus changes except this entry.
+
+* **Result (manual, the executing agent in the browser, against a copy of the frozen R5 base):**
+  - For `VEC_PART2_MIND_P13_DEMO_01_C02`: total 0.317 over 41 relations, 8 directions, the first
+    40.6 % (AXIS_6, AXIS_1, AXIS_7). Shares, top axes and signs equal to an independent power
+    iteration written in the page.
+  - Over all 2,226 notes: no throw, direction count min(relations, 8) everywhere, largest relative
+    difference to the independent trace 8.7e-16 and to the largest eigenvalue 3.0e-15.
+  - Requests: exactly four GETs on the first press, none afterwards. The spiral is unchanged.
+
+* **Declared:**
+  - Every note of this base has a relation (the tree spans it), so the empty case is covered by the
+    unit tests only.
+  - The test files are outside `tsc`; only `node --test` checks them.
+  - Equal eigenvalues keep the solver's order; no rule orders them.
+
+* **Gate:** refapp-01 `npm test` (10 pass), `npm run typecheck` and `npm run build` pass. CI on
+  `1a30d09` green on Node 24.21.0, 18 s (run `36695481694`).
+
+* **Status:** `Consolidated`.
