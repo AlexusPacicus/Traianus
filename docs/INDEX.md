@@ -46,6 +46,7 @@ graph TD
 * **[architecture/contracts/CONTRACTS.md](./architecture/contracts/CONTRACTS.md):** Byte-level Zero-Trust customs, Silent Denial (ADR-002), and Pydantic v2 schemas (`RawDump`, `RefinedEntity`).
 * **[architecture/ADR/ADR.md](./architecture/ADR/ADR.md):** *Append-only* Architecture Decision Record log (ADR-001 to ADR-027).
 * **[specifications/EAS-01_LOGOGRAPHIC_PHYSICS.md](./specifications/EAS-01_LOGOGRAPHIC_PHYSICS.md):** Normative specification of the spectral dispersion experiment, NCD coupling, and Representation-Governance Coupling Problem report.
+* **[specifications/ULPIA_V2_ZERO_COPY_MVP.md](./specifications/ULPIA_V2_ZERO_COPY_MVP.md):** Draft (not normative) client-only V2 64B packet (`TRA2`, `00` reserved) packed from `GET /spatial`; motor untouched.
 * **[audit/AUDIT.md](./audit/AUDIT.md):** Technical audit report with remediation status.
 * **[roadmap/NEXT_RESEARCH.md](./roadmap/NEXT_RESEARCH.md):** Research backlog — Ulpia Spatial Observation Framework, projection/observation theory, nuclear invariants, and future research directions.
 * **[methodology/METHODOLOGY.md](./methodology/METHODOLOGY.md):** Research loop every study runs (problem → hypothesis + refuters → instrument audit + attack → reformulation gate → registry), with paper-writing rules and the evidence pipeline (harness, claims registry, verifier) as sub-nodes. Incubated here; moves to its own repository after a second study completes the loop.
