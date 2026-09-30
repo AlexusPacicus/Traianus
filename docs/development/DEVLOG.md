@@ -2001,3 +2001,68 @@ cambios sin commitear de otra sesión, ya cerrada.
 **Próximo paso:**
 1. El autor recorre las notas FIT con la vista.
 2. Decidir si se añade el sentido medio de las direcciones.
+
+### Cierre (20:33)
+
+**Contexto:** tras el recap del día pedí una valoración del proyecto. De ahí
+salió un cambio de rumbo, y la separación de la gobernanza quedó como primer
+paso.
+
+**Se hizo:**
+- **Rumbo (autor):** voy por mi cuenta, con Traianus como open source y como
+  producto; nada de entrevistas. Primero el producto y después el paper de
+  Polar Projector.
+- **Corpus matemático como producto v1** (LEDGER 93): F pasa a ser también
+  una herramienta para traducir mis definiciones a lenguaje natural, con
+  enunciados reales del corpus y sin generar texto. G, el workbench, pasa a
+  ser la v2.
+  - Las fórmulas van en una base aparte.
+  - Mi definición se observa sin escribirla en la base.
+- **Operaciones como dirección, aparcada en la puerta de física.**
+  - Mi nulo: dirección nula y carga igual a la medida.
+  - Regla (b): una dirección se afirma solo si supera ese nulo y también los
+    pares al azar.
+  - Quedó escrito que la suma normalizada A+B depende solo de las similitudes
+    por pares, así que no prueba composición.
+  - Las citas del filtro 3 están sin verificar.
+- **La puerta de los agentes sale del motor** (LEDGER 94–95), en tres
+  contratos del engine-implementer:
+  - Primero pasó de `traianus/security/` a `tools/governance/`. Ese nombre
+    chocaba con `traianus/governance/`, la doble llave del motor, así que se
+    renombró a `tools/boundary_validator/`.
+  - Después, la auditoría pasó a su propia base en `.data/`, y la puerta dejó
+    de importar `traianus`.
+  - Cada traslado copió primero y borró al final, para que el hook, que falla
+    cerrado, no perdiera la puerta a mitad de camino.
+  - Hizo falta reiniciar la sesión entre pasos, porque el MCP en marcha
+    conserva el código viejo en memoria.
+- **CI en rojo en `737be78`,** por un error del agente: subió AGENTS a
+  v1.13.0 después de correr la suite, y un test fija esa versión. Se corrigió
+  en el contrato siguiente.
+
+**Resultado:** `main` en `4a353da`, subido y con la CI en verde. Tras el
+reinicio, el primer recibo quedó en `.data/boundary_validator_audit.db` y no
+en `traianus.db`.
+
+**Sin resolver / decisión pendiente:**
+- **Autor:**
+  - elegir la fuente del corpus (candidatos: Beezer, ProofWiki, Hefferon,
+    Manning);
+  - decir en qué área están mis primeras definiciones;
+  - verificar las licencias o autorizar el navegador para hacerlo;
+  - elegir la entrada de la consulta: fórmula o borrador verbal.
+- **Filas antiguas:** en `traianus.db` quedan 494 filas de auditoría y no
+  441 como dice el LEDGER 94. Las 53 de más son recibos de hoy, anteriores
+  al reinicio. Se corrige en la próxima entrada del LEDGER.
+- **`CONTRACTS.md`:** sigue nombrando `traianus/security/` y confunde la
+  entrada del motor con la puerta de los agentes.
+- **Otra sesión abierta** sigue con el validador viejo en marcha, que ya no
+  puede editar archivos gobernados.
+- **Arranque de SEC-M-06:** el test ya no arranca el script en un proceso
+  aparte. Lo comprobé a mano, pero no queda cubierto por ningún test.
+
+**Próximo paso:**
+1. Elegir la fuente del corpus y verificar su licencia.
+2. Piloto con la regla comprometida antes: recall de vecinas y cobertura del
+   grafo de citas frente a Spinoza.
+3. Contrato para el endpoint de observación sin escritura.
