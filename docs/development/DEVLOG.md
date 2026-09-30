@@ -1931,3 +1931,73 @@ subidos, con CI en verde en los dos.
 **Próximo paso:**
 1. Decisión del autor sobre el paso 2.
 2. Resolver con la otra sesión sus cambios sin commitear.
+
+## 2026-09-30
+
+**Contexto:** quedaban la decisión sobre el paso 2 (reparto de carga) y los
+cambios sin commitear de otra sesión, ya cerrada.
+
+**Se hizo:**
+- **Cambios de la otra sesión, commiteados:** el filtro para líneas de física
+  en `METHODOLOGY.md` y las dos skills de spec-first (`fd9dc73`), y las
+  direcciones F y G en `NEXT_RESEARCH.md` (`6e1aed1`). El borrador de Ulpia
+  V2 quedó aparcado en la rama `defer/ulpia-v2-zero-copy`, subida y sin
+  fusionar.
+- **Paso 2, como vista y no como física** (LEDGER 85).
+  - T se centra en la nota elegida y suma solo sus relaciones directas en la
+    base. El bloque «Load» muestra cuotas y los tres ejes de cada dirección.
+  - Comprobado contra un cálculo independiente en las 2.226 notas.
+  - refapp-01 tiene ya pruebas con `node --test`, y su CI pasa a Node 24.
+- **Regla para mirar la vista** (`ZOOM.md`, fijada antes de mirar):
+  - solo se eligen notas FIT; las EVAL quedan reservadas;
+  - la nota EVAL que ya vi en las pruebas manuales queda declarada.
+- **`scope: client` de nuevo en `DelegationContract`**, para `../refapp-01`
+  con los gates de npm; AGENTS pasa a v1.12.0 (`35eb46c`, LEDGER 86). En el
+  contrato puse un rango de líneas fuera del archivo, y `context_pack` no
+  sirvió nada.
+- **Mapa a unos 6 fps.** La memoria del Mac estaba al límite (8 GB, swap
+  lleno) y se alivió, pero no era la causa. La causa era una capa antigua de
+  ReactFlow montada bajo el mapa WebGL, con 2.226 nodos del DOM. Al quitarla
+  con el mapa activo, pasa a 60 fps (LEDGER 87).
+- **Espiral en el cliente**, cada cambio por contrato, revisado y comprobado
+  en el panel (LEDGER 88–92):
+  - la frase de cada nota en las vueltas;
+  - atenuación en el mapa de lo no desplegado. En la revisión encontré un
+    fallo con clics seguidos, que el subagente corrigió;
+  - avance vuelta a vuelta con ◀ ▶ y casillas por celda;
+  - reparto de carga por tipo de relación (auto, tree, both), porque una
+    arista larga del árbol puede dominar la carga;
+  - un deslizador por z, que da un avance continuo.
+- **Descartado o aparcado:**
+  - una disposición propia de la espiral (cada nota estaría en dos sitios);
+  - las direcciones de carga sobre el mapa (el plano muestra dos de los 8
+    ejes);
+  - una espiral sin árbol, aparcada. La espiral actual alcanza todas las
+    notas por construcción.
+- **Continuidad:** quedó escrito que la vista muestra un orden fijado en
+  parte por construcción. Afirmar algo sobre la continuidad pasa por el filtro
+  de física, con un juez externo a la espiral.
+
+**Resultado:** Traianus `main` en `033d472` y refapp-01 `main` en
+`1e09b6e`, subidos, con la CI en verde en los dos.
+
+**Resuelto de entradas anteriores:**
+- 2026-09-29, paso 2: hecho como vista.
+- 2026-09-29, cambios ajenos sin commitear: commiteados o aparcados en rama.
+- 2026-09-29, delegación en refapp-01: `scope: client` en el esquema.
+
+**Sin resolver / decisión pendiente:**
+- **Autor:** mirar la vista con notas FIT. Un patrón que quiera afirmar entra
+  por el filtro de física y se contrasta con las EVAL.
+- **Sentido de las direcciones:** cada dirección es una línea, no una
+  flecha. Queda propuesto, sin decidir, mostrar hacia qué lado caen de media
+  las vecinas.
+- **El subagente hizo `cd` dos veces** pese al contrato. No tuvo efecto, pero
+  la regla no se cumple sola.
+- **Declarados en el LEDGER:** en el deslizador, r = 0 no se activa desde
+  apagado; y `DIM_ALPHA` = 0,2 es una elección de pantalla.
+- Ruff y mypy de CI siguen sin cubrir `tools/experiments/**`.
+
+**Próximo paso:**
+1. El autor recorre las notas FIT con la vista.
+2. Decidir si se añade el sentido medio de las direcciones.
