@@ -2917,3 +2917,35 @@
   the executing agent; CI on `6942723` green (run `36714008196`).
 
 * **Status:** `Consolidated`.
+
+### seq 90 — 2026-09-30 — RefApp-01: the spiral turn by turn, and cells to pick
+
+* **Context:** the author wants to watch the spiral open turn by turn and to single out cells, and
+  names what this shows continuity.
+
+* **Decisions (the author, refapp-01 `ZOOM.md`, `2890736`):** ◀ ▶ with «turn k of N» mark turns
+  0..k cumulatively; one checkbox per cell (dominant axis) with its count of marked notes; with cells
+  picked only the marked notes of those cells stay marked. Executing agent's rule, written there:
+  once ◀ ▶ is used the map follows it, otherwise the expanded turns; Reset returns to them; with
+  nothing marked and cells picked, the cells are shown whole. Written with it: the view shows the
+  order in which the spiral enters each cell, partly fixed by construction (phase 1 stays in q's
+  cell; the tree connects the base); a claim about continuity passes the gate for physics lines,
+  with a judge outside the spiral.
+
+* **Δ (refapp-01 `main`, merge `2702b94`):** `src/highlight.ts` (`idsThroughTurn`, `markedIds`,
+  `filterByCells`, `cellCounts`; `toggleTurn` made generic) with 4 tests red first; the stepper and
+  the cell checkboxes in `SpiralPanel`, reported through the existing `onHighlight` (`c75fd90`);
+  `MANUAL_TESTS.md` (T1–T5).
+
+* **Result (the executing agent in the pane, reading the dim buffer):** for a FIT note with 26 turns,
+  turn 2 marks exactly the 8 notes of turns 0–2 and the cell counts match them; one cell picked keeps
+  only its notes; the cell alone marks all 454 of its notes plus the chosen note; the last turn marks
+  all 2,226.
+
+* **Declared:** a first run was made against a perspective left at `NODE_3` and discarded. The
+  label shows turn numbers, so the last of 26 reads «turn 25 of 26».
+
+* **Gate:** refapp-01 `npm test` (23 pass), `npm run typecheck` and `npm run build` pass, re-run by
+  the executing agent; CI on `2702b94` green (run `36715045224`).
+
+* **Status:** `Consolidated`.
