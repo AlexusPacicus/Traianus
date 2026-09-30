@@ -2789,3 +2789,40 @@
   `1a30d09` green on Node 24.21.0, 18 s (run `36695481694`).
 
 * **Status:** `Consolidated`.
+
+### seq 86 — 2026-09-30 — DelegationContract admits `scope: client` again, for ../refapp-01; AGENTS v1.12.0
+
+* **Context:** seq 84 and 85 delegated client work in ../refapp-01 through the nearest `scope` and
+  `gates` values, stating the real ones in prose. The author decided that a third client delegation
+  (text in the spiral) waits for the schema. `scope: client` existed once for the old
+  `frontend/src/**` (`4d4a2f6`, gate `tsc`, manual tests) and was retired with that tree (`877bf20`).
+
+* **Decisions (the author):** extend the schema before the next client change. Executing agent's
+  design, in the contract: the client has a test runner since seq 85, so a client contract has red
+  or guard tests like any other scope, and no `manual` expectation returns.
+
+* **Δ (merge `38afed5`, commit `35eb46c`, by `engine-implementer`):**
+  - `tools/audit/delegation_contract.py`: `scope` admits `client`; `Gate` admits `npm_test`,
+    `npm_typecheck`, `npm_build`. Coupling at the field `gates`: a client contract has exactly those
+    three, in any order; an engine or tools contract has none of them.
+  - `tests/unit/test_delegation_contract.py`: T14 (scope client retired) and the agent-definition
+    test after it are replaced by the client-scope tests; `client` leaves the bad scope values.
+  - `.claude/agents/engine-implementer.md`: client change in the description and opening; a
+    «Client scope» bullet (work in ../refapp-01 through absolute paths or `git -C`, never `cd`;
+    `node --test` first; the three npm gates; no pytest, no `validate_proposal`, no dependency).
+  - `AGENTS.md` 6.1: the engine implementer takes client changes, with their gates; title v1.12.0.
+
+* **Declared:**
+  - The contract's context had a line range past the end of the test file (565–625 of 623), so
+    `context_pack` served nothing and the subagent read the files whole; it listed them. The error
+    was the executing agent's.
+  - The context of a client contract is still a `context_pack` spec over Traianus files
+    (`context_pack` refuses `..`); client files are read directly and listed by the subagent.
+  - The schema does not name the client repository; the agent definition and AGENTS 6.1 do.
+  - A subagent definition changed mid-session may still load its earlier version in that session.
+
+* **Gate:** `pytest tests/` 3,409 passed, 1 skipped, 5 deselected; ruff over the CI file list, all
+  checks passed; `mypy traianus/` no issues; `validate_proposal` EXECUTE_SAFE for the test file and
+  `AGENTS.md` before their edits. All re-run by the executing agent on `35eb46c`.
+
+* **Status:** `Consolidated`.
