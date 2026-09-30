@@ -146,6 +146,23 @@ Until a direction clears its benchmark, it remains **RESEARCH / FUTURE ROADMAP**
 
 ---
 
+# Research Direction F — Second Contrast Manifold (math-only + Faraday intuition)
+
+Apuntado 2026-09-28, fuera de scope v1.0.0. Futuro banco de técnicas/fallos tipo bridges sobre un segundo manifold congelado, espejo de `data/spinoza/` (`PROVENANCE.md` + builder offline + `{label -> chunk}` + `telemetry/` versionada). Vive solo en `data/math/ + tools/experiments/tooling/ + docs/`, nunca en `traianus/` (AGENTS §3.2).
+
+* **F1 math-only, dos vetas:** álgebra (definición/teorema/demostración) y geometría multidimensional (p. ej. Manning, cuatro dimensiones). Filtro por definir tipo `ONE STATEMENT = ONE CHUNK`, fuera prosa histórica y notas editoriales.
+* **F2 intuición física:** Faraday (*Experimental Researches*, líneas de fuerza) como veta de intuición, no matemática: no pasa el filtro math-only y no se mezcla con F1. Su formalización (Maxwell/Love/elasticidad) iría en F1 si se necesita.
+* **Uso:** re-correr la batería ya medida (E_n, `tools/analyze_bridges.py`, puerta de tensión §22, Sammon, rescue) sobre el manifold matemático para ver qué generaliza y dónde falla vs. Spinoza. Sin entrada en registro sin hipótesis + refutadores (`docs/methodology/METHODOLOGY.md` Explore).
+* **Por decidir:** fuentes exactas y dominio público, regla lossless del filtro, etiquetas neutras `MATH_*`.
+
+---
+
+# Research Direction G — Spatial Math Workbench (post-v1.0.0 product)
+
+Apuntado 2026-09-28, fuera de scope v1.0.0. Herramienta cliente de Traianus + Ulpia para hacer matemáticas a nivel espacial: cambiar de plano, bajar a subespacio (gruesa → fina, `RELATIONAL_BRIDGES.md` §9/§15-16), comparar proyecciones sobre el mismo estado congelado. Vive fuera de `traianus/` (cliente, junto a RefApp-01). Usa F como banco: Spinoza + `data/math/` para probar qué vistas generalizan y dónde fallan. Sin hipótesis + refutadores no entra en registro.
+
+---
+
 # Status
 
 This document records research hypotheses only.
