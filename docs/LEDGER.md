@@ -2975,3 +2975,29 @@
   the executing agent; CI on `faf6827` green (run `36717275240`).
 
 * **Status:** `Consolidated`.
+
+### seq 92 — 2026-09-30 — RefApp-01: a continuous reveal of the spiral by z
+
+* **Context:** turns count hops, so the reveal moves in steps set by the graph's density; the
+  author asked for a continuous one. Each note already has z, its shortest-path length.
+
+* **Decisions (the author, refapp-01 `ZOOM.md`, `3494a9b`):** a slider r from 0 to the largest z
+  marks the notes with z ≤ r, next to ◀ ▶; the last control used drives the map; the cells apply.
+  Written with it: no phases in it; continuous in path length along the graph, not continuity in a
+  physical sense; long tree relations still delay what lies behind them.
+
+* **Δ (refapp-01 `main`, merge `1e09b6e`):** `idsWithinRadius` and the radius in `markedIds`
+  (`src/highlight.ts`), 2 tests red first; the slider in `SpiralPanel` (`c248b8d`);
+  `MANUAL_TESTS.md`.
+
+* **Result (the executing agent in the pane, test note only):** the slider's maximum and the marked
+  sets at 25 %, 50 % and 100 % equal an independent Dijkstra over the raw relations (236, 1,733,
+  2,226 notes).
+
+* **Declared:** the slider rests at 0 while off, so setting it to exactly 0 does not turn it on. The
+  subagent again ran one `cd` into ../refapp-01 despite the contract; it had no effect.
+
+* **Gate:** refapp-01 `npm test` (28 pass), `npm run typecheck` and `npm run build` pass, re-run by
+  the executing agent; CI on `1e09b6e` green (run `36723725660`).
+
+* **Status:** `Consolidated`.
