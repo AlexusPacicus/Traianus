@@ -69,3 +69,5 @@ A words-only document may precede the audit record. Seven rules (distilled
 5. Batch words-only edits; verify once at the end.
 6. Branch awareness with concurrent agents.
 7. A ledger entry on freeze, by whoever ran the gates.
+Physics lines additionally pass hypothesis, adversarial critique and outside
+search before definitions (METHODOLOGY.md).

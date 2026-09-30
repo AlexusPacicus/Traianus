@@ -86,6 +86,19 @@ distilled from the relational-bridges session (2026-09-27 → 28):
 7. A ledger entry on freeze: pieces close in chat, but the freeze is recorded in `docs/LEDGER.md`
    only by whoever ran the gates being recorded.
 
+**Gate for physics lines.** No physics line (tension, friction, continuity or successors) opens
+without passing these three filters, in order, before defining anything:
+1. **Hypothesis/framework.** One falsifiable sentence with refuters and a declared non-circular
+   criterion. No sentence, no line.
+2. **Adversarial critique.** Someone with the corpus knowledge tries to kill it in words: does
+   the criterion reward something else by construction? Does the quantity already exist under
+   another name? Survivors pass to definitions.
+3. **Outside search.** Literature first for physics: if the phenomenon has a name (small-world,
+   conceptual spaces, manifold learning), the hypothesis cites it and measures against it, not
+   against the void.
+Without all three passed with paragraph and refuter, the line stays parked. Archived tension
+reopens only through here.
+
 **Mathematical contract.** Every record states its input and output exactly; every shortcut it
 takes (a simplified form standing for a full one) is an equality with its conditions and proof in
 a derivations file, and each equality becomes a unit test in phase 2. A shortcut without its
