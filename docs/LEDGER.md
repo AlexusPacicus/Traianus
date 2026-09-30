@@ -2859,3 +2859,30 @@
   the executing agent; CI on `ac5fe20` green (run `36706885019`).
 
 * **Status:** `Consolidated`.
+
+### seq 88 — 2026-09-30 — RefApp-01: each note of an expanded spiral turn shows its sentence
+
+* **Context:** the spiral listed each note as its id and z only; the author could not tell what a
+  note says without selecting it. The author also fixed the rule for looking at the load view:
+  only FIT notes are chosen, EVAL stays reserved (refapp-01 `ZOOM.md`, `90ec086`).
+
+* **Decisions (the author):** under each note of an expanded turn, its sentence clamped to two
+  lines, whole on hover; from the `/nodos` answer the spiral load already fetches.
+
+* **Δ (refapp-01 `main`, merge `96f3c38`):**
+  - `src/text.ts` (`sentenceById`, `sentenceShown`: null for an unknown id or a blank text, the text
+    as served otherwise) and `src/text.test.ts`, 3 tests written red first; the sentence line in
+    `TurnRow` (`23d70f3`). Contract with `scope: client`.
+  - `MANUAL_TESTS.md` (`0a87190`); `ZOOM.md`, the FIT-only rule (`90ec086`).
+
+* **Result (the executing agent in the pane):** 27 notes of three turns: every sentence present, every
+  `title` equal to its `/nodos` text, clamped at two lines; four GETs on the first press; a click on
+  the sentence selects the note; no error after a full reload.
+
+* **Declared:** a hot module reload under data loaded before the change blanked the page once during
+  development; a full reload fixed it. The empty-sentence case is covered by the unit tests only.
+
+* **Gate:** refapp-01 `npm test` (15 pass), `npm run typecheck` and `npm run build` pass, re-run by
+  the executing agent; CI on `96f3c38` green (run `36707841011`).
+
+* **Status:** `Consolidated`.
