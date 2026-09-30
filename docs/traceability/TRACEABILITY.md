@@ -136,7 +136,7 @@ The `path:line` citations in other documents (e.g. REMEDIATION-01) are dated rec
 - **En palabras:** `/ingesta` exige `X-Idempotency-Key` no vacía; una clave repetida devuelve el
   mismo id de ingesta y no encola nada nuevo.
 - **Code:** `traianus/app.py:433` — «`ingestion_id, duplicate = storage.enqueue_ingest(text, x_idempotency_key)`»
-- **Code:** `traianus/storage/_storage.py:486` — «`"VALUES (?, ?) ON CONFLICT(idempotency_key) DO NOTHING",`»
+- **Code:** `traianus/storage/_storage.py:475` — «`"VALUES (?, ?) ON CONFLICT(idempotency_key) DO NOTHING",`»
 - **Test:** `tests/security/test_ingesta_idempotency.py::test_ingesta_rejects_missing_idempotency_key`
 - **Test:** `tests/security/test_ingesta_idempotency.py::test_ingesta_rejects_empty_idempotency_key`
 - **Test:** `tests/security/test_ingesta_idempotency.py::test_ingesta_rejects_whitespace_idempotency_key`

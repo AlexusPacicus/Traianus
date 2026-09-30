@@ -3071,3 +3071,43 @@
   `traianus/*` 95 %.
 
 * **Status:** `Consolidated`.
+
+### seq 95 — 2026-09-30 — The boundary validator keeps its audit trail in its own database; the gate no longer imports the engine
+
+* **Context:** after seq 94 the gate still wrote its receipts into the engine's `traianus.db`, with
+  the table DDL imported from `traianus.storage`. Main was also red on CI (`737be78`): seq 94 raised
+  AGENTS.md to v1.13.0 after the last suite run, and a test pins the title.
+
+* **Decisions (the author):** the audit trail lives in `.data/boundary_validator_audit.db`, anchored
+  at the repository root; the 441 rows in `traianus.db` stay there. With it (the executing agent):
+  one resolution for writer and reader, a module attribute of `hook_gate`, with no environment or
+  config override, since the hook would trust a path an agent can set.
+
+* **Δ (branch `refactor/boundary-validator-audit-db`, contract `boundary-validator-audit-db`,
+  `1a7e209`):** `hook_gate.AUDIT_DB_PATH` and `_db_path()`; `_persist_audit` writes to that path,
+  creates the directory and the table, and still fails open only on `sqlite3.Error`; the audit DDL
+  moves to `validator.py`; `traianus.storage` no longer defines or exports it and test engine
+  databases have no `audit_log`; `tools/boundary_validator/` imports nothing from `traianus`. An
+  autouse fixture repoints the audit database to each test's tmp path. The version pin follows
+  v1.13.0. New `tests/security/test_audit_database.py` (T1–T7, X1–X2).
+
+* **Review (the executing agent):** SEC-M-06 now runs the server loop in process. The former test
+  wrote a row to the real `traianus.db` and deleted it by `case_id`; the new one writes nothing real,
+  but no longer launches the script in a separate interpreter. Checked by hand instead:
+  `python3 tools/boundary_validator/validator.py` answers `initialize` and `tools/list` over stdio.
+  `docs/traceability/TRACEABILITY.md:139` cited `_storage.py:486`, shifted to 475 by the removed
+  DDL; fixed by the executing agent (the subagent committed with that one test red and said so).
+
+* **Declared:** red was observed in a scratch copy outside the repository, because the autouse
+  fixture needs the attribute that only the last governed write creates. The subagent validated a
+  shortened copy of the contract (sources and decisions verbatim). An `OSError` from creating
+  `.data/` is not swallowed: it reaches the generic catch and the gate blocks. Until the session
+  restarts, the running server writes `traianus.db` while the hook reads the new database, so no
+  governed edit is possible; the first `EXECUTE_SAFE` after the restart creates the database. One
+  pre-move server (`traianus/security/validator.py`) is still running from another session.
+
+* **Gate:** `pytest tests/` 3,439 passed, 1 skipped, 5 deselected, re-run by the executing agent
+  after the citation fix; ruff over the CI list and `mypy traianus/ tools/boundary_validator/` pass
+  (subagent).
+
+* **Status:** `Consolidated`.
