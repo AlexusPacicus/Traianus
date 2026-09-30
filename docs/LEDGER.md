@@ -2886,3 +2886,34 @@
   the executing agent; CI on `96f3c38` green (run `36707841011`).
 
 * **Status:** `Consolidated`.
+
+### seq 89 — 2026-09-30 — RefApp-01: the spiral on the map (expanded turns kept, the rest dimmed)
+
+* **Context:** the author asked whether the spiral should stay a list or go map-first. R5 had ended
+  with the map as the default view and the list one interaction away (refapp-01 `POC.md`).
+
+* **Decisions (the author, refapp-01 `ZOOM.md`, `56844ac`):** mark the spiral on the map that exists,
+  keep the panel as the list to read. The notes of the expanded turns keep their look; the rest are
+  dimmed; the chosen note never. No layout of the spiral's own (a note in two places, a geometric
+  claim, parked with the route); no load directions on the map (the plane shows two of 8 axes).
+  Whether the map beats the list is not claimed.
+
+* **Δ (refapp-01 `main`, merge `6942723`):**
+  - `src/highlight.ts` (`highlightedIds`, `packDim`, `toggleTurn`) and its tests (4, red first);
+    the expanded turns lifted to `SpiralPanel` and reported to the map; a one-byte dim attribute at
+    location 6 in `src/ulpia_renderer.ts`, with `DIM_ALPHA` = 0.2 (`1c7146f`).
+  - The executing agent's review found that toggles dispatched in one task kept only the last; the
+    subagent fixed it with a functional state update (`57061c4`).
+  - `MANUAL_TESTS.md` (T1–T5).
+
+* **Result (the executing agent in the pane, reading every uploaded dim buffer):** with two turns
+  expanded, the undimmed notes are exactly those turns' notes and the chosen note; with six, 30 of
+  2,226; none dimmed with no turn expanded, the panel closed or after Escape.
+
+* **Declared:** `DIM_ALPHA` is a display choice by the executing agent, not a measurement; dimmed
+  notes stay pickable.
+
+* **Gate:** refapp-01 `npm test` (19 pass), `npm run typecheck` and `npm run build` pass, re-run by
+  the executing agent; CI on `6942723` green (run `36714008196`).
+
+* **Status:** `Consolidated`.
