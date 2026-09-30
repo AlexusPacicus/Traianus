@@ -8,7 +8,6 @@ of the former ``traianus/storage.py`` module is re-exported here.
 """
 
 from traianus.storage._storage import (
-    AUDIT_LOG_DDL,
     CONTROL_PLANE_DDL,
     DATA_PLANE_DDL,
     EVENT_ERROR,
@@ -56,7 +55,6 @@ from traianus.storage.sqlite_engine import SQLiteEngine
 DB_PATH = "traianus.db"
 
 __all__ = [
-    "AUDIT_LOG_DDL",
     "CONTROL_PLANE_DDL",
     "DATA_PLANE_DDL",
     "DB_PATH",

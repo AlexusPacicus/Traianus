@@ -23,7 +23,6 @@ from traianus.app import serialize_vector
 # ---------------------------------------------------------------------------
 
 from traianus.storage import (
-    AUDIT_LOG_DDL,
     DATA_PLANE_DDL,
     CONTROL_PLANE_DDL,
     SPATIAL_CALIBRATION_DDL,
@@ -40,7 +39,6 @@ SCHEMA_STATEMENTS = [
     MANIFOLD_NODES_IDEMPOTENCY_INDEX_DDL,
     INGESTION_QUEUE_DDL,
     MANIFOLD_EDGES_DDL,
-    AUDIT_LOG_DDL,
     DATA_PLANE_DDL,
     CONTROL_PLANE_DDL,
     SPATIAL_CALIBRATION_DDL,
