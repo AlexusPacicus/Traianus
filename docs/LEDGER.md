@@ -3030,3 +3030,44 @@
   own; corpus sources and licences.
 
 * **Status:** `Consolidated` (roadmap text only; no code).
+
+### seq 94 — 2026-09-30 — The agent-proposal gate leaves the engine: traianus/security moves to tools/boundary_validator; AGENTS v1.13.0
+
+* **Context:** AGENTS 3.1 reserves `traianus/` for the deterministic state engine, but the Zero-Trust
+  gate for agent mutation proposals lived in `traianus/security/` (about 685 lines). The engine
+  (`app.py`, `core.py`) never imported it. Stage 3 of the modularization plan, due since the PoC closed.
+
+* **Decisions (the author):** destination under `tools/`, so the Python shim, the delegation scope
+  `tools` and `pyproject.toml` stay as they are; the audit trail gets a database of its own under
+  `.data/` in a later step; the 441 rows already in `traianus.db` (2026-08-24 to 2026-09-30, 426
+  `EXECUTE_SAFE`) stay there, neither copied nor deleted. First placed at `tools/governance/`
+  (`2af53c9`), which clashed with `traianus/governance/`, the engine's dual-key gate; renamed to
+  `tools/boundary_validator/` (`1df90f4`), the name the MCP server and the skill already use.
+
+* **Δ (branch `refactor/governance-to-tools`, two engine-implementer contracts, `governance-move-a`
+  and `governance-move-a2`):** a pure move; the code is identical apart from import paths, logger
+  names and one new governed subtree, `tools/boundary_validator/**`. The hook, `.mcp.json`,
+  `opencode.jsonc`, `.claude/settings.json` (the path in one allow entry only), CI (mypy over
+  `tools/boundary_validator/`, one test in the ruff list) and the tests follow;
+  `tests/security/test_gate_location.py` guards that neither former location exists or is named and
+  that the audit database is unchanged. Each move copied first, switched the hook's import, and
+  removed the old tree last, so the fail-closed hook never lost its gate.
+
+* **Docs (the executing agent):** AGENTS.md v1.13.0 (1.3, 5.1 and the governed set in 6.2), the two
+  implementer definitions, both spec-first skills, README, `docs/INDEX.md`,
+  `IMPLEMENTATION_STATUS.md`.
+
+* **Declared:** three of the AGENTS.md edits were written with `sed` through Bash under a valid
+  `EXECUTE_SAFE` receipt for that file; the hook does not gate Bash.
+  `docs/architecture/contracts/CONTRACTS.md` still names `traianus/security/` and already conflated
+  the engine's ingress checks with the agent gate; left for a separate fix. Historical records
+  (REMEDIATION-01, the 2026-08-24 remediation session, this LEDGER, the DEVLOG) keep the former
+  path. The running MCP server still holds the pre-move code and writes `traianus.db`; the session
+  must restart before the audit database moves. Coverage of `tools/boundary_validator/` is exercised
+  by the suite but not gated by CI.
+
+* **Gate:** `pytest tests/` 3,426 passed, 1 skipped, 5 deselected, re-run by the executing agent;
+  ruff over the CI list and `mypy traianus/ tools/boundary_validator/` pass (subagent); coverage over
+  `traianus/*` 95 %.
+
+* **Status:** `Consolidated`.

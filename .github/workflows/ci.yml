@@ -96,6 +96,7 @@ jobs:
             tests/fixtures/polar_fixtures.py \
             tests/security/test_config_perimeter.py \
             tests/security/test_contract_context_hook.py \
+            tests/security/test_gate_location.py \
             tests/security/test_hook_case_identity.py \
             tests/security/test_hook_startup_surface.py \
             tests/security/test_python_gate.py \
@@ -117,7 +118,7 @@ jobs:
             tools/experiments/tooling/load_spinoza_corpus.py
       - name: Mypy (strict, whole control plane)
         run: |
-          mypy traianus/
+          mypy traianus/ tools/boundary_validator/
       - name: Coverage gate (>=85% over traianus/)
         # NOTE: coverage CLI (not pytest --cov) — the plugin crashes on
         # numpy re-import in some environments; `coverage run` is reliable.

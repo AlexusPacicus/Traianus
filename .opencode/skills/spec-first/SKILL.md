@@ -12,7 +12,7 @@ Spec-first governs authoring and reviewing normative documents emitted as
 
 Every change proposal (including SPEC mutations) MUST conform to
 `AgentMutationProposal` (Pydantic, `strict: true`) in
-`traianus/security/schemas/proposals.py`:
+`tools/boundary_validator/schemas/proposals.py`:
 
 1. `Intent_Class`: `[FIX | REFACTOR | TEST | DOC | SPEC | AUDIT]` → `SPEC` for spec work.
 2. `Target_File`: relative path strictly within `REPO_ROOT`.
