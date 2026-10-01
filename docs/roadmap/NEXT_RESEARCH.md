@@ -165,6 +165,32 @@ El texto de arriba se conserva como pregunta anterior. F sigue siendo banco, y a
 * **Consulta sin escritura (autor):** la definición del autor se observa, no se ingiere. El motor calcula su vector y sus relaciones virtuales (ε 0,8 y la vecina más próxima; sin árbol, que cambiaría al meter el punto) y no escribe nada; el cliente calcula el reparto T centrado en ella, como el bloque «Load». Hace falta un endpoint de observación en `traianus/`, genérico (texto → vector y vecinas), sin conceptos de dominio. Refutador de no interferencia: la base queda byte a byte idéntica antes y después (R2). La tensión puede mostrarse solo como descripción (cuánto tira la carga frente a hacia dónde), sin decidir nada.
 * **Por decidir:** si la entrada es la fórmula (búsqueda fórmula → fórmula en la base aparte, y de ahí a los vectores) o un borrador verbal; si las definiciones que el autor quiera conservar entran como nodos propios, marcados y separados del corpus.
 
+## Piloto 1: traducción dentro del área, solo Beezer (autor, 2026-10-01)
+
+Pasos 0 y 1 de `docs/methodology/METHODOLOGY.md`, comprometidos antes de construir el corpus. Fuente y reglas de derivación: `data/math/PROVENANCE.md`.
+
+**0. Problema.** Para una definición del autor escrita en prosa, ¿encuentra el motor el enunciado de Beezer que la formaliza? Fuera: otras ramas (piloto 2, Beezer y un trozo de ProofWiki, con su propia regla), la búsqueda por fórmula, el endpoint de observación y la interfaz.
+
+**1. Hipótesis.** Para las definiciones del autor que tienen enunciado correspondiente en Beezer, la etiqueta esperada está entre las k vecinas más cercanas más a menudo que al azar y más a menudo que con una búsqueda léxica.
+* **Corpus:** definiciones y teoremas de Beezer en el commit fijado, un enunciado = un fragmento (título y enunciado; cada fórmula, en palabras según la tabla de macros de `data/math/macro_words.json`), vectorizados con el proveedor actual (MiniLM-L6-v2).
+* **Entrada:** borrador verbal del autor, sin fórmulas.
+* **k = 5 y k = 1 (autor).** Las dos deciden: la hipótesis se sostiene solo si pasa en las dos.
+* **Conjunto de prueba (autor, comprometido antes de cualquier vectorización del corpus):** N definiciones propias en borrador verbal; para cada una, las `acro` de Beezer que debería encontrar, o «ninguna». Se escribe leyendo el libro, sin mirar nunca vecinas del motor. P son las que tienen `acro`; las «ninguna», el resto.
+* **Medida:** aciertos en P a cada k, es decir, definiciones de P con alguna `acro` esperada entre sus k vecinas.
+* **Azar:** orden uniforme de los N_c fragmentos; para una definición con m `acro` esperadas, p_i = 1 − C(N_c − m, k) / C(N_c, k). Los aciertos bajo el azar siguen una Poisson-binomial de las p_i.
+* **Línea base léxica (decide, autor):** BM25 con sus valores habituales (k1 = 1,2, b = 0,75) sobre el mismo texto sin fórmulas; los empates se rompen con un sorteo de semilla comprometida antes del run.
+* **Regla de decisión:** a cada k, (a) P(aciertos ≥ observados | azar) < 0,05, test exacto de una cola, y (b) el motor gana a BM25 en las definiciones de P donde discrepan, test exacto de McNemar de una cola, < 0,05. La hipótesis se sostiene solo si (a) y (b) se cumplen a k = 5 y a k = 1.
+* **Refutadores:** a algún k, aciertos no superiores al azar, o no superiores a BM25. Incluye el caso de texto vacío: sin fórmulas, la prosa de un enunciado se reduce casi al título, y si eso deja el vector sin contenido, el piloto falla aquí.
+
+**Solo informe (no deciden, salvo que el autor lo decida):**
+* **«Ninguna»:** distancia a la vecina más próxima, frente a la de P.
+* **Prosa sin fórmulas:** distribución de palabras por fragmento.
+* **Grafo de citas:** fracción de las citas de Beezer cuyos extremos están a distancia ≤ 0,8 (ε de `/relations`), y la misma fracción en la Ética. No es comparable uno a uno: la Ética está en frases y Beezer en enunciados; se declara al informar.
+
+**Línea base de proveedor (autor):** el conjunto de prueba, el corpus, la tabla de macros y esta regla quedan congelados como la comparación para cualquier otro proveedor que se evalúe más adelante. Solo cambia el proveedor; se compara por aciertos de etiqueta a k = 5 y k = 1, no por vectores, así que no hace falta reproyectar entre épocas (AGENTS 3.3). Cambiar cualquier otra pieza rompe la comparación, y cada nuevo proveedor entra con su propia regla comprometida antes.
+
+**Orden:** (1) este texto y `PROVENANCE.md`; (2) el conjunto de prueba del autor; (3) contrato del builder y su test sin pérdida (engine-implementer); (4) registro de auditoría del instrumento y revisión ciega; (5) script, primera ejecución y resultado.
+
 ## Línea física aparcada: operaciones como dirección
 
 Aparcada hasta pasar los tres filtros de `docs/methodology/METHODOLOGY.md` (puerta de líneas físicas). Filtros 1 y 2 redactados; el 3, pendiente de verificar las citas.

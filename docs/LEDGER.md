@@ -3111,3 +3111,38 @@
   (subagent).
 
 * **Status:** `Consolidated`.
+
+### seq 96 — 2026-10-01 — Corpus of product v1: Beezer alone for pilot 1, with its rule committed before the corpus is built
+
+* **Context:** seq 93 left the corpus sources and licences open. Candidates: Beezer, Hefferon,
+  ProofWiki, Manning. The author wants the corpus to cover linear algebra and geometry, and also
+  branches they do not work in, so that the tool proposes new fields.
+
+* **Licences, read at the source (2026-10-01, the built-in browser authorized by the author, since
+  webfetch is denied):** Beezer, GFDL 1.2 or later, no Invariant Sections (`COPYING.txt` in
+  `rbeezer/fcla`; the book's site did not load); Hefferon, GFDL or CC BY-SA 3.0 US at the user's
+  choice; ProofWiki, CC BY-SA 3.0 and GFDL, talk and user pages excepted. GFDL is the licence common
+  to the three.
+
+* **Decisions (the author):** pilot 1 uses Beezer alone, at `347f27fe909b54b26970bcc0fcbf69c7e853c766`;
+  breadth (Beezer plus a ProofWiki slice, sized by measurement) is pilot 2 with its own rule;
+  Hefferon is held in reserve. One statement = one chunk. Formulas are stored apart and reach the
+  model as the words of their macros (option B, `data/math/macro_words.json`: 96 macros, 69
+  translated, 27 not). The hypothesis holds only if hits beat chance and BM25 at both k = 5 and
+  k = 1. The test set, corpus, macro table and rule are the baseline for any later provider.
+  Written in `data/math/PROVENANCE.md` and `docs/roadmap/NEXT_RESEARCH.md` (Piloto 1).
+
+* **Written with it:** with chance alone deciding, a few hits out of about 15 would pass, so BM25
+  decides as well. A marker shared by every chunk, or raw LaTeX, would add a direction common to all
+  vectors; so would `\vect`, `\complex`, `\real` and `\lt` if translated, which is why they are not.
+  The Ethics citation graph is over sentences and Beezer's over statements, so their comparison is
+  report-only and declared as not like for like.
+
+* **Correction to seq 94 and 95:** `traianus.db` holds 494 audit rows, not 441. The extra 53 are
+  receipts of 2026-09-30 written before the session restart.
+
+* **Open:** the author's test set (definitions in prose, expected `acro` or none, written before any
+  vector of the corpus exists); the builder contract with its lossless test; the instrument audit
+  record and its blind review.
+
+* **Status:** `Consolidated` (roadmap and data provenance only; no code, no corpus built).
