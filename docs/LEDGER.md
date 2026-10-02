@@ -3177,3 +3177,49 @@
   review; the script and the first run.
 
 * **Status:** `Consolidated` (test set frozen; no code, no corpus built).
+
+### seq 98 — 2026-10-02 — Beezer corpus built: 342 chunks, a separator after every title, citation types declared
+
+* **Context:** seq 96–97 left the builder contract, the instrument audit record and the first run
+  open. The Beezer snapshot was committed (`00e75d0`, 55 files) and the builder was delegated to
+  `engine-implementer` under two strict contracts (`beezer-corpus-builder`,
+  `beezer-title-separator`), on the branch `feat/math-beezer-builder`, not merged.
+
+* **Decisions (the author):** the text of every `<title>` is followed by `. `, the chunk title and
+  each `<property>` title alike, after noticing that title and statement ran together. The acroref
+  types that are not definition or theorem stay dropped but are declared: 11 types in
+  `PROVENANCE.md` and as `DROPPED_CITATION_TYPES` in the builder, which now fails on any other
+  type (the snapshot has 13: `diagram` 8, `solution` 7 and `subsection` 17 were not in the first
+  contract). Both are amendments to seq 96–97 made before any vector exists. The other choices of
+  the builder contract (kinds `DEF` and `THM`, document order by `xi:include` expansion, the text
+  steps, the marker `⟦Fn⟧`, the four artifacts, self-citations dropped) were proposed by Claude and
+  went into the delegation as written; the author launched it without changes.
+
+* **Artifacts:** `data/math/beezer_manifest.json`, `beezer_marked.json`, `beezer_formulas.json` and
+  `beezer_citations.json`, by `tools/experiments/tooling/build_beezer_corpus.py`: 342 chunks (114
+  DEF, 228 THM), 2,078 formulas (1,972 inline, 63 `<equation>`, 43 `<alignmath>`), 851 citation
+  pairs, model text of 8 to 184 words (median 25), none empty. Commits: `17a4065` builder and
+  tests, `83544ca` artifacts, `902f8dd` separator and declared types; the manifest of `83544ca` has
+  no separator and was never vectorized. The other three artifacts are byte-identical across the
+  amendment.
+
+* **Declared:** option B leaves residue where a formula contributes no words: 190 chunks hold a
+  space before a period, 112 before a comma, one (`PEEF`) holds `. .`, and five titles end in a
+  formula that leaves nothing (`Dimension of. The dimension…`, `Consistent Systems, and.`). The
+  formulas inside `<notation>` blocks, which are not in the text, are still in the table and count
+  in the `⟦Fn⟧` numbering, because the rebuild covers the whole span. A macro is a backslash
+  followed by letters, so `\\x` would read as `x`; in the snapshot that only happens in
+  `macros.xml`, outside every chunk. `PROVENANCE.md` still says the licence text ships with the
+  artifacts without naming `src2/gfdl-mathbook.xml` (GFDL 1.3, a copy declared faithful; not
+  compared with the FSF text), while `COPYING.txt` is only Beezer's copyright notice.
+
+* **Gate:** `pytest tests/` 3,494 passed, 1 skipped, 5 deselected, re-run by the executing agent
+  at `902f8dd` (3,471 at `83544ca`); ruff over the CI list passes; `mypy traianus/
+  tools/boundary_validator/` passes, the builder is outside its scope. Independent checks: 336 of
+  336 titles without formula are followed by `. `; each `context_pack` run served its contract's
+  sections once (19 and 17).
+
+* **Open:** the instrument audit record and its blind review; the script and the first run;
+  integration of the branch; the DEVLOG entry.
+
+* **Status:** `Consolidated` (builder and artifacts built; no vector, no model, no pilot run).

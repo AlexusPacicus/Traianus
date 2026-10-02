@@ -2,7 +2,8 @@
 
 Frozen research datasets for direction F (`docs/roadmap/NEXT_RESEARCH.md`), mirror of
 `data/spinoza/`. Every artifact here is derived from a single declared source by a committed,
-offline builder script. No artifact is built yet; this file fixes the source and the rules first.
+offline builder script. The rules below were fixed before the builder existed; the artifacts are
+listed at the end.
 
 ## Source
 
@@ -32,8 +33,35 @@ offline builder script. No artifact is built yet; this file fixes the source and
   96 macros at the pinned commit; `null` = not translated). Only the macros written in the source
   count, never their expansion. Letters, digits, operators and untranslated macros are dropped, so
   a formula with no translated macro leaves nothing. The table is fixed before any vector exists.
+- **Title separator (author, 2026-10-02, before any vector exists):** in the text the model sees,
+  the text of every `<title>` is followed by `. ` (period, space): the chunk title and each
+  `<property>` title inside a definition. No whitespace stands before the period, so a title whose
+  formula leaves no words reads `Dimension of. The dimension…`. The separator is unconditional; no
+  title of the snapshot ends in `. ? ! : ;`, which a test pins.
 - **Labels:** neutral metadata, never embedded: `MATH_BEEZER_<KIND>_<ACRO>`, with `<ACRO>` Beezer's
   own `acro` attribute.
-- **Citations:** an edge from a chunk to each `<acroref>` of type definition or theorem-like inside
-  its element, statement and proof included; references to sections are dropped.
+- **Citations:** an edge from a chunk to each `<acroref>` of type definition or theorem inside its
+  element, statement and proof included. The other types are dropped, and the list is declared
+  (author, 2026-10-02): archetype, chapter, diagram, example, exercise, property, sage, section,
+  solution, subsection, technique. These and the two kept are the 13 types of the snapshot. The
+  builder holds the list as `DROPPED_CITATION_TYPES`; an acroref of any other type is an error. An
+  edge from a chunk to itself is dropped, and each ordered pair appears once.
 - **Manifest:** `{label -> chunk}`, insertion order equal to reading order.
+
+## Artifacts
+
+All four are written by `tools/experiments/tooling/build_beezer_corpus.py` from `source/src` and
+`macro_words.json`, with keys in reading order; `KIND` is `DEF` or `THM`. Reading order is document
+order: `fcla.xml` with every `xi:include` expanded in place. Rebuilding reproduces them byte for
+byte (`tests/unit/test_beezer_dataset_consistency.py`).
+
+| File | Content | Size |
+|---|---|---|
+| `beezer_manifest.json` | `{label -> text the model sees}` | 342 chunks (114 DEF, 228 THM) |
+| `beezer_marked.json` | `{label -> statement with tags kept and each formula as a marker ⟦Fn⟧}` | 342 |
+| `beezer_formulas.json` | `{label -> [formula source, …]}`, by marker position | 2,078 formulas (1,972 inline, 63 `<equation>`, 43 `<alignmath>`) |
+| `beezer_citations.json` | `[[from, to], …]` | 851 ordered pairs |
+
+`source/` is the snapshot of the pinned commit: 53 `src/*.xml`, `COPYING.txt` and
+`src2/gfdl-mathbook.xml`; sha256 of the sorted list of per-file sha256 values
+`5673bdabd0bce8598f7776495762f6cf9138f57d7aea1f068d1120ac791bf4d6` (commit `00e75d0`).
