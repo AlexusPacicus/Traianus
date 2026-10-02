@@ -26,7 +26,9 @@ offline builder script. No artifact is built yet; this file fixes the source and
   in the text by a marker and stored in a separate table keyed by chunk label and position. The
   original statement is reconstructible byte for byte from text plus table, enforced by a test.
 - **What the model sees (author, option B):** the stored text with each marker replaced by the
-  words of the formula's macros, in order of appearance, taken from `macro_words.json` (Beezer's
+  words of the formula's macros, each macro once per formula, in order of first appearance (amended
+  2026-10-01 before any vector exists: a long formula repeats a macro once per entry), taken from
+  `macro_words.json` (Beezer's
   96 macros at the pinned commit; `null` = not translated). Only the macros written in the source
   count, never their expansion. Letters, digits, operators and untranslated macros are dropped, so
   a formula with no translated macro leaves nothing. The table is fixed before any vector exists.

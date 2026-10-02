@@ -3146,3 +3146,34 @@
   record and its blind review.
 
 * **Status:** `Consolidated` (roadmap and data provenance only; no code, no corpus built).
+
+### seq 97 — 2026-10-02 — Pilot 1 test set frozen: 28 of the author's definitions, 18 with an expected Beezer statement
+
+* **Context:** seq 96 committed the pilot 1 rule before the corpus exists; the test set was still
+  to be written.
+
+* **Decisions (the author):** labels follow option B: the prose is the author's, written before
+  reading Beezer; each expected `acro` was proposed by Claude with the Beezer statement and a reason
+  and accepted by the author. The name before the colon is a label, never embedded, so knowing a
+  term's name gives no lexical hit. Amendment to seq 96, before any vector exists: within one
+  formula each macro contributes its words once, in order of first appearance, since a long formula
+  repeats a macro once per entry.
+
+* **Artifact:** `data/math/pilot1_test_set.json`: 28 items (7 from Polar Projector, 21 from
+  Traianus), English prose embedded, the Spanish original kept where it was written first; 18 with
+  expected `acro` (NV, GSP, IP, NSM, KLT, SUV, OV, ROM, ROLT, MM, LT, D, CV, TM, LCCV), 10 none.
+  Beezer's 342 statements (114 definitions, 228 theorems) give a chance hit rate near 1.5% at k = 5
+  and 0.3% at k = 1.
+
+* **Written with it:** with the one-sided exact McNemar test, at least 5 discordant items, all for
+  the engine, are needed at k = 1, so the 7 Polar Projector definitions (3 or 4 positives) alone
+  could never hold; the author added concepts of their own from Traianus. A first list of suggested
+  concepts (eigenvalues, determinant, inverse, diagonalization) was Claude's, from memory, and not in
+  the author's code; it was withdrawn and replaced by concepts the code uses. With labels proposed by
+  Claude, the reference truth is not the author's alone; it is independent of the engine because no
+  vector of the corpus exists.
+
+* **Open:** the builder contract with its lossless test; the instrument audit record and its blind
+  review; the script and the first run.
+
+* **Status:** `Consolidated` (test set frozen; no code, no corpus built).
