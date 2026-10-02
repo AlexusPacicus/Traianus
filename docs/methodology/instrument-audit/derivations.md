@@ -287,6 +287,38 @@ D29 The tension of a sphere along a direction is a quadratic form. For points c_
     every u ∈ ℝ⁸, and it is the same for u and −u.
     Conditions: none (S finite, non-empty).
     Proof: ⟨c_x − p, u⟩² = uᵀ(c_x − p)(c_x − p)ᵀu; sum and halve; (−u)ᵀT(−u) = uᵀTu.
+
+D30 P(none of m given items is among the first k of a uniformly random ordering of N items)
+    = C(N − m, k) / C(N, k); the hit probability is p = 1 − C(N − m, k) / C(N, k).
+    Conditions: 1 ≤ m ≤ N, 1 ≤ k ≤ N, every ordering equally likely. For k > N − m,
+    C(N − m, k) = 0 and p = 1.
+    Proof: the set of the first k items is uniform over the C(N, k) k-subsets; none of the m is
+    in it iff it is a k-subset of the other N − m items, C(N − m, k) of them. For m = 1 this is
+    p = k/N.
+
+D31 For independent Bernoulli(p_1), …, Bernoulli(p_n), X = Σ B_i, define f_0(0) = 1,
+    f_i(x) = (1 − p_i) f_{i−1}(x) + p_i f_{i−1}(x − 1) with f_{i−1}(−1) = 0 and f_{i−1}(i) = 0;
+    then P(X = x) = f_n(x) and P(X ≥ H) = Σ_{x=H..n} f_n(x), which is 1 for H ≤ 0 and 0 for H > n.
+    Conditions: the B_i independent. With every p_i rational the recursion is exact in rational
+    arithmetic.
+    Proof: condition on B_i; X_i = X_{i−1} + B_i.
+
+D32 Exact one-sided McNemar. Among n = b + c discordant pairs, if each is equally likely to fall
+    on either side, independently, then b ~ Binomial(n, 1/2) and
+    P(B ≥ b_obs) = Σ_{j=b_obs..n} C(n, j) / 2^n; for n = 0 it is 1. Concordant pairs do not
+    enter.
+    Conditions: the pairs independent; under the null the two directions are equiprobable
+    (the items are exchangeable between the arms). Items with a shared target are not
+    independent in content, a limit declared in the record.
+    Proof: n independent fair signs, b the number of one kind; the tail is the binomial sum.
+
+D33 A conjunction of tests has size at most the smallest of their sizes. For events A_1, …, A_4
+    (condition r passes), P(A_1 ∩ … ∩ A_4) ≤ min_r P(A_r); if the claim is false because the null
+    of at least one condition r* holds, P(all four pass) ≤ P(A_{r*}) ≤ α.
+    Conditions: each test has size at most α under its own null: (a) is the exact tail of D31
+    and (b) the exact tail of D32, and a tail test that passes iff its p-value is < α has size
+    ≤ α on a discrete distribution. No independence between the four is needed.
+    Proof: A_1 ∩ … ∩ A_4 ⊆ A_{r*}.
 ```
 
 D18 is not used by Z since its revision 3 (the three-point route became two straight legs); it
@@ -294,7 +326,8 @@ stays as verified. D22 is not used by Z since its revision 5 (the search keeps e
 E = 0, so there is no merit function); it stays as verified.
 
 Used by: K6 (D2, D4, D6, D7, D8, D11), R4 (D2, D5, D6, D9, D10), Z (D5, D17, D19, D20, D21, D23,
-D24, D25, D26), TG (D27, D28, D29).
+D24, D25, D26), TG (D27, D28, D29), P1 (D5, D30, D31, D32, D33). D30 to D33 have not yet been
+verified by a maths-only review.
 
 ## En palabras
 
@@ -356,6 +389,17 @@ D24, D25, D26), TG (D27, D28, D29).
   relaciones quedan las vecinas, no del horizonte elegido.
 - **D29** La tensión de una esfera a lo largo de una dirección se calcula con una sola matriz
   de 8 × 8, y no cambia si la dirección se da la vuelta.
+- **D30** Si se ordenan al azar los 342 fragmentos, la probabilidad de que alguno de los m
+  esperados caiga entre los k primeros es 1 menos la fracción de subconjuntos de k que los evitan
+  a todos; con un solo esperado vale k/342.
+- **D31** Los aciertos de varias definiciones, cada una con su propia probabilidad de acertar por
+  azar, se reparten según una cuenta que se calcula de una vez con fracciones exactas, sin
+  redondeos.
+- **D32** De las definiciones en que los dos métodos discrepan, si ninguno fuera mejor cada una
+  caería de un lado como una moneda; la probabilidad de que el motor gane tantas como ha ganado
+  es una suma binomial exacta.
+- **D33** Exigir a la vez cuatro pruebas, cada una al 5 %, no sube el riesgo de dar por buena la
+  hipótesis falsa por encima del 5 %: basta con que una de ellas falle para que no se sostenga.
 
 Verified by the `instrument-auditor` subagent (maths only), 2026-09-18, at `e2f6d70`: D9 defect
 (count vs. fraction) and missing conditions in D1, D2, D4, D6, D7, D10; D11, D12, the D8 tie form
