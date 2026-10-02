@@ -104,6 +104,7 @@ jobs:
             tests/security/test_python_gate_bash_hook.py \
             tests/security/test_python_gate_wiring.py \
             tests/security/test_review_confinement.py \
+            tests/unit/test_build_beezer_corpus.py \
             tests/unit/test_check_doc_citations.py \
             tests/unit/test_context_pack.py \
             tests/unit/test_delegation_contract.py \
@@ -116,6 +117,7 @@ jobs:
             tools/audit/context_pack.py \
             tools/audit/delegation_contract.py \
             tools/audit/run_process.py \
+            tools/experiments/tooling/build_beezer_corpus.py \
             tools/experiments/tooling/load_spinoza_corpus.py
       - name: Mypy (strict, whole control plane)
         run: |
