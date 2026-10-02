@@ -219,11 +219,26 @@ Aparcada hasta pasar los tres filtros de `docs/methodology/METHODOLOGY.md` (puer
 
 ---
 
+## Línea de física: de fuerzas a campos de tensión (aparcada hasta acabar el piloto)
+
+Apuntado 2026-10-02, fuera del piloto y fuera de `traianus/`. Vive en Tomo 0 / §5 del paper de Polar Projector, nunca en el conjunto de prueba (Beezer no trae fricción; ese lenguaje cae a «ninguna» por diseño).
+
+* **Tesis.** Pasar de fuerzas a campos de tensión no elimina la fricción; la convierte de fuerza externa en disipación intrínseca (residuo, no rozamiento).
+* **Diccionario.** Fricción 1D = pérdida de proyección; colisión = evento local de curvatura/disipación; fuerzas entre centroides = gradientes del campo.
+* **Ancla técnica.** `E_esc` como fricción del marco (la definición 6 del conjunto de prueba lo dice sin la palabra).
+* **Puerta.** Entra por la puerta de líneas físicas de `docs/methodology/METHODOLOGY.md` como el resto: hipótesis + refutadores + búsqueda externa antes de definiciones.
+* **Media en el hueco (autor, 2026-10-02).** La media minimiza la distancia cuadrática total, pero en un grupo bimodal cae en tierra de nadie: llegar desde ahí a cualquier miembro real cuesta energía en todas direcciones. Óptima en total, pésima en local (aviso de §5 del paper; la Proposición 2 existe para ese caso).
+* **Estado.** Idea registrada, sin redactar.
+
+---
+
 # Research Direction G — Spatial Math Workbench (post-v1.0.0 product)
 
 Apuntado 2026-09-28, fuera de scope v1.0.0. Herramienta cliente de Traianus + Ulpia para hacer matemáticas a nivel espacial: cambiar de plano, bajar a subespacio (gruesa → fina, `RELATIONAL_BRIDGES.md` §9/§15-16), comparar proyecciones sobre el mismo estado congelado. Vive fuera de `traianus/` (cliente, junto a RefApp-01). Usa F como banco: Spinoza + `data/math/` para probar qué vistas generalizan y dónde fallan. Sin hipótesis + refutadores no entra en registro.
 
 **Reencuadre (autor, 2026-09-30):** G es la v2 del producto de F. Pendiente: la bajada a subespacio se disparaba cuando la tensión salía no concluyente (§9), y la tensión como selector quedó archivada el 2026-09-29 (§23). La v2 necesita otro criterio para decidir cuándo bajar.
+
+**Vista aparcada (autor, 2026-10-02):** cuotas espectrales normalizadas — tomar el total dispersado como 1 y repartirlo por eje, de modo que las 8 cuotas sumen el total. El motor guarda proyecciones crudas (`observables.py:90`); las cuotas serían cálculo de cliente como el bloque Load, no dato del sustrato. Fuera del piloto (usa dispersión cruda, def. 23a).
 
 ---
 
