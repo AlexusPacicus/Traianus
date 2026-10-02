@@ -191,6 +191,10 @@ Pasos 0 y 1 de `docs/methodology/METHODOLOGY.md`, comprometidos antes de constru
 
 **Línea base de proveedor (autor):** el conjunto de prueba, el corpus, la tabla de macros y esta regla quedan congelados como la comparación para cualquier otro proveedor que se evalúe más adelante. Solo cambia el proveedor; se compara por aciertos de etiqueta a k = 5 y k = 1, no por vectores, así que no hace falta reproyectar entre épocas (AGENTS 3.3). Cambiar cualquier otra pieza rompe la comparación, y cada nuevo proveedor entra con su propia regla comprometida antes.
 
+**Predicciones antes de cualquier vector (2026-10-02, no deciden nada; sirven para calibrar la intuición contra el resultado):**
+* **Autor:** (a) pasa; (b) a k = 5 pasa, sin certeza; (b) a k = 1, más dudas.
+* **Claude:** (a) pasa a k = 5 y probablemente a k = 1; (b) a k = 5, dudosa; (b) a k = 1, probablemente falla: los ítems con palabras técnicas los acierta también BM25, los de metáfora probablemente ninguno, y solo cuentan las paráfrasis puras. Las cuatro a la vez, entre un 25 y un 35 %, estimado a ojo, sin cálculo.
+
 **Orden:** (1) este texto y `PROVENANCE.md`; (2) el conjunto de prueba del autor; (3) contrato del builder y su test sin pérdida (engine-implementer); (4) registro de auditoría del instrumento y revisión ciega; (5) script, primera ejecución y resultado.
 
 ## Línea física aparcada: operaciones como dirección
