@@ -104,6 +104,7 @@ jobs:
             tests/security/test_python_gate_bash_hook.py \
             tests/security/test_python_gate_wiring.py \
             tests/security/test_review_confinement.py \
+            tests/unit/test_beezer_dataset_consistency.py \
             tests/unit/test_build_beezer_corpus.py \
             tests/unit/test_check_doc_citations.py \
             tests/unit/test_context_pack.py \

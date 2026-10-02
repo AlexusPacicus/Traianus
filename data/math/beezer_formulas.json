@@ -1,0 +1,2757 @@
+{
+  "MATH_BEEZER_DEF_SLE": [
+    "$m$",
+    "$x_1,\\,x_2,\\,x_3,\\ldots,x_n$",
+    "<alignmath>\n<![CDATA[a_{11}x_1+a_{12}x_2+a_{13}x_3+\\dots+a_{1n}x_n&=b_1\\\\]]>\n<![CDATA[a_{21}x_1+a_{22}x_2+a_{23}x_3+\\dots+a_{2n}x_n&=b_2\\\\]]>\n<![CDATA[a_{31}x_1+a_{32}x_2+a_{33}x_3+\\dots+a_{3n}x_n&=b_3\\\\]]>\n<![CDATA[&\\vdots\\\\]]>\n<![CDATA[a_{m1}x_1+a_{m2}x_2+a_{m3}x_3+\\dots+a_{mn}x_n&=b_m]]>\n</alignmath>",
+    "$a_{ij}$",
+    "$b_i$",
+    "$x_j$",
+    "$1\\leq i\\leq m$",
+    "$1\\leq j\\leq n$",
+    "$\\complex{\\null}$"
+  ],
+  "MATH_BEEZER_DEF_SSLE": [
+    "$n$",
+    "$\\scalarlist{x}{n}$",
+    "$n$",
+    "$\\scalarlist{s}{n}$",
+    "$s_1$",
+    "$x_1$",
+    "$s_2$",
+    "$x_2$",
+    "$s_3$",
+    "$x_3$",
+    "$s_n$",
+    "$x_n$"
+  ],
+  "MATH_BEEZER_DEF_SSSLE": [],
+  "MATH_BEEZER_DEF_ESYS": [],
+  "MATH_BEEZER_DEF_EO": [],
+  "MATH_BEEZER_THM_EOPSS": [],
+  "MATH_BEEZER_DEF_M": [
+    "$m\\times n$",
+    "$\\complex{\\null}$",
+    "$m$",
+    "$n$",
+    "$A,\\,B,\\,C,\\dotsc$",
+    "$A$",
+    "$\\matrixentry{A}{ij}$",
+    "$i$",
+    "$j$",
+    "$A$",
+    "$A$",
+    "$\\matrixentry{A}{ij}$"
+  ],
+  "MATH_BEEZER_DEF_CV": [
+    "$m$",
+    "$m$",
+    "$\\vect{u}$",
+    "$\\vect{v}$",
+    "$\\vect{w}$",
+    "$\\vect{x}$",
+    "$\\vect{y}$",
+    "$\\vect{z}$",
+    "$\\vec{u}$",
+    "$\\underset{\\sim}{\\textstyle u}$",
+    "$\\vect{v}$",
+    "$i$",
+    "$\\vectorentry{\\vect{v}}{i}$",
+    "$\\vect{v}$",
+    "$\\vectorentry{\\vect{v}}{i}$"
+  ],
+  "MATH_BEEZER_DEF_ZCV": [
+    "$m$",
+    "$m$",
+    "<alignmath>\n\\zerovector=\n\\colvector{0\\\\0\\\\0\\\\\\vdots\\\\0}\n</alignmath>",
+    "$\\vectorentry{\\zerovector}{i}=0$",
+    "$1\\leq i\\leq m$",
+    "$\\zerovector$"
+  ],
+  "MATH_BEEZER_DEF_CM": [
+    "<alignmath>\n<![CDATA[a_{11}x_1+a_{12}x_2+a_{13}x_3+\\dots+a_{1n}x_n&=b_1\\\\]]>\n<![CDATA[a_{21}x_1+a_{22}x_2+a_{23}x_3+\\dots+a_{2n}x_n&=b_2\\\\]]>\n<![CDATA[a_{31}x_1+a_{32}x_2+a_{33}x_3+\\dots+a_{3n}x_n&=b_3\\\\]]>\n<![CDATA[\\vdots&\\\\]]>\n<![CDATA[a_{m1}x_1+a_{m2}x_2+a_{m3}x_3+\\dots+a_{mn}x_n&=b_m]]>\n</alignmath>",
+    "$m\\times n$",
+    "<equation>\nA=\n\\begin{bmatrix}\n<![CDATA[a_{11}&a_{12}&a_{13}&\\dots&a_{1n}\\\\]]>\n<![CDATA[a_{21}&a_{22}&a_{23}&\\dots&a_{2n}\\\\]]>\n<![CDATA[a_{31}&a_{32}&a_{33}&\\dots&a_{3n}\\\\]]>\n<![CDATA[\\vdots&\\\\]]>\n<![CDATA[a_{m1}&a_{m2}&a_{m3}&\\dots&a_{mn}\\\\]]>\n\\end{bmatrix}\n</equation>"
+  ],
+  "MATH_BEEZER_DEF_VOC": [
+    "<alignmath>\n<![CDATA[a_{11}x_1+a_{12}x_2+a_{13}x_3+\\dots+a_{1n}x_n&=b_1\\\\]]>\n<![CDATA[a_{21}x_1+a_{22}x_2+a_{23}x_3+\\dots+a_{2n}x_n&=b_2\\\\]]>\n<![CDATA[a_{31}x_1+a_{32}x_2+a_{33}x_3+\\dots+a_{3n}x_n&=b_3\\\\]]>\n<![CDATA[\\vdots&\\\\]]>\n<![CDATA[a_{m1}x_1+a_{m2}x_2+a_{m3}x_3+\\dots+a_{mn}x_n&=b_m]]>\n</alignmath>",
+    "$m$",
+    "<equation>\n\\vect{b}=\n\\begin{bmatrix}\nb_1\\\\\nb_2\\\\\nb_3\\\\\n\\vdots\\\\\nb_m\\\\\n\\end{bmatrix}\n</equation>"
+  ],
+  "MATH_BEEZER_DEF_SOLV": [
+    "<alignmath>\n<![CDATA[a_{11}x_1+a_{12}x_2+a_{13}x_3+\\dots+a_{1n}x_n&=b_1\\\\]]>\n<![CDATA[a_{21}x_1+a_{22}x_2+a_{23}x_3+\\dots+a_{2n}x_n&=b_2\\\\]]>\n<![CDATA[a_{31}x_1+a_{32}x_2+a_{33}x_3+\\dots+a_{3n}x_n&=b_3\\\\]]>\n<![CDATA[\\vdots&\\\\]]>\n<![CDATA[a_{m1}x_1+a_{m2}x_2+a_{m3}x_3+\\dots+a_{mn}x_n&=b_m]]>\n</alignmath>",
+    "$n$",
+    "<equation>\n\\vect{x}=\n\\begin{bmatrix}\nx_1\\\\\nx_2\\\\\nx_3\\\\\n\\vdots\\\\\nx_n\\\\\n\\end{bmatrix}\n</equation>"
+  ],
+  "MATH_BEEZER_DEF_MRLS": [
+    "$A$",
+    "$\\vect{b}$",
+    "$\\linearsystem{A}{\\vect{b}}$",
+    "$\\linearsystem{A}{\\vect{b}}$"
+  ],
+  "MATH_BEEZER_DEF_AM": [
+    "$m$",
+    "$n$",
+    "$A$",
+    "$\\vect{b}$",
+    "$m\\times(n+1)$",
+    "$n$",
+    "$A$",
+    "$n+1$",
+    "$\\vect{b}$",
+    "$\\augmented{A}{\\vect{b}}$",
+    "$\\augmented{A}{\\vect{b}}$"
+  ],
+  "MATH_BEEZER_DEF_RO": [
+    "$m\\times n$",
+    "$\\rowopswap{i}{j}$",
+    "$i$",
+    "$j$",
+    "$\\rowopmult{\\alpha}{i}$",
+    "$i$",
+    "$\\alpha$",
+    "$\\rowopadd{\\alpha}{i}{j}$",
+    "$i$",
+    "$\\alpha$",
+    "$j$",
+    "$\\rowopswap{i}{j}$",
+    "$\\rowopmult{\\alpha}{i}$",
+    "$\\rowopadd{\\alpha}{i}{j}$"
+  ],
+  "MATH_BEEZER_DEF_REM": [
+    "$A$",
+    "$B$"
+  ],
+  "MATH_BEEZER_THM_REMES": [
+    "$A$",
+    "$B$"
+  ],
+  "MATH_BEEZER_DEF_RREF": [
+    "$i$",
+    "$j$",
+    "$s$",
+    "$t$",
+    "$s>i$",
+    "$t>j$",
+    "$r$",
+    "$D=\\set{d_1,\\,d_2,\\,d_3,\\,\\ldots,\\,d_r}$",
+    "$d_1\\lt d_2\\lt d_3\\lt\\cdots\\lt d_r$",
+    "$F=\\set{f_1,\\,f_2,\\,f_3,\\,\\ldots,\\,f_{n-r}}$",
+    "$f_1\\lt f_2\\lt f_3\\lt\\cdots\\lt f_{n-r}$",
+    "$r$",
+    "$D$",
+    "$F$"
+  ],
+  "MATH_BEEZER_THM_REMEF": [
+    "$A$",
+    "$B$",
+    "$A$",
+    "$B$",
+    "$B$"
+  ],
+  "MATH_BEEZER_THM_RREFU": [
+    "$A$",
+    "$m\\times n$",
+    "$B$",
+    "$C$",
+    "$m\\times n$",
+    "$A$",
+    "$B=C$"
+  ],
+  "MATH_BEEZER_DEF_CS": [],
+  "MATH_BEEZER_DEF_IDV": [
+    "$A$",
+    "$B$",
+    "$j$",
+    "$B$",
+    "$x_j$"
+  ],
+  "MATH_BEEZER_THM_RCLS": [
+    "$A$",
+    "$n$",
+    "$B$",
+    "$r$",
+    "$n+1$",
+    "$B$"
+  ],
+  "MATH_BEEZER_THM_CSRN": [
+    "$r$",
+    "$n$",
+    "$A$",
+    "$n$",
+    "$B$",
+    "$r$",
+    "$r\\leq n$",
+    "$r=n$",
+    "$r<![CDATA[<]]>n$"
+  ],
+  "MATH_BEEZER_THM_FVCS": [
+    "$A$",
+    "$n$",
+    "$B$",
+    "$r$",
+    "$n-r$"
+  ],
+  "MATH_BEEZER_THM_PSSLS": [],
+  "MATH_BEEZER_THM_CMVEI": [
+    "$m$",
+    "$n$",
+    "$n>m$"
+  ],
+  "MATH_BEEZER_DEF_HS": [
+    "$\\linearsystem{A}{\\vect{b}}$",
+    "$\\vect{b}=\\zerovector$"
+  ],
+  "MATH_BEEZER_THM_HSC": [],
+  "MATH_BEEZER_DEF_TSHSE": [
+    "$n$",
+    "$x_1=0$",
+    "$x_2=0$",
+    "$x_n=0$",
+    "$\\vect{x}=\\zerovector$"
+  ],
+  "MATH_BEEZER_THM_HMVEI": [
+    "$m$",
+    "$n$",
+    "$n>m$"
+  ],
+  "MATH_BEEZER_DEF_NSM": [
+    "$A$",
+    "$\\nsp{A}$",
+    "$\\homosystem{A}$",
+    "$\\nsp{A}$"
+  ],
+  "MATH_BEEZER_DEF_SQM": [
+    "$m$",
+    "$n$",
+    "$m=n$",
+    "$n$"
+  ],
+  "MATH_BEEZER_DEF_NM": [
+    "$A$",
+    "$\\linearsystem{A}{\\zerovector}$",
+    "$\\set{\\zerovector}$",
+    "$A$",
+    "$A$"
+  ],
+  "MATH_BEEZER_DEF_IM": [
+    "$m\\times m$",
+    "$I_m$",
+    "<alignmath>\n<![CDATA[\\matrixentry{I_m}{ij}&=]]>\n\\begin{cases}\n<![CDATA[1 & i=j\\\\]]>\n<![CDATA[0 & i\\neq j]]>\n\\end{cases}\n\\quad\\quad\n1\\leq i,\\,j\\leq m\n</alignmath>",
+    "$I_m$"
+  ],
+  "MATH_BEEZER_THM_NMRRI": [
+    "$A$",
+    "$B$",
+    "$A$",
+    "$B$"
+  ],
+  "MATH_BEEZER_THM_NMTNS": [
+    "$A$",
+    "$A$",
+    "$A$",
+    "$\\nsp{A}=\\set{\\zerovector}$"
+  ],
+  "MATH_BEEZER_THM_NMUS": [
+    "$A$",
+    "$A$",
+    "$\\linearsystem{A}{\\vect{b}}$",
+    "$\\vect{b}$"
+  ],
+  "MATH_BEEZER_THM_NME1": [
+    "$A$",
+    "$A$",
+    "$A$",
+    "$A$",
+    "$\\nsp{A}=\\set{\\zerovector}$",
+    "$\\linearsystem{A}{\\vect{b}}$",
+    "$\\vect{b}$"
+  ],
+  "MATH_BEEZER_DEF_VSCV": [
+    "$\\complex{m}$",
+    "$m$",
+    "$\\complex{\\null}$",
+    "$\\complex{m}$"
+  ],
+  "MATH_BEEZER_DEF_CVE": [
+    "$\\vect{u},\\,\\vect{v}\\in\\complex{m}$",
+    "$\\vect{u}$",
+    "$\\vect{v}$",
+    "$\\vect{u}=\\vect{v}$",
+    "<alignmath>\n<![CDATA[\\vectorentry{\\vect{u}}{i}&=\\vectorentry{\\vect{v}}{i}]]>\n<![CDATA[&&1\\leq i\\leq m]]>\n</alignmath>",
+    "$\\vect{u}=\\vect{v}$"
+  ],
+  "MATH_BEEZER_DEF_CVA": [
+    "$\\vect{u},\\,\\vect{v}\\in\\complex{m}$",
+    "$\\vect{u}$",
+    "$\\vect{v}$",
+    "$\\vect{u}+\\vect{v}$",
+    "<alignmath>\n\\vectorentry{\\vect{u}+\\vect{v}}{i}\n<![CDATA[&=\\vectorentry{\\vect{u}}{i}+\\vectorentry{\\vect{v}}{i}]]>\n<![CDATA[&&1\\leq i\\leq m]]>\n</alignmath>",
+    "$\\vect{u}+\\vect{v}$"
+  ],
+  "MATH_BEEZER_DEF_CVSM": [
+    "$\\vect{u}\\in\\complex{m}$",
+    "$\\alpha\\in\\complex{\\null}$",
+    "$\\vect{u}$",
+    "$\\alpha$",
+    "$\\alpha\\vect{u}$",
+    "<alignmath>\n\\vectorentry{\\alpha\\vect{u}}{i}\n<![CDATA[&=\\alpha\\vectorentry{\\vect{u}}{i}]]>\n<![CDATA[&&1\\leq i\\leq m]]>\n</alignmath>",
+    "$\\alpha\\vect{u}$"
+  ],
+  "MATH_BEEZER_THM_VSPCV": [
+    "$\\complex{m}$",
+    "$m$",
+    "$\\vect{u},\\,\\vect{v}\\in\\complex{m}$",
+    "$\\vect{u}+\\vect{v}\\in\\complex{m}$",
+    "$\\alpha\\in\\complex{\\null}$",
+    "$\\vect{u}\\in\\complex{m}$",
+    "$\\alpha\\vect{u}\\in\\complex{m}$",
+    "$\\vect{u},\\,\\vect{v}\\in\\complex{m}$",
+    "$\\vect{u}+\\vect{v}=\\vect{v}+\\vect{u}$",
+    "$\\vect{u},\\,\\vect{v},\\,\\vect{w}\\in\\complex{m}$",
+    "$\\vect{u}+\\left(\\vect{v}+\\vect{w}\\right)=\\left(\\vect{u}+\\vect{v}\\right)+\\vect{w}$",
+    "$\\zerovector$",
+    "$\\vect{u}+\\zerovector=\\vect{u}$",
+    "$\\vect{u}\\in\\complex{m}$",
+    "$\\vect{u}\\in\\complex{m}$",
+    "$\\vect{-u}\\in\\complex{m}$",
+    "$\\vect{u}+ (\\vect{-u})=\\zerovector$",
+    "$\\alpha,\\,\\beta\\in\\complex{\\null}$",
+    "$\\vect{u}\\in\\complex{m}$",
+    "$\\alpha(\\beta\\vect{u})=(\\alpha\\beta)\\vect{u}$",
+    "$\\alpha\\in\\complex{\\null}$",
+    "$\\vect{u},\\,\\vect{v}\\in\\complex{m}$",
+    "$\\alpha(\\vect{u}+\\vect{v})=\\alpha\\vect{u}+\\alpha\\vect{v}$",
+    "$\\alpha,\\,\\beta\\in\\complex{\\null}$",
+    "$\\vect{u}\\in\\complex{m}$",
+    "$(\\alpha+\\beta)\\vect{u}=\\alpha\\vect{u}+\\beta\\vect{u}$",
+    "$\\vect{u}\\in\\complex{m}$",
+    "$1\\vect{u}=\\vect{u}$"
+  ],
+  "MATH_BEEZER_DEF_LCCV": [
+    "$n$",
+    "$\\vectorlist{u}{n}$",
+    "$\\complex{m}$",
+    "$n$",
+    "$\\alpha_1,\\,\\alpha_2,\\,\\alpha_3,\\,\\ldots,\\,\\alpha_n$",
+    "<equation>\n\\lincombo{\\alpha}{u}{n}\n</equation>"
+  ],
+  "MATH_BEEZER_THM_SLSLC": [
+    "$m\\times n$",
+    "$A$",
+    "$\\vectorlist{A}{n}$",
+    "$\\vect{x}\\in\\complex{n}$",
+    "$\\linearsystem{A}{\\vect{b}}$",
+    "$\\vect{b}$",
+    "$A$",
+    "$\\vect{x}$",
+    "<equation>\n\\vectorentry{\\vect{x}}{1}\\vect{A}_1+\n\\vectorentry{\\vect{x}}{2}\\vect{A}_2+\n\\vectorentry{\\vect{x}}{3}\\vect{A}_3+\n\\cdots+\n\\vectorentry{\\vect{x}}{n}\\vect{A}_n\n=\n\\vect{b}\n</equation>"
+  ],
+  "MATH_BEEZER_THM_VFSLS": [
+    "$\\augmented{A}{\\vect{b}}$",
+    "$\\linearsystem{A}{\\vect{b}}$",
+    "$m$",
+    "$n$",
+    "$B$",
+    "$m\\times (n+1)$",
+    "$B$",
+    "$r$",
+    "$D=\\set{d_1,\\,d_2,\\,d_3,\\,\\ldots,\\,d_r}$",
+    "$n-r$",
+    "$F=\\set{f_1,\\,f_2,\\,f_3,\\,\\ldots,\\,f_{n-r},\\,n+1}$",
+    "$\\vect{c}$",
+    "$\\vect{u}_j$",
+    "$1\\leq j\\leq n-r$",
+    "$n$",
+    "<alignmath>\n<![CDATA[\\vectorentry{\\vect{c}}{i}&=]]>\n\\begin{cases}\n<![CDATA[0&]]>\\text{if $i\\in F$}\\\\\n<![CDATA[\\matrixentry{B}{k,n+1}&]]>\\text{if $i\\in D$, $i=d_k$}\n\\end{cases}\\\\\n<![CDATA[\\vectorentry{\\vect{u}_j}{i}&=]]>\n\\begin{cases}\n<![CDATA[1&]]>\\text{if $i\\in F$, $i=f_j$}\\\\\n<![CDATA[0&]]>\\text{if $i\\in F$, $i\\neq f_j$}\\\\\n<![CDATA[-\\matrixentry{B}{k,f_j}&]]>\\text{if $i\\in D$, $i=d_k$}\n\\end{cases}.\n</alignmath>",
+    "$\\linearsystem{A}{\\vect{b}}$",
+    "<equation>\nS=\\setparts{\n\\vect{c}+\\alpha_1\\vect{u}_1+\\alpha_2\\vect{u}_2+\\alpha_3\\vect{u}_3+\\cdots+\\alpha_{n-r}\\vect{u}_{n-r}\n}{\n\\alpha_1,\\,\\alpha_2,\\,\\alpha_3,\\,\\ldots,\\,\\alpha_{n-r}\\in\\complex{\\null}\n}\n</equation>"
+  ],
+  "MATH_BEEZER_THM_PSPHS": [
+    "$\\vect{w}$",
+    "$\\linearsystem{A}{\\vect{b}}$",
+    "$\\vect{y}$",
+    "$\\linearsystem{A}{\\vect{b}}$",
+    "$\\vect{y}=\\vect{w}+\\vect{z}$",
+    "$\\vect{z}\\in\\nsp{A}$"
+  ],
+  "MATH_BEEZER_DEF_SSCV": [
+    "$S=\\{\\vectorlist{u}{p}\\}$",
+    "$\\spn{S}$",
+    "$\\vectorlist{u}{p}$",
+    "<alignmath>\n<![CDATA[\\spn{S}&=\\setparts{\\lincombo{\\alpha}{u}{p}}{\\alpha_i\\in\\complex{\\null},\\,1\\leq i\\leq p}\\\\]]>\n<![CDATA[&=\\setparts{\\sum_{i=1}^{p}\\alpha_i\\vect{u}_i}{\\alpha_i\\in\\complex{\\null},\\,1\\leq i\\leq p}]]>\n</alignmath>",
+    "$\\spn{S}$"
+  ],
+  "MATH_BEEZER_THM_SSNS": [
+    "$A$",
+    "$m\\times n$",
+    "$B$",
+    "$B$",
+    "$r$",
+    "$D=\\set{d_1,\\,d_2,\\,d_3,\\,\\ldots,\\,d_r}$",
+    "$n-r$",
+    "$F=\\set{f_1,\\,f_2,\\,f_3,\\,\\ldots,\\,f_{n-r},\\,n+1}$",
+    "$n-r$",
+    "$\\vect{z}_j$",
+    "$1\\leq j\\leq n-r$",
+    "$n$",
+    "<equation>\n\\vectorentry{\\vect{z}_j}{i}=\n\\begin{cases}\n<![CDATA[1&]]>\\text{if $i\\in F$, $i=f_j$}\\\\\n<![CDATA[0&]]>\\text{if $i\\in F$, $i\\neq f_j$}\\\\\n<![CDATA[-\\matrixentry{B}{k,f_j}&]]>\\text{if $i\\in D$, $i=d_k$}\n\\end{cases}\n</equation>",
+    "$A$",
+    "<equation>\n\\nsp{A}=\\spn{\\left\\{\\vectorlist{z}{n-r}\\right\\}}\n</equation>"
+  ],
+  "MATH_BEEZER_DEF_RLDCV": [
+    "$S=\\set{\\vectorlist{u}{n}}$",
+    "<equation>\n\\lincombo{\\alpha}{u}{n}=\\zerovector\n</equation>",
+    "$S$",
+    "$\\alpha_i=0$",
+    "$1\\leq i\\leq n$",
+    "$S$"
+  ],
+  "MATH_BEEZER_DEF_LICV": [
+    "$S=\\set{\\vectorlist{u}{n}}$",
+    "$S$",
+    "$S$",
+    "$S$"
+  ],
+  "MATH_BEEZER_THM_LIVHS": [
+    "$S=\\set{\\vectorlist{v}{n}}\\subseteq\\complex{m}$",
+    "$A$",
+    "$m\\times n$",
+    "$S$",
+    "$S$",
+    "$\\homosystem{A}$"
+  ],
+  "MATH_BEEZER_THM_LIVRN": [
+    "$r$",
+    "$n$",
+    "$S=\\set{\\vectorlist{v}{n}}\\subseteq\\complex{m}$",
+    "$A$",
+    "$m\\times n$",
+    "$S$",
+    "$B$",
+    "$A$",
+    "$r$",
+    "$B$",
+    "$S$",
+    "$n=r$"
+  ],
+  "MATH_BEEZER_THM_MVSLD": [
+    "$S=\\set{\\vectorlist{u}{n}}\\subseteq\\complex{m}$",
+    "$n>m$",
+    "$S$"
+  ],
+  "MATH_BEEZER_THM_NMLIC": [
+    "$A$",
+    "$A$",
+    "$A$"
+  ],
+  "MATH_BEEZER_THM_NME2": [
+    "$A$",
+    "$A$",
+    "$A$",
+    "$A$",
+    "$\\nsp{A}=\\set{\\zerovector}$",
+    "$\\linearsystem{A}{\\vect{b}}$",
+    "$\\vect{b}$",
+    "$A$"
+  ],
+  "MATH_BEEZER_THM_BNS": [
+    "$A$",
+    "$m\\times n$",
+    "$B$",
+    "$r$",
+    "$D=\\{d_1,\\,d_2,\\,d_3,\\,\\ldots,\\,d_r\\}$",
+    "$F=\\{f_1,\\,f_2,\\,f_3,\\,\\ldots,\\,f_{n-r}\\}$",
+    "$B$",
+    "$n-r$",
+    "$\\vect{z}_j$",
+    "$1\\leq j\\leq n-r$",
+    "$n$",
+    "<equation>\n\\vectorentry{\\vect{z}_j}{i}=\n\\begin{cases}\n<![CDATA[1&]]>\\text{if $i\\in F$, $i=f_j$}\\\\\n<![CDATA[0&]]>\\text{if $i\\in F$, $i\\neq f_j$}\\\\\n<![CDATA[-\\matrixentry{B}{k,f_j}&]]>\\text{if $i\\in D$, $i=d_k$}\n\\end{cases}\n</equation>",
+    "$S=\\set{\\vectorlist{z}{n-r}}$",
+    "$\\nsp{A}=\\spn{S}$",
+    "$S$"
+  ],
+  "MATH_BEEZER_THM_DLDS": [
+    "$S=\\set{\\vectorlist{u}{n}}$",
+    "$S$",
+    "$t$",
+    "$1\\leq t\\leq n$",
+    "$\\vect{u_t}$",
+    "$\\vect{u}_1,\\,\\vect{u}_2,\\,\\vect{u}_3,\\,\\ldots,\\,\\vect{u}_{t-1},\\,\\vect{u}_{t+1},\\,\\ldots,\\,\\vect{u}_n$"
+  ],
+  "MATH_BEEZER_THM_BS": [
+    "$S=\\set{\\vectorlist{v}{n}}$",
+    "$W=\\spn{S}$",
+    "$A$",
+    "$S$",
+    "$B$",
+    "$A$",
+    "$D=\\set{\\scalarlist{d}{r}}$",
+    "$B$",
+    "$T=\\set{\\vect{v}_{d_1},\\,\\vect{v}_{d_2},\\,\\vect{v}_{d_3},\\,\\ldots\\,\\vect{v}_{d_r}}$",
+    "$W=\\spn{T}$"
+  ],
+  "MATH_BEEZER_DEF_CCCV": [
+    "$\\vect{u}$",
+    "$\\complex{m}$",
+    "$\\conjugate{\\vect{u}}$",
+    "<alignmath>\n\\vectorentry{\\conjugate{\\vect{u}}}{i}\n<![CDATA[&=\\conjugate{\\vectorentry{\\vect{u}}{i}}]]>\n<![CDATA[&&]]>\\text{$1\\leq i\\leq m$}\n</alignmath>",
+    "$\\conjugate{\\vect{u}}$"
+  ],
+  "MATH_BEEZER_THM_CRVA": [
+    "$\\vect{x}$",
+    "$\\vect{y}$",
+    "$\\complex{m}$",
+    "<equation>\n\\conjugate{\\vect{x}+\\vect{y}}=\\conjugate{\\vect{x}}+\\conjugate{\\vect{y}}\n</equation>"
+  ],
+  "MATH_BEEZER_THM_CRSM": [
+    "$\\vect{x}$",
+    "$\\complex{m}$",
+    "$\\alpha\\in\\complexes$",
+    "<equation>\n\\conjugate{\\alpha\\vect{x}}=\\conjugate{\\alpha}\\,\\conjugate{\\vect{x}}\n</equation>"
+  ],
+  "MATH_BEEZER_DEF_IP": [
+    "$\\vect{u},\\,\\vect{v}\\in\\complex{m}$",
+    "$\\vect{u}$",
+    "$\\vect{v}$",
+    "$\\complex{\\null}$",
+    "<equation>\n\\innerproduct{\\vect{u}}{\\vect{v}}=\n\\conjugate{\\vectorentry{\\vect{u}}{1}}\\vectorentry{\\vect{v}}{1}+\n\\conjugate{\\vectorentry{\\vect{u}}{2}}\\vectorentry{\\vect{v}}{2}+\n\\conjugate{\\vectorentry{\\vect{u}}{3}}\\vectorentry{\\vect{v}}{3}+\n\\cdots+\n\\conjugate{\\vectorentry{\\vect{u}}{m}}\\vectorentry{\\vect{v}}{m}\n=\n\\sum_{i=1}^{m}\\conjugate{\\vectorentry{\\vect{u}}{i}}\\vectorentry{\\vect{v}}{i}\n</equation>",
+    "$\\innerproduct{\\vect{u}}{\\vect{v}}$"
+  ],
+  "MATH_BEEZER_THM_IPVA": [
+    "$\\vect{u},\\,\\vect{v},\\,\\vect{w}\\in\\complex{m}$",
+    "$\\innerproduct{\\vect{u}+\\vect{v}}{\\vect{w}}=\\innerproduct{\\vect{u}}{\\vect{w}}+\\innerproduct{\\vect{v}}{\\vect{w}}$",
+    "$\\innerproduct{\\vect{u}}{\\vect{v}+\\vect{w}}=\\innerproduct{\\vect{u}}{\\vect{v}}+\\innerproduct{\\vect{u}}{\\vect{w}}$"
+  ],
+  "MATH_BEEZER_THM_IPSM": [
+    "$\\vect{u},\\,\\vect{v}\\in\\complex{m}$",
+    "$\\alpha\\in\\complex{\\null}$",
+    "$\\innerproduct{\\alpha\\vect{u}}{\\vect{v}}=\\conjugate{\\alpha}\\innerproduct{\\vect{u}}{\\vect{v}}$",
+    "$\\innerproduct{\\vect{u}}{\\alpha\\vect{v}}=\\alpha\\innerproduct{\\vect{u}}{\\vect{v}}$"
+  ],
+  "MATH_BEEZER_THM_IPAC": [
+    "$\\vect{u}$",
+    "$\\vect{v}$",
+    "$\\complex{m}$",
+    "$\\innerproduct{\\vect{u}}{\\vect{v}}=\\conjugate{\\innerproduct{\\vect{v}}{\\vect{u}}}$"
+  ],
+  "MATH_BEEZER_DEF_NV": [
+    "$\\vect{u}$",
+    "$\\complex{\\null}$",
+    "<equation>\n\\norm{\\vect{u}}=\n\\sqrt{\n\\modulus{\\vectorentry{\\vect{u}}{1}}^2+\n\\modulus{\\vectorentry{\\vect{u}}{2}}^2+\n\\modulus{\\vectorentry{\\vect{u}}{3}}^2+\n\\cdots+\n\\modulus{\\vectorentry{\\vect{u}}{m}}^2\n}\n=\n\\sqrt{\\sum_{i=1}^{m}\\modulus{\\vectorentry{\\vect{u}}{i}}^2}\n</equation>",
+    "$\\norm{\\vect{v}}$"
+  ],
+  "MATH_BEEZER_THM_IPN": [
+    "$\\vect{u}$",
+    "$\\complex{m}$",
+    "$\\norm{\\vect{u}}^2=\\innerproduct{\\vect{u}}{\\vect{u}}$"
+  ],
+  "MATH_BEEZER_THM_PIP": [
+    "$\\vect{u}$",
+    "$\\complex{m}$",
+    "$\\innerproduct{\\vect{u}}{\\vect{u}}\\geq 0$",
+    "$\\vect{u}=\\zerovector$"
+  ],
+  "MATH_BEEZER_DEF_OV": [
+    "$\\vect{u}$",
+    "$\\vect{v}$",
+    "$\\complex{m}$",
+    "$\\innerproduct{\\vect{u}}{\\vect{v}}=0$"
+  ],
+  "MATH_BEEZER_DEF_OSV": [
+    "$S=\\set{\\vectorlist{u}{n}}$",
+    "$\\complex{m}$",
+    "$S$",
+    "$S$",
+    "$\\innerproduct{\\vect{u}_i}{\\vect{u}_j}=0$",
+    "$i\\neq j$"
+  ],
+  "MATH_BEEZER_DEF_SUV": [
+    "$\\vect{e}_j\\in\\complex{m}$",
+    "$1\\leq j\\leq m$",
+    "<alignmath>\n\\vectorentry{\\vect{e}_j}{i}\n<![CDATA[&=]]>\n\\begin{cases}\n<![CDATA[0&]]>\\text{if $i\\neq j$}\\\\\n<![CDATA[1&]]>\\text{if $i=j$}\n\\end{cases}\n</alignmath>",
+    "<alignmath>\n<![CDATA[\\set{\\vectorlist{e}{m}}&=\\setparts{\\vect{e}_j}{1\\leq j\\leq m}]]>\n</alignmath>",
+    "$\\complex{m}$",
+    "$\\vect{e}_i$"
+  ],
+  "MATH_BEEZER_THM_OSLI": [
+    "$S$",
+    "$S$"
+  ],
+  "MATH_BEEZER_THM_GSP": [
+    "$S=\\set{\\vectorlist{v}{p}}$",
+    "$\\complex{m}$",
+    "$\\vect{u}_i$",
+    "$1\\leq i\\leq p$",
+    "<equation>\n\\vect{u}_i=\\vect{v}_i\n-\\frac{\\innerproduct{\\vect{u}_1}{\\vect{v}_i}}{\\innerproduct{\\vect{u}_1}{\\vect{u}_1}}\\vect{u}_1\n-\\frac{\\innerproduct{\\vect{u}_2}{\\vect{v}_i}}{\\innerproduct{\\vect{u}_2}{\\vect{u}_2}}\\vect{u}_2\n-\\frac{\\innerproduct{\\vect{u}_3}{\\vect{v}_i}}{\\innerproduct{\\vect{u}_3}{\\vect{u}_3}}\\vect{u}_3\n-\\cdots\n-\\frac{\\innerproduct{\\vect{u}_{i-1}}{\\vect{v}_i}}{\\innerproduct{\\vect{u}_{i-1}}{\\vect{u}_{i-1}}}\\vect{u}_{i-1}\n</equation>",
+    "$T=\\set{\\vectorlist{u}{p}}$",
+    "$T$",
+    "$\\spn{T}=\\spn{S}$"
+  ],
+  "MATH_BEEZER_DEF_ONS": [
+    "$S=\\set{\\vectorlist{u}{n}}$",
+    "$\\norm{\\vect{u}_i}=1$",
+    "$1\\leq i\\leq n$",
+    "$S$"
+  ],
+  "MATH_BEEZER_DEF_VSM": [
+    "$m\\times n$",
+    "$M_{mn}$",
+    "$m\\times n$",
+    "$M_{mn}$"
+  ],
+  "MATH_BEEZER_DEF_ME": [
+    "$m\\times n$",
+    "$A$",
+    "$B$",
+    "$A=B$",
+    "$\\matrixentry{A}{ij}=\\matrixentry{B}{ij}$",
+    "$1\\leq i\\leq m$",
+    "$1\\leq j\\leq n$",
+    "$A=B$"
+  ],
+  "MATH_BEEZER_DEF_MA": [
+    "$m\\times n$",
+    "$A$",
+    "$B$",
+    "$A$",
+    "$B$",
+    "$m\\times n$",
+    "$A+B$",
+    "<alignmath>\n<![CDATA[\\matrixentry{A+B}{ij}&=\\matrixentry{A}{ij}+\\matrixentry{B}{ij}]]>\n<![CDATA[&&1\\leq i\\leq m,\\,1\\leq j\\leq n]]>\n</alignmath>",
+    "$A+B$"
+  ],
+  "MATH_BEEZER_DEF_MSM": [
+    "$m\\times n$",
+    "$A$",
+    "$\\alpha\\in\\complex{\\null}$",
+    "$A$",
+    "$m\\times n$",
+    "$\\alpha A$",
+    "<alignmath>\n<![CDATA[\\matrixentry{\\alpha A}{ij}&=\\alpha\\matrixentry{A}{ij}&&]]>\n\\quad 1\\leq i\\leq m,\\,1\\leq j\\leq n\n</alignmath>",
+    "$\\alpha A$"
+  ],
+  "MATH_BEEZER_THM_VSPM": [
+    "$M_{mn}$",
+    "$m\\times n$",
+    "$A,\\,B\\in M_{mn}$",
+    "$A+B\\in M_{mn}$",
+    "$\\alpha\\in\\complex{\\null}$",
+    "$A\\in M_{mn}$",
+    "$\\alpha A\\in M_{mn}$",
+    "$A,\\,B\\in M_{mn}$",
+    "$A+B=B+A$",
+    "$A,\\,B,\\,C\\in M_{mn}$",
+    "$A+\\left(B+C\\right)=\\left(A+B\\right)+C$",
+    "$\\zeromatrix$",
+    "$A+\\zeromatrix=A$",
+    "$A\\in M_{mn}$",
+    "$A\\in M_{mn}$",
+    "$-A\\in M_{mn}$",
+    "$A+(-A)=\\zeromatrix$",
+    "$\\alpha,\\,\\beta\\in\\complex{\\null}$",
+    "$A\\in M_{mn}$",
+    "$\\alpha(\\beta A)=(\\alpha\\beta)A$",
+    "$\\alpha\\in\\complex{\\null}$",
+    "$A,\\,B\\in M_{mn}$",
+    "$\\alpha(A+B)=\\alpha A+\\alpha B$",
+    "$\\alpha,\\,\\beta\\in\\complex{\\null}$",
+    "$A\\in M_{mn}$",
+    "$(\\alpha+\\beta)A=\\alpha A+\\beta A$",
+    "$A\\in M_{mn}$",
+    "$1A=A$"
+  ],
+  "MATH_BEEZER_DEF_ZM": [
+    "$m\\times n$",
+    "$\\zeromatrix=\\zeromatrix_{m\\times n}$",
+    "$\\matrixentry{\\zeromatrix}{ij}=0$",
+    "$1\\leq i\\leq m$",
+    "$1\\leq j\\leq n$",
+    "$\\zeromatrix$"
+  ],
+  "MATH_BEEZER_DEF_TM": [
+    "$m\\times n$",
+    "$A$",
+    "$n\\times m$",
+    "$\\transpose{A}$",
+    "<equation>\n\\matrixentry{\\transpose{A}}{ij}=\\matrixentry{A}{ji},\\quad 1\\leq i\\leq n,\\,1\\leq j\\leq m.\n</equation>",
+    "$\\transpose{A}$"
+  ],
+  "MATH_BEEZER_DEF_SYM": [
+    "$A$",
+    "$A=\\transpose{A}$"
+  ],
+  "MATH_BEEZER_THM_SMS": [
+    "$A$",
+    "$A$"
+  ],
+  "MATH_BEEZER_THM_TMA": [
+    "$A$",
+    "$B$",
+    "$m\\times n$",
+    "$\\transpose{(A+B)}=\\transpose{A}+\\transpose{B}$"
+  ],
+  "MATH_BEEZER_THM_TMSM": [
+    "$\\alpha\\in\\complex{\\null}$",
+    "$A$",
+    "$m\\times n$",
+    "$\\transpose{(\\alpha A)}=\\alpha\\transpose{A}$"
+  ],
+  "MATH_BEEZER_THM_TT": [
+    "$A$",
+    "$m\\times n$",
+    "$\\transpose{\\left(\\transpose{A}\\right)}=A$"
+  ],
+  "MATH_BEEZER_DEF_CCM": [
+    "$A$",
+    "$m\\times n$",
+    "$A$",
+    "$\\conjugate{A}$",
+    "$m\\times n$",
+    "<equation>\n\\matrixentry{\\conjugate{A}}{ij}=\\conjugate{\\matrixentry{A}{ij}}\n</equation>",
+    "$\\conjugate{A}$"
+  ],
+  "MATH_BEEZER_THM_CRMA": [
+    "$A$",
+    "$B$",
+    "$m\\times n$",
+    "$\\conjugate{A+B}=\\conjugate{A}+\\conjugate{B}$"
+  ],
+  "MATH_BEEZER_THM_CRMSM": [
+    "$\\alpha\\in\\complex{\\null}$",
+    "$A$",
+    "$m\\times n$",
+    "$\\conjugate{\\alpha A}=\\conjugate{\\alpha}\\conjugate{A}$"
+  ],
+  "MATH_BEEZER_THM_CCM": [
+    "$A$",
+    "$m\\times n$",
+    "$\\conjugate{\\left(\\conjugate{A}\\right)}=A$"
+  ],
+  "MATH_BEEZER_THM_MCT": [
+    "$A$",
+    "$m\\times n$",
+    "$\\conjugate{\\left(\\transpose{A}\\right)}=\\transpose{\\left(\\conjugate{A}\\right)}$"
+  ],
+  "MATH_BEEZER_DEF_A": [
+    "$A$",
+    "$\\adjoint{A}=\\transpose{\\left(\\conjugate{A}\\right)}$",
+    "$\\adjoint{A}$"
+  ],
+  "MATH_BEEZER_THM_AMA": [
+    "$A$",
+    "$B$",
+    "$\\adjoint{\\left(A+B\\right)}=\\adjoint{A}+\\adjoint{B}$"
+  ],
+  "MATH_BEEZER_THM_AMSM": [
+    "$\\alpha\\in\\complexes$",
+    "$A$",
+    "$\\adjoint{\\left(\\alpha A\\right)}=\\conjugate{\\alpha}\\adjoint{A}$"
+  ],
+  "MATH_BEEZER_THM_AA": [
+    "$A$",
+    "$\\adjoint{\\left(\\adjoint{A}\\right)}=A$"
+  ],
+  "MATH_BEEZER_DEF_MVP": [
+    "$A$",
+    "$m\\times n$",
+    "$\\vectorlist{A}{n}$",
+    "$\\vect{u}$",
+    "$n$",
+    "$A$",
+    "$\\vect{u}$",
+    "<equation>\nA\\vect{u}=\n\\vectorentry{\\vect{u}}{1}\\vect{A}_1+\n\\vectorentry{\\vect{u}}{2}\\vect{A}_2+\n\\vectorentry{\\vect{u}}{3}\\vect{A}_3+\n\\cdots+\n\\vectorentry{\\vect{u}}{n}\\vect{A}_n\n</equation>",
+    "$A\\vect{u}$"
+  ],
+  "MATH_BEEZER_THM_SLEMM": [
+    "$\\linearsystem{A}{\\vect{b}}$",
+    "$\\vect{x}$",
+    "$A\\vect{x}=\\vect{b}$"
+  ],
+  "MATH_BEEZER_THM_EMMVP": [
+    "$A$",
+    "$B$",
+    "$m\\times n$",
+    "$A\\vect{x}=B\\vect{x}$",
+    "$\\vect{x}\\in\\complex{n}$",
+    "$A=B$"
+  ],
+  "MATH_BEEZER_DEF_MM": [
+    "$A$",
+    "$m\\times n$",
+    "$\\vectorlist{B}{p}$",
+    "$n\\times p$",
+    "$B$",
+    "$A$",
+    "$B$",
+    "$m\\times p$",
+    "$i$",
+    "$A\\vect{B}_i$",
+    "<equation>\nAB=A\\matrixcolumns{B}{p}=\\left[A\\vect{B}_1|A\\vect{B}_2|A\\vect{B}_3|\\ldots|A\\vect{B}_p\\right].\n</equation>",
+    "$AB$"
+  ],
+  "MATH_BEEZER_THM_EMP": [
+    "$A$",
+    "$m\\times n$",
+    "$B$",
+    "$n\\times p$",
+    "$1\\leq i\\leq m$",
+    "$1\\leq j\\leq p$",
+    "$AB$",
+    "<alignmath>\n\\matrixentry{AB}{ij}\n<![CDATA[&=]]>\n\\matrixentry{A}{i1}\\matrixentry{B}{1j}+\n\\matrixentry{A}{i2}\\matrixentry{B}{2j}+\n\\matrixentry{A}{i3}\\matrixentry{B}{3j}+\n\\cdots+\n\\matrixentry{A}{in}\\matrixentry{B}{nj}\\\\\n<![CDATA[&=]]>\n\\sum_{k=1}^{n}\\matrixentry{A}{ik}\\matrixentry{B}{kj}\n</alignmath>"
+  ],
+  "MATH_BEEZER_THM_MMZM": [
+    "$A$",
+    "$m\\times n$",
+    "$A\\zeromatrix_{n\\times p}=\\zeromatrix_{m\\times p}$",
+    "$\\zeromatrix_{p\\times m}A=\\zeromatrix_{p\\times n}$"
+  ],
+  "MATH_BEEZER_THM_MMIM": [
+    "$A$",
+    "$m\\times n$",
+    "$AI_n=A$",
+    "$I_mA=A$"
+  ],
+  "MATH_BEEZER_THM_MMDAA": [
+    "$A$",
+    "$m\\times n$",
+    "$B$",
+    "$C$",
+    "$n\\times p$",
+    "$D$",
+    "$p\\times s$",
+    "$A(B+C)=AB+AC$",
+    "$(B+C)D=BD+CD$"
+  ],
+  "MATH_BEEZER_THM_MMSMM": [
+    "$A$",
+    "$m\\times n$",
+    "$B$",
+    "$n\\times p$",
+    "$\\alpha$",
+    "$\\alpha(AB)=(\\alpha A)B=A(\\alpha B)$"
+  ],
+  "MATH_BEEZER_THM_MMA": [
+    "$A$",
+    "$m\\times n$",
+    "$B$",
+    "$n\\times p$",
+    "$D$",
+    "$p\\times s$",
+    "$A(BD)=(AB)D$"
+  ],
+  "MATH_BEEZER_THM_MMIP": [
+    "$\\vect{u},\\,\\vect{v}\\in\\complex{m}$",
+    "$m\\times 1$",
+    "<alignmath>\n\\innerproduct{\\vect{u}}{\\vect{v}}\n<![CDATA[&=\\transpose{\\conjugate{\\vect{u}}}\\vect{v}]]>\n<![CDATA[=\\adjoint{\\vect{u}}\\vect{v}]]>\n</alignmath>"
+  ],
+  "MATH_BEEZER_THM_MMCC": [
+    "$A$",
+    "$m\\times n$",
+    "$B$",
+    "$n\\times p$",
+    "$\\conjugate{AB}=\\conjugate{A}\\,\\conjugate{B}$"
+  ],
+  "MATH_BEEZER_THM_MMT": [
+    "$A$",
+    "$m\\times n$",
+    "$B$",
+    "$n\\times p$",
+    "$\\transpose{(AB)}=\\transpose{B}\\transpose{A}$"
+  ],
+  "MATH_BEEZER_THM_MMAD": [
+    "$A$",
+    "$m\\times n$",
+    "$B$",
+    "$n\\times p$",
+    "$\\adjoint{(AB)}=\\adjoint{B}\\adjoint{A}$"
+  ],
+  "MATH_BEEZER_THM_AIP": [
+    "$A$",
+    "$m\\times n$",
+    "$\\vect{x}\\in\\complex{n}$",
+    "$\\vect{y}\\in\\complex{m}$",
+    "$\\innerproduct{A\\vect{x}}{\\vect{y}}=\\innerproduct{\\vect{x}}{\\adjoint{A}\\vect{y}}$"
+  ],
+  "MATH_BEEZER_DEF_HM": [
+    "$A$",
+    "$A=\\adjoint{A}$"
+  ],
+  "MATH_BEEZER_THM_HMIP": [
+    "$A$",
+    "$n$",
+    "$A$",
+    "$\\innerproduct{A\\vect{x}}{\\vect{y}}=\\innerproduct{\\vect{x}}{A\\vect{y}}$",
+    "$\\vect{x},\\,\\vect{y}\\in\\complex{n}$"
+  ],
+  "MATH_BEEZER_DEF_MI": [
+    "$A$",
+    "$B$",
+    "$n$",
+    "$AB=I_n$",
+    "$BA=I_n$",
+    "$A$",
+    "$B$",
+    "$A$",
+    "$B=\\inverse{A}$",
+    "$\\inverse{A}$"
+  ],
+  "MATH_BEEZER_THM_TTMI": [
+    "<equation>\nA=\n\\begin{bmatrix}\n<![CDATA[a&b\\\\]]>\n<![CDATA[c&d]]>\n\\end{bmatrix}\n</equation>",
+    "$A$",
+    "$ad-bc\\neq 0$",
+    "$A$",
+    "<equation>\n\\inverse{A}=\\frac{1}{ad-bc}\n\\begin{bmatrix}\n<![CDATA[d&-b\\\\]]>\n<![CDATA[-c&a]]>\n\\end{bmatrix}\n</equation>"
+  ],
+  "MATH_BEEZER_THM_CINM": [
+    "$A$",
+    "$n$",
+    "$n\\times 2n$",
+    "$M$",
+    "$n\\times n$",
+    "$I_n$",
+    "$A$",
+    "$N$",
+    "$M$",
+    "$J$",
+    "$n$",
+    "$N$",
+    "$AJ=I_n$"
+  ],
+  "MATH_BEEZER_THM_MIU": [
+    "$A$",
+    "$\\inverse{A}$"
+  ],
+  "MATH_BEEZER_THM_SS": [
+    "$A$",
+    "$B$",
+    "$n$",
+    "$AB$",
+    "$\\inverse{(AB)}=\\inverse{B}\\inverse{A}$"
+  ],
+  "MATH_BEEZER_THM_MIMI": [
+    "$A$",
+    "$\\inverse{A}$",
+    "$\\inverse{(\\inverse{A})}=A$"
+  ],
+  "MATH_BEEZER_THM_MIT": [
+    "$A$",
+    "$\\transpose{A}$",
+    "$\\inverse{(\\transpose{A})}=\\transpose{(\\inverse{A})}$"
+  ],
+  "MATH_BEEZER_THM_MISM": [
+    "$A$",
+    "$\\alpha$",
+    "$\\inverse{\\left(\\alpha A\\right)}=\\frac{1}{\\alpha}\\inverse{A}$",
+    "$\\alpha A$"
+  ],
+  "MATH_BEEZER_THM_NPNT": [
+    "$A$",
+    "$B$",
+    "$n$",
+    "$AB$",
+    "$A$",
+    "$B$"
+  ],
+  "MATH_BEEZER_THM_OSIS": [
+    "$A$",
+    "$B$",
+    "$n$",
+    "$AB=I_n$",
+    "$BA=I_n$"
+  ],
+  "MATH_BEEZER_THM_NI": [
+    "$A$",
+    "$A$",
+    "$A$"
+  ],
+  "MATH_BEEZER_THM_NME3": [
+    "$A$",
+    "$n$",
+    "$A$",
+    "$A$",
+    "$A$",
+    "$\\nsp{A}=\\set{\\zerovector}$",
+    "$\\linearsystem{A}{\\vect{b}}$",
+    "$\\vect{b}$",
+    "$A$",
+    "$A$"
+  ],
+  "MATH_BEEZER_THM_SNCM": [
+    "$A$",
+    "$\\linearsystem{A}{\\vect{b}}$",
+    "$\\inverse{A}\\vect{b}$"
+  ],
+  "MATH_BEEZER_DEF_UM": [
+    "$U$",
+    "$n$",
+    "$\\adjoint{U}U=I_n$",
+    "$U$"
+  ],
+  "MATH_BEEZER_THM_UMI": [
+    "$U$",
+    "$n$",
+    "$U$",
+    "$\\inverse{U}=\\adjoint{U}$"
+  ],
+  "MATH_BEEZER_THM_CUMOS": [
+    "$S=\\set{\\vectorlist{A}{n}}$",
+    "$A$",
+    "$n$",
+    "$A$",
+    "$S$"
+  ],
+  "MATH_BEEZER_THM_UMPIP": [
+    "$U$",
+    "$n$",
+    "$\\vect{u}$",
+    "$\\vect{v}$",
+    "$\\complex{n}$",
+    "<alignmath>\n<![CDATA[\\innerproduct{U\\vect{u}}{U\\vect{v}}&=\\innerproduct{\\vect{u}}{\\vect{v}}]]>\n<![CDATA[&]]>\n<![CDATA[&\\text{and}]]>\n<![CDATA[&]]>\n<![CDATA[\\norm{U\\vect{v}}&=\\norm{\\vect{v}}]]>\n</alignmath>"
+  ],
+  "MATH_BEEZER_DEF_CSM": [
+    "$A$",
+    "$m\\times n$",
+    "$\\vectorlist{A}{n}$",
+    "$A$",
+    "$\\csp{A}$",
+    "$\\complex{m}$",
+    "$A$",
+    "<equation>\n\\csp{A}=\\spn{\\set{\\vectorlist{A}{n}}}\n</equation>",
+    "$\\csp{A}$"
+  ],
+  "MATH_BEEZER_THM_CSCS": [
+    "$A$",
+    "$m\\times n$",
+    "$\\vect{b}$",
+    "$m$",
+    "$\\vect{b}\\in\\csp{A}$",
+    "$\\linearsystem{A}{\\vect{b}}$"
+  ],
+  "MATH_BEEZER_THM_BCS": [
+    "$A$",
+    "$m\\times n$",
+    "$\\vectorlist{A}{n}$",
+    "$B$",
+    "$r$",
+    "$D=\\{d_1,\\,d_2,\\,d_3,\\,\\ldots,\\,d_r\\}$",
+    "$B$",
+    "$T=\\set{\\vect{A}_{d_1},\\,\\vect{A}_{d_2},\\,\\vect{A}_{d_3},\\,\\ldots,\\,\\vect{A}_{d_r}}$",
+    "$T$",
+    "$\\csp{A}=\\spn{T}$"
+  ],
+  "MATH_BEEZER_THM_CSNM": [
+    "$A$",
+    "$n$",
+    "$A$",
+    "$\\csp{A}=\\complex{n}$"
+  ],
+  "MATH_BEEZER_THM_NME4": [
+    "$A$",
+    "$n$",
+    "$A$",
+    "$A$",
+    "$A$",
+    "$\\nsp{A}=\\set{\\zerovector}$",
+    "$\\linearsystem{A}{\\vect{b}}$",
+    "$\\vect{b}$",
+    "$A$",
+    "$A$",
+    "$A$",
+    "$\\complex{n}$",
+    "$\\csp{A}=\\complex{n}$"
+  ],
+  "MATH_BEEZER_DEF_RSM": [
+    "$A$",
+    "$m\\times n$",
+    "$A$",
+    "$\\rsp{A}$",
+    "$\\transpose{A}$",
+    "$\\rsp{A}=\\csp{\\transpose{A}}$",
+    "$\\rsp{A}$"
+  ],
+  "MATH_BEEZER_THM_REMRS": [
+    "$A$",
+    "$B$",
+    "$\\rsp{A}=\\rsp{B}$"
+  ],
+  "MATH_BEEZER_THM_BRS": [
+    "$A$",
+    "$B$",
+    "$S$",
+    "$\\transpose{B}$",
+    "$\\rsp{A}=\\spn{S}$",
+    "$S$"
+  ],
+  "MATH_BEEZER_THM_CSRST": [
+    "$A$",
+    "$\\csp{A}=\\rsp{\\transpose{A}}$"
+  ],
+  "MATH_BEEZER_DEF_LNS": [
+    "$A$",
+    "$m\\times n$",
+    "$\\lns{A}=\\nsp{\\transpose{A}}\\subseteq\\complex{m}$",
+    "$\\lns{A}$"
+  ],
+  "MATH_BEEZER_DEF_EEF": [
+    "$A$",
+    "$m\\times n$",
+    "$A$",
+    "$m\\times m$",
+    "$m\\times (n + m)$",
+    "$M$",
+    "$M$",
+    "$N$",
+    "$N$",
+    "$A$",
+    "$B$",
+    "$C$",
+    "$J$",
+    "$K$",
+    "$L$",
+    "$N$",
+    "$B$",
+    "$m\\times n$",
+    "$n$",
+    "$N$",
+    "$J$",
+    "$m\\times m$",
+    "$m$",
+    "$N$",
+    "$B$",
+    "$r$",
+    "$N$",
+    "$C$",
+    "$r\\times n$",
+    "$B$",
+    "$K$",
+    "$r\\times m$",
+    "$r$",
+    "$J$",
+    "$L$",
+    "$(m-r)\\times m$",
+    "$m-r$",
+    "$J$",
+    "<equation>\nM=[A\\vert I_m]\n\\rref\nN=[B\\vert J]\n=\n<![CDATA[\\left[\\begin{array}{c|c}C&K\\\\\\hline0&L\\end{array}\\right]]]>\n</equation>"
+  ],
+  "MATH_BEEZER_THM_PEEF": [
+    "$A$",
+    "$m\\times n$",
+    "$N$",
+    "$J$",
+    "$B=JA$",
+    "$\\vect{x}\\in\\complex{n}$",
+    "$\\vect{y}\\in\\complex{m}$",
+    "$A\\vect{x}=\\vect{y}$",
+    "$B\\vect{x}=J\\vect{y}$",
+    "$C$",
+    "$r$",
+    "$L$",
+    "$m-r$"
+  ],
+  "MATH_BEEZER_THM_FS": [
+    "$A$",
+    "$m\\times n$",
+    "$N$",
+    "$A$",
+    "$r$",
+    "$C$",
+    "$N$",
+    "$r$",
+    "$n$",
+    "$L$",
+    "$N$",
+    "$m$",
+    "$m-r$",
+    "$A$",
+    "$C$",
+    "$\\nsp{A}=\\nsp{C}$",
+    "$A$",
+    "$C$",
+    "$\\rsp{A}=\\rsp{C}$",
+    "$A$",
+    "$L$",
+    "$\\csp{A}=\\nsp{L}$",
+    "$A$",
+    "$L$",
+    "$\\lns{A}=\\rsp{L}$"
+  ],
+  "MATH_BEEZER_DEF_VS": [
+    "$V$",
+    "$V$",
+    "$V$",
+    "$V$",
+    "$\\complexes$",
+    "$\\vect{u},\\,\\vect{v}\\in V$",
+    "$\\vect{u}+\\vect{v}\\in V$",
+    "$\\alpha\\in\\complex{\\null}$",
+    "$\\vect{u}\\in V$",
+    "$\\alpha\\vect{u}\\in V$",
+    "$\\vect{u},\\,\\vect{v}\\in V$",
+    "$\\vect{u}+\\vect{v}=\\vect{v}+\\vect{u}$",
+    "$\\vect{u},\\,\\vect{v},\\,\\vect{w}\\in V$",
+    "$\\vect{u}+\\left(\\vect{v}+\\vect{w}\\right)=\\left(\\vect{u}+\\vect{v}\\right)+\\vect{w}$",
+    "$\\zerovector$",
+    "$\\vect{u}+\\zerovector=\\vect{u}$",
+    "$\\vect{u}\\in V$",
+    "$\\vect{u}\\in V$",
+    "$\\vect{-u}\\in V$",
+    "$\\vect{u}+ (\\vect{-u})=\\zerovector$",
+    "$\\alpha,\\,\\beta\\in\\complex{\\null}$",
+    "$\\vect{u}\\in V$",
+    "$\\alpha(\\beta\\vect{u})=(\\alpha\\beta)\\vect{u}$",
+    "$\\alpha\\in\\complex{\\null}$",
+    "$\\vect{u},\\,\\vect{v}\\in V$",
+    "$\\alpha(\\vect{u}+\\vect{v})=\\alpha\\vect{u}+\\alpha\\vect{v}$",
+    "$\\alpha,\\,\\beta\\in\\complex{\\null}$",
+    "$\\vect{u}\\in V$",
+    "$(\\alpha+\\beta)\\vect{u}=\\alpha\\vect{u}+\\beta\\vect{u}$",
+    "$\\vect{u}\\in V$",
+    "$1\\vect{u}=\\vect{u}$",
+    "$V$"
+  ],
+  "MATH_BEEZER_THM_ZVU": [
+    "$V$",
+    "$\\zerovector$"
+  ],
+  "MATH_BEEZER_THM_AIU": [
+    "$V$",
+    "$\\vect{u}\\in V$",
+    "$\\vect{-u}$"
+  ],
+  "MATH_BEEZER_THM_ZSSM": [
+    "$V$",
+    "$\\vect{u}\\in V$",
+    "$0\\vect{u}=\\zerovector$"
+  ],
+  "MATH_BEEZER_THM_ZVSM": [
+    "$V$",
+    "$\\alpha\\in\\complex{\\null}$",
+    "$\\alpha\\zerovector=\\zerovector$"
+  ],
+  "MATH_BEEZER_THM_AISM": [
+    "$V$",
+    "$\\vect{u}\\in V$",
+    "$\\vect{-u}=(-1)\\vect{u}$"
+  ],
+  "MATH_BEEZER_THM_SMEZV": [
+    "$V$",
+    "$\\alpha\\in\\complex{\\null}$",
+    "$\\alpha\\vect{u}=\\zerovector$",
+    "$\\alpha=0$",
+    "$\\vect{u}=\\zerovector$"
+  ],
+  "MATH_BEEZER_DEF_S": [
+    "$V$",
+    "$W$",
+    "$W$",
+    "$V$",
+    "$W\\subseteq V$",
+    "$W$",
+    "$V$"
+  ],
+  "MATH_BEEZER_THM_TSS": [
+    "$V$",
+    "$W$",
+    "$V$",
+    "$W\\subseteq V$",
+    "$W$",
+    "$V$",
+    "$W$",
+    "$W$",
+    "$W\\neq\\emptyset$",
+    "$\\vect{x}\\in W$",
+    "$\\vect{y}\\in W$",
+    "$\\vect{x}+\\vect{y}\\in W$",
+    "$\\alpha\\in\\complex{\\null}$",
+    "$\\vect{x}\\in W$",
+    "$\\alpha\\vect{x}\\in W$"
+  ],
+  "MATH_BEEZER_DEF_TS": [
+    "$V$",
+    "$V$",
+    "$\\set{\\zerovector}$"
+  ],
+  "MATH_BEEZER_THM_NSMS": [
+    "$A$",
+    "$m\\times n$",
+    "$A$",
+    "$\\nsp{A}$",
+    "$\\complex{n}$"
+  ],
+  "MATH_BEEZER_DEF_LC": [
+    "$V$",
+    "$n$",
+    "$\\vectorlist{u}{n}$",
+    "$n$",
+    "$\\alpha_1,\\,\\alpha_2,\\,\\alpha_3,\\,\\ldots,\\,\\alpha_n$",
+    "<equation>\n\\lincombo{\\alpha}{u}{n}.\n</equation>"
+  ],
+  "MATH_BEEZER_DEF_SS": [
+    "$V$",
+    "$S=\\{\\vectorlist{u}{t}\\}$",
+    "$\\spn{S}$",
+    "$\\vectorlist{u}{t}$",
+    "<alignmath>\n<![CDATA[\\spn{S}&=\\setparts{\\lincombo{\\alpha}{u}{t}}{\\alpha_i\\in\\complex{\\null},\\,1\\leq i\\leq t}\\\\]]>\n<![CDATA[&=\\setparts{\\sum_{i=1}^{t}\\alpha_i\\vect{u}_i}{\\alpha_i\\in\\complex{\\null},\\,1\\leq i\\leq t}]]>\n</alignmath>"
+  ],
+  "MATH_BEEZER_THM_SSS": [
+    "$V$",
+    "$S=\\{\\vectorlist{u}{t}\\}\\subseteq V$",
+    "$\\spn{S}$"
+  ],
+  "MATH_BEEZER_THM_CSMS": [
+    "$A$",
+    "$m\\times n$",
+    "$\\csp{A}$",
+    "$\\complex{m}$"
+  ],
+  "MATH_BEEZER_THM_RSMS": [
+    "$A$",
+    "$m\\times n$",
+    "$\\rsp{A}$",
+    "$\\complex{n}$"
+  ],
+  "MATH_BEEZER_THM_LNSMS": [
+    "$A$",
+    "$m\\times n$",
+    "$\\lns{A}$",
+    "$\\complex{m}$"
+  ],
+  "MATH_BEEZER_DEF_RLD": [
+    "$V$",
+    "$S=\\set{\\vectorlist{u}{n}}$",
+    "<equation>\n\\lincombo{\\alpha}{u}{n}=\\zerovector\n</equation>",
+    "$S$",
+    "$\\alpha_i=0$",
+    "$1\\leq i\\leq n$",
+    "$S$"
+  ],
+  "MATH_BEEZER_DEF_LI": [
+    "$V$",
+    "$S=\\set{\\vectorlist{u}{n}}$",
+    "$V$",
+    "$S$",
+    "$S$",
+    "$S$"
+  ],
+  "MATH_BEEZER_DEF_SSVS": [
+    "$V$",
+    "$S$",
+    "$V$",
+    "$V$",
+    "$\\spn{S}=V$",
+    "$S$",
+    "$V$"
+  ],
+  "MATH_BEEZER_THM_VRRB": [
+    "$V$",
+    "$B=\\set{\\vectorlist{v}{m}}$",
+    "$V$",
+    "$\\vect{w}$",
+    "$V$",
+    "$a_1,\\,a_2,\\,a_3,\\,\\ldots,\\,a_m$",
+    "<equation>\n\\vect{w}=\\lincombo{a}{v}{m}.\n</equation>"
+  ],
+  "MATH_BEEZER_DEF_B": [
+    "$V$",
+    "$S\\subseteq V$",
+    "$V$",
+    "$V$"
+  ],
+  "MATH_BEEZER_THM_SUVB": [
+    "$\\complex{m}$",
+    "$B=\\setparts{\\vect{e}_i}{1\\leq i\\leq m}$",
+    "$\\complex{m}$"
+  ],
+  "MATH_BEEZER_THM_CNMB": [
+    "$A$",
+    "$m$",
+    "$A$",
+    "$\\complex{m}$",
+    "$A$"
+  ],
+  "MATH_BEEZER_THM_NME5": [
+    "$A$",
+    "$n$",
+    "$A$",
+    "$A$",
+    "$A$",
+    "$\\nsp{A}=\\set{\\zerovector}$",
+    "$\\linearsystem{A}{\\vect{b}}$",
+    "$\\vect{b}$",
+    "$A$",
+    "$A$",
+    "$A$",
+    "$\\complex{n}$",
+    "$\\csp{A}=\\complex{n}$",
+    "$A$",
+    "$\\complex{n}$"
+  ],
+  "MATH_BEEZER_THM_COB": [
+    "$B=\\set{\\vectorlist{v}{p}}$",
+    "$W$",
+    "$\\complex{m}$",
+    "$\\vect{w}\\in W$",
+    "<equation>\n\\vect{w}=\n\\innerproduct{\\vect{v}_1}{\\vect{w}}\\vect{v}_1+\n\\innerproduct{\\vect{v}_2}{\\vect{w}}\\vect{v}_2+\n\\innerproduct{\\vect{v}_3}{\\vect{w}}\\vect{v}_3+\n\\cdots+\n\\innerproduct{\\vect{v}_p}{\\vect{w}}\\vect{v}_p\n</equation>"
+  ],
+  "MATH_BEEZER_THM_UMCOB": [
+    "$A$",
+    "$n\\times n$",
+    "$B=\\set{\\vectorlist{x}{n}}$",
+    "$\\complex{n}$",
+    "<alignmath>\n<![CDATA[C&=\\set{A\\vect{x}_1,\\,A\\vect{x}_2,\\,A\\vect{x}_3,\\,\\dots,\\,A\\vect{x}_n}]]>\n</alignmath>",
+    "$A$",
+    "$C$",
+    "$\\complex{n}$"
+  ],
+  "MATH_BEEZER_DEF_D": [
+    "$V$",
+    "$\\set{\\vectorlist{v}{t}}$",
+    "$V$",
+    "$V$",
+    "$\\dimension{V}=t$",
+    "$V$",
+    "$V$",
+    "$\\dimension{V}$"
+  ],
+  "MATH_BEEZER_THM_SSLD": [
+    "$S=\\set{\\vectorlist{v}{t}}$",
+    "$V$",
+    "$t+1$",
+    "$V$"
+  ],
+  "MATH_BEEZER_THM_BIS": [
+    "$V$",
+    "$B$",
+    "$C$",
+    "$B$",
+    "$C$"
+  ],
+  "MATH_BEEZER_THM_DCM": [
+    "$\\complex{m}$",
+    "$\\complex{m}$",
+    "$m$"
+  ],
+  "MATH_BEEZER_THM_DP": [
+    "$P_n$",
+    "$P_{n}$",
+    "$n+1$"
+  ],
+  "MATH_BEEZER_THM_DM": [
+    "$M_{mn}$",
+    "$M_{mn}$",
+    "$mn$"
+  ],
+  "MATH_BEEZER_DEF_NOM": [
+    "$A$",
+    "$m\\times n$",
+    "$A$",
+    "$A$",
+    "$\\nullity{A}=\\dimension{\\nsp{A}}$",
+    "$\\nullity{A}$"
+  ],
+  "MATH_BEEZER_DEF_ROM": [
+    "$A$",
+    "$m\\times n$",
+    "$A$",
+    "$A$",
+    "$\\rank{A}=\\dimension{\\csp{A}}$",
+    "$\\rank{A}$"
+  ],
+  "MATH_BEEZER_THM_CRN": [
+    "$A$",
+    "$m\\times n$",
+    "$B$",
+    "$r$",
+    "$\\rank{A}=r$",
+    "$\\nullity{A}=n-r$"
+  ],
+  "MATH_BEEZER_THM_RPNC": [
+    "$A$",
+    "$m\\times n$",
+    "$\\rank{A}+\\nullity{A}=n$"
+  ],
+  "MATH_BEEZER_THM_RNNM": [
+    "$A$",
+    "$n$",
+    "$A$",
+    "$n$",
+    "$\\rank{A}=n$",
+    "$A$",
+    "$\\nullity{A}=0$"
+  ],
+  "MATH_BEEZER_THM_NME6": [
+    "$A$",
+    "$n$",
+    "$A$",
+    "$A$",
+    "$A$",
+    "$\\nsp{A}=\\set{\\zerovector}$",
+    "$\\linearsystem{A}{\\vect{b}}$",
+    "$\\vect{b}$",
+    "$A$",
+    "$A$",
+    "$A$",
+    "$\\complex{n}$",
+    "$\\csp{A}=\\complex{n}$",
+    "$A$",
+    "$\\complex{n}$",
+    "$A$",
+    "$n$",
+    "$\\rank{A}=n$",
+    "$A$",
+    "$\\nullity{A}=0$"
+  ],
+  "MATH_BEEZER_THM_ELIS": [
+    "$V$",
+    "$S$",
+    "$V$",
+    "$\\vect{w}$",
+    "$\\vect{w}\\not\\in\\spn{S}$",
+    "$S^\\prime=S\\cup\\set{\\vect{w}}$"
+  ],
+  "MATH_BEEZER_THM_G": [
+    "$V$",
+    "$t$",
+    "$S=\\set{\\vectorlist{v}{m}}$",
+    "$V$",
+    "$m>t$",
+    "$S$",
+    "$<![CDATA[m<t]]>$",
+    "$S$",
+    "$V$",
+    "$m=t$",
+    "$S$",
+    "$S$",
+    "$V$",
+    "$m=t$",
+    "$S$",
+    "$V$",
+    "$S$"
+  ],
+  "MATH_BEEZER_THM_PSSD": [
+    "$U$",
+    "$V$",
+    "$W$",
+    "$U\\subsetneq V$",
+    "$\\dimension{U}\\lt\\dimension{V}$"
+  ],
+  "MATH_BEEZER_THM_EDYES": [
+    "$U$",
+    "$V$",
+    "$W$",
+    "$U\\subseteq V$",
+    "$\\dimension{U}=\\dimension{V}$",
+    "$U=V$"
+  ],
+  "MATH_BEEZER_THM_RMRT": [
+    "$A$",
+    "$m\\times n$",
+    "$\\rank{A}=\\rank{\\transpose{A}}$"
+  ],
+  "MATH_BEEZER_THM_DFS": [
+    "$A$",
+    "$m\\times n$",
+    "$B$",
+    "$r$",
+    "$\\dimension{\\nsp{A}}=n-r$",
+    "$\\dimension{\\csp{A}}=r$",
+    "$\\dimension{\\rsp{A}}=r$",
+    "$\\dimension{\\lns{A}}=m-r$"
+  ],
+  "MATH_BEEZER_DEF_ELEM": [
+    "$i\\neq j$",
+    "$\\elemswap{i}{j}$",
+    "$n$",
+    "<equation>\n\\matrixentry{\\elemswap{i}{j}}{k\\ell}=\n\\begin{cases}\n<![CDATA[0 & k\\neq i, k\\neq j, \\ell\\neq k\\\\]]>\n<![CDATA[1 & k\\neq i, k\\neq j, \\ell=k\\\\]]>\n<![CDATA[0 & k=i, \\ell\\neq j\\\\]]>\n<![CDATA[1 & k=i, \\ell=j\\\\]]>\n<![CDATA[0 & k=j, \\ell\\neq i\\\\]]>\n<![CDATA[1 & k=j, \\ell=i]]>\n\\end{cases}\n</equation>",
+    "$\\alpha\\neq 0$",
+    "$\\elemmult{\\alpha}{i}$",
+    "$n$",
+    "<equation>\n\\matrixentry{\\elemmult{\\alpha}{i}}{k\\ell}=\n\\begin{cases}\n<![CDATA[0        & \\ell\\neq k\\\\]]>\n<![CDATA[1        & k\\neq i, \\ell=k\\\\]]>\n<![CDATA[\\alpha & k=i, \\ell=i]]>\n\\end{cases}\n</equation>",
+    "$i\\neq j$",
+    "$\\elemadd{\\alpha}{i}{j}$",
+    "$n$",
+    "<equation>\n\\matrixentry{\\elemadd{\\alpha}{i}{j}}{k\\ell}=\n\\begin{cases}\n<![CDATA[0 & k\\neq j, \\ell\\neq k\\\\]]>\n<![CDATA[1 & k\\neq j, \\ell=k\\\\]]>\n<![CDATA[0 & k=j, \\ell\\neq i, \\ell\\neq j\\\\]]>\n<![CDATA[1 & k=j, \\ell=j\\\\]]>\n<![CDATA[\\alpha & k=j, \\ell=i\\\\]]>\n\\end{cases}\n</equation>",
+    "$\\elemswap{i}{j}$",
+    "$\\elemmult{\\alpha}{i}$",
+    "$\\elemadd{\\alpha}{i}{j}$"
+  ],
+  "MATH_BEEZER_THM_EMDRO": [
+    "$A$",
+    "$m\\times n$",
+    "$B$",
+    "$A$",
+    "$m$",
+    "$A$",
+    "$B$",
+    "$i$",
+    "$j$",
+    "$B=\\elemswap{i}{j}A$",
+    "$i$",
+    "$\\alpha$",
+    "$B=\\elemmult{\\alpha}{i}A$",
+    "$i$",
+    "$\\alpha$",
+    "$j$",
+    "$B=\\elemadd{\\alpha}{i}{j}A$"
+  ],
+  "MATH_BEEZER_THM_EMN": [
+    "$E$",
+    "$E$"
+  ],
+  "MATH_BEEZER_THM_NMPEM": [
+    "$A$",
+    "$E_1,\\,E_2,\\,E_3,\\,\\dots,\\,E_t$",
+    "$A=E_1 E_2 E_3\\dots E_t$"
+  ],
+  "MATH_BEEZER_DEF_SM": [
+    "$A$",
+    "$m\\times n$",
+    "$\\submatrix{A}{i}{j}$",
+    "$(m-1)\\times (n-1)$",
+    "$A$",
+    "$i$",
+    "$j$",
+    "$\\submatrix{A}{i}{j}$"
+  ],
+  "MATH_BEEZER_DEF_DM": [
+    "$A$",
+    "$\\detname{A}=\\detbars{A}$",
+    "$\\complex{\\null}$",
+    "$A$",
+    "$1\\times 1$",
+    "$\\detname{A}=\\matrixentry{A}{11}$",
+    "$A$",
+    "$n$",
+    "$n\\geq 2$",
+    "<alignmath>\n<![CDATA[\\detname{A}&=]]>\n\\matrixentry{A}{11}\\detname{\\submatrix{A}{1}{1}}\n-\\matrixentry{A}{12}\\detname{\\submatrix{A}{1}{2}}\n+\\matrixentry{A}{13}\\detname{\\submatrix{A}{1}{3}}-\\\\\n<![CDATA[&\\quad \\matrixentry{A}{14}\\detname{\\submatrix{A}{1}{4}}]]>\n+\\cdots\n+(-1)^{n+1}\\matrixentry{A}{1n}\\detname{\\submatrix{A}{1}{n}}\n</alignmath>",
+    "$\\detbars{A}$",
+    "$\\detname{A}$"
+  ],
+  "MATH_BEEZER_THM_DMST": [
+    "$A=\\begin{bmatrix}a&amp;b\\\\c&amp;d\\end{bmatrix}$",
+    "$\\detname{A}=ad-bc$"
+  ],
+  "MATH_BEEZER_THM_DER": [
+    "$A$",
+    "$n$",
+    "$1\\leq i\\leq n$",
+    "<alignmath>\n<![CDATA[\\detname{A}&=]]>\n(-1)^{i+1}\\matrixentry{A}{i1}\\detname{\\submatrix{A}{i}{1}}+\n(-1)^{i+2}\\matrixentry{A}{i2}\\detname{\\submatrix{A}{i}{2}}\\\\\n<![CDATA[&\\quad+(-1)^{i+3}\\matrixentry{A}{i3}\\detname{\\submatrix{A}{i}{3}}+]]>\n\\cdots+\n(-1)^{i+n}\\matrixentry{A}{in}\\detname{\\submatrix{A}{i}{n}}\n</alignmath>",
+    "$i$"
+  ],
+  "MATH_BEEZER_THM_DT": [
+    "$A$",
+    "$\\detname{\\transpose{A}}=\\detname{A}$"
+  ],
+  "MATH_BEEZER_THM_DEC": [
+    "$A$",
+    "$n$",
+    "$1\\leq j\\leq n$",
+    "<alignmath>\n<![CDATA[\\detname{A}&=]]>\n(-1)^{1+j}\\matrixentry{A}{1j}\\detname{\\submatrix{A}{1}{j}}+\n(-1)^{2+j}\\matrixentry{A}{2j}\\detname{\\submatrix{A}{2}{j}}\\\\\n<![CDATA[&\\quad+(-1)^{3+j}\\matrixentry{A}{3j}\\detname{\\submatrix{A}{3}{j}}+]]>\n\\cdots+\n(-1)^{n+j}\\matrixentry{A}{nj}\\detname{\\submatrix{A}{n}{j}}\n</alignmath>",
+    "$j$"
+  ],
+  "MATH_BEEZER_THM_DZRC": [
+    "$A$",
+    "$\\detname{A}=0$"
+  ],
+  "MATH_BEEZER_THM_DRCS": [
+    "$A$",
+    "$B$",
+    "$A$",
+    "$\\detname{B}=-\\detname{A}$"
+  ],
+  "MATH_BEEZER_THM_DRCM": [
+    "$A$",
+    "$B$",
+    "$A$",
+    "$\\alpha$",
+    "$\\alpha$",
+    "$\\detname{B}=\\alpha\\detname{A}$"
+  ],
+  "MATH_BEEZER_THM_DERC": [
+    "$A$",
+    "$\\detname{A}=0$"
+  ],
+  "MATH_BEEZER_THM_DRCMA": [
+    "$A$",
+    "$B$",
+    "$A$",
+    "$\\alpha$",
+    "$\\alpha$",
+    "$\\detname{B}=\\detname{A}$"
+  ],
+  "MATH_BEEZER_THM_DIM": [
+    "$n\\geq 1$",
+    "$\\detname{I_n}=1$"
+  ],
+  "MATH_BEEZER_THM_DEM": [
+    "$\\detname{\\elemswap{i}{j}}=-1$",
+    "$\\detname{\\elemmult{\\alpha}{i}}=\\alpha$",
+    "$\\detname{\\elemadd{\\alpha}{i}{j}}=1$"
+  ],
+  "MATH_BEEZER_THM_DEMMM": [
+    "$A$",
+    "$n$",
+    "$E$",
+    "$n$",
+    "<equation>\n\\detname{EA}=\\detname{E}\\detname{A}\n</equation>"
+  ],
+  "MATH_BEEZER_THM_SMZD": [
+    "$A$",
+    "$A$",
+    "$\\detname{A}=0$"
+  ],
+  "MATH_BEEZER_THM_NME7": [
+    "$A$",
+    "$n$",
+    "$A$",
+    "$A$",
+    "$A$",
+    "$\\nsp{A}=\\set{\\zerovector}$",
+    "$\\linearsystem{A}{\\vect{b}}$",
+    "$\\vect{b}$",
+    "$A$",
+    "$A$",
+    "$A$",
+    "$\\complex{n}$",
+    "$\\csp{A}=\\complex{n}$",
+    "$A$",
+    "$\\complex{n}$",
+    "$A$",
+    "$n$",
+    "$\\rank{A}=n$",
+    "$A$",
+    "$\\nullity{A}=0$",
+    "$A$",
+    "$\\detname{A}\\neq 0$"
+  ],
+  "MATH_BEEZER_THM_DRMM": [
+    "$A$",
+    "$B$",
+    "$\\detname{AB}=\\detname{A}\\detname{B}$"
+  ],
+  "MATH_BEEZER_DEF_EEM": [
+    "$A$",
+    "$n$",
+    "$\\vect{x}\\neq\\zerovector$",
+    "$\\complex{n}$",
+    "$\\lambda$",
+    "$\\complex{\\null}$",
+    "$\\vect{x}$",
+    "$A$",
+    "$\\lambda$",
+    "<equation>\nA\\vect{x}=\\lambda\\vect{x}\n</equation>"
+  ],
+  "MATH_BEEZER_THM_EMHE": [
+    "$A$",
+    "$A$"
+  ],
+  "MATH_BEEZER_DEF_CP": [
+    "$A$",
+    "$n$",
+    "$A$",
+    "$\\charpoly{A}{x}$",
+    "<equation>\n\\charpoly{A}{x}=\\detname{A-xI_n}\n</equation>"
+  ],
+  "MATH_BEEZER_THM_EMRCP": [
+    "$A$",
+    "$\\lambda$",
+    "$A$",
+    "$\\charpoly{A}{\\lambda}=0$"
+  ],
+  "MATH_BEEZER_DEF_EM": [
+    "$A$",
+    "$\\lambda$",
+    "$A$",
+    "$A$",
+    "$\\lambda$",
+    "$\\eigenspace{A}{\\lambda}$",
+    "$A$",
+    "$\\lambda$"
+  ],
+  "MATH_BEEZER_THM_EMS": [
+    "$A$",
+    "$n$",
+    "$\\lambda$",
+    "$A$",
+    "$\\eigenspace{A}{\\lambda}$",
+    "$\\complex{n}$"
+  ],
+  "MATH_BEEZER_THM_EMNS": [
+    "$A$",
+    "$n$",
+    "$\\lambda$",
+    "$A$",
+    "<equation>\n\\eigenspace{A}{\\lambda}=\\nsp{A-\\lambda I_n}\n</equation>"
+  ],
+  "MATH_BEEZER_DEF_AME": [
+    "$A$",
+    "$\\lambda$",
+    "$A$",
+    "$\\lambda$",
+    "$\\algmult{A}{\\lambda}$",
+    "$(x-\\lambda)$",
+    "$\\charpoly{A}{x}$",
+    "$\\algmult{A}{\\lambda}$"
+  ],
+  "MATH_BEEZER_DEF_GME": [
+    "$A$",
+    "$\\lambda$",
+    "$A$",
+    "$\\lambda$",
+    "$\\geomult{A}{\\lambda}$",
+    "$\\eigenspace{A}{\\lambda}$",
+    "$\\geomult{A}{\\lambda}$"
+  ],
+  "MATH_BEEZER_THM_EDELI": [
+    "$A$",
+    "$n\\times n$",
+    "$S=\\set{\\vectorlist{x}{p}}$",
+    "$\\scalarlist{\\lambda}{p}$",
+    "$\\lambda_i\\neq\\lambda_j$",
+    "$i\\neq j$",
+    "$S$"
+  ],
+  "MATH_BEEZER_THM_SMZE": [
+    "$A$",
+    "$A$",
+    "$\\lambda=0$",
+    "$A$"
+  ],
+  "MATH_BEEZER_THM_NME8": [
+    "$A$",
+    "$n$",
+    "$A$",
+    "$A$",
+    "$A$",
+    "$\\nsp{A}=\\set{\\zerovector}$",
+    "$\\linearsystem{A}{\\vect{b}}$",
+    "$\\vect{b}$",
+    "$A$",
+    "$A$",
+    "$A$",
+    "$\\complex{n}$",
+    "$\\csp{A}=\\complex{n}$",
+    "$A$",
+    "$\\complex{n}$",
+    "$A$",
+    "$n$",
+    "$\\rank{A}=n$",
+    "$A$",
+    "$\\nullity{A}=0$",
+    "$A$",
+    "$\\detname{A}\\neq 0$",
+    "$\\lambda=0$",
+    "$A$"
+  ],
+  "MATH_BEEZER_THM_ESMM": [
+    "$A$",
+    "$\\lambda$",
+    "$A$",
+    "$\\alpha\\lambda$",
+    "$\\alpha A$"
+  ],
+  "MATH_BEEZER_THM_EOMP": [
+    "$A$",
+    "$\\lambda$",
+    "$A$",
+    "$s\\geq 0$",
+    "$\\lambda^s$",
+    "$A^s$"
+  ],
+  "MATH_BEEZER_THM_EPM": [
+    "$A$",
+    "$\\lambda$",
+    "$A$",
+    "$q(x)$",
+    "$x$",
+    "$q(\\lambda)$",
+    "$q(A)$"
+  ],
+  "MATH_BEEZER_THM_EIM": [
+    "$A$",
+    "$\\lambda$",
+    "$A$",
+    "$\\lambda^{-1}$",
+    "$\\inverse{A}$"
+  ],
+  "MATH_BEEZER_THM_ETM": [
+    "$A$",
+    "$\\lambda$",
+    "$A$",
+    "$\\lambda$",
+    "$\\transpose{A}$"
+  ],
+  "MATH_BEEZER_THM_ERMCP": [
+    "$A$",
+    "$\\vect{x}$",
+    "$A$",
+    "$\\lambda$",
+    "$\\conjugate{\\vect{x}}$",
+    "$A$",
+    "$\\conjugate{\\lambda}$"
+  ],
+  "MATH_BEEZER_THM_DCP": [
+    "$A$",
+    "$n$",
+    "$A$",
+    "$\\charpoly{A}{x}$",
+    "$n$"
+  ],
+  "MATH_BEEZER_THM_NEM": [
+    "$\\scalarlist{\\lambda}{k}$",
+    "$A$",
+    "$n$",
+    "<equation>\n\\sum_{i=1}^{k}\\algmult{A}{\\lambda_i}=n\n</equation>"
+  ],
+  "MATH_BEEZER_THM_ME": [
+    "$A$",
+    "$n$",
+    "$\\lambda$",
+    "<equation>\n1\\leq\\geomult{A}{\\lambda}\\leq\\algmult{A}{\\lambda}\\leq n\n</equation>"
+  ],
+  "MATH_BEEZER_THM_MNEM": [
+    "$A$",
+    "$n$",
+    "$A$",
+    "$n$"
+  ],
+  "MATH_BEEZER_THM_HMRE": [
+    "$A$",
+    "$\\lambda$",
+    "$A$",
+    "$\\lambda\\in{\\mathbb R}$"
+  ],
+  "MATH_BEEZER_THM_HMOE": [
+    "$A$",
+    "$\\vect{x}$",
+    "$\\vect{y}$",
+    "$A$",
+    "$\\vect{x}$",
+    "$\\vect{y}$"
+  ],
+  "MATH_BEEZER_DEF_SIM": [
+    "$A$",
+    "$B$",
+    "$n$",
+    "$A$",
+    "$B$",
+    "$n$",
+    "$S$",
+    "$A=\\similar{B}{S}$"
+  ],
+  "MATH_BEEZER_THM_SER": [
+    "$A$",
+    "$B$",
+    "$C$",
+    "$n$",
+    "$A$",
+    "$A$",
+    "$A$",
+    "$B$",
+    "$B$",
+    "$A$",
+    "$A$",
+    "$B$",
+    "$B$",
+    "$C$",
+    "$A$",
+    "$C$"
+  ],
+  "MATH_BEEZER_THM_SMEE": [
+    "$A$",
+    "$B$",
+    "$A$",
+    "$B$",
+    "$\\charpoly{A}{x}=\\charpoly{B}{x}$"
+  ],
+  "MATH_BEEZER_DEF_DIM": [
+    "$A$",
+    "$A$",
+    "$\\matrixentry{A}{ij}=0$",
+    "$i\\neq j$"
+  ],
+  "MATH_BEEZER_DEF_DZM": [
+    "$A$",
+    "$A$",
+    "$A$"
+  ],
+  "MATH_BEEZER_THM_DC": [
+    "$A$",
+    "$n$",
+    "$A$",
+    "$S$",
+    "$n$",
+    "$A$"
+  ],
+  "MATH_BEEZER_THM_DMFE": [
+    "$A$",
+    "$A$",
+    "$\\geomult{A}{\\lambda}=\\algmult{A}{\\lambda}$",
+    "$\\lambda$",
+    "$A$"
+  ],
+  "MATH_BEEZER_THM_DED": [
+    "$A$",
+    "$n$",
+    "$n$",
+    "$A$"
+  ],
+  "MATH_BEEZER_DEF_LT": [
+    "$\\ltdefn{T}{U}{V}$",
+    "$U$",
+    "$V$",
+    "$\\lt{T}{\\vect{u}_1+\\vect{u}_2}=\\lt{T}{\\vect{u}_1}+\\lt{T}{\\vect{u}_2}$",
+    "$\\vect{u}_1,\\,\\vect{u}_2\\in U$",
+    "$\\lt{T}{\\alpha\\vect{u}}=\\alpha\\lt{T}{\\vect{u}}$",
+    "$\\vect{u}\\in U$",
+    "$\\alpha\\in\\complex{\\null}$",
+    "$\\ltdefn{T}{U}{V}$"
+  ],
+  "MATH_BEEZER_THM_LTTZZ": [
+    "$\\ltdefn{T}{U}{V}$",
+    "$\\lt{T}{\\zerovector}=\\zerovector$"
+  ],
+  "MATH_BEEZER_THM_MBLT": [
+    "$A$",
+    "$m\\times n$",
+    "$\\ltdefn{T}{\\complex{n}}{\\complex{m}}$",
+    "$\\lt{T}{\\vect{x}}=A\\vect{x}$",
+    "$T$"
+  ],
+  "MATH_BEEZER_THM_MLTCV": [
+    "$\\ltdefn{T}{\\complex{n}}{\\complex{m}}$",
+    "$m\\times n$",
+    "$A$",
+    "$\\lt{T}{\\vect{x}}=A\\vect{x}$"
+  ],
+  "MATH_BEEZER_THM_LTLC": [
+    "$\\ltdefn{T}{U}{V}$",
+    "$\\vectorlist{u}{t}$",
+    "$U$",
+    "$\\scalarlist{a}{t}$",
+    "$\\complex{\\null}$",
+    "<equation>\n\\lt{T}{\\lincombo{a}{u}{t}}\n=\na_1\\lt{T}{\\vect{u}_1}+\na_2\\lt{T}{\\vect{u}_2}+\na_3\\lt{T}{\\vect{u}_3}+\\cdots+\na_t\\lt{T}{\\vect{u}_t}\n</equation>"
+  ],
+  "MATH_BEEZER_THM_LTDB": [
+    "$U$",
+    "$B=\\set{\\vectorlist{u}{n}}$",
+    "$V$",
+    "$\\vectorlist{v}{n}$",
+    "$\\ltdefn{T}{U}{V}$",
+    "$\\lt{T}{\\vect{u}_i}=\\vect{v}_i$",
+    "$1\\leq i\\leq n$"
+  ],
+  "MATH_BEEZER_DEF_PI": [
+    "$\\ltdefn{T}{U}{V}$",
+    "$\\vect{v}$",
+    "$\\vect{v}$",
+    "$U$",
+    "<equation>\n\\preimage{T}{\\vect{v}}=\\setparts{\\vect{u}\\in U}{\\lt{T}{\\vect{u}}=\\vect{v}}\n</equation>"
+  ],
+  "MATH_BEEZER_DEF_LTA": [
+    "$\\ltdefn{T}{U}{V}$",
+    "$\\ltdefn{S}{U}{V}$",
+    "$\\ltdefn{T+S}{U}{V}$",
+    "<equation>\n\\lt{(T+S)}{\\vect{u}}=\\lt{T}{\\vect{u}}+\\lt{S}{\\vect{u}}\n</equation>"
+  ],
+  "MATH_BEEZER_THM_SLTLT": [
+    "$\\ltdefn{T}{U}{V}$",
+    "$\\ltdefn{S}{U}{V}$",
+    "$\\ltdefn{T+S}{U}{V}$"
+  ],
+  "MATH_BEEZER_DEF_LTSM": [
+    "$\\ltdefn{T}{U}{V}$",
+    "$\\alpha\\in\\complex{\\null}$",
+    "$\\ltdefn{\\alpha T}{U}{V}$",
+    "<equation>\n\\lt{(\\alpha T)}{\\vect{u}}=\\alpha\\lt{T}{\\vect{u}}\n</equation>"
+  ],
+  "MATH_BEEZER_THM_MLTLT": [
+    "$\\ltdefn{T}{U}{V}$",
+    "$\\alpha\\in\\complex{\\null}$",
+    "$\\ltdefn{(\\alpha T)}{U}{V}$"
+  ],
+  "MATH_BEEZER_THM_VSLT": [
+    "$U$",
+    "$V$",
+    "$U$",
+    "$V$",
+    "$\\vslt{U}{V}$"
+  ],
+  "MATH_BEEZER_DEF_LTC": [
+    "$\\ltdefn{T}{U}{V}$",
+    "$\\ltdefn{S}{V}{W}$",
+    "$S$",
+    "$T$",
+    "$\\ltdefn{(\\compose{S}{T})}{U}{W}$",
+    "<equation>\n\\lt{(\\compose{S}{T})}{\\vect{u}}=\\lt{S}{\\lt{T}{\\vect{u}}}\n</equation>"
+  ],
+  "MATH_BEEZER_THM_CLTLT": [
+    "$\\ltdefn{T}{U}{V}$",
+    "$\\ltdefn{S}{V}{W}$",
+    "$\\ltdefn{(\\compose{S}{T})}{U}{W}$"
+  ],
+  "MATH_BEEZER_DEF_ILT": [
+    "$\\ltdefn{T}{U}{V}$",
+    "$T$",
+    "$\\lt{T}{\\vect{x}}=\\lt{T}{\\vect{y}}$",
+    "$\\vect{x}=\\vect{y}$"
+  ],
+  "MATH_BEEZER_DEF_KLT": [
+    "$\\ltdefn{T}{U}{V}$",
+    "$T$",
+    "<equation>\n\\krn{T}=\\setparts{\\vect{u}\\in U}{\\lt{T}{\\vect{u}}=\\zerovector}\n</equation>",
+    "$\\krn{T}$"
+  ],
+  "MATH_BEEZER_THM_KLTS": [
+    "$\\ltdefn{T}{U}{V}$",
+    "$T$",
+    "$\\krn{T}$",
+    "$U$"
+  ],
+  "MATH_BEEZER_THM_KPI": [
+    "$\\ltdefn{T}{U}{V}$",
+    "$\\vect{v}\\in V$",
+    "$\\preimage{T}{\\vect{v}}$",
+    "$\\vect{u}\\in\\preimage{T}{\\vect{v}}$",
+    "<equation>\n\\preimage{T}{\\vect{v}}=\n\\setparts{\\vect{u}+\\vect{z}}{\\vect{z}\\in\\krn{T}}\n=\\vect{u}+\\krn{T}\n</equation>"
+  ],
+  "MATH_BEEZER_THM_KILT": [
+    "$\\ltdefn{T}{U}{V}$",
+    "$T$",
+    "$T$",
+    "$\\krn{T}=\\set{\\zerovector}$"
+  ],
+  "MATH_BEEZER_THM_ILTLI": [
+    "$\\ltdefn{T}{U}{V}$",
+    "<alignmath>\n<![CDATA[S&=\\set{\\vectorlist{u}{t}}]]>\n</alignmath>",
+    "$U$",
+    "<alignmath>\n<![CDATA[R&=\\set{\\lt{T}{\\vect{u}_1},\\,\\lt{T}{\\vect{u}_2},\\,\\lt{T}{\\vect{u}_3},\\,\\ldots,\\,\\lt{T}{\\vect{u}_t}}]]>\n</alignmath>",
+    "$V$"
+  ],
+  "MATH_BEEZER_THM_ILTB": [
+    "$\\ltdefn{T}{U}{V}$",
+    "<alignmath>\n<![CDATA[B&=\\set{\\vectorlist{u}{m}}]]>\n</alignmath>",
+    "$U$",
+    "$T$",
+    "<alignmath>\n<![CDATA[C&=\\set{\\lt{T}{\\vect{u}_1},\\,\\lt{T}{\\vect{u}_2},\\,\\lt{T}{\\vect{u}_3},\\,\\ldots,\\,\\lt{T}{\\vect{u}_m}}]]>\n</alignmath>",
+    "$V$"
+  ],
+  "MATH_BEEZER_THM_ILTD": [
+    "$\\ltdefn{T}{U}{V}$",
+    "$\\dimension{U}\\leq\\dimension{V}$"
+  ],
+  "MATH_BEEZER_THM_CILTI": [
+    "$\\ltdefn{T}{U}{V}$",
+    "$\\ltdefn{S}{V}{W}$",
+    "$\\ltdefn{(\\compose{S}{T})}{U}{W}$"
+  ],
+  "MATH_BEEZER_DEF_SLT": [
+    "$\\ltdefn{T}{U}{V}$",
+    "$T$",
+    "$\\vect{v}\\in V$",
+    "$\\vect{u}\\in U$",
+    "$\\lt{T}{\\vect{u}}=\\vect{v}$"
+  ],
+  "MATH_BEEZER_DEF_RLT": [
+    "$\\ltdefn{T}{U}{V}$",
+    "$T$",
+    "<equation>\n\\rng{T}=\\setparts{\\lt{T}{\\vect{u}}}{\\vect{u}\\in U}\n</equation>",
+    "$\\rng{T}$"
+  ],
+  "MATH_BEEZER_THM_RLTS": [
+    "$\\ltdefn{T}{U}{V}$",
+    "$T$",
+    "$\\rng{T}$",
+    "$V$"
+  ],
+  "MATH_BEEZER_THM_RSLT": [
+    "$\\ltdefn{T}{U}{V}$",
+    "$T$",
+    "$T$",
+    "$\\rng{T}=V$"
+  ],
+  "MATH_BEEZER_THM_SSRLT": [
+    "$\\ltdefn{T}{U}{V}$",
+    "<alignmath>\n<![CDATA[S&=\\set{\\vectorlist{u}{t}}]]>\n</alignmath>",
+    "$U$",
+    "<alignmath>\n<![CDATA[R&=\\set{\\lt{T}{\\vect{u}_1},\\,\\lt{T}{\\vect{u}_2},\\,\\lt{T}{\\vect{u}_3},\\,\\ldots,\\,\\lt{T}{\\vect{u}_t}}]]>\n</alignmath>",
+    "$\\rng{T}$"
+  ],
+  "MATH_BEEZER_THM_RPI": [
+    "$\\ltdefn{T}{U}{V}$",
+    "<equation>\n\\vect{v}\\in\\rng{T}\\text{ if and only if }\\preimage{T}{\\vect{v}}\\neq\\emptyset\n</equation>"
+  ],
+  "MATH_BEEZER_THM_SLTB": [
+    "$\\ltdefn{T}{U}{V}$",
+    "<alignmath>\n<![CDATA[B&=\\set{\\vectorlist{u}{m}}]]>\n</alignmath>",
+    "$U$",
+    "$T$",
+    "<alignmath>\n<![CDATA[C&=\\set{\\lt{T}{\\vect{u}_1},\\,\\lt{T}{\\vect{u}_2},\\,\\lt{T}{\\vect{u}_3},\\,\\ldots,\\,\\lt{T}{\\vect{u}_m}}]]>\n</alignmath>",
+    "$V$"
+  ],
+  "MATH_BEEZER_THM_SLTD": [
+    "$\\ltdefn{T}{U}{V}$",
+    "$\\dimension{U}\\geq\\dimension{V}$"
+  ],
+  "MATH_BEEZER_THM_CSLTS": [
+    "$\\ltdefn{T}{U}{V}$",
+    "$\\ltdefn{S}{V}{W}$",
+    "$\\ltdefn{(\\compose{S}{T})}{U}{W}$"
+  ],
+  "MATH_BEEZER_DEF_IDLT": [
+    "$W$",
+    "<equation>\n\\ltdefn{I_W}{W}{W},\\quad\\quad \\lt{I_W}{\\vect{w}}=\\vect{w}\n</equation>"
+  ],
+  "MATH_BEEZER_DEF_IVLT": [
+    "$\\ltdefn{T}{U}{V}$",
+    "$\\ltdefn{S}{V}{U}$",
+    "<alignmath>\n<![CDATA[\\compose{S}{T}&=I_U & \\compose{T}{S}&=I_V]]>\n</alignmath>",
+    "$T$",
+    "$S$",
+    "$T$",
+    "$S=\\ltinverse{T}$"
+  ],
+  "MATH_BEEZER_THM_ILTLT": [
+    "$\\ltdefn{T}{U}{V}$",
+    "$\\ltdefn{\\ltinverse{T}}{V}{U}$"
+  ],
+  "MATH_BEEZER_THM_IILT": [
+    "$\\ltdefn{T}{U}{V}$",
+    "$\\ltinverse{T}$",
+    "$\\ltinverse{\\left(\\ltinverse{T}\\right)}=T$"
+  ],
+  "MATH_BEEZER_THM_ILTIS": [
+    "$\\ltdefn{T}{U}{V}$",
+    "$T$",
+    "$T$"
+  ],
+  "MATH_BEEZER_THM_CIVLT": [
+    "$\\ltdefn{T}{U}{V}$",
+    "$\\ltdefn{S}{V}{W}$",
+    "$\\ltdefn{\\left(\\compose{S}{T}\\right)}{U}{W}$"
+  ],
+  "MATH_BEEZER_THM_ICLT": [
+    "$\\ltdefn{T}{U}{V}$",
+    "$\\ltdefn{S}{V}{W}$",
+    "$\\compose{S}{T}$",
+    "$\\ltinverse{\\left(\\compose{S}{T}\\right)}=\\compose{\\ltinverse{T}}{\\ltinverse{S}}$"
+  ],
+  "MATH_BEEZER_DEF_IVS": [
+    "$U$",
+    "$V$",
+    "$T$",
+    "$U$",
+    "$V$",
+    "$\\ltdefn{T}{U}{V}$",
+    "$U\\isomorphic V$",
+    "$T$",
+    "$U$",
+    "$V$"
+  ],
+  "MATH_BEEZER_THM_IVSED": [
+    "$U$",
+    "$V$",
+    "$\\dimension{U}=\\dimension{V}$"
+  ],
+  "MATH_BEEZER_DEF_ROLT": [
+    "$\\ltdefn{T}{U}{V}$",
+    "$T$",
+    "$\\rank{T}$",
+    "$T$",
+    "<equation>\n\\rank{T}=\\dimension{\\rng{T}}\n</equation>",
+    "$\\rank{T}$"
+  ],
+  "MATH_BEEZER_DEF_NOLT": [
+    "$\\ltdefn{T}{U}{V}$",
+    "$T$",
+    "$\\nullity{T}$",
+    "$T$",
+    "<equation>\n\\nullity{T}=\\dimension{\\krn{T}}\n</equation>",
+    "$\\nullity{T}$"
+  ],
+  "MATH_BEEZER_THM_ROSLT": [
+    "$\\ltdefn{T}{U}{V}$",
+    "$T$",
+    "$V$",
+    "$\\rank{T}=\\dimension{V}$",
+    "$T$"
+  ],
+  "MATH_BEEZER_THM_NOILT": [
+    "$\\ltdefn{T}{U}{V}$",
+    "$T$",
+    "$\\nullity{T}=0$",
+    "$T$"
+  ],
+  "MATH_BEEZER_THM_RPNDD": [
+    "$\\ltdefn{T}{U}{V}$",
+    "<equation>\n\\rank{T}+\\nullity{T}=\\dimension{U}\n</equation>"
+  ],
+  "MATH_BEEZER_DEF_VR": [
+    "$V$",
+    "$B=\\set{\\vectorlist{v}{n}}$",
+    "$\\ltdefn{\\vectrepname{B}}{V}{\\complex{n}}$",
+    "$\\vect{w}\\in V$",
+    "$\\vectrep{B}{\\vect{w}}\\in\\complex{n}$",
+    "<alignmath>\n\\vect{w}\n<![CDATA[&=]]>\n\\vectorentry{\\vectrep{B}{\\vect{w}}}{1}\\vect{v}_1+\n\\vectorentry{\\vectrep{B}{\\vect{w}}}{2}\\vect{v}_2+\n\\vectorentry{\\vectrep{B}{\\vect{w}}}{3}\\vect{v}_3+\n\\cdots+\n\\vectorentry{\\vectrep{B}{\\vect{w}}}{n}\\vect{v}_n\n</alignmath>",
+    "$\\vectrep{B}{\\vect{w}}$"
+  ],
+  "MATH_BEEZER_THM_VRLT": [
+    "$\\vectrepname{B}$"
+  ],
+  "MATH_BEEZER_THM_VRI": [
+    "$\\vectrepname{B}$"
+  ],
+  "MATH_BEEZER_THM_VRS": [
+    "$\\vectrepname{B}$"
+  ],
+  "MATH_BEEZER_THM_VRILT": [
+    "$\\vectrepname{B}$"
+  ],
+  "MATH_BEEZER_THM_CFDVS": [
+    "$V$",
+    "$n$",
+    "$V$",
+    "$\\complex{n}$"
+  ],
+  "MATH_BEEZER_THM_IFDVS": [
+    "$U$",
+    "$V$",
+    "$U$",
+    "$V$",
+    "$\\dimension{U}=\\dimension{V}$"
+  ],
+  "MATH_BEEZER_THM_CLI": [
+    "$U$",
+    "$B$",
+    "$n$",
+    "<alignmath>\nS=\\set{\\vectorlist{u}{k}}\n</alignmath>",
+    "$U$",
+    "<alignmath>\nR=\\set{\\vectrep{B}{\\vect{u}_1},\\,\\vectrep{B}{\\vect{u}_2},\\,\\vectrep{B}{\\vect{u}_3},\\,\\ldots,\\,\\vectrep{B}{\\vect{u}_k}}\n</alignmath>",
+    "$\\complex{n}$"
+  ],
+  "MATH_BEEZER_THM_CSS": [
+    "$U$",
+    "$B$",
+    "$n$",
+    "<alignmath>\n\\vect{u}\\in\\spn{\\set{\\vectorlist{u}{k}}}\n</alignmath>",
+    "<alignmath>\n\\vectrep{B}{\\vect{u}}\\in\\spn{\\set{\\vectrep{B}{\\vect{u}_1},\\,\\vectrep{B}{\\vect{u}_2},\\,\\vectrep{B}{\\vect{u}_3},\\,\\ldots,\\,\\vectrep{B}{\\vect{u}_k}}}\n</alignmath>"
+  ],
+  "MATH_BEEZER_DEF_MR": [
+    "$\\ltdefn{T}{U}{V}$",
+    "$B=\\set{\\vectorlist{u}{n}}$",
+    "$U$",
+    "$n$",
+    "$C$",
+    "$V$",
+    "$m$",
+    "$T$",
+    "$B$",
+    "$C$",
+    "$m\\times n$",
+    "<equation>\n\\matrixrep{T}{B}{C}=\\left[\n\\left.\\vectrep{C}{\\lt{T}{\\vect{u}_1}}\\right|\n\\left.\\vectrep{C}{\\lt{T}{\\vect{u}_2}}\\right|\n\\left.\\vectrep{C}{\\lt{T}{\\vect{u}_3}}\\right|\n\\ldots\n\\left|\\vectrep{C}{\\lt{T}{\\vect{u}_n}}\\right.\n\\right]\n</equation>",
+    "$\\matrixrep{T}{B}{C}$"
+  ],
+  "MATH_BEEZER_THM_FTMR": [
+    "$\\ltdefn{T}{U}{V}$",
+    "$B$",
+    "$U$",
+    "$C$",
+    "$V$",
+    "$\\matrixrep{T}{B}{C}$",
+    "$T$",
+    "$B$",
+    "$C$",
+    "$\\vect{u}\\in U$",
+    "<equation>\n\\vectrep{C}{\\lt{T}{\\vect{u}}}=\\matrixrep{T}{B}{C}\\left(\\vectrep{B}{\\vect{u}}\\right)\n</equation>",
+    "<equation>\n\\lt{T}{\\vect{u}}=\\vectrepinv{C}{\\matrixrep{T}{B}{C}\\left(\\vectrep{B}{\\vect{u}}\\right)}\n</equation>"
+  ],
+  "MATH_BEEZER_THM_MRSLT": [
+    "$\\ltdefn{T}{U}{V}$",
+    "$\\ltdefn{S}{U}{V}$",
+    "$B$",
+    "$U$",
+    "$C$",
+    "$V$",
+    "<equation>\n\\matrixrep{T+S}{B}{C}=\\matrixrep{T}{B}{C}+\\matrixrep{S}{B}{C}\n</equation>"
+  ],
+  "MATH_BEEZER_THM_MRMLT": [
+    "$\\ltdefn{T}{U}{V}$",
+    "$\\alpha\\in\\complex{\\null}$",
+    "$B$",
+    "$U$",
+    "$C$",
+    "$V$",
+    "<equation>\n\\matrixrep{\\alpha T}{B}{C}=\\alpha\\matrixrep{T}{B}{C}\n</equation>"
+  ],
+  "MATH_BEEZER_THM_MRCLT": [
+    "$\\ltdefn{T}{U}{V}$",
+    "$\\ltdefn{S}{V}{W}$",
+    "$B$",
+    "$U$",
+    "$C$",
+    "$V$",
+    "$D$",
+    "$W$",
+    "<equation>\n\\matrixrep{\\compose{S}{T}}{B}{D}=\\matrixrep{S}{C}{D}\\matrixrep{T}{B}{C}\n</equation>"
+  ],
+  "MATH_BEEZER_THM_KNSI": [
+    "$\\ltdefn{T}{U}{V}$",
+    "$B$",
+    "$U$",
+    "$n$",
+    "$C$",
+    "$V$",
+    "$T$",
+    "$\\matrixrep{T}{B}{C}$",
+    "<equation>\n\\krn{T}\\isomorphic\\nsp{\\matrixrep{T}{B}{C}}\n</equation>"
+  ],
+  "MATH_BEEZER_THM_RCSI": [
+    "$\\ltdefn{T}{U}{V}$",
+    "$B$",
+    "$U$",
+    "$n$",
+    "$C$",
+    "$V$",
+    "$m$",
+    "$T$",
+    "$\\matrixrep{T}{B}{C}$",
+    "<equation>\n\\rng{T}\\isomorphic\\csp{\\matrixrep{T}{B}{C}}\n</equation>"
+  ],
+  "MATH_BEEZER_THM_IMR": [
+    "$\\ltdefn{T}{U}{V}$",
+    "$B$",
+    "$U$",
+    "$C$",
+    "$V$",
+    "$T$",
+    "$T$",
+    "$B$",
+    "$C$",
+    "$\\matrixrep{T}{B}{C}$",
+    "$T$",
+    "<equation>\n\\matrixrep{\\ltinverse{T}}{C}{B}=\\inverse{\\left(\\matrixrep{T}{B}{C}\\right)}\n</equation>"
+  ],
+  "MATH_BEEZER_THM_IMILT": [
+    "$A$",
+    "$n$",
+    "$\\ltdefn{T}{\\complex{n}}{\\complex{n}}$",
+    "$\\lt{T}{\\vect{x}}=A\\vect{x}$",
+    "$A$",
+    "$T$"
+  ],
+  "MATH_BEEZER_THM_NME9": [
+    "$A$",
+    "$n$",
+    "$A$",
+    "$A$",
+    "$A$",
+    "$\\nsp{A}=\\set{\\zerovector}$",
+    "$\\linearsystem{A}{\\vect{b}}$",
+    "$\\vect{b}$",
+    "$A$",
+    "$A$",
+    "$A$",
+    "$\\complex{n}$",
+    "$\\csp{A}=\\complex{n}$",
+    "$A$",
+    "$\\complex{n}$",
+    "$A$",
+    "$n$",
+    "$\\rank{A}=n$",
+    "$A$",
+    "$\\nullity{A}=0$",
+    "$A$",
+    "$\\detname{A}\\neq 0$",
+    "$\\lambda=0$",
+    "$A$",
+    "$\\ltdefn{T}{\\complex{n}}{\\complex{n}}$",
+    "$\\lt{T}{\\vect{x}}=A\\vect{x}$"
+  ],
+  "MATH_BEEZER_DEF_EELT": [
+    "$\\ltdefn{T}{V}{V}$",
+    "$\\vect{v}\\in V$",
+    "$T$",
+    "$\\lambda$",
+    "$\\lt{T}{\\vect{v}}=\\lambda\\vect{v}$"
+  ],
+  "MATH_BEEZER_DEF_CBM": [
+    "$V$",
+    "$\\ltdefn{I_V}{V}{V}$",
+    "$V$",
+    "$B=\\set{\\vectorlist{v}{n}}$",
+    "$C$",
+    "$V$",
+    "$B$",
+    "$C$",
+    "$I_V$",
+    "$B$",
+    "$C$",
+    "<alignmath>\n<![CDATA[\\cbm{B}{C}&=\\matrixrep{I_V}{B}{C}\\\\]]>\n<![CDATA[&=\\matrixrepcolumns{I_V}{C}{v}{n}\\\\]]>\n<![CDATA[&=\\left\\lbrack]]>\n\\left.\\vectrep{C}{\\vect{v}_1}\\right|\n\\left.\\vectrep{C}{\\vect{v}_2}\\right|\n\\left.\\vectrep{C}{\\vect{v}_3}\\right|\n\\ldots\n\\left|\\vectrep{C}{\\vect{v}_n}\\right.\n\\right\\rbrack\n</alignmath>"
+  ],
+  "MATH_BEEZER_THM_CB": [
+    "$\\vect{v}$",
+    "$V$",
+    "$B$",
+    "$C$",
+    "$V$",
+    "<equation>\n\\vectrep{C}{\\vect{v}}=\\cbm{B}{C}\\vectrep{B}{\\vect{v}}\n</equation>"
+  ],
+  "MATH_BEEZER_THM_ICBM": [
+    "$V$",
+    "$B$",
+    "$C$",
+    "$V$",
+    "$\\cbm{B}{C}$",
+    "<equation>\n\\inverse{\\cbm{B}{C}}=\\cbm{C}{B}\n</equation>"
+  ],
+  "MATH_BEEZER_THM_MRCB": [
+    "$\\ltdefn{T}{U}{V}$",
+    "$B$",
+    "$C$",
+    "$U$",
+    "$D$",
+    "$E$",
+    "$V$",
+    "<equation>\n\\matrixrep{T}{B}{D}=\\cbm{E}{D}\\matrixrep{T}{C}{E}\\cbm{B}{C}\n</equation>"
+  ],
+  "MATH_BEEZER_THM_SCB": [
+    "$\\ltdefn{T}{V}{V}$",
+    "$B$",
+    "$C$",
+    "$V$",
+    "<equation>\n\\matrixrep{T}{B}{B}=\\inverse{\\cbm{B}{C}}\\matrixrep{T}{C}{C}\\cbm{B}{C}\n</equation>"
+  ],
+  "MATH_BEEZER_THM_EER": [
+    "$\\ltdefn{T}{V}{V}$",
+    "$B$",
+    "$V$",
+    "$\\vect{v}\\in V$",
+    "$T$",
+    "$\\lambda$",
+    "$\\vectrep{B}{\\vect{v}}$",
+    "$\\matrixrep{T}{B}{B}$",
+    "$\\lambda$"
+  ],
+  "MATH_BEEZER_DEF_UTM": [
+    "$n\\times n$",
+    "$A$",
+    "$\\matrixentry{A}{ij} =0$",
+    "$i>j$"
+  ],
+  "MATH_BEEZER_DEF_LTM": [
+    "$n\\times n$",
+    "$A$",
+    "$\\matrixentry{A}{ij} =0$",
+    "$i\\lt j$"
+  ],
+  "MATH_BEEZER_THM_PTMT": [
+    "$A$",
+    "$B$",
+    "$n$",
+    "$AB$"
+  ],
+  "MATH_BEEZER_THM_ITMT": [
+    "$A$",
+    "$n$",
+    "$A$",
+    "$\\inverse{A}$",
+    "$\\inverse{A}$",
+    "$A$",
+    "$\\matrixentry{\\inverse{A}}{ii}=\\matrixentry{A}{ii}^{-1}$"
+  ],
+  "MATH_BEEZER_THM_UTMR": [
+    "$\\ltdefn{T}{V}{V}$",
+    "$B$",
+    "$V$",
+    "$T$",
+    "$B$",
+    "$\\matrixrep{T}{B}{B}$",
+    "$T$",
+    "$\\lambda$",
+    "$T$",
+    "$\\lambda$",
+    "$\\algmult{T}{\\lambda}$"
+  ],
+  "MATH_BEEZER_THM_OBUTR": [
+    "$A$",
+    "$U$",
+    "$T$",
+    "<alignmath>\n\\adjoint{U}AU=T\n</alignmath>",
+    "$T$",
+    "$A$"
+  ],
+  "MATH_BEEZER_DEF_NRML": [
+    "$A$",
+    "$\\adjoint{A}A=A\\adjoint{A}$"
+  ],
+  "MATH_BEEZER_THM_OD": [
+    "$A$",
+    "$U$",
+    "$D$",
+    "$A$",
+    "$\\adjoint{U}AU=D$",
+    "$A$"
+  ],
+  "MATH_BEEZER_THM_OBNM": [
+    "$A$",
+    "$n$",
+    "$\\complex{n}$",
+    "$A$"
+  ],
+  "MATH_BEEZER_DEF_CNE": [
+    "$\\alpha=a+bi$",
+    "$\\beta=c+di$",
+    "$\\alpha=\\beta$",
+    "$a=c$",
+    "$b=d$",
+    "$\\alpha=\\beta$"
+  ],
+  "MATH_BEEZER_DEF_CNA": [
+    "$\\alpha=a+bi$",
+    "$\\beta=c+di$",
+    "$\\alpha+\\beta$",
+    "$(a+c)+(b+d)i$",
+    "$\\alpha+\\beta$"
+  ],
+  "MATH_BEEZER_DEF_CNM": [
+    "$\\alpha=a+bi$",
+    "$\\beta=c+di$",
+    "$\\alpha\\beta$",
+    "$(ac-bd)+(ad+bc)i$",
+    "$\\alpha\\beta$"
+  ],
+  "MATH_BEEZER_THM_PCNA": [
+    "$\\alpha,\\beta\\in\\complexes$",
+    "$\\alpha+\\beta\\in\\complexes$",
+    "$\\alpha,\\beta\\in\\complexes$",
+    "$\\alpha\\beta\\in\\complexes$",
+    "$\\alpha,\\,\\beta\\in\\complexes$",
+    "$\\alpha+\\beta=\\beta+\\alpha$",
+    "$\\alpha,\\,\\beta\\in\\complexes$",
+    "$\\alpha\\beta=\\beta\\alpha$",
+    "$\\alpha,\\,\\beta,\\,\\gamma\\in\\complexes$",
+    "$\\alpha+\\left(\\beta+\\gamma\\right)=\\left(\\alpha+\\beta\\right)+\\gamma$",
+    "$\\alpha,\\,\\beta,\\,\\gamma\\in\\complexes$",
+    "$\\alpha\\left(\\beta\\gamma\\right)=\\left(\\alpha\\beta\\right)\\gamma$",
+    "$\\alpha,\\,\\beta,\\,\\gamma\\in\\complexes$",
+    "$\\alpha(\\beta+\\gamma)=\\alpha\\beta+\\alpha\\gamma$",
+    "$0=0+0i$",
+    "$\\alpha\\in\\complexes$",
+    "$0+\\alpha=\\alpha$",
+    "$1=1+0i$",
+    "$\\alpha\\in\\complexes$",
+    "$1\\alpha=\\alpha$",
+    "$\\alpha\\in\\complexes$",
+    "$-\\alpha\\in\\complexes$",
+    "$\\alpha+\\left(-\\alpha\\right)=0$",
+    "$\\alpha\\in\\complexes$",
+    "$\\alpha\\neq 0$",
+    "$\\frac{1}{\\alpha}\\in\\complexes$",
+    "$\\alpha\\left(\\frac{1}{\\alpha}\\right)=1$"
+  ],
+  "MATH_BEEZER_THM_ZPCN": [
+    "$\\alpha\\in\\complexes$",
+    "$0\\alpha=0$"
+  ],
+  "MATH_BEEZER_THM_ZPZT": [
+    "$\\alpha,\\beta\\in\\complexes$",
+    "$\\alpha\\beta=0$",
+    "$\\alpha=0$",
+    "$\\beta=0$"
+  ],
+  "MATH_BEEZER_DEF_CCN": [
+    "$\\alpha=a+bi\\in\\complex{\\null}$",
+    "$\\conjugate{\\alpha}=a-bi$",
+    "$\\conjugate{\\alpha}$"
+  ],
+  "MATH_BEEZER_THM_CCRA": [
+    "$\\alpha$",
+    "$\\beta$",
+    "$\\conjugate{\\alpha+\\beta}=\\conjugate{\\alpha}+\\conjugate{\\beta}$"
+  ],
+  "MATH_BEEZER_THM_CCRM": [
+    "$\\alpha$",
+    "$\\beta$",
+    "$\\conjugate{\\alpha\\beta}=\\conjugate{\\alpha}\\conjugate{\\beta}$"
+  ],
+  "MATH_BEEZER_THM_CCT": [
+    "$\\alpha$",
+    "$\\conjugate{\\conjugate{\\alpha}}=\\alpha$"
+  ],
+  "MATH_BEEZER_DEF_MCN": [
+    "$\\alpha=a+bi\\in\\complex{\\null}$",
+    "<equation>\n\\modulus{\\alpha}=\\sqrt{\\conjugate{\\alpha}\\alpha}=\\sqrt{a^2+b^2}.\n</equation>"
+  ],
+  "MATH_BEEZER_DEF_SET": [
+    "$S$",
+    "$x$",
+    "$S$",
+    "$x\\in S$",
+    "$x$",
+    "$S$",
+    "$x\\not\\in S$",
+    "$x\\in S$"
+  ],
+  "MATH_BEEZER_DEF_SSET": [
+    "$S$",
+    "$T$",
+    "$S$",
+    "$T$",
+    "$S\\subseteq T$",
+    "$x\\in S$",
+    "$x\\in T$",
+    "$S\\subseteq T$"
+  ],
+  "MATH_BEEZER_DEF_ES": [
+    "$\\emptyset$",
+    "$\\emptyset$"
+  ],
+  "MATH_BEEZER_DEF_SE": [
+    "$S$",
+    "$T$",
+    "$S\\subseteq T$",
+    "$T\\subseteq S$",
+    "$S=T$",
+    "$S=T$"
+  ],
+  "MATH_BEEZER_DEF_C": [
+    "$S$",
+    "$S$",
+    "$S$",
+    "$\\card{S}$",
+    "$\\card{S}$"
+  ],
+  "MATH_BEEZER_DEF_SU": [
+    "$S$",
+    "$T$",
+    "$S$",
+    "$T$",
+    "$S\\cup T$",
+    "$S$",
+    "$T$",
+    "<alignmath>\nx\\in S\\cup T\\text{ if and only if }x\\in S\\text{ or }x\\in T\n</alignmath>",
+    "$S\\cup T$"
+  ],
+  "MATH_BEEZER_DEF_SI": [
+    "$S$",
+    "$T$",
+    "$S$",
+    "$T$",
+    "$S\\cap T$",
+    "$S$",
+    "$T$",
+    "<alignmath>\nx\\in S\\cap T\\text{ if and only if }x\\in S\\text{ and }x\\in T\n</alignmath>",
+    "$S\\cap T$"
+  ],
+  "MATH_BEEZER_DEF_SC": [
+    "$S$",
+    "$U$",
+    "$S$",
+    "$\\setcomplement{S}$",
+    "$U$",
+    "$S$",
+    "<alignmath>\nx\\in\\setcomplement{S}\\text{ if and only if }x\\in U\\text{ and }x\\not\\in S\n</alignmath>",
+    "$\\setcomplement{S}$"
+  ]
+}
