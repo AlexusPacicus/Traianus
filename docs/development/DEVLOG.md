@@ -2066,3 +2066,69 @@ en `traianus.db`.
 2. Piloto con la regla comprometida antes: recall de vecinas y cobertura del
    grafo de citas frente a Spinoza.
 3. Contrato para el endpoint de observación sin escritura.
+
+## 2026-10-02
+
+**Contexto:** sesión del 1 y el 2 de octubre. Quedaba elegir el corpus del
+producto v1. Además, me quedan pocos créditos del plan.
+
+**Se hizo:**
+- **Créditos.** Comprobé qué existe solo en el Mac: la memoria, `.data/`, el
+  modelo y cinco ramas sin fusionar.
+  - Subí cuatro de esas ramas. `research/ulpia-3d-membrane` no, porque su
+    copia remota fue borrada.
+  - Seguiré en el CLI con los créditos de la API, que conserva todo lo local.
+- **Licencias, leídas en la fuente** con el navegador, que autoricé porque el
+  perímetro deniega webfetch:
+  - Beezer: GFDL 1.2 o posterior;
+  - Hefferon: GFDL o CC BY-SA 3.0 US, a elegir;
+  - ProofWiki: CC BY-SA 3.0 y GFDL.
+- **Corpus y regla del piloto 1** (LEDGER 96):
+  - Beezer solo, en un commit fijado. ProofWiki queda para el piloto 2, para
+    proponer campos nuevos, y Hefferon en reserva.
+  - Un enunciado = un fragmento.
+  - La hipótesis se sostiene solo si gana al azar y a BM25, a k = 5 y a
+    k = 1. Con el azar solo, casi no podía fallar.
+  - El conjunto y la regla quedan como línea base para comparar cualquier
+    otro proveedor.
+- **Fórmulas como palabras:** el modelo ve los nombres de las macros de
+  Beezer (`\norm` → «norm»).
+  - El LaTeX crudo o un marcador común darían una dirección compartida por
+    todos los vectores.
+  - Enmienda antes de existir ningún vector: cada macro cuenta una vez por
+    fórmula.
+- **Conjunto de prueba congelado** (LEDGER 97): 28 definiciones mías en
+  inglés, porque MiniLM no entiende castellano; 18 con enunciado esperado.
+  - Mis etiquetas iniciales eran a ojo. Las propone Claude, y yo leo cada
+    enunciado y lo acepto.
+  - Las 7 de Polar Projector solas daban 3 o 4 positivos, y McNemar necesita
+    al menos 5 casos a favor del motor. Por eso añadí conceptos de Traianus.
+  - Claude propuso primero conceptos de memoria que no están en mi código.
+    Se retiraron.
+
+**Resultado:** `main` en `26c558d`, subido, con la CI en verde. No hay código
+ni corpus construido todavía.
+
+**Resuelto de entradas anteriores:**
+- 2026-09-30, cierre: fuente del corpus, área de mis definiciones, licencias
+  y entrada de la consulta (borrador verbal).
+- 2026-09-30, cierre: las filas antiguas de auditoría son 494, corregido en
+  el LEDGER 96.
+
+**Sin resolver / decisión pendiente:**
+- **Autor:** en `NEXT_RESEARCH.md` queda texto del 2 de octubre sin
+  commitear, fuera de esta sesión: la línea de física «de fuerzas a campos
+  de tensión» y la vista de cuotas espectrales.
+- **Siguen abiertos del 2026-09-30:** `CONTRACTS.md` nombra
+  `traianus/security/`; el arranque de SEC-M-06 no tiene test; una sesión
+  conserva el validador viejo.
+- `research/ulpia-3d-membrane` solo existe en local.
+- El CLI aún no está instalado.
+
+**Próximo paso:**
+1. Instalar el CLI con la cuenta de la API y comprobar la suite hermética, la
+   puerta de Python y los MCP.
+2. Contrato del builder de Beezer para el engine-implementer, con el test
+   sin pérdida.
+3. Registro de auditoría del instrumento y revisión ciega.
+4. Script y primera ejecución.
