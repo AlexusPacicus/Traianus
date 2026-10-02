@@ -4,6 +4,7 @@ T1 and T2 pin the committed snapshot and macro table. The rest specify
 tools/experiments/tooling/build_beezer_corpus.py on synthetic trees and on the
 real snapshot, whose oracle here shares no code with the builder.
 """
+import html
 import json
 import re
 import sys
@@ -157,8 +158,8 @@ def test_spans_labels_and_reading_order(bc, tmp_path):
     for outside in ("Prose out", "Example out", "Proof out", "Shared proof", "Exercise out"):
         assert outside not in stored
     assert "Notation out" not in " ".join(out["manifest"].values())
-    assert out["manifest"]["MATH_BEEZER_DEF_ZD"] == "Zed Zed text."
-    assert out["manifest"]["MATH_BEEZER_THM_ZD"] == "Shared Shared statement."
+    assert out["manifest"]["MATH_BEEZER_DEF_ZD"] == "Zed. Zed text."
+    assert out["manifest"]["MATH_BEEZER_THM_ZD"] == "Shared. Shared statement."
     assert out["marked"]["MATH_BEEZER_THM_ZT"].endswith("</statement>")
 
 
@@ -201,11 +202,11 @@ THEOREM = (
 def test_model_text_rule(bc, tmp_path):
     out = bc.build_corpus(_one(tmp_path, ALL_TAGS_DEFINITION + "\n" + THEOREM), {})
     assert out["manifest"]["MATH_BEEZER_DEF_TD"] == (
-        "Title & More First term with emphasis and quoted here , then dash and dots, "
+        "Title & More. First term with emphasis and quoted here , then dash and dots, "
         "see now. Second < > \"a\" 'b' paragraph. "
-        "Prop One Content one. Prop Two Content two."
+        "Prop One. Content one. Prop Two. Content two."
     )
-    assert out["manifest"]["MATH_BEEZER_THM_TT"] == "Theorem Title Stated."
+    assert out["manifest"]["MATH_BEEZER_THM_TT"] == "Theorem Title. Stated."
 
 
 FORMULA_DEFINITION = (
@@ -234,7 +235,7 @@ def test_formulas_apart_and_lossless(bc, tmp_path):
     assert "Then ⟦F4⟧</p>" in marked
     raw = FORMULA_DEFINITION.split(">", 1)[1].rsplit("</definition>", 1)[0]
     assert MARKER.sub(lambda m: formulas[int(m[1]) - 1], marked) == raw
-    assert out["manifest"]["MATH_BEEZER_DEF_FD"] == "Formulas Inline then done. Then"
+    assert out["manifest"]["MATH_BEEZER_DEF_FD"] == "Formulas. Inline then done. Then"
     assert out["formulas"]["MATH_BEEZER_DEF_PD"] == []
 
 
@@ -244,18 +245,46 @@ SMALL_TABLE = {"alpha": "alpha word", "beta": "beta", "pair": "two words", "nul"
 @pytest.mark.parametrize(
     ("body", "expected"),
     [
-        (r"A $\alpha\alpha\alpha$ B", "T A alpha word B"),
-        (r"A $\beta+\alpha+\beta$ B", "T A beta alpha word B"),
-        (r"A $\nul x$ B", "T A B"),
-        (r"A $\left(x\right)\ldots$ B", "T A B"),
-        (r"A $x+1$ B", "T A B"),
-        (r"A <equation><![CDATA[\pair{x}+\alpha]]></equation> B", "T A two words alpha word B"),
-        (r"A $\alpha$ and $\alpha$ B", "T A alpha word and alpha word B"),
+        (r"A $\alpha\alpha\alpha$ B", "T. A alpha word B"),
+        (r"A $\beta+\alpha+\beta$ B", "T. A beta alpha word B"),
+        (r"A $\nul x$ B", "T. A B"),
+        (r"A $\left(x\right)\ldots$ B", "T. A B"),
+        (r"A $x+1$ B", "T. A B"),
+        (r"A <equation><![CDATA[\pair{x}+\alpha]]></equation> B", "T. A two words alpha word B"),
+        (r"A $\alpha$ and $\alpha$ B", "T. A alpha word and alpha word B"),
     ],
 )
 def test_macro_words(bc, tmp_path, body, expected):
     out = bc.build_corpus(_one(tmp_path, _definition("M", body)), SMALL_TABLE)
     assert out["manifest"]["MATH_BEEZER_DEF_M"] == expected
+
+
+@pytest.mark.parametrize(
+    ("title", "expected"),
+    [
+        ("Dimension of $x$", "Dimension of. Body."),
+        (r"$\pair{x}$ tail", "two words tail. Body."),
+        (r"Lead $\alpha$ tail", "Lead alpha word tail. Body."),
+        ("\n  Spaced \n", "Spaced. Body."),
+    ],
+)
+def test_title_separator_is_one_period_and_one_space(bc, tmp_path, title, expected):
+    body = (
+        f'<definition acro="TS" index="i"><title>{title}</title><p>Body.</p></definition>'
+    )
+    out = bc.build_corpus(_one(tmp_path, body), SMALL_TABLE)
+    assert out["manifest"]["MATH_BEEZER_DEF_TS"] == expected
+
+
+def test_property_titles_get_the_separator(bc, tmp_path):
+    body = (
+        '<definition acro="PL" index="i"><title>Chunk</title><p>Intro.</p><propertylist>'
+        '<property acro="P1" index="p"><title>First</title><content>One.</content></property>'
+        '<property acro="P2" index="p"><title>Second $x$</title><content>Two.</content></property>'
+        "</propertylist></definition>"
+    )
+    out = bc.build_corpus(_one(tmp_path, body), {})
+    assert out["manifest"]["MATH_BEEZER_DEF_PL"] == "Chunk. Intro. First. One. Second. Two."
 
 
 def _citation_body():
@@ -300,6 +329,35 @@ def test_citations(bc, tmp_path):
         ["MATH_BEEZER_DEF_CC", "MATH_BEEZER_THM_CB"],
         ["MATH_BEEZER_THM_CA", "MATH_BEEZER_DEF_CA"],
     ]
+
+
+DECLARED_DROPPED = (
+    "archetype", "chapter", "diagram", "example", "exercise", "property",
+    "sage", "section", "solution", "subsection", "technique",
+)
+
+
+def test_dropped_citation_types_are_the_declared_eleven(bc):
+    assert bc.DROPPED_CITATION_TYPES == frozenset(DECLARED_DROPPED)
+
+
+@pytest.mark.parametrize("kind", DECLARED_DROPPED)
+def test_declared_dropped_type_gives_no_edge(bc, tmp_path, kind):
+    body = _definition("D1", f'<acroref type="{kind}" acro="D2" />') + _definition("D2", "x")
+    assert bc.build_corpus(_one(tmp_path, body), {})["citations"] == []
+
+
+def test_undeclared_citation_type_is_an_error(bc, tmp_path):
+    body = _definition("U", '<acroref type="bogus" acro="X" />')
+    with pytest.raises(ValueError, match="bogus") as caught:
+        bc.build_corpus(_one(tmp_path, body), {})
+    assert "MATH_BEEZER_DEF_U" in str(caught.value)
+
+
+@pytest.mark.parametrize("reference", ['<acroref acro="X" />', '<acroref type="section" />'])
+def test_acroref_without_type_or_acro_is_an_error(bc, tmp_path, reference):
+    with pytest.raises(ValueError, match="without type or acro"):
+        bc.build_corpus(_one(tmp_path, _definition("U", reference)), {})
 
 
 def test_unresolvable_citation_is_an_error(bc, tmp_path):
@@ -369,6 +427,41 @@ def test_real_model_text_is_clean(real):
         assert " ".join(text.split()) == text, label
 
 
+def test_snapshot_acroref_types_are_the_declared_thirteen(bc):
+    text = "".join(f.read_text(encoding="utf-8") for f in sorted(SRC.glob("*.xml")))
+    types = set(re.findall(r'<acroref\b[^>]*?\btype="([^"]*)"', text))
+    assert types == {"definition", "theorem"} | bc.DROPPED_CITATION_TYPES
+    assert len(types) == 13
+
+
+def _titles(raw):
+    raw = re.sub(r"<notation\b.*?</notation>", "", raw, flags=re.DOTALL)
+    return re.findall(r"<title>(.*?)</title>", raw, re.DOTALL)
+
+
+def test_snapshot_titles_do_not_end_in_punctuation():
+    for label, raw in _oracle():
+        titles = _titles(raw)
+        assert titles, label
+        for title in titles:
+            assert not title.rstrip().endswith((".", "?", "!", ":", ";")), (label, title)
+
+
+def test_real_chunk_title_is_followed_by_period_and_space(real):
+    checked = 0
+    for label, raw in _oracle():
+        title = _titles(raw)[0]
+        if "$" in title or "<equation" in title or "<alignmath" in title:
+            continue
+        words = " ".join(html.unescape(re.sub(r"<[^>]*>", "", title)).split())
+        text = real["manifest"][label]
+        assert text.startswith(words + ". "), label
+        assert not text[len(words) + 2:].startswith((" ", ".")), label
+        assert "  " not in text, label
+        checked += 1
+    assert checked > 0
+
+
 def test_real_citation_endpoints_are_labels(real):
     labels = set(real["manifest"])
     assert real["citations"]
@@ -403,7 +496,7 @@ def test_main_writes_four_files_byte_identical_across_runs(bc, tmp_path):
     for name in ARTIFACTS[:3]:
         assert list(json.loads((outs[0] / name).read_text(encoding="utf-8"))) == labels
     assert json.loads((outs[0] / ARTIFACTS[0]).read_text(encoding="utf-8")) == {
-        "MATH_BEEZER_DEF_D1": "T x alpha word y",
-        "MATH_BEEZER_THM_TT": "Theorem Title Stated.",
+        "MATH_BEEZER_DEF_D1": "T. x alpha word y",
+        "MATH_BEEZER_THM_TT": "Theorem Title. Stated.",
     }
     assert stamps == {p: p.stat().st_mtime_ns for p in DATA.rglob("*") if p.is_file()}

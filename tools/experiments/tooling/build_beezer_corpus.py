@@ -26,6 +26,13 @@ ARTIFACTS = {
     "citations": "beezer_citations.json",
 }
 KINDS = {"definition": "DEF", "theorem": "THM"}
+# The declared list of acroref types dropped from the citation graph.
+DROPPED_CITATION_TYPES = frozenset(
+    {
+        "archetype", "chapter", "diagram", "example", "exercise", "property",
+        "sage", "section", "solution", "subsection", "technique",
+    }
+)
 ENTITIES = {"amp": "&", "lt": "<", "gt": ">", "quot": '"', "apos": "'"}
 
 INCLUDE = re.compile(r'<xi:include\s+href="([^"]+)"\s*/>')
@@ -128,15 +135,18 @@ def _model_text(
     text = DROPPED.sub("", marked)
     if "<![CDATA[" in text:
         raise ValueError(f"{label}: CDATA section outside a formula")
-    text = INLINE_TAG.sub("", BLOCK_TAG.sub(" ", text))
-    tag = re.search(r"<[^\s>]*", text)
-    if tag is not None:
-        raise ValueError(f"{label}: unknown tag {tag[0]}")
-    entity = UNKNOWN_ENTITY.search(text)
-    if entity is not None:
-        raise ValueError(f"{label}: unknown entity {entity[0]}")
-    text = MARKER.sub(lambda m: _words(formulas[int(m[1]) - 1], macro_words), text)
-    text = ENTITY.sub(lambda m: ENTITIES[m[1]], text)
+    parts = []
+    for part in text.split("</title>"):
+        part = INLINE_TAG.sub("", BLOCK_TAG.sub(" ", part))
+        tag = re.search(r"<[^\s>]*", part)
+        if tag is not None:
+            raise ValueError(f"{label}: unknown tag {tag[0]}")
+        entity = UNKNOWN_ENTITY.search(part)
+        if entity is not None:
+            raise ValueError(f"{label}: unknown entity {entity[0]}")
+        part = MARKER.sub(lambda m: _words(formulas[int(m[1]) - 1], macro_words), part)
+        parts.append(ENTITY.sub(lambda m: ENTITIES[m[1]], part))
+    text = "".join(f"{part.rstrip()}. " for part in parts[:-1]) + parts[-1]
     return " ".join(text.split())
 
 
@@ -149,6 +159,8 @@ def _citations(statements: dict[str, _Statement]) -> list[list[str]]:
                 raise ValueError(f"{label}: acroref without type or acro")
             kind = KINDS.get(fields["type"])
             if kind is None:
+                if fields["type"] not in DROPPED_CITATION_TYPES:
+                    raise ValueError(f"{label}: undeclared citation type {fields['type']}")
                 continue
             target = f"MATH_BEEZER_{kind}_{fields['acro']}"
             if target not in statements:
