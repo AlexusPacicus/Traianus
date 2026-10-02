@@ -13,9 +13,12 @@ listed at the end.
 - **Licence:** GNU Free Documentation License, Version 1.2 or any later version, with no Invariant
   Sections, no Front-Cover Texts and no Back-Cover Texts (`COPYING.txt` at that commit, read
   2026-10-01). Every artifact derived from it under `data/math/` carries the same licence, and the
-  licence text ships with them.
-- **Acquisition:** the `src/` tree at the pinned commit, fetched once by the operator and committed
-  as a source snapshot, as `data/spinoza/source/` is; the builder runs offline on that snapshot.
+  licence text ships with them: `source/src2/gfdl-mathbook.xml`, the full GFDL 1.3 (allowed by "1.2
+  or any later"), which declares itself a faithful copy of the FSF text and has not been compared
+  with it. `COPYING.txt` is only Beezer's copyright notice and grant, not the licence text.
+- **Acquisition:** the `src/` tree at the pinned commit, with `COPYING.txt` and
+  `src2/gfdl-mathbook.xml`, fetched once by the operator and committed as a source snapshot, as
+  `data/spinoza/source/` is; the builder runs offline on that snapshot.
 
 ## Derivation rules (fixed before the builder exists)
 
