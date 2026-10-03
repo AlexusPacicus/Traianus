@@ -399,11 +399,12 @@ Input    M = data/math/beezer_manifest.json, {label -> text}, 342 entries in rea
          T = data/math/pilot1_test_set.json, 28 items; E = data/math/beezer_citations.json, 851
          ordered pairs of labels. The sha256 of the three files are in P1.md; any mismatch refuses.
          Provider: SentenceTransformerProvider, revision in P1.md, device cpu, one text per call.
-         ε = resolve_epsilon_edge() (traianus/config.py), required to be 0.8.
+         ε = resolve_epsilon_edge() (traianus/config.py), required to be 0.8; a value it cannot
+         parse refuses as RF4.
          Seed: 20261002, numpy.random.Generator(numpy.random.PCG64), draws in P1.md's order.
 Output   data/math/P1_result.json with: valid; first_failed (null when valid); failed (the
          Validity identifiers that failed, in check order); digests; environment (python, numpy,
-         torch, sentence-transformers, platform, device, max_seq_length, numpy_config =
+         torch, sentence_transformers, platform, device, max_seq_length, numpy_config =
          numpy.show_config(mode="dicts"), torch_threads = torch.get_num_threads());
          vectors_sha256 (the 370 first-pass rows); alignment_vectors_sha256 (the 342 second-pass
          rows); counts (chunks, distinct texts, items, positives, chunk and query texts over
