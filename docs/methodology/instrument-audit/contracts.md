@@ -401,13 +401,17 @@ Input    M = data/math/beezer_manifest.json, {label -> text}, 342 entries in rea
          Provider: SentenceTransformerProvider, revision in P1.md, device cpu, one text per call.
          ε = resolve_epsilon_edge() (traianus/config.py), required to be 0.8.
          Seed: 20261002, numpy.random.Generator(numpy.random.PCG64), draws in P1.md's order.
-Output   data/math/P1_result.json with: valid; first_failed; failed (list); digests; environment
-         (python, numpy, torch, sentence-transformers, platform, device, max_seq_length);
-         vectors_sha256; counts (chunks, items, positives, texts over max_seq_length); alignment
-         ({matched, required}); per k in {5, 1}: H_engine, H_bm25, chance ({num, den, float,
-         pass}), mcnemar ({b, c, n, num, den, float, pass}), k_pass; holds; shuffle (per k, the
-         fraction); report_only (as P1.md lists it). With valid = false every decision field
-         (holds, k_pass, each pass) is null.
+Output   data/math/P1_result.json with: valid; first_failed (null when valid); failed (the
+         Validity identifiers that failed, in check order); digests; environment (python, numpy,
+         torch, sentence-transformers, platform, device, max_seq_length, numpy_config =
+         numpy.show_config(mode="dicts"), torch_threads = torch.get_num_threads());
+         vectors_sha256 (the 370 first-pass rows); alignment_vectors_sha256 (the 342 second-pass
+         rows); counts (chunks, items, positives, chunk and query texts over max_seq_length);
+         alignment ({matched, required, bitwise_differences}); per k in {5, 1}: H_engine, H_bm25,
+         chance ({num, den, float, pass}), mcnemar ({b, c, n, num, den, float, pass}), k_pass;
+         holds; shuffle (per k, the fraction); bm25_check ({chunks_with_unique_token, passed});
+         report_only (as P1.md lists it, with the distinct acros recovered per arm and k). With
+         valid = false every decision field (holds, k_pass, each pass) is null.
 Function
   chunk text t_j = M's j-th value; query text q_i = item i's prose_en.
   v = float64(u) / ‖float64(u)‖₂ for u = encode(text), float32, shape (384,), finite, non-zero.
@@ -422,22 +426,34 @@ Function
   H_arm(k) = Σ_{i ∈ P} hit_i(k).
   p_i = 1 − C(342 − m_i, k) / C(342, k) (D30); chance = P(Σ Bernoulli(p_i) ≥ H_engine(k)) (D31).
   b_k, c_k = counts of engine-only and BM25-only hits over P; mcnemar = Σ_{j ≥ b_k} C(n, j) / 2^n (D32).
-  k_pass = chance < 1/20 ∧ mcnemar < 1/20; holds = k_pass(5) ∧ k_pass(1) (D33).
+  k_pass = chance < 1/20 ∧ mcnemar < 1/20; holds = k_pass(5) ∧ k_pass(1) (D33). Both tails take
+  the items as independent; items sharing a target are not (P1.md, Chance: declared limit).
   alignment: for every j, the first chunk of the engine order for query text t_j (ties to the
-             lower chunk index) has text t_j.
-  shuffle: 1,000 permutations π of the 18 expected sets, drawn after the 28 key permutations.
+             lower chunk index) has text t_j; the second-pass vectors are hashed apart and
+             compared bitwise with the first-pass ones.
+  shuffle: π = rng.permutation(18), 1,000 times, drawn after the 28 key permutations; with
+           s_0 < … < s_17 the positive ids, item s_r receives the expected set of item s_{π[r]}.
+  acros recovered (report-only): per arm and k, the distinct expected acros a for which some
+           item i with a in its expected list has a's label in top_k(i).
+  bm25_check (report-only): for each chunk j holding a token with n_t = 1, its first such token
+           as query scores chunk j above 0 and every other chunk 0.
+  distances (report-only): √(max(0, 2 − 2·S)) in binary64, first-pass vectors.
 Data layer
   Files read once as bytes, hashed, then parsed as strict UTF-8 JSON; duplicate keys, NaN and
   Infinity refused. Vectors matrix: 370 × 384 (342 chunks, then 28 queries), float64, C order,
-  little-endian, hashed as raw bytes. Exact quantities (chance, mcnemar) computed with
-  fractions.Fraction and written as numerator, denominator and float(); other floats written by
-  json.dumps. File: json.dumps(indent=2, ensure_ascii=False), keys in the order above, final
+  little-endian, hashed as raw bytes; the second-pass matrix, 342 × 384, hashed the same way.
+  Every manifest label and text and every prose_en a non-empty string. Exact quantities (chance,
+  mcnemar) computed with fractions.Fraction and written as numerator, denominator and float();
+  other floats written by json.dumps. File: json.dumps(indent=2, ensure_ascii=False), keys in the order above, final
   newline, UTF-8.
 Threads  The script sets OMP_NUM_THREADS = OPENBLAS_NUM_THREADS = VECLIB_MAXIMUM_THREADS = 1
          itself, before its own first numpy or torch import.
-Refusal  A digest mismatch, an epsilon other than 0.8, an expected acro with zero or two labels or
-         an encoder that cannot load offline writes no result. A failed alignment control or an
-         invalid vector writes the result with valid = false and every decision null.
+Refusal  No result is written; checked in this order, the first failure ends the run with a
+         non-zero exit and its identifier on stderr. Identifiers: R1 digests, R2 strict_json,
+         R3 acro_resolution, R4 epsilon, R5 encoder_offline_cpu.
+Validity The result is written with valid = false and every decision null if any check fails;
+         every check runs. Identifiers, in check order: V1 vectors, V2 alignment. The unit tests
+         are checked at review and are not a field of the result.
 ```
 
 En palabras: P1 mide si el motor encuentra los enunciados de Beezer que corresponden a las
@@ -447,6 +463,9 @@ el más cercano. Lo mismo se hace con una búsqueda por palabras (BM25) sobre ex
 texto. Dos pruebas exactas deciden a cada k: que los aciertos superen lo esperable al ordenar los
 fragmentos al azar, y que el motor gane a BM25 en las definiciones donde discrepan. La hipótesis
 solo se sostiene si pasan las cuatro. Un control comprueba que cada enunciado, tomado como
-consulta, se encuentra a sí mismo; si falla, el resultado no es válido y no decide nada. Lo demás
-(distancias, longitudes, citas, un control con las respuestas barajadas) solo se informa. La
-semilla es 20261002.
+consulta, se encuentra a sí mismo; si falla, el resultado no es válido y no decide nada. Si los
+archivos no son los fijados, el script no escribe nada. Las dos pruebas tratan las definiciones
+como independientes, y las que comparten enunciado esperado no lo son: el p-valor puede salir
+más pequeño de lo que debería, sobre todo en McNemar. Queda declarado como límite. Lo demás
+(distancias, longitudes, citas, cuántos enunciados distintos acierta cada brazo, una comprobación
+de BM25, un control con las respuestas barajadas) solo se informa. La semilla es 20261002.

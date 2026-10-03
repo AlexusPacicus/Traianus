@@ -300,7 +300,10 @@ D31 For independent Bernoulli(p_1), …, Bernoulli(p_n), X = Σ B_i, define f_0(
     f_i(x) = (1 − p_i) f_{i−1}(x) + p_i f_{i−1}(x − 1) with f_{i−1}(−1) = 0 and f_{i−1}(i) = 0;
     then P(X = x) = f_n(x) and P(X ≥ H) = Σ_{x=H..n} f_n(x), which is 1 for H ≤ 0 and 0 for H > n.
     Conditions: the B_i independent. With every p_i rational the recursion is exact in rational
-    arithmetic.
+    arithmetic. Items with a shared target are not independent in content; with positively
+    dependent B_i the tail can understate P(X ≥ H) above the mean, and a test on it is then
+    anti-conservative, a limit
+    declared in the record.
     Proof: condition on B_i; X_i = X_{i−1} + B_i.
 
 D32 Exact one-sided McNemar. Among n = b + c discordant pairs, if each is equally likely to fall
@@ -317,7 +320,9 @@ D33 A conjunction of tests has size at most the smallest of their sizes. For eve
     of at least one condition r* holds, P(all four pass) ≤ P(A_{r*}) ≤ α.
     Conditions: each test has size at most α under its own null: (a) is the exact tail of D31
     and (b) the exact tail of D32, and a tail test that passes iff its p-value is < α has size
-    ≤ α on a discrete distribution. No independence between the four is needed.
+    ≤ α on a discrete distribution. No independence between the four is needed. The size of
+    (a) and (b) holds under their nulls as modelled (D31, D32: independent items); where a
+    record declares that independence as a limit, the bound carries the same limit.
     Proof: A_1 ∩ … ∩ A_4 ⊆ A_{r*}.
 ```
 
