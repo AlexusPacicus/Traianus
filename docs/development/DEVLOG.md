@@ -2132,3 +2132,76 @@ ni corpus construido todavía.
    sin pérdida.
 3. Registro de auditoría del instrumento y revisión ciega.
 4. Script y primera ejecución.
+
+### Cierre (23:28)
+
+**Contexto:** después de la entrada de la mañana instalé el CLI con la API.
+El builder y el registro los hizo esa sesión; esta sesión los revisó y
+lanzó las revisiones.
+
+**Se hizo:**
+- **CLI, en una línea:** snapshot de Beezer (`00e75d0`); builder, corpus,
+  separador de títulos y tipos de cita descartados (LEDGER 98); registro P1
+  revisión 1 en `feat/math-beezer-builder`.
+  - Se bloqueó otra vez por un `cd`.
+  - Los tres enunciados idénticos (DCM, DP, DM) obligaron a fijar el
+    desempate también para el motor.
+- **P1 revisión 2** (`829aa3a`): «Leakage» dice ya de dónde sale la prosa.
+  Usé un traductor automático, y no miré el índice de Beezer al escribir la
+  8–28.
+- **Tres revisiones ciegas de fase 1, sobre el mismo commit:**
+  - Claude (Sonnet, ciega por construcción): PASS.
+  - OpenCode `muse-spark-1.3-contributor-free`: PASS. La versión de pago
+    falló por saldo antes de leer nada.
+  - OpenCode `space-bunny-free` con esfuerzo max: CHANGES, con dos
+    bloqueantes.
+  - Encontraron cosas distintas. Dos de tres vieron la contradicción entre
+    negarse a ejecutar y marcar `valid = false`; muse-spark dijo que no
+    existía.
+  - Los veredictos están fuera del registro (`.data/reviews/`), para que
+    ningún revisor viera los de los otros.
+- **Ítems que comparten objetivo (B1):** decidí dejarlo como límite
+  declarado, con la dirección del sesgo escrita. Añado como solo informe
+  cuántos objetivos distintos acierta cada brazo.
+- **Predicciones antes de cualquier vector** (`42a2ff1`): yo creo que (a) y
+  (b) a k = 5 pasan y dudo de (b) a k = 1. Claude cree que (b) a k = 1
+  probablemente falla.
+- **Gobernanza, solo un día a la semana:**
+  - entre semana las ideas van a issues con la etiqueta `governance`, como
+    el `cd` (#89) y el lanzador de varios revisores a la vez (#90);
+  - salió de una valoración del proceso: la maquinaria se llevaba más
+    sesiones que el producto.
+- **Ramas en GitHub:** quedan `main`, `ngi` y la del piloto.
+  - Las aparcadas pasaron a etiquetas `archive/*`, también
+    `ulpia-3d-membrane` en los dos repos.
+  - `ngi` no se toca: la presenté a una candidatura.
+  - Borradas las ramas locales ya fusionadas.
+- **Texto aparcado** de NEXT_RESEARCH, commiteado (`3cf7f62`).
+- **Repaso de mis definiciones:** las ideas están bien y el vocabulario
+  falla. Lección sobre traspuesta, mínimos cuadrados y SVD en mi propio
+  código.
+
+**Resultado:** `main` en `42a2ff1`, con `42a2ff1` sin subir. La rama del
+piloto está subida en `829aa3a`. No existe ningún vector del corpus.
+
+**Resuelto de entradas anteriores:**
+- 2026-10-02 (mañana), próximos pasos 1–3: CLI instalado, contrato y builder
+  hechos, registro escrito y revisado en ciego.
+- 2026-10-02 (mañana): `research/ulpia-3d-membrane` está archivada.
+- 2026-10-02 (mañana): el texto ajeno de NEXT_RESEARCH, commiteado.
+
+**Sin resolver / decisión pendiente:**
+- **Autor:** subir `42a2ff1`, para que las predicciones queden fechadas en
+  GitHub antes del resultado.
+- Pregunta abierta: ¿son ortonormales los 8 ejes de `B_0`? Si no lo son, el
+  resto que calcula `observables.py` no es perpendicular de verdad. Para
+  después del piloto.
+- **Siguen del 2026-09-30:** `CONTRACTS.md` nombra `traianus/security/`, el
+  arranque de SEC-M-06 no tiene test y una sesión conserva el validador
+  viejo.
+
+**Próximo paso:**
+1. Revisión 3 de P1, con lo de los tres revisores, B1 como límite declarado
+   y el recuento por objetivo.
+2. Nueva ronda de revisión ciega sobre la revisión 3.
+3. Script y primera ejecución.
