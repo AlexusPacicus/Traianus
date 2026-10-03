@@ -1,6 +1,6 @@
 """P1 — recovery of expected Beezer statements.
 
-Implements docs/methodology/instrument-audit/P1.md (instrument audit record, revision 6) against
+Implements docs/methodology/instrument-audit/P1.md (instrument audit record, revision 7) against
 docs/methodology/instrument-audit/contracts.md (section 6) and derivations.md (D5, D30-D34).
 
 For the test items that have an expected statement, measures whether an expected label is among the

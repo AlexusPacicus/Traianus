@@ -1,6 +1,6 @@
 """Unit tests of tools/experiments/p1_beezer_retrieval.py.
 
-Specification: docs/methodology/instrument-audit/P1.md (revision 6), contracts.md (section 6) and
+Specification: docs/methodology/instrument-audit/P1.md (revision 7), contracts.md (section 6) and
 derivations.md (D5, D30-D34; the derivation tests are in test_audit_derivations.py). Synthetic
 inputs and stub providers only: CI has no .data/, and the measurement is never run on the real
 files here. The one test that loads the real model is in the model partition.
@@ -649,9 +649,9 @@ def test_a_flip_of_the_sign_or_of_an_exponent_bit_that_stays_finite_is_accepted_
     assert not np.allclose(v, _unit(u), rtol=0.0, atol=1e-7)
 
 
-def test_the_docstrings_of_the_script_and_of_the_tests_name_only_revision_6():
+def test_the_docstrings_of_the_script_and_of_the_tests_name_only_revision_7():
     for module_doc in (p1.__doc__, __doc__):
-        assert re.findall(r"revision \d+", module_doc) == ["revision 6"]
+        assert re.findall(r"revision \d+", module_doc) == ["revision 7"]
 
 
 def test_unit_vector_normalises_in_binary64():

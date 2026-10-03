@@ -962,6 +962,16 @@ def _hit_frequency(n, m, k):
     return Fraction(hits, total)
 
 
+def _tail_of_law(law, h):
+    """P(sum of the outcome >= h) under a joint law given as (outcome, weight) pairs."""
+    return sum((weight for outcome, weight in law if sum(outcome) >= h), Fraction(0))
+
+
+def _perfectly_dependent(n, p):
+    """Joint law of n Bernoulli(p) that always agree: all ones with probability p, else all zeros."""
+    return [((1,) * n, p), ((0,) * n, 1 - p)]
+
+
 # D30 --------------------------------------------------------------------------------------------
 
 
@@ -981,6 +991,17 @@ def test_d30_is_one_when_k_exceeds_n_minus_m(p1):
 def test_d30_breaks_with_the_independent_draw_shortcut(p1):
     shortcut = 1 - (1 - Fraction(3, 6)) ** 2
     assert p1.hit_probability(6, 2, 3) == _hit_frequency(6, 2, 3) != shortcut
+
+
+def test_d30_at_its_boundaries_by_exhaustive_enumeration_of_orderings(p1):
+    n = 6
+    for m in (1, 2, 3):
+        for k in (n - m, n):
+            assert p1.hit_probability(n, m, k) == _hit_frequency(n, m, k)
+        assert p1.hit_probability(n, m, n - m) < 1
+        assert p1.hit_probability(n, m, n) == 1
+    for k in range(1, n + 1):
+        assert p1.hit_probability(n, 3, k) == _hit_frequency(n, 3, k)
 
 
 # D31 --------------------------------------------------------------------------------------------
@@ -1010,6 +1031,32 @@ def test_d31_breaks_for_positively_dependent_outcomes(p1):
     assert p1.poisson_binomial_tail([half, half], 2) == Fraction(1, 4) != dependent
 
 
+def test_d31_breaks_for_dependent_outcomes_near_the_mean(p1):
+    tenth = Fraction(1, 10)
+    dependent = _tail_of_law(_perfectly_dependent(2, tenth), 1)
+    assert dependent == tenth
+    assert p1.poisson_binomial_tail([tenth, tenth], 1) == Fraction(19, 100) != dependent
+
+
+def test_d31_with_no_outcomes_and_with_probabilities_zero_and_one(p1):
+    for h in (-2, -1, 0):
+        assert p1.poisson_binomial_tail([], h) == 1
+    for h in (1, 2):
+        assert p1.poisson_binomial_tail([], h) == 0
+    zero, one = Fraction(0), Fraction(1)
+    cases = [
+        [zero, zero, zero],
+        [one, one, one],
+        [zero, one],
+        [one, Fraction(1, 3), zero, Fraction(2, 5), one, Fraction(1, 7)],
+    ]
+    for ps in cases:
+        for h in range(-1, len(ps) + 2):
+            assert p1.poisson_binomial_tail(ps, h) == _tail_by_outcomes(ps, h)
+    assert p1.poisson_binomial_tail([zero, zero, zero], 1) == 0
+    assert p1.poisson_binomial_tail([one, one, one], 3) == 1
+
+
 # D32 --------------------------------------------------------------------------------------------
 
 
@@ -1031,6 +1078,14 @@ def test_d32_by_exhaustive_enumeration_of_fair_signs(p1):
 def test_d32_breaks_when_the_two_directions_are_not_equiprobable(p1):
     weighted = sum(math.comb(4, j) * Fraction(3, 4) ** j * Fraction(1, 4) ** (4 - j) for j in (3, 4))
     assert p1.mcnemar_tail(3, 1) == Fraction(5, 16) != weighted
+
+
+@pytest.mark.parametrize("n", range(2, 7))
+def test_d32_breaks_for_perfectly_dependent_signs(p1, n):
+    half = Fraction(1, 2)
+    dependent = _tail_of_law(_perfectly_dependent(n, half), n)
+    assert dependent == half
+    assert p1.mcnemar_tail(n, 0) == Fraction(1, 2**n) != dependent
 
 
 # D33 --------------------------------------------------------------------------------------------
@@ -1067,6 +1122,20 @@ def test_d33_each_tail_test_passing_below_alpha_has_size_at_most_alpha(p1):
         assert size <= ALPHA
 
 
+def test_d33_size_of_the_poisson_binomial_test_exceeds_alpha_under_dependence(p1):
+    fifth = Fraction(1, 5)
+    tail = p1.poisson_binomial_tail([fifth, fifth], 2)
+    assert tail == Fraction(1, 25) and p1.passes(tail)
+    assert [x for x in range(3) if p1.passes(p1.poisson_binomial_tail([fifth, fifth], x))] == [2]
+    assert _tail_of_law(_perfectly_dependent(2, fifth), 2) == fifth > ALPHA
+
+
+def test_d33_size_of_the_mcnemar_test_exceeds_alpha_under_dependent_signs(p1):
+    n = 5
+    assert [b for b in range(n + 1) if p1.passes(p1.mcnemar_tail(b, n - b))] == [n]
+    assert _tail_of_law(_perfectly_dependent(n, Fraction(1, 2)), n) == Fraction(1, 2) > ALPHA
+
+
 # D34 --------------------------------------------------------------------------------------------
 
 
@@ -1084,3 +1153,27 @@ def test_d34_breaks_for_dependent_events_and_for_a_sum_of_probabilities(p1):
     unit = p1.unit_probabilities([[0, 1]], {0: half, 1: half})[0]
     assert unit == Fraction(3, 4) != dependent == half
     assert unit != half + half
+
+
+def test_d34_with_no_events_and_with_probabilities_zero_and_one(p1):
+    assert p1.unit_probabilities([[]], {}) == [0]
+    zero, one = Fraction(0), Fraction(1)
+    cases = [
+        [zero, zero],
+        [zero, Fraction(1, 3)],
+        [one, Fraction(2, 5)],
+        [one, one, zero],
+        [zero, one, Fraction(1, 3), Fraction(2, 5), one, zero, Fraction(1, 7)],
+    ]
+    for ps in cases:
+        unit = p1.unit_probabilities([list(range(len(ps)))], dict(enumerate(ps)))
+        assert unit == [_tail_by_outcomes(ps, 1)]
+
+
+@pytest.mark.parametrize("p", [Fraction(1, 10), Fraction(1, 2)])
+@pytest.mark.parametrize("n", range(2, 5))
+def test_d34_positive_dependence_lowers_the_probability_of_at_least_one(p1, n, p):
+    dependent = _tail_of_law(_perfectly_dependent(n, p), 1)
+    unit = p1.unit_probabilities([list(range(n))], dict.fromkeys(range(n), p))[0]
+    assert dependent == p
+    assert unit == 1 - (1 - p) ** n > dependent
