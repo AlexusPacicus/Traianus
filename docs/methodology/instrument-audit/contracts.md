@@ -408,9 +408,11 @@ Output   data/math/P1_result.json with: valid; first_failed (null when valid); f
          vectors_sha256 (the 370 first-pass rows); alignment_vectors_sha256 (the 342 second-pass
          rows); counts (chunks, distinct texts, items, positives, chunk and query texts over
          max_seq_length);
-         alignment ({matched, required, bitwise_differences}); per k in {5, 1}: H_engine, H_bm25,
-         chance ({num, den, float, pass}), mcnemar ({b, c, n, num, den, float, pass}), k_pass;
-         holds; shuffle (per k, the fraction); bm25_check ({chunks_with_unique_token, passed});
+         alignment ({matched, required, bitwise_differences}); k5 then k1, each: H_engine,
+         H_bm25, chance ({num, den, float, pass}), mcnemar ({b, c, n, num, den, float, pass}),
+         k_pass; holds; holds_limit (a fixed sentence: the independence limit, written also when
+         holds is null); shuffle (k5, k1: {count, total, fraction}); bm25_check
+         ({chunks_with_unique_token, passed});
          group_sensitivity ({units: the lists of ids; per k: H_engine, H_bm25, chance ({num,
          den, float}), mcnemar ({b, c, n, num, den, float})}, no pass field);
          report_only (as P1.md lists it, with the distinct acros recovered per arm and k). With
