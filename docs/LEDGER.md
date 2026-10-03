@@ -3177,3 +3177,119 @@
   review; the script and the first run.
 
 * **Status:** `Consolidated` (test set frozen; no code, no corpus built).
+
+### seq 98 — 2026-10-02 — Beezer corpus built: 342 chunks, a separator after every title, citation types declared
+
+* **Context:** seq 96–97 left the builder contract, the instrument audit record and the first run
+  open. The Beezer snapshot was committed (`00e75d0`, 55 files) and the builder was delegated to
+  `engine-implementer` under two strict contracts (`beezer-corpus-builder`,
+  `beezer-title-separator`), on the branch `feat/math-beezer-builder`, not merged.
+
+* **Decisions (the author):** the text of every `<title>` is followed by `. `, the chunk title and
+  each `<property>` title alike, after noticing that title and statement ran together. The acroref
+  types that are not definition or theorem stay dropped but are declared: 11 types in
+  `PROVENANCE.md` and as `DROPPED_CITATION_TYPES` in the builder, which now fails on any other
+  type (the snapshot has 13: `diagram` 8, `solution` 7 and `subsection` 17 were not in the first
+  contract). Both are amendments to seq 96–97 made before any vector exists. The other choices of
+  the builder contract (kinds `DEF` and `THM`, document order by `xi:include` expansion, the text
+  steps, the marker `⟦Fn⟧`, the four artifacts, self-citations dropped) were proposed by Claude and
+  went into the delegation as written; the author launched it without changes.
+
+* **Artifacts:** `data/math/beezer_manifest.json`, `beezer_marked.json`, `beezer_formulas.json` and
+  `beezer_citations.json`, by `tools/experiments/tooling/build_beezer_corpus.py`: 342 chunks (114
+  DEF, 228 THM), 2,078 formulas (1,972 inline, 63 `<equation>`, 43 `<alignmath>`), 851 citation
+  pairs, model text of 8 to 184 words (median 25), none empty. Commits: `17a4065` builder and
+  tests, `83544ca` artifacts, `902f8dd` separator and declared types; the manifest of `83544ca` has
+  no separator and was never vectorized. The other three artifacts are byte-identical across the
+  amendment.
+
+* **Declared:** option B leaves residue where a formula contributes no words: 190 chunks hold a
+  space before a period, 112 before a comma, one (`PEEF`) holds `. .`, and five titles end in a
+  formula that leaves nothing (`Dimension of. The dimension…`, `Consistent Systems, and.`). The
+  formulas inside `<notation>` blocks, which are not in the text, are still in the table and count
+  in the `⟦Fn⟧` numbering, because the rebuild covers the whole span. A macro is a backslash
+  followed by letters, so `\\x` would read as `x`; in the snapshot that only happens in
+  `macros.xml`, outside every chunk. `PROVENANCE.md` still says the licence text ships with the
+  artifacts without naming `src2/gfdl-mathbook.xml` (GFDL 1.3, a copy declared faithful; not
+  compared with the FSF text), while `COPYING.txt` is only Beezer's copyright notice.
+
+* **Gate:** `pytest tests/` 3,494 passed, 1 skipped, 5 deselected, re-run by the executing agent
+  at `902f8dd` (3,471 at `83544ca`); ruff over the CI list passes; `mypy traianus/
+  tools/boundary_validator/` passes, the builder is outside its scope. Independent checks: 336 of
+  336 titles without formula are followed by `. `; each `context_pack` run served its contract's
+  sections once (19 and 17).
+
+* **Open:** the instrument audit record and its blind review; the script and the first run;
+  integration of the branch; the DEVLOG entry.
+
+* **Status:** `Consolidated` (builder and artifacts built; no vector, no model, no pilot run).
+
+### seq 99 — 2026-10-03 — Pilot 1 run: valid, holds false; (a) passes at both k, (b) fails at both
+
+* **Context:** seq 96–98 fixed the rule, the test set and the corpus before any vector. The P1
+  record (`docs/methodology/instrument-audit/P1.md`) was written before the script, reviewed blind
+  and revised. The script was implemented test-first by `instrument-implementer` under validated
+  `DelegationContract`s, all on `feat/math-beezer-builder`.
+
+* **Review path (record history has the detail):**
+  - **Phase 1:** three blind reviewers on revision 2 (`829aa3a`). Claude PASS (8 non-blocking),
+    OpenCode muse-spark PASS (6), OpenCode space-bunny CHANGES, with 2 blocking items: B1, items
+    sharing targets are not independent; B2, refusal and `valid = false` contradicted each other.
+    For B1 the author kept a declared limit, with the bias direction stated and a report-only
+    count of distinct targets. Revision 3 (`1b8cb4f`): Claude PASS, 9 non-blocking. Revision 4
+    (`5b52179`) added a report-only group sensitivity (12 units, new D34), and the author closed
+    phase 1.
+  - **Script:** `5034e52`, followed by revision 5 (`c240ac0`, wording).
+  - **Phase 2 round 1:** PASS, 10 non-blocking. Revision 6 (`73da6a6`) specified the fixes before
+    the code; they were made in `221f8a9`: ε read within the refusal checks (an unparsable value is
+    RF4), RF2 structural tests, accepted bit-flip tests.
+  - **Maths-only review of D30–D34 at `221f8a9`:** D33 defect (its heading bounded a conjunction by
+    the smallest size, not the largest; P1's rule is unaffected, since all four sizes are at most
+    0.05); D31's dependence remark gave a wrong criterion; conditions amended. Revision 7
+    (`564f140`) and the missing derivation tests (`e69a013`) followed.
+  - **Phase 2 round 2 at `e69a013`:** PASS, 7 non-blocking, 4 of them declared and not applied
+    (`f374fe0`).
+
+* **Run (the executing agent, at `f374fe0`, cpu, one thread):** `valid = true`; alignment 342 of
+  342, with 0 bitwise differences between passes. A second run to another path gave a
+  byte-identical file. Result committed at `64e3450`, a commit that states figures only.
+
+  | k | H_engine / 18 | H_bm25 | p_chance | McNemar b, c | p_mcnemar |
+  |---|---|---|---|---|---|
+  | 5 | 4 | 1 | 2.06·10⁻⁴ (pass) | 3, 0 | 1/8 (fail) |
+  | 1 | 2 | 1 | 1.71·10⁻³ (pass) | 1, 0 | 1/2 (fail) |
+
+  `holds = false`. Report only: the group sensitivity gives the same McNemar values; distinct
+  acros recovered by the engine are 4 (k = 5) and 2 (k = 1), by BM25 1 and 1; the label shuffle
+  gives 0.078 (k = 5) and 0.052 (k = 1); 0 texts were truncated; the BM25 check passed 92 of 92;
+  27.6 % of the 851 cited pairs are at distance ≤ 0.8.
+
+* **Against the dated predictions (`42a2ff1`):** (a) passes, as both predicted. (b) at k = 5
+  fails, against the author's prediction and against Claude's "doubtful". (b) at k = 1 fails, as
+  Claude predicted.
+
+* **Reading (the author with Claude, item by item, after the result; exploration that decides
+  nothing):** in `docs/roadmap/NEXT_RESEARCH.md`, pilot 1. Each item separates three causes: the
+  prose (P), the expected label (E) and the corpus text (C).
+  - BM25 mostly ranked on function words and false friends, because the author's content words
+    (projection, distance, angle, direction, axis…) are absent from all 342 statements.
+  - Formulas turned into macro words emptied the expected statements of 11 of the 18 items.
+  - The three identical "Dimension of" chunks entered the engine's top 5 three times.
+  - Wording moved the engine more than the label did.
+  - By rank, which was not part of the rule, the engine placed the expected statement better than
+    BM25 in 13 items, worse in 4 and tied in 1 (median rank 19 against 52).
+  - The author's five open questions for pilot 2 are recorded there, undecided.
+
+* **Declared:**
+  - The report page shown to the author is a private claude.ai artifact built from the result,
+    the test set and the manifest titles. It is not in the repository.
+  - Two implementer reports deviated from process. The first loaded its context without
+    `context_pack`. The third answered outside the `delegation-report/1` schema. Issue #91
+    (governance) proposes enforcing contracts and reports in code.
+  - `main` was merged into the branch (`a421bb1`, no conflict) to bring in the predictions before
+    the reading was written next to them.
+
+* **Open:** integration of the branch into `main`; the design of pilot 2 from the open questions.
+
+* **Status:** `Consolidated` (pilot 1 run and read; hypothesis not held under the committed
+  rule).

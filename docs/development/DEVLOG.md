@@ -2205,3 +2205,81 @@ piloto está subida en `829aa3a`. No existe ningún vector del corpus.
    y el recuento por objetivo.
 2. Nueva ronda de revisión ciega sobre la revisión 3.
 3. Script y primera ejecución.
+
+## 2026-10-03
+
+**Contexto:** P1 en la revisión 2, con tres revisiones ciegas (una con
+CHANGES). Quedaba revisar el registro, escribir el script y hacer la
+primera ejecución.
+
+**Se hizo:**
+- **Fase 1 de P1, cerrada.**
+  - Revisión 3: B1 queda como límite declarado, con la dirección del sesgo.
+    B2 separa los rechazos, que no escriben nada, de `valid = false`.
+  - Ronda 2 ciega de Claude: PASS.
+  - Revisión 4: añade una sensibilidad por grupos, con los objetivos
+    compartidos contados una vez (D34). Con ella cerré la fase 1.
+- **Script**, escrito por el instrument-implementer con contrato JSON
+  validado (`5034e52`).
+- **Fase 2.**
+  - Ronda 1: PASS con 10 no bloqueantes. Elegí el camino completo.
+  - Revisión 6, escrita antes que el código: ε ilegible se rechaza como
+    RF4 (`221f8a9`).
+  - Revisión solo matemática de D30–D34:
+    - D33 acotaba la conjunción por el menor tamaño, y es el mayor. A P1 no
+      le afecta.
+    - D31 tenía un criterio falso, escrito por Claude en la revisión 3.
+    - Corregidas las dos, con los tests que faltaban.
+  - Ronda 2: PASS.
+- **Primera ejecución: válida y `holds = false`** (`64e3450`).
+  - (a) pasa a k = 5 y a k = 1.
+  - (b) falla a los dos k por falta de discrepancias: 3 a 0 y 1 a 0, a
+    favor del motor, cuando hacían falta 5.
+  - Una repetición dio un archivo idéntico byte a byte.
+  - Frente a mis predicciones: acerté (a) y fallé (b) a k = 5.
+- **Lectura ítem por ítem**, con Claude y como exploración, en
+  NEXT_RESEARCH. Para cada ítem: prosa, etiqueta o corpus.
+  - Mi vocabulario casi no está en Beezer, así que BM25 ordenó por
+    palabras funcionales.
+  - Las fórmulas pasadas a macros vaciaron los esperados de 11 de los 18
+    ítems.
+  - La redacción pesa más que la etiqueta: 26 frente a 4 con el mismo
+    esperado.
+  - Por puestos, el motor coloca mejor que BM25 en 13 de 18. No estaba en
+    la regla.
+- **Preguntas para el piloto 2**, sin decidir:
+  - más lenguaje natural en el corpus;
+  - fórmulas pasadas a frases con reglas;
+  - la prosa propia es el caso de uso, no un defecto;
+  - una vista no arregla la recuperación;
+  - otro proveedor, cambiando una cosa cada vez.
+- **Issue #91, de gobernanza:** contratos e informes JSON obligatorios por
+  código y subagente aislado. Viene de dos fallos de hoy: un implementer
+  no usó `context_pack` y otro informe salió fuera del esquema.
+
+**Resultado:** `feat/math-beezer-builder` en `c4c9172`, con `main`
+fusionado. Están subidos hasta `f374fe0`; el resultado, el merge y el
+LEDGER 99 están sin subir.
+
+**Resuelto de entradas anteriores:**
+- 2026-10-02, cierre:
+  - próximos pasos 1–3: revisión 3, ronda ciega, script y primera
+    ejecución;
+  - subir `42a2ff1`, ya en `main`.
+
+**Sin resolver / decisión pendiente:**
+- **Autor:** elegir qué pregunta abre el piloto 2 y comprometer su regla
+  antes de cualquier vector.
+- Subir la rama e integrarla en `main`.
+- #91, para el día de gobernanza.
+- ¿Son ortonormales los ejes de `B_0`? Estaba aparcado hasta después del
+  piloto.
+- **Siguen del 2026-09-30:**
+  - `CONTRACTS.md` todavía nombra `traianus/security/`;
+  - el arranque de SEC-M-06 no tiene test;
+  - una sesión conserva el validador viejo.
+
+**Próximo paso:**
+1. Subir y fusionar `feat/math-beezer-builder`.
+2. Diseño del piloto 2 a partir de las preguntas abiertas.
+3. #91 el día de gobernanza.
