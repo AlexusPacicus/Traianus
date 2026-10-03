@@ -1,6 +1,6 @@
 """P1 — recovery of expected Beezer statements.
 
-Implements docs/methodology/instrument-audit/P1.md (instrument audit record, revision 4) against
+Implements docs/methodology/instrument-audit/P1.md (instrument audit record, revision 6) against
 docs/methodology/instrument-audit/contracts.md (section 6) and derivations.md (D5, D30-D34).
 
 For the test items that have an expected statement, measures whether an expected label is among the
@@ -10,9 +10,9 @@ the claim holds iff the four exact tests pass. Everything else is report-only an
 
 Refuses to run, and writes nothing, unless the three input digests match (RF1), the inputs parse
 as strict JSON (RF2), every expected acro resolves to one label (RF3), resolve_epsilon_edge()
-returns 0.8 (RF4) and the encoder loads offline at the pinned revision on the cpu (RF5). A run that
-completes but fails a check (V1 vectors, V2 alignment) is written with valid = false, no decision
-and, for V1, no vector-derived figure.
+returns 0.8, a value it cannot parse being refused too (RF4), and the encoder loads offline at the
+pinned revision on the cpu (RF5). A run that completes but fails a check (V1 vectors, V2
+alignment) is written with valid = false, no decision and, for V1, no vector-derived figure.
 
 Usage:
     python3 tools/experiments/p1_beezer_retrieval.py [--out PATH]
@@ -244,7 +244,11 @@ def resolve_acros(inp: Inputs) -> dict[str, int]:
 # Epsilon and encoder (RF4, RF5) ------------------------------------------------------------------
 
 
-def check_epsilon(value: float) -> None:
+def check_epsilon(resolve: Callable[[], float]) -> None:
+    try:
+        value = resolve()
+    except ValueError as exc:
+        raise Refusal("RF4", f"resolve_epsilon_edge() cannot parse its value: {exc}") from exc
     if value != EPSILON:
         raise Refusal("RF4", f"resolve_epsilon_edge() returned {value!r}, not {EPSILON!r}")
 
@@ -781,7 +785,7 @@ def run(
     out: Path,
     paths: Mapping[str, Path],
     digests: Mapping[str, str],
-    epsilon: float,
+    resolve_epsilon: Callable[[], float],
     build: Callable[[], Any],
     provider: Any,
 ) -> int:
@@ -789,7 +793,7 @@ def run(
         raw = read_verified(paths, digests)
         inp = parse_inputs(raw)
         acro_index = resolve_acros(inp)
-        check_epsilon(epsilon)
+        check_epsilon(resolve_epsilon)
         model = load_encoder(build, MODEL_REVISION)
         result = measure(
             inp,
@@ -812,7 +816,7 @@ def main(argv: Sequence[str] | None = None) -> int:
     parser.add_argument("--out", type=Path, default=RESULT)
     args = parser.parse_args(argv)
     return run(
-        args.out, PATHS, EXPECTED_DIGESTS, resolve_epsilon_edge(), build_encoder, SentenceTransformerProvider()
+        args.out, PATHS, EXPECTED_DIGESTS, resolve_epsilon_edge, build_encoder, SentenceTransformerProvider()
     )
 
 

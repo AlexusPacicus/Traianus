@@ -1,6 +1,6 @@
 """Unit tests of tools/experiments/p1_beezer_retrieval.py.
 
-Specification: docs/methodology/instrument-audit/P1.md (revision 4), contracts.md (section 6) and
+Specification: docs/methodology/instrument-audit/P1.md (revision 6), contracts.md (section 6) and
 derivations.md (D5, D30-D34; the derivation tests are in test_audit_derivations.py). Synthetic
 inputs and stub providers only: CI has no .data/, and the measurement is never run on the real
 files here. The one test that loads the real model is in the model partition.
@@ -10,6 +10,7 @@ import hashlib
 import itertools
 import json
 import math
+import re
 import struct
 import zlib
 from fractions import Fraction
@@ -158,11 +159,20 @@ def _files(directory, raw):
     return paths, {key: hashlib.sha256(data).hexdigest() for key, data in raw.items()}
 
 
+def _resolver(epsilon):
+    """The resolver run() takes: ``epsilon`` is a value to return, or already a callable."""
+    return epsilon if callable(epsilon) else lambda: epsilon
+
+
+def _unparsable():
+    raise ValueError("could not convert string to float: 'not-a-number'")
+
+
 def _run(directory, raw=None, *, digests=None, epsilon=0.8, build=Model, provider=None):
     paths, own = _files(directory, raw or _raw())
     out = directory / "P1_result.json"
     provider = provider or Stub(_query_vectors())
-    return p1.run(out, paths, digests or own, epsilon, build, provider), out
+    return p1.run(out, paths, digests or own, _resolver(epsilon), build, provider), out
 
 
 def _measure(provider=None, raw=None):
@@ -395,7 +405,7 @@ def test_rf1_one_flipped_bit_in_any_of_the_three_files_refuses(tmp_path, capsys,
     data[{"first": 0, "last": len(data) - 1, "seeded": seeded}[where]] ^= 0x01
     paths[name].write_bytes(bytes(data))
     out = tmp_path / "P1_result.json"
-    code = p1.run(out, paths, digests, 0.8, Model, Stub(_query_vectors()))
+    code = p1.run(out, paths, digests, _resolver(0.8), Model, Stub(_query_vectors()))
     assert code != 0 and capsys.readouterr().err.startswith("RF1")
     assert not out.exists()
 
@@ -404,7 +414,7 @@ def test_rf1_a_missing_file_refuses(tmp_path, capsys):
     paths, digests = _files(tmp_path, _raw())
     paths["citations"].unlink()
     out = tmp_path / "P1_result.json"
-    assert p1.run(out, paths, digests, 0.8, Model, Stub()) != 0
+    assert p1.run(out, paths, digests, _resolver(0.8), Model, Stub()) != 0
     assert capsys.readouterr().err.startswith("RF1") and not out.exists()
 
 
@@ -417,6 +427,7 @@ BAD_MANIFESTS = {
     "non_string_text": b'{"MATH_BEEZER_DEF_A": 7}',
     "invalid_utf8": b'{"MATH_BEEZER_DEF_A": "\xff"}',
     "not_an_object": b'["MATH_BEEZER_DEF_A"]',
+    "number_that_parses_to_infinity": b'{"MATH_BEEZER_DEF_A": "x", "MATH_BEEZER_DEF_B": 1e999}',
 }
 BAD_TEST_SETS = {
     "duplicate_key": b'{"items": [], "items": []}',
@@ -425,6 +436,29 @@ BAD_TEST_SETS = {
     "empty_prose": b'{"items": [{"id": 1, "prose_en": "", "expected": []}]}',
     "non_string_prose": b'{"items": [{"id": 1, "prose_en": 3, "expected": []}]}',
     "missing_prose": b'{"items": [{"id": 1, "expected": []}]}',
+    "number_that_parses_to_infinity": b'{"items": [{"id": 1, "prose_en": "q", "expected": [], "x": 1e999}]}',
+    "not_an_object": b'[{"id": 1, "prose_en": "q", "expected": []}]',
+    "no_items_key": b'{"pilot": "synthetic"}',
+    "items_not_a_list": b'{"items": {"id": 1, "prose_en": "q", "expected": []}}',
+    "item_not_an_object": b'{"items": [{"id": 1, "prose_en": "q", "expected": []}, 7]}',
+    "missing_id": b'{"items": [{"prose_en": "q", "expected": []}]}',
+    "string_id": b'{"items": [{"id": "1", "prose_en": "q", "expected": []}]}',
+    "float_id": b'{"items": [{"id": 1.0, "prose_en": "q", "expected": []}]}',
+    "boolean_id": b'{"items": [{"id": true, "prose_en": "q", "expected": []}]}',
+    "repeated_id": b'{"items": [{"id": 1, "prose_en": "q", "expected": []}, '
+    b'{"id": 1, "prose_en": "r", "expected": []}]}',
+    "expected_missing": b'{"items": [{"id": 1, "prose_en": "q"}]}',
+    "expected_a_string": b'{"items": [{"id": 1, "prose_en": "q", "expected": "A"}]}',
+    "expected_with_a_non_string": b'{"items": [{"id": 1, "prose_en": "q", "expected": ["A", 3]}]}',
+}
+BAD_CITATIONS = {
+    "number_that_parses_to_infinity": b'[["MATH_BEEZER_DEF_A", 1e999]]',
+    "not_a_list": b'{"MATH_BEEZER_DEF_A": "MATH_BEEZER_DEF_B"}',
+    "pair_not_a_list": b'[{"MATH_BEEZER_DEF_A": 1, "MATH_BEEZER_DEF_B": 2}]',
+    "pair_of_one": b'[["MATH_BEEZER_DEF_A"]]',
+    "pair_of_three": b'[["MATH_BEEZER_DEF_A", "MATH_BEEZER_DEF_B", "MATH_BEEZER_DEF_C"]]',
+    "end_not_a_string": b'[["MATH_BEEZER_DEF_A", 3]]',
+    "end_not_a_manifest_label": b'[["MATH_BEEZER_DEF_A", "MATH_BEEZER_DEF_Z"]]',
 }
 
 
@@ -441,6 +475,15 @@ def test_rf2_the_parser_refuses_a_bad_manifest(name):
 def test_rf2_the_parser_refuses_a_bad_test_set(name):
     raw = _raw()
     raw["test_set"] = BAD_TEST_SETS[name]
+    with pytest.raises(p1.Refusal) as caught:
+        p1.parse_inputs(raw)
+    assert caught.value.identifier == "RF2"
+
+
+@pytest.mark.parametrize("name", list(BAD_CITATIONS))
+def test_rf2_the_parser_refuses_bad_citations(name):
+    raw = _raw()
+    raw["citations"] = BAD_CITATIONS[name]
     with pytest.raises(p1.Refusal) as caught:
         p1.parse_inputs(raw)
     assert caught.value.identifier == "RF2"
@@ -476,6 +519,41 @@ def test_rf4_an_epsilon_other_than_0_8_refuses(tmp_path, capsys):
     _refused(tmp_path, capsys, "RF4", epsilon=0.81)
 
 
+def test_rf4_the_resolver_is_called_within_the_checks_and_a_value_error_refuses(tmp_path, capsys):
+    calls = []
+
+    def resolver():
+        calls.append(1)
+        return _unparsable()
+
+    _refused(tmp_path, capsys, "RF4", epsilon=resolver)
+    assert calls == [1]
+
+
+def test_rf4_a_resolver_returning_0_81_is_called_once_and_refuses(tmp_path, capsys):
+    calls = []
+
+    def resolver():
+        calls.append(1)
+        return 0.81
+
+    _refused(tmp_path, capsys, "RF4", epsilon=resolver)
+    assert calls == [1]
+
+
+def test_rf4_the_real_resolver_with_an_unparsable_environment_value_refuses(tmp_path, capsys, monkeypatch):
+    monkeypatch.setenv("TRAIANUS_EPSILON_EDGE", "not-a-number")
+    _refused(tmp_path, capsys, "RF4", epsilon=p1.resolve_epsilon_edge)
+
+
+def test_rf4_an_error_other_than_value_error_is_not_a_refusal(tmp_path):
+    def resolver():
+        raise RuntimeError("not a parse failure")
+
+    with pytest.raises(RuntimeError):
+        _run(tmp_path, epsilon=resolver)
+
+
 def _cannot_load():
     raise OSError("offline cache miss")
 
@@ -501,19 +579,19 @@ def test_the_first_failure_ends_the_run_in_the_order_rf1_to_rf5(tmp_path, capsys
     bad_json["test_set"] = BAD_TEST_SETS["duplicate_key"]
     bad_acro = _raw(manifest={PREFIX + k: v for k, v in CHUNKS.items() if k != "THM_E"})
     cases = [
-        ("RF1", bad_json, "f" * 64, 0.9, _cannot_load),
-        ("RF2", bad_json, None, 0.9, _cannot_load),
-        ("RF3", bad_acro, None, 0.9, _cannot_load),
-        ("RF4", _raw(), None, 0.9, _cannot_load),
-        ("RF5", _raw(), None, 0.8, _cannot_load),
+        ("RF1", bad_json, "f" * 64, _unparsable, _cannot_load),
+        ("RF2", bad_json, None, _unparsable, _cannot_load),
+        ("RF3", bad_acro, None, _unparsable, _cannot_load),
+        ("RF4", _raw(), None, _unparsable, _cannot_load),
+        ("RF5", _raw(), None, _resolver(0.8), _cannot_load),
     ]
-    for number, (identifier, raw, digest, epsilon, build) in enumerate(cases):
+    for number, (identifier, raw, digest, resolver, build) in enumerate(cases):
         directory = tmp_path / str(number)
         directory.mkdir()
         paths, own = _files(directory, raw)
         digests = own if digest is None else {**own, "manifest": digest}
         out = directory / "P1_result.json"
-        assert p1.run(out, paths, digests, epsilon, build, Stub()) != 0
+        assert p1.run(out, paths, digests, resolver, build, Stub()) != 0
         assert capsys.readouterr().err.startswith(identifier)
         assert not out.exists()
 
@@ -554,6 +632,26 @@ def test_a_flip_of_the_lowest_mantissa_bit_is_accepted():
     w.view(np.uint32)[0] ^= 1
     assert not np.array_equal(u, w)
     assert p1.unit_vector(w).shape == (DIM,)
+
+
+@pytest.mark.parametrize(
+    ("name", "mask"),
+    [("sign", 0x80000000), ("lowest_exponent_bit", 1 << 23), ("middle_exponent_bit", 1 << 27)],
+)
+def test_a_flip_of_the_sign_or_of_an_exponent_bit_that_stays_finite_is_accepted_and_renormalised(name, mask):
+    u = _vec("x")
+    w = u.copy()
+    w.view(np.uint32)[0] ^= mask
+    assert np.isfinite(w[0]) and w[0] != 0.0 and w[0] != u[0]
+    v = p1.unit_vector(w)
+    assert abs(np.linalg.norm(v) - 1.0) <= 1e-12
+    assert np.allclose(v, _unit(w), rtol=0.0, atol=1e-7)
+    assert not np.allclose(v, _unit(u), rtol=0.0, atol=1e-7)
+
+
+def test_the_docstrings_of_the_script_and_of_the_tests_name_only_revision_6():
+    for module_doc in (p1.__doc__, __doc__):
+        assert re.findall(r"revision \d+", module_doc) == ["revision 6"]
 
 
 def test_unit_vector_normalises_in_binary64():
