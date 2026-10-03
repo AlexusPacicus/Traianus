@@ -447,5 +447,6 @@ conditioning on n were missing). Condition fixes applied from its report: D30 (d
 D31 (the dependence remark, whose "above the mean" criterion was wrong; f zero outside 0..i;
 n = 0 and p_i in {0, 1}), D32 (exchangeability of the arms within an item, conditional on the
 discordant set), D34 (mutually independent; the direction of dependence). En palabras amended
-for D31, D32 and D33. Test gaps it listed (independence breaks for D32 and for D33's size,
-D30's boundary k = N − m, D31 with n = 0 and p_i in {0, 1}) are not yet closed.
+for D31, D32 and D33. The test gaps it listed (independence breaks for D32 and for D33's size,
+D30's boundary k = N − m, D31 with n = 0 and p_i in {0, 1}) were closed in `e69a013`, with
+dependence breaks for D31 and D34 as well.
