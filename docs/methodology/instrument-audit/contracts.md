@@ -406,10 +406,13 @@ Output   data/math/P1_result.json with: valid; first_failed (null when valid); f
          torch, sentence-transformers, platform, device, max_seq_length, numpy_config =
          numpy.show_config(mode="dicts"), torch_threads = torch.get_num_threads());
          vectors_sha256 (the 370 first-pass rows); alignment_vectors_sha256 (the 342 second-pass
-         rows); counts (chunks, items, positives, chunk and query texts over max_seq_length);
+         rows); counts (chunks, distinct texts, items, positives, chunk and query texts over
+         max_seq_length);
          alignment ({matched, required, bitwise_differences}); per k in {5, 1}: H_engine, H_bm25,
          chance ({num, den, float, pass}), mcnemar ({b, c, n, num, den, float, pass}), k_pass;
          holds; shuffle (per k, the fraction); bm25_check ({chunks_with_unique_token, passed});
+         group_sensitivity ({units: the lists of ids; per k: H_engine, H_bm25, chance ({num,
+         den, float}), mcnemar ({b, c, n, num, den, float})}, no pass field);
          report_only (as P1.md lists it, with the distinct acros recovered per arm and k). With
          valid = false every decision field (holds, k_pass, each pass) is null.
 Function
@@ -438,22 +441,29 @@ Function
   bm25_check (report-only): for each chunk j holding a token with n_t = 1, its first such token
            as query scores chunk j above 0 and every other chunk 0.
   distances (report-only): √(max(0, 2 − 2·S)) in binary64, first-pass vectors.
+  group_sensitivity (report-only): units = connected components of the positive items under
+           "the expected lists share an acro"; a unit hits iff one of its items hits;
+           q_u = 1 − Π_{i∈u} (1 − p_i) (D34); chance over the q_u (D31), mcnemar over the
+           units' b and c (D32).
+  Every comparison with 1/20 is made on fractions.Fraction, never on the stored float.
 Data layer
   Files read once as bytes, hashed, then parsed as strict UTF-8 JSON; duplicate keys, NaN and
   Infinity refused. Vectors matrix: 370 × 384 (342 chunks, then 28 queries), float64, C order,
   little-endian, hashed as raw bytes; the second-pass matrix, 342 × 384, hashed the same way.
   Every manifest label and text and every prose_en a non-empty string. Exact quantities (chance,
   mcnemar) computed with fractions.Fraction and written as numerator, denominator and float();
-  other floats written by json.dumps. File: json.dumps(indent=2, ensure_ascii=False), keys in the order above, final
+  other floats written by json.dumps. File: json.dumps(indent=2, ensure_ascii=False,
+  allow_nan=False), so no NaN or Infinity is ever written, keys in the order above, final
   newline, UTF-8.
 Threads  The script sets OMP_NUM_THREADS = OPENBLAS_NUM_THREADS = VECLIB_MAXIMUM_THREADS = 1
          itself, before its own first numpy or torch import.
 Refusal  No result is written; checked in this order, the first failure ends the run with a
-         non-zero exit and its identifier on stderr. Identifiers: R1 digests, R2 strict_json,
-         R3 acro_resolution, R4 epsilon, R5 encoder_offline_cpu.
+         non-zero exit and its identifier on stderr. Identifiers: RF1 digests, RF2 strict_json,
+         RF3 acro_resolution, RF4 epsilon, RF5 encoder_offline_cpu.
 Validity The result is written with valid = false and every decision null if any check fails;
-         every check runs. Identifiers, in check order: V1 vectors, V2 alignment. The unit tests
-         are checked at review and are not a field of the result.
+         every check runs. Identifiers, in check order: V1 vectors, V2 alignment. When V1 fails,
+         every vector-derived figure is null and V2 counts as failed. The unit tests are checked
+         at review and are not a field of the result.
 ```
 
 En palabras: P1 mide si el motor encuentra los enunciados de Beezer que corresponden a las
@@ -467,5 +477,6 @@ consulta, se encuentra a sí mismo; si falla, el resultado no es válido y no de
 archivos no son los fijados, el script no escribe nada. Las dos pruebas tratan las definiciones
 como independientes, y las que comparten enunciado esperado no lo son: el p-valor puede salir
 más pequeño de lo que debería, sobre todo en McNemar. Queda declarado como límite. Lo demás
-(distancias, longitudes, citas, cuántos enunciados distintos acierta cada brazo, una comprobación
+(distancias, longitudes, citas, cuántos enunciados distintos acierta cada brazo, las dos pruebas
+repetidas contando una sola vez cada grupo de definiciones con el mismo enunciado, una comprobación
 de BM25, un control con las respuestas barajadas) solo se informa. La semilla es 20261002.

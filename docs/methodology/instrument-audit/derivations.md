@@ -324,6 +324,12 @@ D33 A conjunction of tests has size at most the smallest of their sizes. For eve
     (a) and (b) holds under their nulls as modelled (D31, D32: independent items); where a
     record declares that independence as a limit, the bound carries the same limit.
     Proof: A_1 ∩ … ∩ A_4 ⊆ A_{r*}.
+
+D34 For independent events E_1, …, E_n with P(E_i) = p_i, P(at least one E_i) = 1 − Π_i (1 − p_i).
+    Conditions: the E_i independent (in P1, the items of one unit under the chance model, whose
+    orderings are drawn independently). With every p_i rational the value is exact in rational
+    arithmetic.
+    Proof: the complement is ∩ E_iᶜ, and P(∩ E_iᶜ) = Π (1 − p_i) by independence.
 ```
 
 D18 is not used by Z since its revision 3 (the three-point route became two straight legs); it
@@ -331,7 +337,7 @@ stays as verified. D22 is not used by Z since its revision 5 (the search keeps e
 E = 0, so there is no merit function); it stays as verified.
 
 Used by: K6 (D2, D4, D6, D7, D8, D11), R4 (D2, D5, D6, D9, D10), Z (D5, D17, D19, D20, D21, D23,
-D24, D25, D26), TG (D27, D28, D29), P1 (D5, D30, D31, D32, D33). D30 to D33 have not yet been
+D24, D25, D26), TG (D27, D28, D29), P1 (D5, D30, D31, D32, D33, D34). D30 to D34 have not yet been
 verified by a maths-only review.
 
 ## En palabras
@@ -405,6 +411,9 @@ verified by a maths-only review.
   es una suma binomial exacta.
 - **D33** Exigir a la vez cuatro pruebas, cada una al 5 %, no sube el riesgo de dar por buena la
   hipótesis falsa por encima del 5 %: basta con que una de ellas falle para que no se sostenga.
+- **D34** Si varias definiciones aciertan o fallan por azar cada una por su lado, la probabilidad
+  de que acierte al menos una es 1 menos la probabilidad de que fallen todas, que es el producto
+  de sus fallos.
 
 Verified by the `instrument-auditor` subagent (maths only), 2026-09-18, at `e2f6d70`: D9 defect
 (count vs. fraction) and missing conditions in D1, D2, D4, D6, D7, D10; D11, D12, the D8 tie form
