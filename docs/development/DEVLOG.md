@@ -2283,3 +2283,50 @@ LEDGER 99 están sin subir.
 1. Subir y fusionar `feat/math-beezer-builder`.
 2. Diseño del piloto 2 a partir de las preguntas abiertas.
 3. #91 el día de gobernanza.
+
+### Cierre (16:11)
+
+**Contexto:** con el piloto 1 leído, pedí a Claude una valoración sincera
+de los resultados, la viabilidad y los próximos pasos.
+
+**Se hizo:**
+- **Valoración, con la que estoy de acuerdo:**
+  - **La regla estaba casi condenada.** Con BM25 casi ciego, (b) se
+    reducía a que el motor acertara 5 o más de 18. No calculamos qué
+    resultados eran alcanzables antes de congelarla.
+  - **Para un producto, el motor es pobre:** 4 de 18 en el top 5. Las
+    causas son conocidas: fórmulas vaciadas, vocabulario y un modelo
+    pequeño.
+  - **El principio de «sin generación» es la identidad del producto y
+    también su desventaja.** Una opción, que decido yo: reescribir la
+    consulta con un LLM y devolver solo texto real del corpus.
+  - **El proceso fue desproporcionado** para 28 ítems. En el piloto 2,
+    registros más cortos y un solo revisor.
+- **Un modelo aparte para fórmulas, descartado por ahora:**
+  - mis consultas no traen fórmulas, así que el daño está en el corpus;
+  - los vectores de dos modelos no se suman: se combinan puntuaciones, con
+    un peso que habría que fijar por regla;
+  - un vector combinado rompe los 384D del motor.
+
+  Primero pasar las fórmulas a frases con reglas. Un modelo de fórmulas
+  solo tendría sentido si algún día las consultas las traen.
+- **Rama del piloto en `main`** (`c322b04`), con la CI en verde, y rama
+  borrada en local y en GitHub.
+
+**Resultado:** `main` en `c322b04`, subido y con la CI en verde.
+
+**Resuelto de entradas anteriores:**
+- 2026-10-03, próximo paso 1: subir y fusionar `feat/math-beezer-builder`.
+
+**Sin resolver / decisión pendiente:**
+- **Autor:** si se reescribe la consulta con un LLM. Es una decisión de
+  principios del producto.
+- Siguen abiertos de la entrada anterior: #91, los ejes de `B_0` y los
+  tres puntos del 2026-09-30.
+
+**Próximo paso:**
+1. Piloto 2: los 28 ítems pasan a ser el conjunto de desarrollo y hará
+   falta un conjunto nuevo escrito a ciegas para confirmar.
+2. Pasar las fórmulas a frases con reglas y repetir con el mismo script.
+3. Un proveedor más fuerte sobre el desarrollo, cambiando solo eso.
+4. Comprobar qué resultados son alcanzables antes de congelar la regla.
