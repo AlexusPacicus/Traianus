@@ -3223,3 +3223,73 @@
   integration of the branch; the DEVLOG entry.
 
 * **Status:** `Consolidated` (builder and artifacts built; no vector, no model, no pilot run).
+
+### seq 99 — 2026-10-03 — Pilot 1 run: valid, holds false; (a) passes at both k, (b) fails at both
+
+* **Context:** seq 96–98 fixed the rule, the test set and the corpus before any vector. The P1
+  record (`docs/methodology/instrument-audit/P1.md`) was written before the script, reviewed blind
+  and revised. The script was implemented test-first by `instrument-implementer` under validated
+  `DelegationContract`s, all on `feat/math-beezer-builder`.
+
+* **Review path (record history has the detail):**
+  - **Phase 1:** three blind reviewers on revision 2 (`829aa3a`). Claude PASS (8 non-blocking),
+    OpenCode muse-spark PASS (6), OpenCode space-bunny CHANGES, with 2 blocking items: B1, items
+    sharing targets are not independent; B2, refusal and `valid = false` contradicted each other.
+    For B1 the author kept a declared limit, with the bias direction stated and a report-only
+    count of distinct targets. Revision 3 (`1b8cb4f`): Claude PASS, 9 non-blocking. Revision 4
+    (`5b52179`) added a report-only group sensitivity (12 units, new D34), and the author closed
+    phase 1.
+  - **Script:** `5034e52`, followed by revision 5 (`c240ac0`, wording).
+  - **Phase 2 round 1:** PASS, 10 non-blocking. Revision 6 (`73da6a6`) specified the fixes before
+    the code; they were made in `221f8a9`: ε read within the refusal checks (an unparsable value is
+    RF4), RF2 structural tests, accepted bit-flip tests.
+  - **Maths-only review of D30–D34 at `221f8a9`:** D33 defect (its heading bounded a conjunction by
+    the smallest size, not the largest; P1's rule is unaffected, since all four sizes are at most
+    0.05); D31's dependence remark gave a wrong criterion; conditions amended. Revision 7
+    (`564f140`) and the missing derivation tests (`e69a013`) followed.
+  - **Phase 2 round 2 at `e69a013`:** PASS, 7 non-blocking, 4 of them declared and not applied
+    (`f374fe0`).
+
+* **Run (the executing agent, at `f374fe0`, cpu, one thread):** `valid = true`; alignment 342 of
+  342, with 0 bitwise differences between passes. A second run to another path gave a
+  byte-identical file. Result committed at `64e3450`, a commit that states figures only.
+
+  | k | H_engine / 18 | H_bm25 | p_chance | McNemar b, c | p_mcnemar |
+  |---|---|---|---|---|---|
+  | 5 | 4 | 1 | 2.06·10⁻⁴ (pass) | 3, 0 | 1/8 (fail) |
+  | 1 | 2 | 1 | 1.71·10⁻³ (pass) | 1, 0 | 1/2 (fail) |
+
+  `holds = false`. Report only: the group sensitivity gives the same McNemar values; distinct
+  acros recovered by the engine are 4 (k = 5) and 2 (k = 1), by BM25 1 and 1; the label shuffle
+  gives 0.078 (k = 5) and 0.052 (k = 1); 0 texts were truncated; the BM25 check passed 92 of 92;
+  27.6 % of the 851 cited pairs are at distance ≤ 0.8.
+
+* **Against the dated predictions (`42a2ff1`):** (a) passes, as both predicted. (b) at k = 5
+  fails, against the author's prediction and against Claude's "doubtful". (b) at k = 1 fails, as
+  Claude predicted.
+
+* **Reading (the author with Claude, item by item, after the result; exploration that decides
+  nothing):** in `docs/roadmap/NEXT_RESEARCH.md`, pilot 1. Each item separates three causes: the
+  prose (P), the expected label (E) and the corpus text (C).
+  - BM25 mostly ranked on function words and false friends, because the author's content words
+    (projection, distance, angle, direction, axis…) are absent from all 342 statements.
+  - Formulas turned into macro words emptied the expected statements of 11 of the 18 items.
+  - The three identical "Dimension of" chunks entered the engine's top 5 three times.
+  - Wording moved the engine more than the label did.
+  - By rank, which was not part of the rule, the engine placed the expected statement better than
+    BM25 in 13 items, worse in 4 and tied in 1 (median rank 19 against 52).
+  - The author's five open questions for pilot 2 are recorded there, undecided.
+
+* **Declared:**
+  - The report page shown to the author is a private claude.ai artifact built from the result,
+    the test set and the manifest titles. It is not in the repository.
+  - Two implementer reports deviated from process. The first loaded its context without
+    `context_pack`. The third answered outside the `delegation-report/1` schema. Issue #91
+    (governance) proposes enforcing contracts and reports in code.
+  - `main` was merged into the branch (`a421bb1`, no conflict) to bring in the predictions before
+    the reading was written next to them.
+
+* **Open:** integration of the branch into `main`; the design of pilot 2 from the open questions.
+
+* **Status:** `Consolidated` (pilot 1 run and read; hypothesis not held under the committed
+  rule).

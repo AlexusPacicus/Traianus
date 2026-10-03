@@ -197,6 +197,53 @@ Pasos 0 y 1 de `docs/methodology/METHODOLOGY.md`, comprometidos antes de constru
 
 **Orden:** (1) este texto y `PROVENANCE.md`; (2) el conjunto de prueba del autor; (3) contrato del builder y su test sin pérdida (engine-implementer); (4) registro de auditoría del instrumento y revisión ciega; (5) script, primera ejecución y resultado.
 
+**Resultado (2026-10-03, `data/math/P1_result.json`, commit `64e3450`; registro `docs/methodology/instrument-audit/P1.md`, revisión 7):** válido; `holds = false`, la hipótesis no se sostiene.
+
+| | aciertos motor | aciertos BM25 | (a) contra el azar | (b) McNemar contra BM25 |
+|---|---|---|---|---|
+| k = 5 | 4 de 18 | 1 | p ≈ 2,1·10⁻⁴, pasa | b = 3, c = 0, p = 1/8, falla |
+| k = 1 | 2 de 18 | 1 | p ≈ 1,7·10⁻³, pasa | b = 1, c = 0, p = 1/2, falla |
+
+(b) falla porque hubo pocas discrepancias. Con la regla fijada, (b) necesitaba al menos 5, todas a favor del motor. Frente a las predicciones: (a) pasa, como esperaban los dos; (b) a k = 5 falla, contra la del autor; (b) a k = 1 falla, como esperaba Claude.
+
+**Lectura ítem por ítem (autor y Claude, 2026-10-03; exploración posterior al resultado, no cambia `holds`).** Para cada ítem se separan tres causas: la prosa del autor (P), la etiqueta esperada (E) y el texto del corpus tras pasar las fórmulas a palabras (C). Las causas son la lectura acordada por el autor y Claude, ítem por ítem. El puesto es el del mejor enunciado esperado entre los 342 (1 = el más cercano).
+
+| ítem | motor | BM25 | causa principal | nota |
+|---|---|---|---|---|
+| 1 ĉ₁ | 47 | 147 | P + C | prosa de ancla y centroide; NV casi vacío |
+| 2 P⊥ | **2** | 232 | acierto a k = 5 | describe la operación; la fórmula de GSP se perdió |
+| 6 d_esc | 15 | 155 | P + C | «square» es un falso amigo en los dos brazos; fragmentos vacíos en el top del motor |
+| 7 y | 16 | 136 | P | imagen geométrica sin el término «inner product» |
+| 11 complemento ortogonal | 26 | 21 | E | «perpendicular» no existe en Beezer; NSM se elige por un rodeo |
+| 12 núcleo | **4** | 27 | acierto a k = 5 | «gives zero» entra en la familia del espacio nulo |
+| 13 vectores canónicos | 52 | 54 | C | la definición de SUV era la fórmula |
+| 14 ortogonalidad | **1** | **1** | acierto doble | la prosa contiene «orthogonal» |
+| 15 coeficiente de proyección | 69 | 214 | P | metáfora de la sombra; «size» es un falso amigo |
+| 16 rango 1 | 58 | 27 | P | el concepto está en el nombre, no en la prosa |
+| 17 forma por lotes | 17 | 143 | P | «the operation» sin especificar |
+| 18 linealidad | 215 | 50 | P + C | caso particular de los polos; las dos propiedades de LT se perdieron |
+| 21 384d | 6 | 13 | C | los tres fragmentos vacíos «Dimension of» lo empujan fuera del top 5 |
+| 23 coordenadas en 8 ejes | 56 | 111 | P | «scattered on each axis» |
+| 24 coseno | 21 | 46 | P | «similar» es un falso amigo en los dos brazos |
+| 25 traspuesta | 119 | 99 | P | describe un paso del pipeline; «spectral» lleva a autovalores |
+| 27 media | 6 | 16 | E | el motor pone LC (el mismo concepto, otro enunciado) en el puesto 4 |
+| 28 distancia euclídea | **1** | 47 | acierto a k = 1 | paráfrasis estándar sin ninguna palabra compartida |
+
+Lo que se repite:
+* **BM25 casi nunca tuvo palabras con contenido.** projection, distance, perpendicular, angle, direction, axis, operator, average y energy no aparecen en ninguno de los 342 enunciados. Salvo en el ítem 14, BM25 ordenó por palabras funcionales o por falsos amigos («its», «much», «union», «left», el «2» de «Round 2»).
+* **Pasar las fórmulas a nombres de macros vació enunciados clave:** NV, GSP, SUV, LT, TM e IP. Los esperados de 11 de los 18 ítems perdieron su contenido definitorio. Los tres fragmentos idénticos «Dimension of» entran en el top 5 del motor en los ítems 6, 21 y 22.
+* **Si la única palabra técnica es «vector», el motor cae en las definiciones genéricas de vector** (ítems 1, 7, 15 y 23, y en las «ninguna» 3, 4, 5, 20 y 26).
+* **La redacción pesa más que la etiqueta.** Con el mismo esperado, el motor coloca 11 → 26 y 12 → 4; 2 → 2 y 15 → 69; 7 → 16 y 23 → 56; y para NV, 28 → 1, 6 → 15 y 1 → 47.
+* **Comparación por puestos, exploratoria:** el motor coloca el esperado mejor que BM25 en 13 ítems, peor en 4 (11, 16, 18 y 25) y empata en 1 (el 14). La mediana del puesto es 19 en el motor y 52 en BM25. Esta comparación no estaba en la regla y no decide nada.
+* **Las 10 «ninguna»:** ningún brazo propone una traducción útil. La distancia al más cercano (mediana 1,118) no las separa de P (mediana 1,090). En los ítems 9, 10, 20 y 26 el concepto está en el nombre y no en la prosa, como en el 16.
+
+**Preguntas abiertas para el piloto 2 (autor, 2026-10-03; sin decidir, cada una entra con su regla comprometida antes de cualquier vector):**
+1. **Un corpus con más lenguaje natural.** La lectura lo apoya: el vocabulario del autor no está en Beezer. La física encajaría con sus metáforas, pero devolvería enunciados de física en lugar de matemáticos, y eso cambia el producto. Un corpus mayor también añade competidores al esperado.
+2. **Recuperar las fórmulas.** El corpus ya es reconstruible byte a byte (texto con marcadores y tabla de fórmulas), pero el modelo necesita frases. Una opción es pasar cada fórmula a lenguaje con reglas deterministas, no con generación. Claude citó de memoria, sin verificar, los motores de lectura de fórmulas para accesibilidad (el Speech Rule Engine de MathJax). Cambiar el texto del corpus rompe la línea base de proveedor de arriba: el corpus nuevo es una línea base nueva.
+3. **La prosa propia.** Es el caso de uso, no un defecto que corregir. Reescribirla mirando Beezer filtraría la respuesta en la pregunta. Lo legítimo es fijar antes de ver nada otra forma de escribir, por ejemplo cada definición en dos versiones (imagen y mecanismo) medidas por separado.
+4. **Una vista para manipular dimensiones** puede ayudar al autor a escribir, pero cambia la entrada, no el motor. Construirla esperando que arregle la recuperación es un error (autor).
+5. **Otro proveedor de embeddings.** Ya estaba previsto como línea base. Se cambia una cosa cada vez. Los 28 ítems ya están vistos: sirven de línea base, pero una confirmación necesita ítems nuevos escritos a ciegas.
+
 ## Línea física aparcada: operaciones como dirección
 
 Aparcada hasta pasar los tres filtros de `docs/methodology/METHODOLOGY.md` (puerta de líneas físicas). Filtros 1 y 2 redactados; el 3, pendiente de verificar las citas.
