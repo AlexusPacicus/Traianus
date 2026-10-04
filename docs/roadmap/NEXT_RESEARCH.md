@@ -268,6 +268,20 @@ Aparcada hasta pasar los tres filtros de `docs/methodology/METHODOLOGY.md` (puer
 * Uniformidad en la esfera: test de Rayleigh (Mardia y Jupp, *Directional Statistics*).
 * Recuperación matemática, para el producto: Approach0, la búsqueda por fórmula de zbMATH, y buscadores de mathlib en lenguaje natural (Moogle, LeanSearch).
 
+## Línea física aparcada: ley de continua dirección
+
+Apuntado 2026-10-04 (autor). Idea, sin redactar como hipótesis; entra por la puerta de líneas físicas de `docs/methodology/METHODOLOGY.md` como el resto.
+
+* **Ley.** La continuidad de una entidad es continuidad de dirección de su trayectoria.
+* **Trayectoria.** Los caminos más cortos sobre la base de la espiral (`docs/relational-bridges/RELATIONAL_BRIDGES.md` §24), desde todas las notas a la vez; continuidad = coseno entre pasos consecutivos.
+* **Consecuencia para el postulado tiempo–fricción.** El tiempo de una ruta sería su giro acumulado, no su longitud.
+* **Subdirecciones (autor).** Todas las descomposiciones de la dirección superior en subespacios a la vez, que se deforman en conjunto.
+* **Ortogonalidad (autor, ley).** Toda descomposición en subespacios es ortogonal, respecto al producto euclídeo en 384D. Con ella las subdirecciones de Δ forman exactamente la esfera de diámetro [0, Δ] (Tales); cada partición en V y V⊥ es un diámetro, y la familia es continua si lo es Δ. Es un teorema, no una medida: va al archivo de derivaciones con su test. Familias admisibles: solo ortogonales (las celdas no lo son sin ortogonalizar; B_0 lo es solo si B_0 B_0ᵀ = I, comprobación aparcada que pasa a ser condición previa).
+* **Representaciones (autor).** Las formas de representar la dirección superior son todas a la vez; cada una es y no es: P_V Δ es la parte de Δ en V y su complemento P_{V⊥} Δ es su antípoda en la esfera de Tales, de modo que las dos juntas dan Δ. Misma forma que la capa de proyección de Ulpia sobre Traianus (un estado, todas sus observaciones, ninguna lo altera), pero solo para las observaciones que son proyecciones ortogonales lineales; la perspectiva y las polares quedan como vistas para mostrar. Pendiente: comprobar qué proyecciones de Ulpia lo son.
+* **Contenido empírico posible.** Solo si B_0 sale privilegiada frente a subespacios al azar de la misma dimensión.
+* **Pendiente.** Control de circularidad (los caminos más cortos en un grafo de proximidad tienden a ser rectos; decide un control en el mismo grafo); dependencia del proveedor; puerta de líneas físicas.
+* **Relacionada.** «Operaciones como dirección», las cuotas espectrales normalizadas y Ética II, Lemas 4–7 (cita sin verificar).
+
 ---
 
 ## Línea de física: de fuerzas a campos de tensión (aparcada hasta acabar el piloto)
