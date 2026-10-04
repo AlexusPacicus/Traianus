@@ -244,6 +244,35 @@ Lo que se repite:
 4. **Una vista para manipular dimensiones** puede ayudar al autor a escribir, pero cambia la entrada, no el motor. Construirla esperando que arregle la recuperación es un error (autor).
 5. **Otro proveedor de embeddings.** Ya estaba previsto como línea base. Se cambia una cosa cada vez. Los 28 ítems ya están vistos: sirven de línea base, pero una confirmación necesita ítems nuevos escritos a ciegas.
 
+### Línea base de proveedor: Qwen3-Embedding-0.6B (autor, 2026-10-03; exploración, comprometida antes de cualquier vector)
+
+Primera aplicación de la línea base de proveedor de arriba. Los 28 ítems ya están vistos, así que es exploración etiquetada (METHODOLOGY, proporcionalidad): no confirma nada y no hay auditoría completa. La pregunta es si el modelo es el cuello de botella; se prueba primero el más fuerte que cabe en la envolvente.
+
+* **Por qué este modelo (búsqueda del 2026-10-03, tarjetas y API de Hugging Face):** Apache 2.0; arquitectura `qwen3` nativa de transformers, sin `trust_remote_code`; 595,8M parámetros; salida de 1024 con entrenamiento MRL, que admite recortar a 32–1024. Descartados: `math-similarity/Bert-MLM_arXiv-MP-class_zbMath` (sin licencia declarada), `uw-math-ai/MathLeap-Qwen-8B` (8B y 4096 dimensiones, fuera de la envolvente; se descarga de un espejo anónimo) y `google/embeddinggemma-300m` (licencia Gemma y acceso restringido). Referencia externa: en MIRB (arXiv 2505.15585), tarea Informalized Mathlib4 Retrieval, BM25 31,5, bge-large-en-v1.5 42,0 y gte-Qwen2-1.5B-instruct 55,2 de nDCG@10; Qwen3 no aparece, el artículo es anterior.
+* **Proveedor:** `Qwen/Qwen3-Embedding-0.6B` en la revisión `97b0c614be4d77ee51c0cef4e5f07c00f9eb65b3`, cargado sin red desde la caché local, en la cpu, en float32 forzado (los pesos vienen en bfloat16), con la implementación de atención fijada y registrada, un hilo y un texto por llamada. El pipeline es el del modelo: Transformer, último token, normalización.
+* **Instrucción de consulta (autor, opción propia):** cada consulta se codifica como `Instruct: Given a description of a mathematical concept, retrieve the definition or theorem that states it\nQuery:` seguido de la prosa del ítem. Los fragmentos van sin instrucción. Queda fijada aquí y no se retoca mirando resultados.
+* **Dos versiones, las dos comprometidas ahora:**
+  * **1024:** la salida completa. Es el techo; no puede entrar en el motor, que trabaja en 384 (AGENTS 3.1).
+  * **384:** las primeras 384 componentes de la salida float32 de 1024, renormalizadas en float64 por la comprobación de vectores de P1. Es la versión que podría entrar en el motor.
+* **Todo lo demás, como en P1:** corpus, conjunto de prueba, tabla de macros, BM25 y su semilla, ε, las comprobaciones de rechazo y de validez, y la definición del puesto (el del mejor enunciado esperado entre los 342).
+* **Brazo MiniLM:** se lee de `data/math/P1_result.json` (commit `64e3450`), verificado por su sha256; no se vuelve a ejecutar. Así comparten ítems, empates y puestos.
+* **Lo que decide, por versión (autor):** Qwen3 coloca mejor que MiniLM si un test de Wilcoxon de rangos con signo, exacto y de una cola, da p < 0,05. Pares: los 18 ítems de P; diferencia d = puesto MiniLM − puesto Qwen3 (positiva si Qwen3 coloca mejor); las d = 0 se descartan; rangos de |d| con rangos medios en los empates; p exacto enumerando los 2ⁿ signos sobre esos rangos. Se decide por separado para 1024 y para 384, sin corrección por multiplicidad, declarado. Es la respuesta a la pregunta de arriba; no confirma nada sobre el producto.
+* **Solo informe (no deciden):**
+  * La regla de P1 por versión: (a) contra el azar y (b) McNemar contra BM25, a k = 5 y k = 1, y su `holds`, por continuidad.
+  * McNemar exacto de una cola Qwen3 frente a MiniLM, a k = 5 y k = 1.
+  * MRR, recall@10, recall@20 y mediana del puesto, en los tres brazos (MiniLM, Qwen3, BM25).
+  * Consulta sin instrucción, en las dos versiones: los mismos vectores de fragmentos y las 28 consultas sin el prefijo. Dice si la instrucción aporta; no sirve para elegir instrucción.
+  * Separación entre P y «ninguna», dentro de cada modelo: AUC = probabilidad de que la distancia al fragmento más cercano de un ítem de P sea menor que la de un ítem «ninguna», los empates cuentan 1/2. Para MiniLM, con las distancias guardadas en `P1_result.json`. Se compara el AUC, no las distancias, porque la escala del coseno cambia de un modelo a otro.
+  * Latencia por texto (p50 y p95) y memoria máxima del proceso, medidas, en un fichero aparte, porque los tiempos no son reproducibles byte a byte.
+  * Desglose por esperado vaciado: los 11 ítems cuyo esperado es NV, GSP, SUV, LT, TM o IP (1, 2, 6, 7, 13, 15, 18, 23, 24, 25 y 28) frente a los 7 restantes (11, 12, 14, 16, 17, 21 y 27). La etiqueta viene de la lectura de P1, posterior a su resultado, y por eso solo informa.
+  * Aciertos y puestos ítem por ítem frente a MiniLM, y los bloques de solo informe de P1.
+* **Ficheros:** los resultados van a ficheros aparte; `P1_result.json` y el script de P1 no cambian de comportamiento.
+* **Coste esperado:** unos 1,2 GB en disco y unos 3 GB de RAM; la latencia por texto, estimada sin medir, entre 30 y 50 veces la de MiniLM.
+
+**Predicciones antes de cualquier vector (2026-10-04, no deciden nada):**
+* **Autor:** el Wilcoxon pasa en las dos versiones, pero con poca diferencia. Aciertos a k = 5: 1 o 2 más que MiniLM (de 4 a 5 o 6); entran en el top 5 los que MiniLM dejó justo fuera, en el puesto 6 (ítems 21 y 27), y quizá alguno que quedó más abajo.
+* **Claude (a ojo, sin cálculo):** Wilcoxon a 1024 pasa (65–70 %), a 384 pasa (55–60 %): los puestos mejoran en general aunque haya pocos aciertos nuevos. Aciertos a k = 5 entre 6 y 8 de 18; la regla de P1 contra BM25 entera, 10–15 %. La mejora se concentra en los 7 no vaciados; en los 11 vaciados, poca. AUC P frente a «ninguna» entre 0,5 y 0,65 en los dos modelos. La instrucción mueve la mediana del puesto uno o dos puestos.
+
 ## Línea física aparcada: operaciones como dirección
 
 Aparcada hasta pasar los tres filtros de `docs/methodology/METHODOLOGY.md` (puerta de líneas físicas). Filtros 1 y 2 redactados; el 3, pendiente de verificar las citas.

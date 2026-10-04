@@ -3293,3 +3293,40 @@
 
 * **Status:** `Consolidated` (pilot 1 run and read; hypothesis not held under the committed
   rule).
+
+### seq 100 — 2026-10-04 — Provider baseline: Qwen3-Embedding-0.6B protocol frozen before any vector
+
+* **Context:** seq 99 left pilot 1 with `holds = false` and the question whether the provider is the
+  bottleneck. The provider baseline of pilot 1 (`docs/roadmap/NEXT_RESEARCH.md`) freezes corpus,
+  test set, macro table and rule for any later provider, each with its own rule committed first.
+
+* **Choice (author, after a search on 2026-10-03):** `Qwen/Qwen3-Embedding-0.6B` at revision
+  `97b0c614be4d77ee51c0cef4e5f07c00f9eb65b3`, Apache 2.0, native `qwen3` architecture without
+  `trust_remote_code`, 1024 dimensions trained with MRL. Rejected: a math-similarity model without a
+  declared licence, MathLeap-Qwen-8B (outside the 8 GB envelope, anonymous mirror) and
+  EmbeddingGemma (Gemma licence, gated).
+
+* **Protocol (detail in `NEXT_RESEARCH.md`):**
+  - Offline, cpu, float32 forced, attention implementation fixed, one thread, one text per call.
+  - Author's query instruction; chunks without one.
+  - Two versions: 1024, and 384 (first 384 components, renormalised in float64).
+  - The MiniLM arm is read from `data/math/P1_result.json`, checked by its sha256, not re-run.
+  - **Decides, per version:** exact one-sided Wilcoxon signed-rank test on the position of the best
+    expected statement, MiniLM against Qwen3, over the 18 positive items, p < 0.05. No
+    multiplicity correction, declared.
+  - **Report only:** P1's rule against chance and BM25; McNemar Qwen3 against MiniLM; MRR,
+    recall@10 and @20, median position; the query without instruction; AUC of P against «none»;
+    measured latency and memory, in a separate file; the split by formula-emptied expected
+    statements (11 against 7, labels from the post-result reading of P1).
+  - Exploration on the development set: the 28 items have been seen, so nothing is confirmed.
+
+* **Predictions (dated, decide nothing):** the author and Claude both predict that the Wilcoxon
+  passes in both versions; the author with little difference, 1 or 2 more hits at k = 5 than MiniLM,
+  the items MiniLM left at position 6 (21 and 27) entering the top 5.
+
+* **Declared:** the weights were fetched with `hf` and, after the transfer stalled, resumed with
+  `curl`; the file matches its published sha256 (`0437e45c…`). No vector has been computed.
+
+* **Open:** the script, by the engine implementer under a `DelegationContract`; the run; the reading.
+
+* **Status:** `Approved` (protocol frozen; nothing run).
