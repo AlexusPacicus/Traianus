@@ -3374,3 +3374,34 @@
 
 * **Status:** `Consolidated` (baseline run and read; no improvement detected under the committed
   rule).
+
+### seq 102 — 2026-10-05 — Engine gate on P1: protocol frozen before any σ²
+
+* **Context:** P1 (seq 99) and the Qwen3 baseline (seq 101) used only the encoder and ε from
+  `traianus/`; ranking happened in the script, with no ingestion, gate or lifecycle. This is the
+  first product measurement through the engine's state. One change against P1: candidates are the
+  chunks the C1 gate consolidates.
+
+* **Protocol (detail in `docs/roadmap/NEXT_RESEARCH.md`, section "La puerta del motor sobre P1"):**
+  - Fresh base, `traianus-bootstrap`; the 342 chunks enter through `/ingesta/vector` with P1's
+    MiniLM vector, then `/nodos/{id}/consolidar` with the ethical key true.
+  - **Ethical key (author): approval by source.** The author approves Beezer as a whole, not chunk
+    by chunk, because approving per chunk would leak the expected labels. Hence consolidated ⟺
+    σ² ≥ θ_dyn. Declared: this is not per-chunk HITL.
+  - The query is encoded as in P1 and written nowhere; P1's ranking over consolidated nodes, read
+    read-only. A lost expected statement gets position 343. BM25 stays on the full corpus.
+  - **Decides (author, rule (b)):** an exact one-sided Wilcoxon against P1 on the 18 positive items,
+    p < 0.05, **and** a same-size random-subset control (10 000 draws, seed 20261005, statistic the
+    exact Wilcoxon p), p_random < 0.05. A gate passing 0 or 342 chunks is "not applicable".
+  - Validity: engine vectors byte-identical to those sent; the unfiltered engine ranking reproduces
+    P1's stored positions; BM25 equal to the stored one; `manifold_nodes` unchanged by the queries
+    (R2).
+  - Exploration on the development set: the 28 items have been seen, so nothing is confirmed.
+
+* **Predictions (dated, decide nothing):** the author predicts half the chunks pass, the Wilcoxon
+  fails and the gate does not beat chance. Claude predicts 30–60 % pass, the Wilcoxon fails
+  (65–70 %), both conditions together 5–10 %.
+
+* **Open:** the script, by the engine implementer under a `DelegationContract`; the run; the reading.
+
+* **Status:** `Approved` (protocol frozen; no σ² computed).
