@@ -1,0 +1,17 @@
+{
+  "chunk_calls": {
+    "count": 684,
+    "p50_ms": 186.73706199999998,
+    "p95_ms": 371.6903750000001
+  },
+  "query_calls": {
+    "count": 56,
+    "p50_ms": 189.1562295,
+    "p95_ms": 234.31426025000002
+  },
+  "peak_resident_memory": {
+    "ru_maxrss": 2064547840,
+    "unit": "bytes",
+    "platform": "Darwin"
+  }
+}
