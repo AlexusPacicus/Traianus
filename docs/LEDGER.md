@@ -3374,3 +3374,94 @@
 
 * **Status:** `Consolidated` (baseline run and read; no improvement detected under the committed
   rule).
+
+### seq 102 — 2026-10-05 — Engine gate on P1: protocol frozen before any σ²
+
+* **Context:** P1 (seq 99) and the Qwen3 baseline (seq 101) used only the encoder and ε from
+  `traianus/`; ranking happened in the script, with no ingestion, gate or lifecycle. This is the
+  first product measurement through the engine's state. One change against P1: candidates are the
+  chunks the C1 gate consolidates.
+
+* **Protocol (detail in `docs/roadmap/NEXT_RESEARCH.md`, section "La puerta del motor sobre P1"):**
+  - Fresh base, `traianus-bootstrap`; the 342 chunks enter through `/ingesta/vector` with P1's
+    MiniLM vector, then `/nodos/{id}/consolidar` with the ethical key true.
+  - **Ethical key (author): approval by source.** The author approves Beezer as a whole, not chunk
+    by chunk, because approving per chunk would leak the expected labels. Hence consolidated ⟺
+    σ² ≥ θ_dyn. Declared: this is not per-chunk HITL.
+  - The query is encoded as in P1 and written nowhere; P1's ranking over consolidated nodes, read
+    read-only. A lost expected statement gets position 343. BM25 stays on the full corpus.
+  - **Decides (author, rule (b)):** an exact one-sided Wilcoxon against P1 on the 18 positive items,
+    p < 0.05, **and** a same-size random-subset control (10 000 draws, seed 20261005, statistic the
+    exact Wilcoxon p), p_random < 0.05. A gate passing 0 or 342 chunks is "not applicable".
+  - Validity: engine vectors byte-identical to those sent; the unfiltered engine ranking reproduces
+    P1's stored positions; BM25 equal to the stored one; `manifold_nodes` unchanged by the queries
+    (R2).
+  - Exploration on the development set: the 28 items have been seen, so nothing is confirmed.
+
+* **Predictions (dated, decide nothing):** the author predicts half the chunks pass, the Wilcoxon
+  fails and the gate does not beat chance. Claude predicts 30–60 % pass, the Wilcoxon fails
+  (65–70 %), both conditions together 5–10 %.
+
+* **Open:** the script, by the engine implementer under a `DelegationContract`; the run; the reading.
+
+* **Status:** `Approved` (protocol frozen; no σ² computed).
+
+  **Correction before any data (2026-10-05):** the frozen version required each node's two
+  revisions to hold a vector byte-identical to the one sent. `/nodos/{id}/consolidar` re-encodes
+  the text and normalises in float32 before widening to float64, while P1 normalises in float64,
+  so that check could never pass. It becomes report-only (maximum difference and count of
+  identical vectors per revision). The unfiltered ranking reproducing P1's positions still decides
+  validity. The engine is not changed.
+
+### seq 103 — 2026-10-05 — Engine gate on P1 run: valid; the gate does not improve retrieval
+
+* **Context:** seq 102 froze the protocol and the predictions at `0abb0c4`. It was corrected
+  before any data at `c848364`.
+
+* **Script:** `tools/experiments/p1_engine_gate.py` and 87 unit tests, written test-first by
+  `engine-implementer` under a validated `DelegationContract`, at `15f1135`; the report was
+  validated too. P1 and the Qwen3 baseline are unchanged. The executing agent reviewed the diff and
+  re-ran `pytest tests/` (3784 passed, 1 skipped, 6 deselected).
+
+* **Run (the executing agent):** `valid = true`.
+  - V1: the unfiltered positions equal P1's in 28 of 28 items.
+  - V2: BM25 equals the stored one.
+  - V3: the queries leave `manifold_nodes` unchanged.
+
+  A second run gave a byte-identical file. The result is committed at `4d988f6`, a commit that
+  states figures only.
+
+  | condition | figures | pass |
+  |---|---|---|
+  | Wilcoxon against P1 | n = 18, W+ = 1, W− = 170, p = 262143/262144 | no |
+  | Random control | 6636 of 10 000 draws at or below; p_random = 6637/10001 | no |
+
+  The gate consolidates 26 of 342 chunks (θ_dyn = 0.00429; the corpus median σ² is 0.0019). One
+  of the 15 expected statements survives: D, item 21, which moves from position 6 to 1. The other
+  17 items fall to 343.
+
+  Report only:
+  - Hits at k = 5: 1 (P1: 4). MRR 0.058 (P1: 0.192).
+  - The three "Dimension of" chunks stay incubating.
+  - The topological key agrees on both write paths (largest σ² difference 7.7·10⁻¹⁰).
+
+  Against the predictions: both expected the Wilcoxon to fail and the gate not to beat chance.
+  Both overestimated the fraction passing (the author said half, Claude 30–60 %).
+
+* **Reading (author and Claude, after the result; decides nothing):**
+  - σ² measures how unevenly a vector loads on B_0's 8 NSM primes, not whether a statement is the
+    one sought. The gate keeps expected statements as chance does.
+  - This does not say the gate is useless. Its declared role is governing consolidation, not
+    ranking.
+  - θ_dyn is very high for this corpus (limitation L4). Tuning the basis or the threshold to make
+    it work would be fitting on the result, and would need its own rule committed first.
+
+* **Declared:**
+  - The subagent's context pack exceeded its cap (54 609 bytes against 40 000).
+  - The contract named a `tests/conftest.py` range past the end of the file.
+  - The subagent served two packs and said so.
+  - The engine normalises in float32 on `/consolidar` and `/ingesta`, and in float64 on
+    `/ingesta/vector`. This is issue #92, not changed here.
+
+* **Status:** `Consolidated` (run and read; the gate does not improve retrieval under the committed
+  rule).

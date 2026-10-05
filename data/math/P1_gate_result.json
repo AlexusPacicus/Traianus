@@ -1,0 +1,3476 @@
+{
+  "valid": true,
+  "first_failed": null,
+  "failed": [],
+  "decides": "only decision.pass decides; everything under report_only decides nothing. Exploration: the 28 items were seen before this protocol, so nothing is confirmed",
+  "digests": {
+    "beezer_manifest.json": "6d1782002c7650c3c59ed26332bcef500782fab04f8b7322661d671249fb9626",
+    "pilot1_test_set.json": "9fc7ad6f875f55d63e75e71f83fb75afa9e0adf62a1f8e699c9dd830dd866d82",
+    "beezer_citations.json": "50e831d2041eec62fc728c4ddaf6d74aa1ea63c3b050d7a497958446b8304226"
+  },
+  "environment": {
+    "python": "3.11.6",
+    "numpy": "2.4.1",
+    "torch": "2.11.0",
+    "sentence_transformers": "5.2.3",
+    "platform": "macOS-15.6-arm64-arm-64bit",
+    "device": "cpu",
+    "max_seq_length": 256,
+    "numpy_config": {
+      "Compilers": {
+        "c": {
+          "name": "clang",
+          "linker": "ld64",
+          "version": "15.0.0",
+          "commands": "cc"
+        },
+        "cython": {
+          "name": "cython",
+          "linker": "cython",
+          "version": "3.2.4",
+          "commands": "cython"
+        },
+        "c++": {
+          "name": "clang",
+          "linker": "ld64",
+          "version": "15.0.0",
+          "commands": "c++"
+        }
+      },
+      "Machine Information": {
+        "host": {
+          "cpu": "aarch64",
+          "family": "aarch64",
+          "endian": "little",
+          "system": "darwin"
+        },
+        "build": {
+          "cpu": "aarch64",
+          "family": "aarch64",
+          "endian": "little",
+          "system": "darwin"
+        }
+      },
+      "Build Dependencies": {
+        "blas": {
+          "name": "accelerate",
+          "found": true,
+          "version": "unknown",
+          "detection method": "system",
+          "include directory": "unknown",
+          "lib directory": "unknown",
+          "openblas configuration": "unknown",
+          "pc file directory": "unknown"
+        },
+        "lapack": {
+          "name": "accelerate",
+          "found": true,
+          "version": "unknown",
+          "detection method": "system",
+          "include directory": "unknown",
+          "lib directory": "unknown",
+          "openblas configuration": "unknown",
+          "pc file directory": "unknown"
+        }
+      },
+      "Python Information": {
+        "path": "/private/var/folders/pr/_3h4tm913_l56k6hrhpm89z00000gn/T/build-env-9ze0nkjb/bin/python",
+        "version": "3.11"
+      },
+      "SIMD Extensions": {
+        "baseline": [
+          "NEON",
+          "NEON_FP16",
+          "NEON_VFPV4",
+          "ASIMD"
+        ],
+        "found": [
+          "ASIMDHP",
+          "ASIMDDP"
+        ],
+        "not found": [
+          "ASIMDFHM"
+        ]
+      }
+    },
+    "torch_threads": 1,
+    "minilm_result_sha256": "00522a30465ae3dc21a949aca6d5464c9060f99d2a50038c05f088976c9132d8",
+    "engine_model_revision": "1110a243fdf4706b3f48f1d95db1a4f5529b4d41",
+    "epoch_provenance": [
+      "PROSTHETIC_NSM_V1"
+    ],
+    "protocol_commit": "c848364"
+  },
+  "counts": {
+    "chunks": 342,
+    "items": 28,
+    "positives": 18,
+    "candidates": 26
+  },
+  "validity": {
+    "V1": {
+      "mismatched_ids": []
+    },
+    "V2": {
+      "mismatched_ids": []
+    },
+    "V3": {
+      "equal": true
+    }
+  },
+  "decision": {
+    "applicable": true,
+    "wilcoxon": {
+      "n": 18,
+      "dropped_zeros": 0,
+      "w_plus": 1.0,
+      "w_minus": 170.0,
+      "p": {
+        "num": 262143,
+        "den": 262144,
+        "float": 0.9999961853027344
+      },
+      "pass": false,
+      "pairs": [
+        {
+          "id": 1,
+          "p1": 47,
+          "gate": 343,
+          "d": -296
+        },
+        {
+          "id": 2,
+          "p1": 2,
+          "gate": 343,
+          "d": -341
+        },
+        {
+          "id": 6,
+          "p1": 15,
+          "gate": 343,
+          "d": -328
+        },
+        {
+          "id": 7,
+          "p1": 16,
+          "gate": 343,
+          "d": -327
+        },
+        {
+          "id": 11,
+          "p1": 26,
+          "gate": 343,
+          "d": -317
+        },
+        {
+          "id": 12,
+          "p1": 4,
+          "gate": 343,
+          "d": -339
+        },
+        {
+          "id": 13,
+          "p1": 52,
+          "gate": 343,
+          "d": -291
+        },
+        {
+          "id": 14,
+          "p1": 1,
+          "gate": 343,
+          "d": -342
+        },
+        {
+          "id": 15,
+          "p1": 69,
+          "gate": 343,
+          "d": -274
+        },
+        {
+          "id": 16,
+          "p1": 58,
+          "gate": 343,
+          "d": -285
+        },
+        {
+          "id": 17,
+          "p1": 17,
+          "gate": 343,
+          "d": -326
+        },
+        {
+          "id": 18,
+          "p1": 215,
+          "gate": 343,
+          "d": -128
+        },
+        {
+          "id": 21,
+          "p1": 6,
+          "gate": 1,
+          "d": 5
+        },
+        {
+          "id": 23,
+          "p1": 56,
+          "gate": 343,
+          "d": -287
+        },
+        {
+          "id": 24,
+          "p1": 21,
+          "gate": 343,
+          "d": -322
+        },
+        {
+          "id": 25,
+          "p1": 119,
+          "gate": 343,
+          "d": -224
+        },
+        {
+          "id": 27,
+          "p1": 6,
+          "gate": 343,
+          "d": -337
+        },
+        {
+          "id": 28,
+          "p1": 1,
+          "gate": 343,
+          "d": -342
+        }
+      ]
+    },
+    "random_control": {
+      "draws": 10000,
+      "seed": 20261005,
+      "count": 6636,
+      "p": {
+        "num": 6637,
+        "den": 10001,
+        "float": 0.6636336366363363
+      },
+      "pass": false
+    },
+    "pass": false,
+    "multiplicity": "no multiplicity correction: two conditions, each at 1/20, both required"
+  },
+  "report_only": {
+    "n_pass": 26,
+    "theta_dyn": 0.004292364752459969,
+    "theta_dyn_distinct": 1,
+    "expected_statements": {
+      "distinct": 15,
+      "surviving": 1
+    },
+    "duplicated_texts": [
+      {
+        "text": "Dimension of. The dimension of ( ) is .",
+        "keys": [
+          "MATH_BEEZER_THM_DCM",
+          "MATH_BEEZER_THM_DP",
+          "MATH_BEEZER_THM_DM"
+        ],
+        "states": [
+          "incubating",
+          "incubating",
+          "incubating"
+        ]
+      }
+    ],
+    "chunks": [
+      {
+        "key": "MATH_BEEZER_DEF_SLE",
+        "sigma2": 0.0005071657935486737,
+        "sigma2_ingest": 0.000507165711131542,
+        "threshold": 0.004292364752459969,
+        "topological_passed": false,
+        "state": "incubating"
+      },
+      {
+        "key": "MATH_BEEZER_DEF_SSLE",
+        "sigma2": 0.0011491592356118658,
+        "sigma2_ingest": 0.0011491591203913823,
+        "threshold": 0.004292364752459969,
+        "topological_passed": false,
+        "state": "incubating"
+      },
+      {
+        "key": "MATH_BEEZER_DEF_SSSLE",
+        "sigma2": 0.002014148359594747,
+        "sigma2_ingest": 0.002014148372170163,
+        "threshold": 0.004292364752459969,
+        "topological_passed": false,
+        "state": "incubating"
+      },
+      {
+        "key": "MATH_BEEZER_DEF_ESYS",
+        "sigma2": 0.0004250312069138055,
+        "sigma2_ingest": 0.0004250311963526,
+        "threshold": 0.004292364752459969,
+        "topological_passed": false,
+        "state": "incubating"
+      },
+      {
+        "key": "MATH_BEEZER_DEF_EO",
+        "sigma2": 0.000825234211554505,
+        "sigma2_ingest": 0.0008252341087629774,
+        "threshold": 0.004292364752459969,
+        "topological_passed": false,
+        "state": "incubating"
+      },
+      {
+        "key": "MATH_BEEZER_THM_EOPSS",
+        "sigma2": 0.0010320093994692625,
+        "sigma2_ingest": 0.001032009349675857,
+        "threshold": 0.004292364752459969,
+        "topological_passed": false,
+        "state": "incubating"
+      },
+      {
+        "key": "MATH_BEEZER_DEF_M",
+        "sigma2": 0.0006288108099185751,
+        "sigma2_ingest": 0.0006288108333559202,
+        "threshold": 0.004292364752459969,
+        "topological_passed": false,
+        "state": "incubating"
+      },
+      {
+        "key": "MATH_BEEZER_DEF_CV",
+        "sigma2": 0.0011190028259831415,
+        "sigma2_ingest": 0.0011190028171439899,
+        "threshold": 0.004292364752459969,
+        "topological_passed": false,
+        "state": "incubating"
+      },
+      {
+        "key": "MATH_BEEZER_DEF_ZCV",
+        "sigma2": 0.0034093374717721683,
+        "sigma2_ingest": 0.003409337340629984,
+        "threshold": 0.004292364752459969,
+        "topological_passed": false,
+        "state": "incubating"
+      },
+      {
+        "key": "MATH_BEEZER_DEF_CM",
+        "sigma2": 0.0010021935098845983,
+        "sigma2_ingest": 0.0010021934029636485,
+        "threshold": 0.004292364752459969,
+        "topological_passed": false,
+        "state": "incubating"
+      },
+      {
+        "key": "MATH_BEEZER_DEF_VOC",
+        "sigma2": 0.004252457563220126,
+        "sigma2_ingest": 0.004252457343779157,
+        "threshold": 0.004292364752459969,
+        "topological_passed": false,
+        "state": "incubating"
+      },
+      {
+        "key": "MATH_BEEZER_DEF_SOLV",
+        "sigma2": 0.0015261200644506427,
+        "sigma2_ingest": 0.0015261198290729995,
+        "threshold": 0.004292364752459969,
+        "topological_passed": false,
+        "state": "incubating"
+      },
+      {
+        "key": "MATH_BEEZER_DEF_MRLS",
+        "sigma2": 0.0015648950464796452,
+        "sigma2_ingest": 0.0015648950483218378,
+        "threshold": 0.004292364752459969,
+        "topological_passed": false,
+        "state": "incubating"
+      },
+      {
+        "key": "MATH_BEEZER_DEF_AM",
+        "sigma2": 0.002987545669134484,
+        "sigma2_ingest": 0.0029875450677748433,
+        "threshold": 0.004292364752459969,
+        "topological_passed": false,
+        "state": "incubating"
+      },
+      {
+        "key": "MATH_BEEZER_DEF_RO",
+        "sigma2": 0.000605659805425047,
+        "sigma2_ingest": 0.0006056597825645569,
+        "threshold": 0.004292364752459969,
+        "topological_passed": false,
+        "state": "incubating"
+      },
+      {
+        "key": "MATH_BEEZER_DEF_REM",
+        "sigma2": 0.0014083827129506988,
+        "sigma2_ingest": 0.0014083828601951273,
+        "threshold": 0.004292364752459969,
+        "topological_passed": false,
+        "state": "incubating"
+      },
+      {
+        "key": "MATH_BEEZER_THM_REMES",
+        "sigma2": 0.0010328856303550417,
+        "sigma2_ingest": 0.0010328856066137207,
+        "threshold": 0.004292364752459969,
+        "topological_passed": false,
+        "state": "incubating"
+      },
+      {
+        "key": "MATH_BEEZER_DEF_RREF",
+        "sigma2": 0.00363366448640119,
+        "sigma2_ingest": 0.0036336644198551376,
+        "threshold": 0.004292364752459969,
+        "topological_passed": false,
+        "state": "incubating"
+      },
+      {
+        "key": "MATH_BEEZER_THM_REMEF",
+        "sigma2": 0.0017605319000981877,
+        "sigma2_ingest": 0.0017605317426645205,
+        "threshold": 0.004292364752459969,
+        "topological_passed": false,
+        "state": "incubating"
+      },
+      {
+        "key": "MATH_BEEZER_THM_RREFU",
+        "sigma2": 0.0017502571181191315,
+        "sigma2_ingest": 0.0017502569131717406,
+        "threshold": 0.004292364752459969,
+        "topological_passed": false,
+        "state": "incubating"
+      },
+      {
+        "key": "MATH_BEEZER_DEF_CS",
+        "sigma2": 0.002025354847007259,
+        "sigma2_ingest": 0.002025355057701762,
+        "threshold": 0.004292364752459969,
+        "topological_passed": false,
+        "state": "incubating"
+      },
+      {
+        "key": "MATH_BEEZER_DEF_IDV",
+        "sigma2": 0.003280473233118123,
+        "sigma2_ingest": 0.0032804732121385683,
+        "threshold": 0.004292364752459969,
+        "topological_passed": false,
+        "state": "incubating"
+      },
+      {
+        "key": "MATH_BEEZER_THM_RCLS",
+        "sigma2": 0.0014987605901428847,
+        "sigma2_ingest": 0.001498760503075124,
+        "threshold": 0.004292364752459969,
+        "topological_passed": false,
+        "state": "incubating"
+      },
+      {
+        "key": "MATH_BEEZER_THM_CSRN",
+        "sigma2": 0.002718943401310242,
+        "sigma2_ingest": 0.0027189430148041303,
+        "threshold": 0.004292364752459969,
+        "topological_passed": false,
+        "state": "incubating"
+      },
+      {
+        "key": "MATH_BEEZER_THM_FVCS",
+        "sigma2": 0.0031108955256308034,
+        "sigma2_ingest": 0.003110895372163874,
+        "threshold": 0.004292364752459969,
+        "topological_passed": false,
+        "state": "incubating"
+      },
+      {
+        "key": "MATH_BEEZER_THM_PSSLS",
+        "sigma2": 0.0022752404967728065,
+        "sigma2_ingest": 0.0022752401822116568,
+        "threshold": 0.004292364752459969,
+        "topological_passed": false,
+        "state": "incubating"
+      },
+      {
+        "key": "MATH_BEEZER_THM_CMVEI",
+        "sigma2": 0.0031625073125571054,
+        "sigma2_ingest": 0.003162507069874104,
+        "threshold": 0.004292364752459969,
+        "topological_passed": false,
+        "state": "incubating"
+      },
+      {
+        "key": "MATH_BEEZER_DEF_HS",
+        "sigma2": 0.0012331766713250232,
+        "sigma2_ingest": 0.0012331766271340256,
+        "threshold": 0.004292364752459969,
+        "topological_passed": false,
+        "state": "incubating"
+      },
+      {
+        "key": "MATH_BEEZER_THM_HSC",
+        "sigma2": 0.0009819655802937228,
+        "sigma2_ingest": 0.0009819656994510232,
+        "threshold": 0.004292364752459969,
+        "topological_passed": false,
+        "state": "incubating"
+      },
+      {
+        "key": "MATH_BEEZER_DEF_TSHSE",
+        "sigma2": 0.00316870367981113,
+        "sigma2_ingest": 0.0031687035257126355,
+        "threshold": 0.004292364752459969,
+        "topological_passed": false,
+        "state": "incubating"
+      },
+      {
+        "key": "MATH_BEEZER_THM_HMVEI",
+        "sigma2": 0.0017880300416143876,
+        "sigma2_ingest": 0.001788029699973309,
+        "threshold": 0.004292364752459969,
+        "topological_passed": false,
+        "state": "incubating"
+      },
+      {
+        "key": "MATH_BEEZER_DEF_NSM",
+        "sigma2": 0.0022335549049473367,
+        "sigma2_ingest": 0.0022335546612737406,
+        "threshold": 0.004292364752459969,
+        "topological_passed": false,
+        "state": "incubating"
+      },
+      {
+        "key": "MATH_BEEZER_DEF_SQM",
+        "sigma2": 0.005783463437961887,
+        "sigma2_ingest": 0.005783462980217941,
+        "threshold": 0.004292364752459969,
+        "topological_passed": true,
+        "state": "consolidated"
+      },
+      {
+        "key": "MATH_BEEZER_DEF_NM",
+        "sigma2": 0.0028522113499509687,
+        "sigma2_ingest": 0.0028522113146452668,
+        "threshold": 0.004292364752459969,
+        "topological_passed": false,
+        "state": "incubating"
+      },
+      {
+        "key": "MATH_BEEZER_DEF_IM",
+        "sigma2": 0.0027248794204400803,
+        "sigma2_ingest": 0.002724879326005297,
+        "threshold": 0.004292364752459969,
+        "topological_passed": false,
+        "state": "incubating"
+      },
+      {
+        "key": "MATH_BEEZER_THM_NMRRI",
+        "sigma2": 0.004902145938246431,
+        "sigma2_ingest": 0.004902146104636035,
+        "threshold": 0.004292364752459969,
+        "topological_passed": true,
+        "state": "consolidated"
+      },
+      {
+        "key": "MATH_BEEZER_THM_NMTNS",
+        "sigma2": 0.003342286292483639,
+        "sigma2_ingest": 0.003342286038446798,
+        "threshold": 0.004292364752459969,
+        "topological_passed": false,
+        "state": "incubating"
+      },
+      {
+        "key": "MATH_BEEZER_THM_NMUS",
+        "sigma2": 0.0023471126809639494,
+        "sigma2_ingest": 0.0023471127440573185,
+        "threshold": 0.004292364752459969,
+        "topological_passed": false,
+        "state": "incubating"
+      },
+      {
+        "key": "MATH_BEEZER_THM_NME1",
+        "sigma2": 0.001589247256757562,
+        "sigma2_ingest": 0.0015892471930805156,
+        "threshold": 0.004292364752459969,
+        "topological_passed": false,
+        "state": "incubating"
+      },
+      {
+        "key": "MATH_BEEZER_DEF_VSCV",
+        "sigma2": 0.0008237805187959148,
+        "sigma2_ingest": 0.0008237805936847169,
+        "threshold": 0.004292364752459969,
+        "topological_passed": false,
+        "state": "incubating"
+      },
+      {
+        "key": "MATH_BEEZER_DEF_CVE",
+        "sigma2": 0.002588379106366405,
+        "sigma2_ingest": 0.0025883790560489324,
+        "threshold": 0.004292364752459969,
+        "topological_passed": false,
+        "state": "incubating"
+      },
+      {
+        "key": "MATH_BEEZER_DEF_CVA",
+        "sigma2": 0.002681233040658171,
+        "sigma2_ingest": 0.0026812331030349,
+        "threshold": 0.004292364752459969,
+        "topological_passed": false,
+        "state": "incubating"
+      },
+      {
+        "key": "MATH_BEEZER_DEF_CVSM",
+        "sigma2": 0.0013273735399115976,
+        "sigma2_ingest": 0.00132737347463298,
+        "threshold": 0.004292364752459969,
+        "topological_passed": false,
+        "state": "incubating"
+      },
+      {
+        "key": "MATH_BEEZER_THM_VSPCV",
+        "sigma2": 0.0023004383014722115,
+        "sigma2_ingest": 0.0023004382241473055,
+        "threshold": 0.004292364752459969,
+        "topological_passed": false,
+        "state": "incubating"
+      },
+      {
+        "key": "MATH_BEEZER_DEF_LCCV",
+        "sigma2": 0.0007750540004254555,
+        "sigma2_ingest": 0.0007750540175712986,
+        "threshold": 0.004292364752459969,
+        "topological_passed": false,
+        "state": "incubating"
+      },
+      {
+        "key": "MATH_BEEZER_THM_SLSLC",
+        "sigma2": 0.0014199172220203799,
+        "sigma2_ingest": 0.001419916999671635,
+        "threshold": 0.004292364752459969,
+        "topological_passed": false,
+        "state": "incubating"
+      },
+      {
+        "key": "MATH_BEEZER_THM_VFSLS",
+        "sigma2": 0.0012890756766861717,
+        "sigma2_ingest": 0.0012890756210231428,
+        "threshold": 0.004292364752459969,
+        "topological_passed": false,
+        "state": "incubating"
+      },
+      {
+        "key": "MATH_BEEZER_THM_PSPHS",
+        "sigma2": 0.002323684041157969,
+        "sigma2_ingest": 0.00232368388059494,
+        "threshold": 0.004292364752459969,
+        "topological_passed": false,
+        "state": "incubating"
+      },
+      {
+        "key": "MATH_BEEZER_DEF_SSCV",
+        "sigma2": 0.0007070842718671633,
+        "sigma2_ingest": 0.0007070843220485681,
+        "threshold": 0.004292364752459969,
+        "topological_passed": false,
+        "state": "incubating"
+      },
+      {
+        "key": "MATH_BEEZER_THM_SSNS",
+        "sigma2": 0.0006709748265113605,
+        "sigma2_ingest": 0.0006709748009223939,
+        "threshold": 0.004292364752459969,
+        "topological_passed": false,
+        "state": "incubating"
+      },
+      {
+        "key": "MATH_BEEZER_DEF_RLDCV",
+        "sigma2": 0.002392183788265349,
+        "sigma2_ingest": 0.0023921835785197243,
+        "threshold": 0.004292364752459969,
+        "topological_passed": false,
+        "state": "incubating"
+      },
+      {
+        "key": "MATH_BEEZER_DEF_LICV",
+        "sigma2": 0.002689160581865135,
+        "sigma2_ingest": 0.0026891607795467053,
+        "threshold": 0.004292364752459969,
+        "topological_passed": false,
+        "state": "incubating"
+      },
+      {
+        "key": "MATH_BEEZER_THM_LIVHS",
+        "sigma2": 0.0022232130413914054,
+        "sigma2_ingest": 0.0022232130935145294,
+        "threshold": 0.004292364752459969,
+        "topological_passed": false,
+        "state": "incubating"
+      },
+      {
+        "key": "MATH_BEEZER_THM_LIVRN",
+        "sigma2": 0.002336443047217973,
+        "sigma2_ingest": 0.0023364428172740156,
+        "threshold": 0.004292364752459969,
+        "topological_passed": false,
+        "state": "incubating"
+      },
+      {
+        "key": "MATH_BEEZER_THM_MVSLD",
+        "sigma2": 0.008706154054106732,
+        "sigma2_ingest": 0.008706154820559421,
+        "threshold": 0.004292364752459969,
+        "topological_passed": true,
+        "state": "consolidated"
+      },
+      {
+        "key": "MATH_BEEZER_THM_NMLIC",
+        "sigma2": 0.004803970373588588,
+        "sigma2_ingest": 0.004803970295269344,
+        "threshold": 0.004292364752459969,
+        "topological_passed": true,
+        "state": "consolidated"
+      },
+      {
+        "key": "MATH_BEEZER_THM_NME2",
+        "sigma2": 0.0016176711664979144,
+        "sigma2_ingest": 0.0016176712566789567,
+        "threshold": 0.004292364752459969,
+        "topological_passed": false,
+        "state": "incubating"
+      },
+      {
+        "key": "MATH_BEEZER_THM_BNS",
+        "sigma2": 0.0010172491668036987,
+        "sigma2_ingest": 0.001017249217085132,
+        "threshold": 0.004292364752459969,
+        "topological_passed": false,
+        "state": "incubating"
+      },
+      {
+        "key": "MATH_BEEZER_THM_DLDS",
+        "sigma2": 0.0024479929241273406,
+        "sigma2_ingest": 0.0024479926873824474,
+        "threshold": 0.004292364752459969,
+        "topological_passed": false,
+        "state": "incubating"
+      },
+      {
+        "key": "MATH_BEEZER_THM_BS",
+        "sigma2": 0.0016199700605211665,
+        "sigma2_ingest": 0.0016199697949089886,
+        "threshold": 0.004292364752459969,
+        "topological_passed": false,
+        "state": "incubating"
+      },
+      {
+        "key": "MATH_BEEZER_DEF_CCCV",
+        "sigma2": 0.0011003606230528564,
+        "sigma2_ingest": 0.0011003605822099763,
+        "threshold": 0.004292364752459969,
+        "topological_passed": false,
+        "state": "incubating"
+      },
+      {
+        "key": "MATH_BEEZER_THM_CRVA",
+        "sigma2": 0.0023514526512010974,
+        "sigma2_ingest": 0.002351452620077532,
+        "threshold": 0.004292364752459969,
+        "topological_passed": false,
+        "state": "incubating"
+      },
+      {
+        "key": "MATH_BEEZER_THM_CRSM",
+        "sigma2": 0.0021732564562910012,
+        "sigma2_ingest": 0.0021732562666477986,
+        "threshold": 0.004292364752459969,
+        "topological_passed": false,
+        "state": "incubating"
+      },
+      {
+        "key": "MATH_BEEZER_DEF_IP",
+        "sigma2": 0.0015280336392845336,
+        "sigma2_ingest": 0.0015280335320299163,
+        "threshold": 0.004292364752459969,
+        "topological_passed": false,
+        "state": "incubating"
+      },
+      {
+        "key": "MATH_BEEZER_THM_IPVA",
+        "sigma2": 0.0017355359498656894,
+        "sigma2_ingest": 0.0017355356556201754,
+        "threshold": 0.004292364752459969,
+        "topological_passed": false,
+        "state": "incubating"
+      },
+      {
+        "key": "MATH_BEEZER_THM_IPSM",
+        "sigma2": 0.0010895948950140732,
+        "sigma2_ingest": 0.001089594938745907,
+        "threshold": 0.004292364752459969,
+        "topological_passed": false,
+        "state": "incubating"
+      },
+      {
+        "key": "MATH_BEEZER_THM_IPAC",
+        "sigma2": 0.0018004069851160396,
+        "sigma2_ingest": 0.0018004068905122534,
+        "threshold": 0.004292364752459969,
+        "topological_passed": false,
+        "state": "incubating"
+      },
+      {
+        "key": "MATH_BEEZER_DEF_NV",
+        "sigma2": 0.0017418154692946262,
+        "sigma2_ingest": 0.0017418155102250097,
+        "threshold": 0.004292364752459969,
+        "topological_passed": false,
+        "state": "incubating"
+      },
+      {
+        "key": "MATH_BEEZER_THM_IPN",
+        "sigma2": 0.0014988889993875702,
+        "sigma2_ingest": 0.0014988888694912681,
+        "threshold": 0.004292364752459969,
+        "topological_passed": false,
+        "state": "incubating"
+      },
+      {
+        "key": "MATH_BEEZER_THM_PIP",
+        "sigma2": 0.0017716816333709373,
+        "sigma2_ingest": 0.001771681537569089,
+        "threshold": 0.004292364752459969,
+        "topological_passed": false,
+        "state": "incubating"
+      },
+      {
+        "key": "MATH_BEEZER_DEF_OV",
+        "sigma2": 0.000950764254874168,
+        "sigma2_ingest": 0.0009507642297151439,
+        "threshold": 0.004292364752459969,
+        "topological_passed": false,
+        "state": "incubating"
+      },
+      {
+        "key": "MATH_BEEZER_DEF_OSV",
+        "sigma2": 0.000922038686963682,
+        "sigma2_ingest": 0.0009220385575769355,
+        "threshold": 0.004292364752459969,
+        "topological_passed": false,
+        "state": "incubating"
+      },
+      {
+        "key": "MATH_BEEZER_DEF_SUV",
+        "sigma2": 0.0008953315024910677,
+        "sigma2_ingest": 0.0008953314095486518,
+        "threshold": 0.004292364752459969,
+        "topological_passed": false,
+        "state": "incubating"
+      },
+      {
+        "key": "MATH_BEEZER_THM_OSLI",
+        "sigma2": 0.0022121180224379273,
+        "sigma2_ingest": 0.0022121180559397137,
+        "threshold": 0.004292364752459969,
+        "topological_passed": false,
+        "state": "incubating"
+      },
+      {
+        "key": "MATH_BEEZER_THM_GSP",
+        "sigma2": 0.002110992172202387,
+        "sigma2_ingest": 0.0021109919351720847,
+        "threshold": 0.004292364752459969,
+        "topological_passed": false,
+        "state": "incubating"
+      },
+      {
+        "key": "MATH_BEEZER_DEF_ONS",
+        "sigma2": 0.001672498052295622,
+        "sigma2_ingest": 0.001672497898638852,
+        "threshold": 0.004292364752459969,
+        "topological_passed": false,
+        "state": "incubating"
+      },
+      {
+        "key": "MATH_BEEZER_DEF_VSM",
+        "sigma2": 0.0010398045836966072,
+        "sigma2_ingest": 0.0010398045403245417,
+        "threshold": 0.004292364752459969,
+        "topological_passed": false,
+        "state": "incubating"
+      },
+      {
+        "key": "MATH_BEEZER_DEF_ME",
+        "sigma2": 0.0013137538552230677,
+        "sigma2_ingest": 0.001313753755179295,
+        "threshold": 0.004292364752459969,
+        "topological_passed": false,
+        "state": "incubating"
+      },
+      {
+        "key": "MATH_BEEZER_DEF_MA",
+        "sigma2": 0.0017237946246177807,
+        "sigma2_ingest": 0.0017237944013688182,
+        "threshold": 0.004292364752459969,
+        "topological_passed": false,
+        "state": "incubating"
+      },
+      {
+        "key": "MATH_BEEZER_DEF_MSM",
+        "sigma2": 0.00016088057518322732,
+        "sigma2_ingest": 0.00016088055933558205,
+        "threshold": 0.004292364752459969,
+        "topological_passed": false,
+        "state": "incubating"
+      },
+      {
+        "key": "MATH_BEEZER_THM_VSPM",
+        "sigma2": 0.0022483149585804008,
+        "sigma2_ingest": 0.0022483148552535155,
+        "threshold": 0.004292364752459969,
+        "topological_passed": false,
+        "state": "incubating"
+      },
+      {
+        "key": "MATH_BEEZER_DEF_ZM",
+        "sigma2": 0.0024136775664460918,
+        "sigma2_ingest": 0.002413677333918017,
+        "threshold": 0.004292364752459969,
+        "topological_passed": false,
+        "state": "incubating"
+      },
+      {
+        "key": "MATH_BEEZER_DEF_TM",
+        "sigma2": 0.0006104530521208289,
+        "sigma2_ingest": 0.0006104529388727653,
+        "threshold": 0.004292364752459969,
+        "topological_passed": false,
+        "state": "incubating"
+      },
+      {
+        "key": "MATH_BEEZER_DEF_SYM",
+        "sigma2": 0.0012394240100560723,
+        "sigma2_ingest": 0.0012394238310261616,
+        "threshold": 0.004292364752459969,
+        "topological_passed": false,
+        "state": "incubating"
+      },
+      {
+        "key": "MATH_BEEZER_THM_SMS",
+        "sigma2": 0.002500686780061821,
+        "sigma2_ingest": 0.002500686876632749,
+        "threshold": 0.004292364752459969,
+        "topological_passed": false,
+        "state": "incubating"
+      },
+      {
+        "key": "MATH_BEEZER_THM_TMA",
+        "sigma2": 0.0020348081117378307,
+        "sigma2_ingest": 0.0020348081611150514,
+        "threshold": 0.004292364752459969,
+        "topological_passed": false,
+        "state": "incubating"
+      },
+      {
+        "key": "MATH_BEEZER_THM_TMSM",
+        "sigma2": 0.00139790957212893,
+        "sigma2_ingest": 0.0013979096475966706,
+        "threshold": 0.004292364752459969,
+        "topological_passed": false,
+        "state": "incubating"
+      },
+      {
+        "key": "MATH_BEEZER_THM_TT",
+        "sigma2": 0.0007724627474606957,
+        "sigma2_ingest": 0.0007724627812983113,
+        "threshold": 0.004292364752459969,
+        "topological_passed": false,
+        "state": "incubating"
+      },
+      {
+        "key": "MATH_BEEZER_DEF_CCM",
+        "sigma2": 0.0011701188401225086,
+        "sigma2_ingest": 0.0011701188226678869,
+        "threshold": 0.004292364752459969,
+        "topological_passed": false,
+        "state": "incubating"
+      },
+      {
+        "key": "MATH_BEEZER_THM_CRMA",
+        "sigma2": 0.0030310840184282857,
+        "sigma2_ingest": 0.0030310841615085664,
+        "threshold": 0.004292364752459969,
+        "topological_passed": false,
+        "state": "incubating"
+      },
+      {
+        "key": "MATH_BEEZER_THM_CRMSM",
+        "sigma2": 0.0026139176506685393,
+        "sigma2_ingest": 0.002613917763669122,
+        "threshold": 0.004292364752459969,
+        "topological_passed": false,
+        "state": "incubating"
+      },
+      {
+        "key": "MATH_BEEZER_THM_CCM",
+        "sigma2": 0.00182660684147778,
+        "sigma2_ingest": 0.0018266069102741216,
+        "threshold": 0.004292364752459969,
+        "topological_passed": false,
+        "state": "incubating"
+      },
+      {
+        "key": "MATH_BEEZER_THM_MCT",
+        "sigma2": 0.001445923210072426,
+        "sigma2_ingest": 0.0014459233141563498,
+        "threshold": 0.004292364752459969,
+        "topological_passed": false,
+        "state": "incubating"
+      },
+      {
+        "key": "MATH_BEEZER_DEF_A",
+        "sigma2": 0.0011549525865305445,
+        "sigma2_ingest": 0.00115495247952892,
+        "threshold": 0.004292364752459969,
+        "topological_passed": false,
+        "state": "incubating"
+      },
+      {
+        "key": "MATH_BEEZER_THM_AMA",
+        "sigma2": 0.003414641199018475,
+        "sigma2_ingest": 0.0034146411313465334,
+        "threshold": 0.004292364752459969,
+        "topological_passed": false,
+        "state": "incubating"
+      },
+      {
+        "key": "MATH_BEEZER_THM_AMSM",
+        "sigma2": 0.0011863687216917102,
+        "sigma2_ingest": 0.0011863686182062218,
+        "threshold": 0.004292364752459969,
+        "topological_passed": false,
+        "state": "incubating"
+      },
+      {
+        "key": "MATH_BEEZER_THM_AA",
+        "sigma2": 0.0009595857040094966,
+        "sigma2_ingest": 0.0009595856937706303,
+        "threshold": 0.004292364752459969,
+        "topological_passed": false,
+        "state": "incubating"
+      },
+      {
+        "key": "MATH_BEEZER_DEF_MVP",
+        "sigma2": 0.0021652409888737708,
+        "sigma2_ingest": 0.002165240761937253,
+        "threshold": 0.004292364752459969,
+        "topological_passed": false,
+        "state": "incubating"
+      },
+      {
+        "key": "MATH_BEEZER_THM_SLEMM",
+        "sigma2": 0.0006595110551088049,
+        "sigma2_ingest": 0.0006595110817394953,
+        "threshold": 0.004292364752459969,
+        "topological_passed": false,
+        "state": "incubating"
+      },
+      {
+        "key": "MATH_BEEZER_THM_EMMVP",
+        "sigma2": 0.0035650986606671595,
+        "sigma2_ingest": 0.003565098218909195,
+        "threshold": 0.004292364752459969,
+        "topological_passed": false,
+        "state": "incubating"
+      },
+      {
+        "key": "MATH_BEEZER_DEF_MM",
+        "sigma2": 0.0006462169892483467,
+        "sigma2_ingest": 0.0006462169258974314,
+        "threshold": 0.004292364752459969,
+        "topological_passed": false,
+        "state": "incubating"
+      },
+      {
+        "key": "MATH_BEEZER_THM_EMP",
+        "sigma2": 0.0007843362614675606,
+        "sigma2_ingest": 0.0007843361405138011,
+        "threshold": 0.004292364752459969,
+        "topological_passed": false,
+        "state": "incubating"
+      },
+      {
+        "key": "MATH_BEEZER_THM_MMZM",
+        "sigma2": 0.002742586679465047,
+        "sigma2_ingest": 0.002742586176185632,
+        "threshold": 0.004292364752459969,
+        "topological_passed": false,
+        "state": "incubating"
+      },
+      {
+        "key": "MATH_BEEZER_THM_MMIM",
+        "sigma2": 0.0029760270017576695,
+        "sigma2_ingest": 0.0029760267781172942,
+        "threshold": 0.004292364752459969,
+        "topological_passed": false,
+        "state": "incubating"
+      },
+      {
+        "key": "MATH_BEEZER_THM_MMDAA",
+        "sigma2": 0.001586225048255931,
+        "sigma2_ingest": 0.0015862248787039278,
+        "threshold": 0.004292364752459969,
+        "topological_passed": false,
+        "state": "incubating"
+      },
+      {
+        "key": "MATH_BEEZER_THM_MMSMM",
+        "sigma2": 0.002737123505458981,
+        "sigma2_ingest": 0.0027371231616504788,
+        "threshold": 0.004292364752459969,
+        "topological_passed": false,
+        "state": "incubating"
+      },
+      {
+        "key": "MATH_BEEZER_THM_MMA",
+        "sigma2": 0.001798568826398646,
+        "sigma2_ingest": 0.0017985687100053628,
+        "threshold": 0.004292364752459969,
+        "topological_passed": false,
+        "state": "incubating"
+      },
+      {
+        "key": "MATH_BEEZER_THM_MMIP",
+        "sigma2": 0.0005354017764453319,
+        "sigma2_ingest": 0.0005354017230534638,
+        "threshold": 0.004292364752459969,
+        "topological_passed": false,
+        "state": "incubating"
+      },
+      {
+        "key": "MATH_BEEZER_THM_MMCC",
+        "sigma2": 0.001859793755518012,
+        "sigma2_ingest": 0.0018597934494618384,
+        "threshold": 0.004292364752459969,
+        "topological_passed": false,
+        "state": "incubating"
+      },
+      {
+        "key": "MATH_BEEZER_THM_MMT",
+        "sigma2": 0.0012330430026149084,
+        "sigma2_ingest": 0.0012330429086087281,
+        "threshold": 0.004292364752459969,
+        "topological_passed": false,
+        "state": "incubating"
+      },
+      {
+        "key": "MATH_BEEZER_THM_MMAD",
+        "sigma2": 0.0009720054357929055,
+        "sigma2_ingest": 0.0009720053842153828,
+        "threshold": 0.004292364752459969,
+        "topological_passed": false,
+        "state": "incubating"
+      },
+      {
+        "key": "MATH_BEEZER_THM_AIP",
+        "sigma2": 0.0006697013174088186,
+        "sigma2_ingest": 0.00066970130805458,
+        "threshold": 0.004292364752459969,
+        "topological_passed": false,
+        "state": "incubating"
+      },
+      {
+        "key": "MATH_BEEZER_DEF_HM",
+        "sigma2": 0.0011828931433653343,
+        "sigma2_ingest": 0.001182893159866556,
+        "threshold": 0.004292364752459969,
+        "topological_passed": false,
+        "state": "incubating"
+      },
+      {
+        "key": "MATH_BEEZER_THM_HMIP",
+        "sigma2": 0.002598613086023808,
+        "sigma2_ingest": 0.00259861268112807,
+        "threshold": 0.004292364752459969,
+        "topological_passed": false,
+        "state": "incubating"
+      },
+      {
+        "key": "MATH_BEEZER_DEF_MI",
+        "sigma2": 0.00395731184487819,
+        "sigma2_ingest": 0.003957311682160975,
+        "threshold": 0.004292364752459969,
+        "topological_passed": false,
+        "state": "incubating"
+      },
+      {
+        "key": "MATH_BEEZER_THM_TTMI",
+        "sigma2": 0.003616170405500432,
+        "sigma2_ingest": 0.0036161703390765547,
+        "threshold": 0.004292364752459969,
+        "topological_passed": false,
+        "state": "incubating"
+      },
+      {
+        "key": "MATH_BEEZER_THM_CINM",
+        "sigma2": 0.0016095125056239052,
+        "sigma2_ingest": 0.001609512415971047,
+        "threshold": 0.004292364752459969,
+        "topological_passed": false,
+        "state": "incubating"
+      },
+      {
+        "key": "MATH_BEEZER_THM_MIU",
+        "sigma2": 0.002474038990296477,
+        "sigma2_ingest": 0.0024740390229059765,
+        "threshold": 0.004292364752459969,
+        "topological_passed": false,
+        "state": "incubating"
+      },
+      {
+        "key": "MATH_BEEZER_THM_SS",
+        "sigma2": 0.005636354207470614,
+        "sigma2_ingest": 0.005636353736212017,
+        "threshold": 0.004292364752459969,
+        "topological_passed": true,
+        "state": "consolidated"
+      },
+      {
+        "key": "MATH_BEEZER_THM_MIMI",
+        "sigma2": 0.00303901071270009,
+        "sigma2_ingest": 0.003039010492045432,
+        "threshold": 0.004292364752459969,
+        "topological_passed": false,
+        "state": "incubating"
+      },
+      {
+        "key": "MATH_BEEZER_THM_MIT",
+        "sigma2": 0.0014993215061744733,
+        "sigma2_ingest": 0.00149932134030532,
+        "threshold": 0.004292364752459969,
+        "topological_passed": false,
+        "state": "incubating"
+      },
+      {
+        "key": "MATH_BEEZER_THM_MISM",
+        "sigma2": 0.004531178752608183,
+        "sigma2_ingest": 0.004531178418950578,
+        "threshold": 0.004292364752459969,
+        "topological_passed": true,
+        "state": "consolidated"
+      },
+      {
+        "key": "MATH_BEEZER_THM_NPNT",
+        "sigma2": 0.0027177920701020025,
+        "sigma2_ingest": 0.002717791957024058,
+        "threshold": 0.004292364752459969,
+        "topological_passed": false,
+        "state": "incubating"
+      },
+      {
+        "key": "MATH_BEEZER_THM_OSIS",
+        "sigma2": 0.004765561305233565,
+        "sigma2_ingest": 0.0047655611487613355,
+        "threshold": 0.004292364752459969,
+        "topological_passed": true,
+        "state": "consolidated"
+      },
+      {
+        "key": "MATH_BEEZER_THM_NI",
+        "sigma2": 0.005934737657162191,
+        "sigma2_ingest": 0.005934737700358409,
+        "threshold": 0.004292364752459969,
+        "topological_passed": true,
+        "state": "consolidated"
+      },
+      {
+        "key": "MATH_BEEZER_THM_NME3",
+        "sigma2": 0.00155422327297612,
+        "sigma2_ingest": 0.001554223283946019,
+        "threshold": 0.004292364752459969,
+        "topological_passed": false,
+        "state": "incubating"
+      },
+      {
+        "key": "MATH_BEEZER_THM_SNCM",
+        "sigma2": 0.0012986494017616652,
+        "sigma2_ingest": 0.0012986493190254294,
+        "threshold": 0.004292364752459969,
+        "topological_passed": false,
+        "state": "incubating"
+      },
+      {
+        "key": "MATH_BEEZER_DEF_UM",
+        "sigma2": 0.0009333573396645005,
+        "sigma2_ingest": 0.0009333572490296356,
+        "threshold": 0.004292364752459969,
+        "topological_passed": false,
+        "state": "incubating"
+      },
+      {
+        "key": "MATH_BEEZER_THM_UMI",
+        "sigma2": 0.002176252328513593,
+        "sigma2_ingest": 0.002176252031790572,
+        "threshold": 0.004292364752459969,
+        "topological_passed": false,
+        "state": "incubating"
+      },
+      {
+        "key": "MATH_BEEZER_THM_CUMOS",
+        "sigma2": 0.0002798983190692221,
+        "sigma2_ingest": 0.0002798983187520171,
+        "threshold": 0.004292364752459969,
+        "topological_passed": false,
+        "state": "incubating"
+      },
+      {
+        "key": "MATH_BEEZER_THM_UMPIP",
+        "sigma2": 0.0017808110767404235,
+        "sigma2_ingest": 0.0017808110184545263,
+        "threshold": 0.004292364752459969,
+        "topological_passed": false,
+        "state": "incubating"
+      },
+      {
+        "key": "MATH_BEEZER_DEF_CSM",
+        "sigma2": 0.000530608039363243,
+        "sigma2_ingest": 0.0005306080114173949,
+        "threshold": 0.004292364752459969,
+        "topological_passed": false,
+        "state": "incubating"
+      },
+      {
+        "key": "MATH_BEEZER_THM_CSCS",
+        "sigma2": 0.0027308920595432848,
+        "sigma2_ingest": 0.002730891801897913,
+        "threshold": 0.004292364752459969,
+        "topological_passed": false,
+        "state": "incubating"
+      },
+      {
+        "key": "MATH_BEEZER_THM_BCS",
+        "sigma2": 0.0014618525373776925,
+        "sigma2_ingest": 0.0014618525085722065,
+        "threshold": 0.004292364752459969,
+        "topological_passed": false,
+        "state": "incubating"
+      },
+      {
+        "key": "MATH_BEEZER_THM_CSNM",
+        "sigma2": 0.0029564656884063538,
+        "sigma2_ingest": 0.002956465453601526,
+        "threshold": 0.004292364752459969,
+        "topological_passed": false,
+        "state": "incubating"
+      },
+      {
+        "key": "MATH_BEEZER_THM_NME4",
+        "sigma2": 0.0013987621159199084,
+        "sigma2_ingest": 0.001398761905938651,
+        "threshold": 0.004292364752459969,
+        "topological_passed": false,
+        "state": "incubating"
+      },
+      {
+        "key": "MATH_BEEZER_DEF_RSM",
+        "sigma2": 0.000748936417506249,
+        "sigma2_ingest": 0.0007489364316032523,
+        "threshold": 0.004292364752459969,
+        "topological_passed": false,
+        "state": "incubating"
+      },
+      {
+        "key": "MATH_BEEZER_THM_REMRS",
+        "sigma2": 0.0018259111810429336,
+        "sigma2_ingest": 0.0018259111419024754,
+        "threshold": 0.004292364752459969,
+        "topological_passed": false,
+        "state": "incubating"
+      },
+      {
+        "key": "MATH_BEEZER_THM_BRS",
+        "sigma2": 0.0016713993952920734,
+        "sigma2_ingest": 0.0016713994097209528,
+        "threshold": 0.004292364752459969,
+        "topological_passed": false,
+        "state": "incubating"
+      },
+      {
+        "key": "MATH_BEEZER_THM_CSRST",
+        "sigma2": 0.000905461688701774,
+        "sigma2_ingest": 0.0009054617652284043,
+        "threshold": 0.004292364752459969,
+        "topological_passed": false,
+        "state": "incubating"
+      },
+      {
+        "key": "MATH_BEEZER_DEF_LNS",
+        "sigma2": 0.0005376004199932799,
+        "sigma2_ingest": 0.0005376003782333956,
+        "threshold": 0.004292364752459969,
+        "topological_passed": false,
+        "state": "incubating"
+      },
+      {
+        "key": "MATH_BEEZER_DEF_EEF",
+        "sigma2": 0.0033430315160947917,
+        "sigma2_ingest": 0.003343031764382505,
+        "threshold": 0.004292364752459969,
+        "topological_passed": false,
+        "state": "incubating"
+      },
+      {
+        "key": "MATH_BEEZER_THM_PEEF",
+        "sigma2": 0.004253580244445434,
+        "sigma2_ingest": 0.0042535801194805815,
+        "threshold": 0.004292364752459969,
+        "topological_passed": false,
+        "state": "incubating"
+      },
+      {
+        "key": "MATH_BEEZER_THM_FS",
+        "sigma2": 0.0023663341932989588,
+        "sigma2_ingest": 0.0023663343124417976,
+        "threshold": 0.004292364752459969,
+        "topological_passed": false,
+        "state": "incubating"
+      },
+      {
+        "key": "MATH_BEEZER_DEF_VS",
+        "sigma2": 0.0026924850686828343,
+        "sigma2_ingest": 0.0026924848684698978,
+        "threshold": 0.004292364752459969,
+        "topological_passed": false,
+        "state": "incubating"
+      },
+      {
+        "key": "MATH_BEEZER_THM_ZVU",
+        "sigma2": 0.0029191438912702585,
+        "sigma2_ingest": 0.002919143774165144,
+        "threshold": 0.004292364752459969,
+        "topological_passed": false,
+        "state": "incubating"
+      },
+      {
+        "key": "MATH_BEEZER_THM_AIU",
+        "sigma2": 0.0017697835564205028,
+        "sigma2_ingest": 0.0017697834151720001,
+        "threshold": 0.004292364752459969,
+        "topological_passed": false,
+        "state": "incubating"
+      },
+      {
+        "key": "MATH_BEEZER_THM_ZSSM",
+        "sigma2": 0.0025259672614483205,
+        "sigma2_ingest": 0.0025259672353901575,
+        "threshold": 0.004292364752459969,
+        "topological_passed": false,
+        "state": "incubating"
+      },
+      {
+        "key": "MATH_BEEZER_THM_ZVSM",
+        "sigma2": 0.002567044827598841,
+        "sigma2_ingest": 0.0025670449496452,
+        "threshold": 0.004292364752459969,
+        "topological_passed": false,
+        "state": "incubating"
+      },
+      {
+        "key": "MATH_BEEZER_THM_AISM",
+        "sigma2": 0.0033395425952011696,
+        "sigma2_ingest": 0.0033395427583472535,
+        "threshold": 0.004292364752459969,
+        "topological_passed": false,
+        "state": "incubating"
+      },
+      {
+        "key": "MATH_BEEZER_THM_SMEZV",
+        "sigma2": 0.0023504324340035913,
+        "sigma2_ingest": 0.0023504323269216017,
+        "threshold": 0.004292364752459969,
+        "topological_passed": false,
+        "state": "incubating"
+      },
+      {
+        "key": "MATH_BEEZER_DEF_S",
+        "sigma2": 0.0007345093888103252,
+        "sigma2_ingest": 0.0007345092651623688,
+        "threshold": 0.004292364752459969,
+        "topological_passed": false,
+        "state": "incubating"
+      },
+      {
+        "key": "MATH_BEEZER_THM_TSS",
+        "sigma2": 0.0013904630489415114,
+        "sigma2_ingest": 0.0013904628583628566,
+        "threshold": 0.004292364752459969,
+        "topological_passed": false,
+        "state": "incubating"
+      },
+      {
+        "key": "MATH_BEEZER_DEF_TS",
+        "sigma2": 0.0041150428013700825,
+        "sigma2_ingest": 0.004115042570941489,
+        "threshold": 0.004292364752459969,
+        "topological_passed": false,
+        "state": "incubating"
+      },
+      {
+        "key": "MATH_BEEZER_THM_NSMS",
+        "sigma2": 0.0007753375747836106,
+        "sigma2_ingest": 0.0007753375036316238,
+        "threshold": 0.004292364752459969,
+        "topological_passed": false,
+        "state": "incubating"
+      },
+      {
+        "key": "MATH_BEEZER_DEF_LC",
+        "sigma2": 0.0016813500426512277,
+        "sigma2_ingest": 0.001681350128761552,
+        "threshold": 0.004292364752459969,
+        "topological_passed": false,
+        "state": "incubating"
+      },
+      {
+        "key": "MATH_BEEZER_DEF_SS",
+        "sigma2": 0.000983309601329982,
+        "sigma2_ingest": 0.000983309522509025,
+        "threshold": 0.004292364752459969,
+        "topological_passed": false,
+        "state": "incubating"
+      },
+      {
+        "key": "MATH_BEEZER_THM_SSS",
+        "sigma2": 0.0018369701577377914,
+        "sigma2_ingest": 0.0018369701197304493,
+        "threshold": 0.004292364752459969,
+        "topological_passed": false,
+        "state": "incubating"
+      },
+      {
+        "key": "MATH_BEEZER_THM_CSMS",
+        "sigma2": 0.0008559193601230179,
+        "sigma2_ingest": 0.0008559193579892294,
+        "threshold": 0.004292364752459969,
+        "topological_passed": false,
+        "state": "incubating"
+      },
+      {
+        "key": "MATH_BEEZER_THM_RSMS",
+        "sigma2": 0.0013832055772409653,
+        "sigma2_ingest": 0.001383205554105062,
+        "threshold": 0.004292364752459969,
+        "topological_passed": false,
+        "state": "incubating"
+      },
+      {
+        "key": "MATH_BEEZER_THM_LNSMS",
+        "sigma2": 0.0009756278465322707,
+        "sigma2_ingest": 0.000975627766235434,
+        "threshold": 0.004292364752459969,
+        "topological_passed": false,
+        "state": "incubating"
+      },
+      {
+        "key": "MATH_BEEZER_DEF_RLD",
+        "sigma2": 0.001882017261697414,
+        "sigma2_ingest": 0.0018820171093353062,
+        "threshold": 0.004292364752459969,
+        "topological_passed": false,
+        "state": "incubating"
+      },
+      {
+        "key": "MATH_BEEZER_DEF_LI",
+        "sigma2": 0.0025682134571379618,
+        "sigma2_ingest": 0.002568213292257983,
+        "threshold": 0.004292364752459969,
+        "topological_passed": false,
+        "state": "incubating"
+      },
+      {
+        "key": "MATH_BEEZER_DEF_SSVS",
+        "sigma2": 0.002456812721014192,
+        "sigma2_ingest": 0.0024568126890063,
+        "threshold": 0.004292364752459969,
+        "topological_passed": false,
+        "state": "incubating"
+      },
+      {
+        "key": "MATH_BEEZER_THM_VRRB",
+        "sigma2": 0.001529924139460503,
+        "sigma2_ingest": 0.0015299238835408846,
+        "threshold": 0.004292364752459969,
+        "topological_passed": false,
+        "state": "incubating"
+      },
+      {
+        "key": "MATH_BEEZER_DEF_B",
+        "sigma2": 0.0007128666404451249,
+        "sigma2_ingest": 0.0007128665372629834,
+        "threshold": 0.004292364752459969,
+        "topological_passed": false,
+        "state": "incubating"
+      },
+      {
+        "key": "MATH_BEEZER_THM_SUVB",
+        "sigma2": 0.0012504629186226028,
+        "sigma2_ingest": 0.0012504627313420552,
+        "threshold": 0.004292364752459969,
+        "topological_passed": false,
+        "state": "incubating"
+      },
+      {
+        "key": "MATH_BEEZER_THM_CNMB",
+        "sigma2": 0.0027741068659479086,
+        "sigma2_ingest": 0.002774106559423599,
+        "threshold": 0.004292364752459969,
+        "topological_passed": false,
+        "state": "incubating"
+      },
+      {
+        "key": "MATH_BEEZER_THM_NME5",
+        "sigma2": 0.0012365388933607726,
+        "sigma2_ingest": 0.001236538836510971,
+        "threshold": 0.004292364752459969,
+        "topological_passed": false,
+        "state": "incubating"
+      },
+      {
+        "key": "MATH_BEEZER_THM_COB",
+        "sigma2": 0.0022442064750526143,
+        "sigma2_ingest": 0.002244206130456836,
+        "threshold": 0.004292364752459969,
+        "topological_passed": false,
+        "state": "incubating"
+      },
+      {
+        "key": "MATH_BEEZER_THM_UMCOB",
+        "sigma2": 0.0009368456813310452,
+        "sigma2_ingest": 0.000936845621906991,
+        "threshold": 0.004292364752459969,
+        "topological_passed": false,
+        "state": "incubating"
+      },
+      {
+        "key": "MATH_BEEZER_DEF_D",
+        "sigma2": 0.004476302721165998,
+        "sigma2_ingest": 0.004476302543143266,
+        "threshold": 0.004292364752459969,
+        "topological_passed": true,
+        "state": "consolidated"
+      },
+      {
+        "key": "MATH_BEEZER_THM_SSLD",
+        "sigma2": 0.001824744460106968,
+        "sigma2_ingest": 0.0018247444862724462,
+        "threshold": 0.004292364752459969,
+        "topological_passed": false,
+        "state": "incubating"
+      },
+      {
+        "key": "MATH_BEEZER_THM_BIS",
+        "sigma2": 0.005437957080453699,
+        "sigma2_ingest": 0.005437956623552383,
+        "threshold": 0.004292364752459969,
+        "topological_passed": true,
+        "state": "consolidated"
+      },
+      {
+        "key": "MATH_BEEZER_THM_DCM",
+        "sigma2": 0.003363869646812358,
+        "sigma2_ingest": 0.0033638694050879703,
+        "threshold": 0.004292364752459969,
+        "topological_passed": false,
+        "state": "incubating"
+      },
+      {
+        "key": "MATH_BEEZER_THM_DP",
+        "sigma2": 0.003363869646812358,
+        "sigma2_ingest": 0.0033638694050879703,
+        "threshold": 0.004292364752459969,
+        "topological_passed": false,
+        "state": "incubating"
+      },
+      {
+        "key": "MATH_BEEZER_THM_DM",
+        "sigma2": 0.003363869646812358,
+        "sigma2_ingest": 0.0033638694050879703,
+        "threshold": 0.004292364752459969,
+        "topological_passed": false,
+        "state": "incubating"
+      },
+      {
+        "key": "MATH_BEEZER_DEF_NOM",
+        "sigma2": 0.0018065698319426821,
+        "sigma2_ingest": 0.0018065698355834514,
+        "threshold": 0.004292364752459969,
+        "topological_passed": false,
+        "state": "incubating"
+      },
+      {
+        "key": "MATH_BEEZER_DEF_ROM",
+        "sigma2": 0.0029175149886802843,
+        "sigma2_ingest": 0.0029175145970179945,
+        "threshold": 0.004292364752459969,
+        "topological_passed": false,
+        "state": "incubating"
+      },
+      {
+        "key": "MATH_BEEZER_THM_CRN",
+        "sigma2": 0.0025212056365526182,
+        "sigma2_ingest": 0.0025212056006413226,
+        "threshold": 0.004292364752459969,
+        "topological_passed": false,
+        "state": "incubating"
+      },
+      {
+        "key": "MATH_BEEZER_THM_RPNC",
+        "sigma2": 0.004817578285135864,
+        "sigma2_ingest": 0.004817577980440438,
+        "threshold": 0.004292364752459969,
+        "topological_passed": true,
+        "state": "consolidated"
+      },
+      {
+        "key": "MATH_BEEZER_THM_RNNM",
+        "sigma2": 0.005399100809124769,
+        "sigma2_ingest": 0.005399101326394968,
+        "threshold": 0.004292364752459969,
+        "topological_passed": true,
+        "state": "consolidated"
+      },
+      {
+        "key": "MATH_BEEZER_THM_NME6",
+        "sigma2": 0.0016566753888674888,
+        "sigma2_ingest": 0.0016566754008403033,
+        "threshold": 0.004292364752459969,
+        "topological_passed": false,
+        "state": "incubating"
+      },
+      {
+        "key": "MATH_BEEZER_THM_ELIS",
+        "sigma2": 0.0031559111146081276,
+        "sigma2_ingest": 0.003155911075706904,
+        "threshold": 0.004292364752459969,
+        "topological_passed": false,
+        "state": "incubating"
+      },
+      {
+        "key": "MATH_BEEZER_THM_G",
+        "sigma2": 0.0019786276919026282,
+        "sigma2_ingest": 0.001978627595928649,
+        "threshold": 0.004292364752459969,
+        "topological_passed": false,
+        "state": "incubating"
+      },
+      {
+        "key": "MATH_BEEZER_THM_PSSD",
+        "sigma2": 0.0025315104662129526,
+        "sigma2_ingest": 0.002531510521683402,
+        "threshold": 0.004292364752459969,
+        "topological_passed": false,
+        "state": "incubating"
+      },
+      {
+        "key": "MATH_BEEZER_THM_EDYES",
+        "sigma2": 0.0035254138794193904,
+        "sigma2_ingest": 0.00352541378372285,
+        "threshold": 0.004292364752459969,
+        "topological_passed": false,
+        "state": "incubating"
+      },
+      {
+        "key": "MATH_BEEZER_THM_RMRT",
+        "sigma2": 0.003733194233137992,
+        "sigma2_ingest": 0.003733194097556199,
+        "threshold": 0.004292364752459969,
+        "topological_passed": false,
+        "state": "incubating"
+      },
+      {
+        "key": "MATH_BEEZER_THM_DFS",
+        "sigma2": 0.0013988650008388691,
+        "sigma2_ingest": 0.0013988648944563277,
+        "threshold": 0.004292364752459969,
+        "topological_passed": false,
+        "state": "incubating"
+      },
+      {
+        "key": "MATH_BEEZER_DEF_ELEM",
+        "sigma2": 0.0007962413940233972,
+        "sigma2_ingest": 0.0007962414262954428,
+        "threshold": 0.004292364752459969,
+        "topological_passed": false,
+        "state": "incubating"
+      },
+      {
+        "key": "MATH_BEEZER_THM_EMDRO",
+        "sigma2": 0.0021539484991391763,
+        "sigma2_ingest": 0.002153948589678621,
+        "threshold": 0.004292364752459969,
+        "topological_passed": false,
+        "state": "incubating"
+      },
+      {
+        "key": "MATH_BEEZER_THM_EMN",
+        "sigma2": 0.004788183232497169,
+        "sigma2_ingest": 0.004788183369966287,
+        "threshold": 0.004292364752459969,
+        "topological_passed": true,
+        "state": "consolidated"
+      },
+      {
+        "key": "MATH_BEEZER_THM_NMPEM",
+        "sigma2": 0.003593474331550838,
+        "sigma2_ingest": 0.003593474176328856,
+        "threshold": 0.004292364752459969,
+        "topological_passed": false,
+        "state": "incubating"
+      },
+      {
+        "key": "MATH_BEEZER_DEF_SM",
+        "sigma2": 0.001092407022456765,
+        "sigma2_ingest": 0.0010924069746216444,
+        "threshold": 0.004292364752459969,
+        "topological_passed": false,
+        "state": "incubating"
+      },
+      {
+        "key": "MATH_BEEZER_DEF_DM",
+        "sigma2": 0.000939472932236248,
+        "sigma2_ingest": 0.0009394728331069322,
+        "threshold": 0.004292364752459969,
+        "topological_passed": false,
+        "state": "incubating"
+      },
+      {
+        "key": "MATH_BEEZER_THM_DMST",
+        "sigma2": 0.0033066556296701523,
+        "sigma2_ingest": 0.0033066555809132263,
+        "threshold": 0.004292364752459969,
+        "topological_passed": false,
+        "state": "incubating"
+      },
+      {
+        "key": "MATH_BEEZER_THM_DER",
+        "sigma2": 0.0014413399326938911,
+        "sigma2_ingest": 0.0014413397920321899,
+        "threshold": 0.004292364752459969,
+        "topological_passed": false,
+        "state": "incubating"
+      },
+      {
+        "key": "MATH_BEEZER_THM_DT",
+        "sigma2": 0.0014441355467398789,
+        "sigma2_ingest": 0.0014441356199962612,
+        "threshold": 0.004292364752459969,
+        "topological_passed": false,
+        "state": "incubating"
+      },
+      {
+        "key": "MATH_BEEZER_THM_DEC",
+        "sigma2": 0.0017003795399132405,
+        "sigma2_ingest": 0.001700379474144923,
+        "threshold": 0.004292364752459969,
+        "topological_passed": false,
+        "state": "incubating"
+      },
+      {
+        "key": "MATH_BEEZER_THM_DZRC",
+        "sigma2": 0.0021192017385121987,
+        "sigma2_ingest": 0.002119201812571325,
+        "threshold": 0.004292364752459969,
+        "topological_passed": false,
+        "state": "incubating"
+      },
+      {
+        "key": "MATH_BEEZER_THM_DRCS",
+        "sigma2": 0.0012065953462549836,
+        "sigma2_ingest": 0.001206595199797447,
+        "threshold": 0.004292364752459969,
+        "topological_passed": false,
+        "state": "incubating"
+      },
+      {
+        "key": "MATH_BEEZER_THM_DRCM",
+        "sigma2": 0.0010598965302528432,
+        "sigma2_ingest": 0.0010598965668555105,
+        "threshold": 0.004292364752459969,
+        "topological_passed": false,
+        "state": "incubating"
+      },
+      {
+        "key": "MATH_BEEZER_THM_DERC",
+        "sigma2": 0.001253130375896343,
+        "sigma2_ingest": 0.0012531302174371153,
+        "threshold": 0.004292364752459969,
+        "topological_passed": false,
+        "state": "incubating"
+      },
+      {
+        "key": "MATH_BEEZER_THM_DRCMA",
+        "sigma2": 0.0008129834287271536,
+        "sigma2_ingest": 0.0008129833683552475,
+        "threshold": 0.004292364752459969,
+        "topological_passed": false,
+        "state": "incubating"
+      },
+      {
+        "key": "MATH_BEEZER_THM_DIM",
+        "sigma2": 0.0014354220506596505,
+        "sigma2_ingest": 0.0014354221133855644,
+        "threshold": 0.004292364752459969,
+        "topological_passed": false,
+        "state": "incubating"
+      },
+      {
+        "key": "MATH_BEEZER_THM_DEM",
+        "sigma2": 0.0024185316411959625,
+        "sigma2_ingest": 0.0024185315590115703,
+        "threshold": 0.004292364752459969,
+        "topological_passed": false,
+        "state": "incubating"
+      },
+      {
+        "key": "MATH_BEEZER_THM_DEMMM",
+        "sigma2": 0.0020879203131462885,
+        "sigma2_ingest": 0.002087920130823558,
+        "threshold": 0.004292364752459969,
+        "topological_passed": false,
+        "state": "incubating"
+      },
+      {
+        "key": "MATH_BEEZER_THM_SMZD",
+        "sigma2": 0.0025968179170163335,
+        "sigma2_ingest": 0.002596817643600503,
+        "threshold": 0.004292364752459969,
+        "topological_passed": false,
+        "state": "incubating"
+      },
+      {
+        "key": "MATH_BEEZER_THM_NME7",
+        "sigma2": 0.0015540181226362576,
+        "sigma2_ingest": 0.001554018054193311,
+        "threshold": 0.004292364752459969,
+        "topological_passed": false,
+        "state": "incubating"
+      },
+      {
+        "key": "MATH_BEEZER_THM_DRMM",
+        "sigma2": 0.005630548694438797,
+        "sigma2_ingest": 0.0056305486298207546,
+        "threshold": 0.004292364752459969,
+        "topological_passed": true,
+        "state": "consolidated"
+      },
+      {
+        "key": "MATH_BEEZER_DEF_EEM",
+        "sigma2": 0.0020417040607277185,
+        "sigma2_ingest": 0.002041704037640352,
+        "threshold": 0.004292364752459969,
+        "topological_passed": false,
+        "state": "incubating"
+      },
+      {
+        "key": "MATH_BEEZER_THM_EMHE",
+        "sigma2": 0.003555900666163308,
+        "sigma2_ingest": 0.003555900958566045,
+        "threshold": 0.004292364752459969,
+        "topological_passed": false,
+        "state": "incubating"
+      },
+      {
+        "key": "MATH_BEEZER_DEF_CP",
+        "sigma2": 0.002356828811678866,
+        "sigma2_ingest": 0.0023568285834687825,
+        "threshold": 0.004292364752459969,
+        "topological_passed": false,
+        "state": "incubating"
+      },
+      {
+        "key": "MATH_BEEZER_THM_EMRCP",
+        "sigma2": 0.0017970762859059492,
+        "sigma2_ingest": 0.0017970762439658333,
+        "threshold": 0.004292364752459969,
+        "topological_passed": false,
+        "state": "incubating"
+      },
+      {
+        "key": "MATH_BEEZER_DEF_EM",
+        "sigma2": 0.0011901561570880309,
+        "sigma2_ingest": 0.0011901560190854651,
+        "threshold": 0.004292364752459969,
+        "topological_passed": false,
+        "state": "incubating"
+      },
+      {
+        "key": "MATH_BEEZER_THM_EMS",
+        "sigma2": 0.0004915187984320599,
+        "sigma2_ingest": 0.0004915188279108864,
+        "threshold": 0.004292364752459969,
+        "topological_passed": false,
+        "state": "incubating"
+      },
+      {
+        "key": "MATH_BEEZER_THM_EMNS",
+        "sigma2": 0.001025859765000171,
+        "sigma2_ingest": 0.0010258596243075558,
+        "threshold": 0.004292364752459969,
+        "topological_passed": false,
+        "state": "incubating"
+      },
+      {
+        "key": "MATH_BEEZER_DEF_AME",
+        "sigma2": 0.0011923852392001315,
+        "sigma2_ingest": 0.0011923852162702715,
+        "threshold": 0.004292364752459969,
+        "topological_passed": false,
+        "state": "incubating"
+      },
+      {
+        "key": "MATH_BEEZER_DEF_GME",
+        "sigma2": 0.0007131310779789469,
+        "sigma2_ingest": 0.0007131310949250735,
+        "threshold": 0.004292364752459969,
+        "topological_passed": false,
+        "state": "incubating"
+      },
+      {
+        "key": "MATH_BEEZER_THM_EDELI",
+        "sigma2": 0.0025156814752238755,
+        "sigma2_ingest": 0.0025156815036690614,
+        "threshold": 0.004292364752459969,
+        "topological_passed": false,
+        "state": "incubating"
+      },
+      {
+        "key": "MATH_BEEZER_THM_SMZE",
+        "sigma2": 0.0024065063243629767,
+        "sigma2_ingest": 0.002406506014019856,
+        "threshold": 0.004292364752459969,
+        "topological_passed": false,
+        "state": "incubating"
+      },
+      {
+        "key": "MATH_BEEZER_THM_NME8",
+        "sigma2": 0.0016814866999328285,
+        "sigma2_ingest": 0.0016814866952276051,
+        "threshold": 0.004292364752459969,
+        "topological_passed": false,
+        "state": "incubating"
+      },
+      {
+        "key": "MATH_BEEZER_THM_ESMM",
+        "sigma2": 0.0010072487409650982,
+        "sigma2_ingest": 0.0010072486865988519,
+        "threshold": 0.004292364752459969,
+        "topological_passed": false,
+        "state": "incubating"
+      },
+      {
+        "key": "MATH_BEEZER_THM_EOMP",
+        "sigma2": 0.0014383546451654586,
+        "sigma2_ingest": 0.0014383544795801967,
+        "threshold": 0.004292364752459969,
+        "topological_passed": false,
+        "state": "incubating"
+      },
+      {
+        "key": "MATH_BEEZER_THM_EPM",
+        "sigma2": 0.0011468245834534711,
+        "sigma2_ingest": 0.0011468245124932272,
+        "threshold": 0.004292364752459969,
+        "topological_passed": false,
+        "state": "incubating"
+      },
+      {
+        "key": "MATH_BEEZER_THM_EIM",
+        "sigma2": 0.0027647605306677027,
+        "sigma2_ingest": 0.0027647601343879207,
+        "threshold": 0.004292364752459969,
+        "topological_passed": false,
+        "state": "incubating"
+      },
+      {
+        "key": "MATH_BEEZER_THM_ETM",
+        "sigma2": 0.0006900563022801432,
+        "sigma2_ingest": 0.00069005627322468,
+        "threshold": 0.004292364752459969,
+        "topological_passed": false,
+        "state": "incubating"
+      },
+      {
+        "key": "MATH_BEEZER_THM_ERMCP",
+        "sigma2": 0.0025090651598145266,
+        "sigma2_ingest": 0.0025090650407874533,
+        "threshold": 0.004292364752459969,
+        "topological_passed": false,
+        "state": "incubating"
+      },
+      {
+        "key": "MATH_BEEZER_THM_DCP",
+        "sigma2": 0.0030117509157818224,
+        "sigma2_ingest": 0.0030117506807803038,
+        "threshold": 0.004292364752459969,
+        "topological_passed": false,
+        "state": "incubating"
+      },
+      {
+        "key": "MATH_BEEZER_THM_NEM",
+        "sigma2": 0.002630314576169922,
+        "sigma2_ingest": 0.002630314282308441,
+        "threshold": 0.004292364752459969,
+        "topological_passed": false,
+        "state": "incubating"
+      },
+      {
+        "key": "MATH_BEEZER_THM_ME",
+        "sigma2": 0.0021998491499411322,
+        "sigma2_ingest": 0.0021998490812305932,
+        "threshold": 0.004292364752459969,
+        "topological_passed": false,
+        "state": "incubating"
+      },
+      {
+        "key": "MATH_BEEZER_THM_MNEM",
+        "sigma2": 0.004419613237426719,
+        "sigma2_ingest": 0.004419612955690891,
+        "threshold": 0.004292364752459969,
+        "topological_passed": true,
+        "state": "consolidated"
+      },
+      {
+        "key": "MATH_BEEZER_THM_HMRE",
+        "sigma2": 0.002381477944772212,
+        "sigma2_ingest": 0.0023814779030907926,
+        "threshold": 0.004292364752459969,
+        "topological_passed": false,
+        "state": "incubating"
+      },
+      {
+        "key": "MATH_BEEZER_THM_HMOE",
+        "sigma2": 0.0010829454931248767,
+        "sigma2_ingest": 0.001082945355667193,
+        "threshold": 0.004292364752459969,
+        "topological_passed": false,
+        "state": "incubating"
+      },
+      {
+        "key": "MATH_BEEZER_DEF_SIM",
+        "sigma2": 0.0045883888795869255,
+        "sigma2_ingest": 0.004588388920265055,
+        "threshold": 0.004292364752459969,
+        "topological_passed": true,
+        "state": "consolidated"
+      },
+      {
+        "key": "MATH_BEEZER_THM_SER",
+        "sigma2": 0.0022020457314150905,
+        "sigma2_ingest": 0.0022020456019949965,
+        "threshold": 0.004292364752459969,
+        "topological_passed": false,
+        "state": "incubating"
+      },
+      {
+        "key": "MATH_BEEZER_THM_SMEE",
+        "sigma2": 0.002022373162886946,
+        "sigma2_ingest": 0.0020223731135804437,
+        "threshold": 0.004292364752459969,
+        "topological_passed": false,
+        "state": "incubating"
+      },
+      {
+        "key": "MATH_BEEZER_DEF_DIM",
+        "sigma2": 0.00198907735513899,
+        "sigma2_ingest": 0.0019890772549812654,
+        "threshold": 0.004292364752459969,
+        "topological_passed": false,
+        "state": "incubating"
+      },
+      {
+        "key": "MATH_BEEZER_DEF_DZM",
+        "sigma2": 0.003265352241293722,
+        "sigma2_ingest": 0.003265352204801463,
+        "threshold": 0.004292364752459969,
+        "topological_passed": false,
+        "state": "incubating"
+      },
+      {
+        "key": "MATH_BEEZER_THM_DC",
+        "sigma2": 0.003395919013038341,
+        "sigma2_ingest": 0.003395918764561453,
+        "threshold": 0.004292364752459969,
+        "topological_passed": false,
+        "state": "incubating"
+      },
+      {
+        "key": "MATH_BEEZER_THM_DMFE",
+        "sigma2": 0.001874654258997278,
+        "sigma2_ingest": 0.0018746541720275536,
+        "threshold": 0.004292364752459969,
+        "topological_passed": false,
+        "state": "incubating"
+      },
+      {
+        "key": "MATH_BEEZER_THM_DED",
+        "sigma2": 0.004416803246216416,
+        "sigma2_ingest": 0.004416803378693815,
+        "threshold": 0.004292364752459969,
+        "topological_passed": true,
+        "state": "consolidated"
+      },
+      {
+        "key": "MATH_BEEZER_DEF_LT",
+        "sigma2": 0.0019509835028964683,
+        "sigma2_ingest": 0.0019509833686068177,
+        "threshold": 0.004292364752459969,
+        "topological_passed": false,
+        "state": "incubating"
+      },
+      {
+        "key": "MATH_BEEZER_THM_LTTZZ",
+        "sigma2": 0.003286884669582611,
+        "sigma2_ingest": 0.0032868844641334256,
+        "threshold": 0.004292364752459969,
+        "topological_passed": false,
+        "state": "incubating"
+      },
+      {
+        "key": "MATH_BEEZER_THM_MBLT",
+        "sigma2": 0.0011749829462992208,
+        "sigma2_ingest": 0.0011749829428062027,
+        "threshold": 0.004292364752459969,
+        "topological_passed": false,
+        "state": "incubating"
+      },
+      {
+        "key": "MATH_BEEZER_THM_MLTCV",
+        "sigma2": 0.0025766354186438473,
+        "sigma2_ingest": 0.0025766349317000166,
+        "threshold": 0.004292364752459969,
+        "topological_passed": false,
+        "state": "incubating"
+      },
+      {
+        "key": "MATH_BEEZER_THM_LTLC",
+        "sigma2": 0.0026027925904803313,
+        "sigma2_ingest": 0.0026027922264555137,
+        "threshold": 0.004292364752459969,
+        "topological_passed": false,
+        "state": "incubating"
+      },
+      {
+        "key": "MATH_BEEZER_THM_LTDB",
+        "sigma2": 0.002304287104909346,
+        "sigma2_ingest": 0.0023042870210637644,
+        "threshold": 0.004292364752459969,
+        "topological_passed": false,
+        "state": "incubating"
+      },
+      {
+        "key": "MATH_BEEZER_DEF_PI",
+        "sigma2": 0.0029927579432150104,
+        "sigma2_ingest": 0.002992757337381337,
+        "threshold": 0.004292364752459969,
+        "topological_passed": false,
+        "state": "incubating"
+      },
+      {
+        "key": "MATH_BEEZER_DEF_LTA",
+        "sigma2": 0.0024620887166028936,
+        "sigma2_ingest": 0.002462088467875366,
+        "threshold": 0.004292364752459969,
+        "topological_passed": false,
+        "state": "incubating"
+      },
+      {
+        "key": "MATH_BEEZER_THM_SLTLT",
+        "sigma2": 0.0025815706688350113,
+        "sigma2_ingest": 0.0025815706320135496,
+        "threshold": 0.004292364752459969,
+        "topological_passed": false,
+        "state": "incubating"
+      },
+      {
+        "key": "MATH_BEEZER_DEF_LTSM",
+        "sigma2": 0.0004943558927588841,
+        "sigma2_ingest": 0.0004943558909681821,
+        "threshold": 0.004292364752459969,
+        "topological_passed": false,
+        "state": "incubating"
+      },
+      {
+        "key": "MATH_BEEZER_THM_MLTLT",
+        "sigma2": 0.0015613837745075973,
+        "sigma2_ingest": 0.0015613837127142001,
+        "threshold": 0.004292364752459969,
+        "topological_passed": false,
+        "state": "incubating"
+      },
+      {
+        "key": "MATH_BEEZER_THM_VSLT",
+        "sigma2": 0.0008081803914412256,
+        "sigma2_ingest": 0.0008081803507004106,
+        "threshold": 0.004292364752459969,
+        "topological_passed": false,
+        "state": "incubating"
+      },
+      {
+        "key": "MATH_BEEZER_DEF_LTC",
+        "sigma2": 0.0014864958898061832,
+        "sigma2_ingest": 0.0014864957167167044,
+        "threshold": 0.004292364752459969,
+        "topological_passed": false,
+        "state": "incubating"
+      },
+      {
+        "key": "MATH_BEEZER_THM_CLTLT",
+        "sigma2": 0.0010897232704333468,
+        "sigma2_ingest": 0.001089723097656368,
+        "threshold": 0.004292364752459969,
+        "topological_passed": false,
+        "state": "incubating"
+      },
+      {
+        "key": "MATH_BEEZER_DEF_ILT",
+        "sigma2": 0.0020025825054746007,
+        "sigma2_ingest": 0.0020025824163318016,
+        "threshold": 0.004292364752459969,
+        "topological_passed": false,
+        "state": "incubating"
+      },
+      {
+        "key": "MATH_BEEZER_DEF_KLT",
+        "sigma2": 0.0009371648013432895,
+        "sigma2_ingest": 0.0009371648124941921,
+        "threshold": 0.004292364752459969,
+        "topological_passed": false,
+        "state": "incubating"
+      },
+      {
+        "key": "MATH_BEEZER_THM_KLTS",
+        "sigma2": 0.00034857313709709157,
+        "sigma2_ingest": 0.0003485730840905709,
+        "threshold": 0.004292364752459969,
+        "topological_passed": false,
+        "state": "incubating"
+      },
+      {
+        "key": "MATH_BEEZER_THM_KPI",
+        "sigma2": 0.002392540107186556,
+        "sigma2_ingest": 0.002392540180695821,
+        "threshold": 0.004292364752459969,
+        "topological_passed": false,
+        "state": "incubating"
+      },
+      {
+        "key": "MATH_BEEZER_THM_KILT",
+        "sigma2": 0.0022935895099556107,
+        "sigma2_ingest": 0.0022935895329539192,
+        "threshold": 0.004292364752459969,
+        "topological_passed": false,
+        "state": "incubating"
+      },
+      {
+        "key": "MATH_BEEZER_THM_ILTLI",
+        "sigma2": 0.0017852452188915086,
+        "sigma2_ingest": 0.0017852451140831173,
+        "threshold": 0.004292364752459969,
+        "topological_passed": false,
+        "state": "incubating"
+      },
+      {
+        "key": "MATH_BEEZER_THM_ILTB",
+        "sigma2": 0.00257439102072047,
+        "sigma2_ingest": 0.0025743909098857325,
+        "threshold": 0.004292364752459969,
+        "topological_passed": false,
+        "state": "incubating"
+      },
+      {
+        "key": "MATH_BEEZER_THM_ILTD",
+        "sigma2": 0.004369627515163845,
+        "sigma2_ingest": 0.0043696270760210576,
+        "threshold": 0.004292364752459969,
+        "topological_passed": true,
+        "state": "consolidated"
+      },
+      {
+        "key": "MATH_BEEZER_THM_CILTI",
+        "sigma2": 0.0012971659110204818,
+        "sigma2_ingest": 0.0012971659767132685,
+        "threshold": 0.004292364752459969,
+        "topological_passed": false,
+        "state": "incubating"
+      },
+      {
+        "key": "MATH_BEEZER_DEF_SLT",
+        "sigma2": 0.00424613223041771,
+        "sigma2_ingest": 0.0042461316584306835,
+        "threshold": 0.004292364752459969,
+        "topological_passed": false,
+        "state": "incubating"
+      },
+      {
+        "key": "MATH_BEEZER_DEF_RLT",
+        "sigma2": 0.0023947925533897253,
+        "sigma2_ingest": 0.0023947925882189065,
+        "threshold": 0.004292364752459969,
+        "topological_passed": false,
+        "state": "incubating"
+      },
+      {
+        "key": "MATH_BEEZER_THM_RLTS",
+        "sigma2": 0.002934508310547159,
+        "sigma2_ingest": 0.0029345082124541027,
+        "threshold": 0.004292364752459969,
+        "topological_passed": false,
+        "state": "incubating"
+      },
+      {
+        "key": "MATH_BEEZER_THM_RSLT",
+        "sigma2": 0.005344539987203402,
+        "sigma2_ingest": 0.005344540399502381,
+        "threshold": 0.004292364752459969,
+        "topological_passed": true,
+        "state": "consolidated"
+      },
+      {
+        "key": "MATH_BEEZER_THM_SSRLT",
+        "sigma2": 0.0010770531646285856,
+        "sigma2_ingest": 0.001077053143064866,
+        "threshold": 0.004292364752459969,
+        "topological_passed": false,
+        "state": "incubating"
+      },
+      {
+        "key": "MATH_BEEZER_THM_RPI",
+        "sigma2": 0.003211132223770154,
+        "sigma2_ingest": 0.0032111318131094473,
+        "threshold": 0.004292364752459969,
+        "topological_passed": false,
+        "state": "incubating"
+      },
+      {
+        "key": "MATH_BEEZER_THM_SLTB",
+        "sigma2": 0.003473235014765992,
+        "sigma2_ingest": 0.0034732345909565076,
+        "threshold": 0.004292364752459969,
+        "topological_passed": false,
+        "state": "incubating"
+      },
+      {
+        "key": "MATH_BEEZER_THM_SLTD",
+        "sigma2": 0.004662082421714185,
+        "sigma2_ingest": 0.004662082186672046,
+        "threshold": 0.004292364752459969,
+        "topological_passed": true,
+        "state": "consolidated"
+      },
+      {
+        "key": "MATH_BEEZER_THM_CSLTS",
+        "sigma2": 0.0024646960313392577,
+        "sigma2_ingest": 0.0024646957032193233,
+        "threshold": 0.004292364752459969,
+        "topological_passed": false,
+        "state": "incubating"
+      },
+      {
+        "key": "MATH_BEEZER_DEF_IDLT",
+        "sigma2": 0.0019102788657827728,
+        "sigma2_ingest": 0.001910278713202793,
+        "threshold": 0.004292364752459969,
+        "topological_passed": false,
+        "state": "incubating"
+      },
+      {
+        "key": "MATH_BEEZER_DEF_IVLT",
+        "sigma2": 0.003063650192339599,
+        "sigma2_ingest": 0.0030636501349821654,
+        "threshold": 0.004292364752459969,
+        "topological_passed": false,
+        "state": "incubating"
+      },
+      {
+        "key": "MATH_BEEZER_THM_ILTLT",
+        "sigma2": 0.0019597356291304094,
+        "sigma2_ingest": 0.0019597355415648205,
+        "threshold": 0.004292364752459969,
+        "topological_passed": false,
+        "state": "incubating"
+      },
+      {
+        "key": "MATH_BEEZER_THM_IILT",
+        "sigma2": 0.002436565488386536,
+        "sigma2_ingest": 0.0024365654602996763,
+        "threshold": 0.004292364752459969,
+        "topological_passed": false,
+        "state": "incubating"
+      },
+      {
+        "key": "MATH_BEEZER_THM_ILTIS",
+        "sigma2": 0.0049329407796937135,
+        "sigma2_ingest": 0.004932940452703853,
+        "threshold": 0.004292364752459969,
+        "topological_passed": true,
+        "state": "consolidated"
+      },
+      {
+        "key": "MATH_BEEZER_THM_CIVLT",
+        "sigma2": 0.0015377949626011838,
+        "sigma2_ingest": 0.001537794900510745,
+        "threshold": 0.004292364752459969,
+        "topological_passed": false,
+        "state": "incubating"
+      },
+      {
+        "key": "MATH_BEEZER_THM_ICLT",
+        "sigma2": 0.0019466181746506251,
+        "sigma2_ingest": 0.0019466181106038232,
+        "threshold": 0.004292364752459969,
+        "topological_passed": false,
+        "state": "incubating"
+      },
+      {
+        "key": "MATH_BEEZER_DEF_IVS",
+        "sigma2": 0.0021658181681618355,
+        "sigma2_ingest": 0.0021658181101688865,
+        "threshold": 0.004292364752459969,
+        "topological_passed": false,
+        "state": "incubating"
+      },
+      {
+        "key": "MATH_BEEZER_THM_IVSED",
+        "sigma2": 0.004688250065641314,
+        "sigma2_ingest": 0.004688250107365098,
+        "threshold": 0.004292364752459969,
+        "topological_passed": true,
+        "state": "consolidated"
+      },
+      {
+        "key": "MATH_BEEZER_DEF_ROLT",
+        "sigma2": 0.003938549262307796,
+        "sigma2_ingest": 0.003938549436128034,
+        "threshold": 0.004292364752459969,
+        "topological_passed": false,
+        "state": "incubating"
+      },
+      {
+        "key": "MATH_BEEZER_DEF_NOLT",
+        "sigma2": 0.00185598983888405,
+        "sigma2_ingest": 0.001855989803356365,
+        "threshold": 0.004292364752459969,
+        "topological_passed": false,
+        "state": "incubating"
+      },
+      {
+        "key": "MATH_BEEZER_THM_ROSLT",
+        "sigma2": 0.005463819264995808,
+        "sigma2_ingest": 0.005463818753527302,
+        "threshold": 0.004292364752459969,
+        "topological_passed": true,
+        "state": "consolidated"
+      },
+      {
+        "key": "MATH_BEEZER_THM_NOILT",
+        "sigma2": 0.00160041115449019,
+        "sigma2_ingest": 0.0016004109890278779,
+        "threshold": 0.004292364752459969,
+        "topological_passed": false,
+        "state": "incubating"
+      },
+      {
+        "key": "MATH_BEEZER_THM_RPNDD",
+        "sigma2": 0.0030660590049074584,
+        "sigma2_ingest": 0.0030660586933481037,
+        "threshold": 0.004292364752459969,
+        "topological_passed": false,
+        "state": "incubating"
+      },
+      {
+        "key": "MATH_BEEZER_DEF_VR",
+        "sigma2": 0.0012572340243304505,
+        "sigma2_ingest": 0.0012572339397586866,
+        "threshold": 0.004292364752459969,
+        "topological_passed": false,
+        "state": "incubating"
+      },
+      {
+        "key": "MATH_BEEZER_THM_VRLT",
+        "sigma2": 0.0010133646557086973,
+        "sigma2_ingest": 0.0010133646482018003,
+        "threshold": 0.004292364752459969,
+        "topological_passed": false,
+        "state": "incubating"
+      },
+      {
+        "key": "MATH_BEEZER_THM_VRI",
+        "sigma2": 0.0013051417490929644,
+        "sigma2_ingest": 0.001305141739263478,
+        "threshold": 0.004292364752459969,
+        "topological_passed": false,
+        "state": "incubating"
+      },
+      {
+        "key": "MATH_BEEZER_THM_VRS",
+        "sigma2": 0.0019048405350193974,
+        "sigma2_ingest": 0.0019048403511098453,
+        "threshold": 0.004292364752459969,
+        "topological_passed": false,
+        "state": "incubating"
+      },
+      {
+        "key": "MATH_BEEZER_THM_VRILT",
+        "sigma2": 0.0012955276985530952,
+        "sigma2_ingest": 0.0012955277621237967,
+        "threshold": 0.004292364752459969,
+        "topological_passed": false,
+        "state": "incubating"
+      },
+      {
+        "key": "MATH_BEEZER_THM_CFDVS",
+        "sigma2": 0.004264278485093022,
+        "sigma2_ingest": 0.004264278573363595,
+        "threshold": 0.004292364752459969,
+        "topological_passed": false,
+        "state": "incubating"
+      },
+      {
+        "key": "MATH_BEEZER_THM_IFDVS",
+        "sigma2": 0.003269598996768114,
+        "sigma2_ingest": 0.0032695991536230975,
+        "threshold": 0.004292364752459969,
+        "topological_passed": false,
+        "state": "incubating"
+      },
+      {
+        "key": "MATH_BEEZER_THM_CLI",
+        "sigma2": 0.0025967470865082723,
+        "sigma2_ingest": 0.0025967467282572453,
+        "threshold": 0.004292364752459969,
+        "topological_passed": false,
+        "state": "incubating"
+      },
+      {
+        "key": "MATH_BEEZER_THM_CSS",
+        "sigma2": 0.0017023394736315142,
+        "sigma2_ingest": 0.0017023393339762397,
+        "threshold": 0.004292364752459969,
+        "topological_passed": false,
+        "state": "incubating"
+      },
+      {
+        "key": "MATH_BEEZER_DEF_MR",
+        "sigma2": 0.0006428329940445726,
+        "sigma2_ingest": 0.0006428329616622335,
+        "threshold": 0.004292364752459969,
+        "topological_passed": false,
+        "state": "incubating"
+      },
+      {
+        "key": "MATH_BEEZER_THM_FTMR",
+        "sigma2": 0.00022816434005081595,
+        "sigma2_ingest": 0.00022816431750514202,
+        "threshold": 0.004292364752459969,
+        "topological_passed": false,
+        "state": "incubating"
+      },
+      {
+        "key": "MATH_BEEZER_THM_MRSLT",
+        "sigma2": 0.001290080976889675,
+        "sigma2_ingest": 0.0012900811171176181,
+        "threshold": 0.004292364752459969,
+        "topological_passed": false,
+        "state": "incubating"
+      },
+      {
+        "key": "MATH_BEEZER_THM_MRMLT",
+        "sigma2": 0.0010570393209423136,
+        "sigma2_ingest": 0.0010570391894131127,
+        "threshold": 0.004292364752459969,
+        "topological_passed": false,
+        "state": "incubating"
+      },
+      {
+        "key": "MATH_BEEZER_THM_MRCLT",
+        "sigma2": 0.0009315813370844886,
+        "sigma2_ingest": 0.0009315812860183352,
+        "threshold": 0.004292364752459969,
+        "topological_passed": false,
+        "state": "incubating"
+      },
+      {
+        "key": "MATH_BEEZER_THM_KNSI",
+        "sigma2": 0.0007450461044072996,
+        "sigma2_ingest": 0.0007450460375918935,
+        "threshold": 0.004292364752459969,
+        "topological_passed": false,
+        "state": "incubating"
+      },
+      {
+        "key": "MATH_BEEZER_THM_RCSI",
+        "sigma2": 0.001927884271770702,
+        "sigma2_ingest": 0.001927883967924374,
+        "threshold": 0.004292364752459969,
+        "topological_passed": false,
+        "state": "incubating"
+      },
+      {
+        "key": "MATH_BEEZER_THM_IMR",
+        "sigma2": 0.003049328921575842,
+        "sigma2_ingest": 0.003049328530185417,
+        "threshold": 0.004292364752459969,
+        "topological_passed": false,
+        "state": "incubating"
+      },
+      {
+        "key": "MATH_BEEZER_THM_IMILT",
+        "sigma2": 0.005292450039345509,
+        "sigma2_ingest": 0.0052924501758144955,
+        "threshold": 0.004292364752459969,
+        "topological_passed": true,
+        "state": "consolidated"
+      },
+      {
+        "key": "MATH_BEEZER_THM_NME9",
+        "sigma2": 0.001504796903924361,
+        "sigma2_ingest": 0.0015047969927062675,
+        "threshold": 0.004292364752459969,
+        "topological_passed": false,
+        "state": "incubating"
+      },
+      {
+        "key": "MATH_BEEZER_DEF_EELT",
+        "sigma2": 0.004015529094644518,
+        "sigma2_ingest": 0.004015528801439094,
+        "threshold": 0.004292364752459969,
+        "topological_passed": false,
+        "state": "incubating"
+      },
+      {
+        "key": "MATH_BEEZER_DEF_CBM",
+        "sigma2": 0.0009888288316165913,
+        "sigma2_ingest": 0.0009888289694716583,
+        "threshold": 0.004292364752459969,
+        "topological_passed": false,
+        "state": "incubating"
+      },
+      {
+        "key": "MATH_BEEZER_THM_CB",
+        "sigma2": 0.0012280411413077654,
+        "sigma2_ingest": 0.0012280411559216105,
+        "threshold": 0.004292364752459969,
+        "topological_passed": false,
+        "state": "incubating"
+      },
+      {
+        "key": "MATH_BEEZER_THM_ICBM",
+        "sigma2": 0.0021039326596956997,
+        "sigma2_ingest": 0.002103932503270689,
+        "threshold": 0.004292364752459969,
+        "topological_passed": false,
+        "state": "incubating"
+      },
+      {
+        "key": "MATH_BEEZER_THM_MRCB",
+        "sigma2": 0.0017443292187967524,
+        "sigma2_ingest": 0.0017443292985808454,
+        "threshold": 0.004292364752459969,
+        "topological_passed": false,
+        "state": "incubating"
+      },
+      {
+        "key": "MATH_BEEZER_THM_SCB",
+        "sigma2": 0.0014700279941641246,
+        "sigma2_ingest": 0.0014700281032782104,
+        "threshold": 0.004292364752459969,
+        "topological_passed": false,
+        "state": "incubating"
+      },
+      {
+        "key": "MATH_BEEZER_THM_EER",
+        "sigma2": 0.0019468615867335383,
+        "sigma2_ingest": 0.0019468615103284783,
+        "threshold": 0.004292364752459969,
+        "topological_passed": false,
+        "state": "incubating"
+      },
+      {
+        "key": "MATH_BEEZER_DEF_UTM",
+        "sigma2": 0.0017337088585993633,
+        "sigma2_ingest": 0.0017337088627868997,
+        "threshold": 0.004292364752459969,
+        "topological_passed": false,
+        "state": "incubating"
+      },
+      {
+        "key": "MATH_BEEZER_DEF_LTM",
+        "sigma2": 0.00413053910406517,
+        "sigma2_ingest": 0.004130538836433939,
+        "threshold": 0.004292364752459969,
+        "topological_passed": false,
+        "state": "incubating"
+      },
+      {
+        "key": "MATH_BEEZER_THM_PTMT",
+        "sigma2": 0.003530143658200416,
+        "sigma2_ingest": 0.003530143318693278,
+        "threshold": 0.004292364752459969,
+        "topological_passed": false,
+        "state": "incubating"
+      },
+      {
+        "key": "MATH_BEEZER_THM_ITMT",
+        "sigma2": 0.0010026991719081038,
+        "sigma2_ingest": 0.0010026990970275762,
+        "threshold": 0.004292364752459969,
+        "topological_passed": false,
+        "state": "incubating"
+      },
+      {
+        "key": "MATH_BEEZER_THM_UTMR",
+        "sigma2": 0.001625948294672578,
+        "sigma2_ingest": 0.0016259483211837028,
+        "threshold": 0.004292364752459969,
+        "topological_passed": false,
+        "state": "incubating"
+      },
+      {
+        "key": "MATH_BEEZER_THM_OBUTR",
+        "sigma2": 0.0014139946716723263,
+        "sigma2_ingest": 0.0014139944612568654,
+        "threshold": 0.004292364752459969,
+        "topological_passed": false,
+        "state": "incubating"
+      },
+      {
+        "key": "MATH_BEEZER_DEF_NRML",
+        "sigma2": 0.0017087466657004057,
+        "sigma2_ingest": 0.0017087466399583655,
+        "threshold": 0.004292364752459969,
+        "topological_passed": false,
+        "state": "incubating"
+      },
+      {
+        "key": "MATH_BEEZER_THM_OD",
+        "sigma2": 0.0013101408938398938,
+        "sigma2_ingest": 0.0013101408393000997,
+        "threshold": 0.004292364752459969,
+        "topological_passed": false,
+        "state": "incubating"
+      },
+      {
+        "key": "MATH_BEEZER_THM_OBNM",
+        "sigma2": 0.0010731911434423112,
+        "sigma2_ingest": 0.0010731910720315622,
+        "threshold": 0.004292364752459969,
+        "topological_passed": false,
+        "state": "incubating"
+      },
+      {
+        "key": "MATH_BEEZER_DEF_CNE",
+        "sigma2": 0.0018087759314645948,
+        "sigma2_ingest": 0.0018087760062202092,
+        "threshold": 0.004292364752459969,
+        "topological_passed": false,
+        "state": "incubating"
+      },
+      {
+        "key": "MATH_BEEZER_DEF_CNA",
+        "sigma2": 0.0017125676858560494,
+        "sigma2_ingest": 0.0017125676376533213,
+        "threshold": 0.004292364752459969,
+        "topological_passed": false,
+        "state": "incubating"
+      },
+      {
+        "key": "MATH_BEEZER_DEF_CNM",
+        "sigma2": 0.00043987657615849235,
+        "sigma2_ingest": 0.00043987654395866464,
+        "threshold": 0.004292364752459969,
+        "topological_passed": false,
+        "state": "incubating"
+      },
+      {
+        "key": "MATH_BEEZER_THM_PCNA",
+        "sigma2": 0.003097595091547272,
+        "sigma2_ingest": 0.0030975947682914764,
+        "threshold": 0.004292364752459969,
+        "topological_passed": false,
+        "state": "incubating"
+      },
+      {
+        "key": "MATH_BEEZER_THM_ZPCN",
+        "sigma2": 0.0014956254138690642,
+        "sigma2_ingest": 0.0014956253853312547,
+        "threshold": 0.004292364752459969,
+        "topological_passed": false,
+        "state": "incubating"
+      },
+      {
+        "key": "MATH_BEEZER_THM_ZPZT",
+        "sigma2": 0.0014850259199283644,
+        "sigma2_ingest": 0.001485025789057457,
+        "threshold": 0.004292364752459969,
+        "topological_passed": false,
+        "state": "incubating"
+      },
+      {
+        "key": "MATH_BEEZER_DEF_CCN",
+        "sigma2": 0.0015857815752704685,
+        "sigma2_ingest": 0.0015857815125385354,
+        "threshold": 0.004292364752459969,
+        "topological_passed": false,
+        "state": "incubating"
+      },
+      {
+        "key": "MATH_BEEZER_THM_CCRA",
+        "sigma2": 0.0027226006486958465,
+        "sigma2_ingest": 0.002722600296160402,
+        "threshold": 0.004292364752459969,
+        "topological_passed": false,
+        "state": "incubating"
+      },
+      {
+        "key": "MATH_BEEZER_THM_CCRM",
+        "sigma2": 0.002637644372156438,
+        "sigma2_ingest": 0.002637644085100593,
+        "threshold": 0.004292364752459969,
+        "topological_passed": false,
+        "state": "incubating"
+      },
+      {
+        "key": "MATH_BEEZER_THM_CCT",
+        "sigma2": 0.0013607449909298105,
+        "sigma2_ingest": 0.001360744964327541,
+        "threshold": 0.004292364752459969,
+        "topological_passed": false,
+        "state": "incubating"
+      },
+      {
+        "key": "MATH_BEEZER_DEF_MCN",
+        "sigma2": 0.002970577351693002,
+        "sigma2_ingest": 0.0029705772868956607,
+        "threshold": 0.004292364752459969,
+        "topological_passed": false,
+        "state": "incubating"
+      },
+      {
+        "key": "MATH_BEEZER_DEF_SET",
+        "sigma2": 0.003857190679463256,
+        "sigma2_ingest": 0.00385719022448184,
+        "threshold": 0.004292364752459969,
+        "topological_passed": false,
+        "state": "incubating"
+      },
+      {
+        "key": "MATH_BEEZER_DEF_SSET",
+        "sigma2": 0.0014691921775805688,
+        "sigma2_ingest": 0.0014691921529890973,
+        "threshold": 0.004292364752459969,
+        "topological_passed": false,
+        "state": "incubating"
+      },
+      {
+        "key": "MATH_BEEZER_DEF_ES",
+        "sigma2": 0.005741174167784503,
+        "sigma2_ingest": 0.005741173520030384,
+        "threshold": 0.004292364752459969,
+        "topological_passed": true,
+        "state": "consolidated"
+      },
+      {
+        "key": "MATH_BEEZER_DEF_SE",
+        "sigma2": 0.0017200487990233714,
+        "sigma2_ingest": 0.0017200490004697904,
+        "threshold": 0.004292364752459969,
+        "topological_passed": false,
+        "state": "incubating"
+      },
+      {
+        "key": "MATH_BEEZER_DEF_C",
+        "sigma2": 0.0021418789386064107,
+        "sigma2_ingest": 0.0021418787407472845,
+        "threshold": 0.004292364752459969,
+        "topological_passed": false,
+        "state": "incubating"
+      },
+      {
+        "key": "MATH_BEEZER_DEF_SU",
+        "sigma2": 0.0032293172836496123,
+        "sigma2_ingest": 0.003229317210926245,
+        "threshold": 0.004292364752459969,
+        "topological_passed": false,
+        "state": "incubating"
+      },
+      {
+        "key": "MATH_BEEZER_DEF_SI",
+        "sigma2": 0.0025976272868813263,
+        "sigma2_ingest": 0.002597627053503787,
+        "threshold": 0.004292364752459969,
+        "topological_passed": false,
+        "state": "incubating"
+      },
+      {
+        "key": "MATH_BEEZER_DEF_SC",
+        "sigma2": 0.0049230992011576645,
+        "sigma2_ingest": 0.004923099128890228,
+        "threshold": 0.004292364752459969,
+        "topological_passed": true,
+        "state": "consolidated"
+      }
+    ],
+    "vector_differences": {
+      "ingested": {
+        "of": 342,
+        "byte_identical": 249,
+        "max_abs_difference": 5.551115123125783e-17
+      },
+      "consolidated": {
+        "of": 342,
+        "byte_identical": 0,
+        "max_abs_difference": 1.9273701912236874e-08
+      }
+    },
+    "p1_rule": {
+      "k5": {
+        "H_gate": 1,
+        "H_bm25": 1,
+        "chance": {
+          "num": 5,
+          "den": 26,
+          "float": 0.19230769230769232,
+          "below_alpha": false
+        },
+        "mcnemar": {
+          "b": 1,
+          "c": 1,
+          "n": 2,
+          "num": 3,
+          "den": 4,
+          "float": 0.75,
+          "below_alpha": false
+        }
+      },
+      "k1": {
+        "H_gate": 1,
+        "H_bm25": 1,
+        "chance": {
+          "num": 1,
+          "den": 26,
+          "float": 0.038461538461538464,
+          "below_alpha": true
+        },
+        "mcnemar": {
+          "b": 1,
+          "c": 1,
+          "n": 2,
+          "num": 3,
+          "den": 4,
+          "float": 0.75,
+          "below_alpha": false
+        }
+      },
+      "holds": false
+    },
+    "mcnemar_gate_vs_p1": {
+      "k5": {
+        "b": 1,
+        "c": 4,
+        "n": 5,
+        "num": 31,
+        "den": 32,
+        "float": 0.96875
+      },
+      "k1": {
+        "b": 1,
+        "c": 2,
+        "n": 3,
+        "num": 7,
+        "den": 8,
+        "float": 0.875
+      }
+    },
+    "rank_metrics": {
+      "gate": {
+        "mrr": 0.05830903790087463,
+        "recall_10": 0.05555555555555555,
+        "recall_20": 0.05555555555555555,
+        "median_position": 343.0
+      },
+      "p1": {
+        "mrr": 0.19225318224409513,
+        "recall_10": 0.3333333333333333,
+        "recall_20": 0.5,
+        "median_position": 19.0
+      },
+      "bm25": {
+        "mrr": 0.07768577703384369,
+        "recall_10": 0.05555555555555555,
+        "recall_20": 0.16666666666666666,
+        "median_position": 52.0
+      }
+    },
+    "nearest_candidate_distance": {
+      "p": [
+        1.3302199519804834,
+        1.2306631428707457,
+        1.1975497000791362,
+        1.3024134814347128,
+        1.1888224251070436,
+        1.109460428571478,
+        1.1508344523528091,
+        1.1475770488421697,
+        1.2748837354394684,
+        1.2992429973101984,
+        1.2029540197426871,
+        1.3578101826112303,
+        1.1480128993223313,
+        1.270717272269079,
+        1.0483519521181233,
+        1.11227144818638,
+        1.2581650748805437,
+        1.2299831462581707
+      ],
+      "n0": [
+        1.3114620647383617,
+        1.2583567624076877,
+        1.2700762810409096,
+        1.353203922736086,
+        1.3846992905362936,
+        1.2024531644295107,
+        1.1085589281681665,
+        1.2766530205925952,
+        1.121230982581613,
+        1.2312727250567017
+      ]
+    },
+    "auc": {
+      "num": 28,
+      "den": 45,
+      "float": 0.6222222222222222
+    },
+    "split": {
+      "source": "taken from P1's post-result reading (docs/roadmap/NEXT_RESEARCH.md), which came after P1's result; report-only",
+      "emptied": {
+        "ids": [
+          1,
+          2,
+          6,
+          7,
+          13,
+          15,
+          18,
+          23,
+          24,
+          25,
+          28
+        ],
+        "arms": {
+          "p1": {
+            "hits_k5": 2,
+            "hits_k1": 1,
+            "median_position": 47,
+            "mrr": 0.16024522726152102
+          },
+          "gate": {
+            "hits_k5": 0,
+            "hits_k1": 0,
+            "median_position": 343,
+            "mrr": 0.0029154518950437317
+          },
+          "bm25": {
+            "hits_k5": 0,
+            "hits_k1": 0,
+            "median_position": 111,
+            "mrr": 0.011839525545452794
+          }
+        }
+      },
+      "kept": {
+        "ids": [
+          11,
+          12,
+          14,
+          16,
+          17,
+          21,
+          27
+        ],
+        "arms": {
+          "p1": {
+            "hits_k5": 2,
+            "hits_k1": 1,
+            "median_position": 6,
+            "mrr": 0.24255139721671162
+          },
+          "gate": {
+            "hits_k5": 1,
+            "hits_k1": 1,
+            "median_position": 343,
+            "mrr": 0.1453561016243232
+          },
+          "bm25": {
+            "hits_k5": 1,
+            "hits_k1": 1,
+            "median_position": 21,
+            "mrr": 0.18115845794417224
+          }
+        }
+      }
+    },
+    "items": [
+      {
+        "id": 1,
+        "p1_position": 47,
+        "gate_position": 343,
+        "gate_top5": [
+          "MATH_BEEZER_THM_RPNC",
+          "MATH_BEEZER_THM_RSLT",
+          "MATH_BEEZER_DEF_SQM",
+          "MATH_BEEZER_THM_RNNM",
+          "MATH_BEEZER_THM_ROSLT"
+        ],
+        "surviving_expected": [],
+        "bm25_position": 147
+      },
+      {
+        "id": 2,
+        "p1_position": 2,
+        "gate_position": 343,
+        "gate_top5": [
+          "MATH_BEEZER_THM_RPNC",
+          "MATH_BEEZER_THM_ROSLT",
+          "MATH_BEEZER_THM_NMRRI",
+          "MATH_BEEZER_THM_MISM",
+          "MATH_BEEZER_THM_RNNM"
+        ],
+        "surviving_expected": [],
+        "bm25_position": 232
+      },
+      {
+        "id": 6,
+        "p1_position": 15,
+        "gate_position": 343,
+        "gate_top5": [
+          "MATH_BEEZER_DEF_SQM",
+          "MATH_BEEZER_DEF_SIM",
+          "MATH_BEEZER_DEF_D",
+          "MATH_BEEZER_THM_IMILT",
+          "MATH_BEEZER_THM_RSLT"
+        ],
+        "surviving_expected": [],
+        "bm25_position": 155
+      },
+      {
+        "id": 7,
+        "p1_position": 16,
+        "gate_position": 343,
+        "gate_top5": [
+          "MATH_BEEZER_THM_MVSLD",
+          "MATH_BEEZER_THM_RPNC",
+          "MATH_BEEZER_THM_ROSLT",
+          "MATH_BEEZER_THM_RSLT",
+          "MATH_BEEZER_THM_RNNM"
+        ],
+        "surviving_expected": [],
+        "bm25_position": 136
+      },
+      {
+        "id": 11,
+        "p1_position": 26,
+        "gate_position": 343,
+        "gate_top5": [
+          "MATH_BEEZER_THM_RPNC",
+          "MATH_BEEZER_THM_ROSLT",
+          "MATH_BEEZER_THM_RNNM",
+          "MATH_BEEZER_THM_SLTD",
+          "MATH_BEEZER_THM_MVSLD"
+        ],
+        "surviving_expected": [],
+        "bm25_position": 21
+      },
+      {
+        "id": 12,
+        "p1_position": 4,
+        "gate_position": 343,
+        "gate_top5": [
+          "MATH_BEEZER_THM_RPNC",
+          "MATH_BEEZER_THM_RNNM",
+          "MATH_BEEZER_THM_ROSLT",
+          "MATH_BEEZER_THM_SLTD",
+          "MATH_BEEZER_THM_MVSLD"
+        ],
+        "surviving_expected": [],
+        "bm25_position": 27
+      },
+      {
+        "id": 13,
+        "p1_position": 52,
+        "gate_position": 343,
+        "gate_top5": [
+          "MATH_BEEZER_DEF_ES",
+          "MATH_BEEZER_THM_SS",
+          "MATH_BEEZER_THM_RNNM",
+          "MATH_BEEZER_DEF_D",
+          "MATH_BEEZER_THM_RPNC"
+        ],
+        "surviving_expected": [],
+        "bm25_position": 54
+      },
+      {
+        "id": 14,
+        "p1_position": 1,
+        "gate_position": 343,
+        "gate_top5": [
+          "MATH_BEEZER_DEF_SIM",
+          "MATH_BEEZER_THM_NI",
+          "MATH_BEEZER_DEF_SQM",
+          "MATH_BEEZER_THM_NMLIC",
+          "MATH_BEEZER_THM_RNNM"
+        ],
+        "surviving_expected": [],
+        "bm25_position": 1
+      },
+      {
+        "id": 15,
+        "p1_position": 69,
+        "gate_position": 343,
+        "gate_top5": [
+          "MATH_BEEZER_THM_MVSLD",
+          "MATH_BEEZER_DEF_SQM",
+          "MATH_BEEZER_DEF_D",
+          "MATH_BEEZER_THM_ROSLT",
+          "MATH_BEEZER_THM_MNEM"
+        ],
+        "surviving_expected": [],
+        "bm25_position": 214
+      },
+      {
+        "id": 16,
+        "p1_position": 58,
+        "gate_position": 343,
+        "gate_top5": [
+          "MATH_BEEZER_THM_RSLT",
+          "MATH_BEEZER_THM_ROSLT",
+          "MATH_BEEZER_THM_OSIS",
+          "MATH_BEEZER_THM_RNNM",
+          "MATH_BEEZER_THM_RPNC"
+        ],
+        "surviving_expected": [],
+        "bm25_position": 27
+      },
+      {
+        "id": 17,
+        "p1_position": 17,
+        "gate_position": 343,
+        "gate_top5": [
+          "MATH_BEEZER_THM_MVSLD",
+          "MATH_BEEZER_THM_MISM",
+          "MATH_BEEZER_THM_ILTD",
+          "MATH_BEEZER_THM_OSIS",
+          "MATH_BEEZER_THM_RSLT"
+        ],
+        "surviving_expected": [],
+        "bm25_position": 143
+      },
+      {
+        "id": 18,
+        "p1_position": 215,
+        "gate_position": 343,
+        "gate_top5": [
+          "MATH_BEEZER_THM_NMRRI",
+          "MATH_BEEZER_DEF_SIM",
+          "MATH_BEEZER_THM_MISM",
+          "MATH_BEEZER_THM_IMILT",
+          "MATH_BEEZER_THM_SLTD"
+        ],
+        "surviving_expected": [],
+        "bm25_position": 50
+      },
+      {
+        "id": 21,
+        "p1_position": 6,
+        "gate_position": 1,
+        "gate_top5": [
+          "MATH_BEEZER_DEF_D",
+          "MATH_BEEZER_THM_ROSLT",
+          "MATH_BEEZER_DEF_SQM",
+          "MATH_BEEZER_THM_MVSLD",
+          "MATH_BEEZER_THM_SLTD"
+        ],
+        "surviving_expected": [
+          "D"
+        ],
+        "bm25_position": 13
+      },
+      {
+        "id": 23,
+        "p1_position": 56,
+        "gate_position": 343,
+        "gate_top5": [
+          "MATH_BEEZER_THM_MVSLD",
+          "MATH_BEEZER_THM_MNEM",
+          "MATH_BEEZER_DEF_SQM",
+          "MATH_BEEZER_THM_DRMM",
+          "MATH_BEEZER_THM_RSLT"
+        ],
+        "surviving_expected": [],
+        "bm25_position": 111
+      },
+      {
+        "id": 24,
+        "p1_position": 21,
+        "gate_position": 343,
+        "gate_top5": [
+          "MATH_BEEZER_DEF_SIM",
+          "MATH_BEEZER_THM_MVSLD",
+          "MATH_BEEZER_THM_NMRRI",
+          "MATH_BEEZER_THM_BIS",
+          "MATH_BEEZER_THM_IVSED"
+        ],
+        "surviving_expected": [],
+        "bm25_position": 46
+      },
+      {
+        "id": 25,
+        "p1_position": 119,
+        "gate_position": 343,
+        "gate_top5": [
+          "MATH_BEEZER_THM_MNEM",
+          "MATH_BEEZER_DEF_SIM",
+          "MATH_BEEZER_THM_DRMM",
+          "MATH_BEEZER_THM_DED",
+          "MATH_BEEZER_THM_OSIS"
+        ],
+        "surviving_expected": [],
+        "bm25_position": 99
+      },
+      {
+        "id": 27,
+        "p1_position": 6,
+        "gate_position": 343,
+        "gate_top5": [
+          "MATH_BEEZER_THM_MVSLD",
+          "MATH_BEEZER_THM_RPNC",
+          "MATH_BEEZER_DEF_SIM",
+          "MATH_BEEZER_THM_IVSED",
+          "MATH_BEEZER_THM_MISM"
+        ],
+        "surviving_expected": [],
+        "bm25_position": 16
+      },
+      {
+        "id": 28,
+        "p1_position": 1,
+        "gate_position": 343,
+        "gate_top5": [
+          "MATH_BEEZER_THM_MVSLD",
+          "MATH_BEEZER_DEF_SIM",
+          "MATH_BEEZER_THM_RSLT",
+          "MATH_BEEZER_THM_IVSED",
+          "MATH_BEEZER_THM_BIS"
+        ],
+        "surviving_expected": [],
+        "bm25_position": 47
+      }
+    ]
+  }
+}

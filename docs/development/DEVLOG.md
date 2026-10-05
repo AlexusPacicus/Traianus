@@ -2439,3 +2439,43 @@ lectura (`9b40618`). Está en local, sin subir.
 1. Subir la rama, fusionarla en `main` y comprobar CI.
 2. Diseño del piloto 2: más ítems, división desarrollo/prueba y si entra
    el glosario.
+
+**Por la tarde: la puerta del motor sobre P1 (seq 102–103)**
+
+**Contexto:** hasta hoy, los pilotos no pasaban por el estado de
+Traianus: solo usaban el encoder y ε, y ordenaban en el script.
+
+**Se hizo:**
+- **Protocolo congelado antes de calcular ningún σ²** (`0abb0c4`). Los
+  mismos 28 ítems, el mismo corpus y MiniLM; los candidatos, los que
+  consolida la puerta.
+  - Clave ética por fuente: apruebo Beezer entero, no fragmento a
+    fragmento, porque conozco los esperados.
+  - Decide el Wilcoxon contra P1 y además un control de subconjuntos al
+    azar del mismo tamaño.
+- **Corrección antes de cualquier dato** (`c848364`): `/consolidar`
+  normaliza en float32, así que la identidad byte a byte de los vectores
+  pasa a ser solo informe. Issue #92.
+- **Script y 87 tests** por el engine-implementer (`15f1135`). Revisado
+  el diff; la suite, en verde (3784 pasan).
+- **Ejecución:** válida y determinista (`4d988f6`). No pasa.
+  - La puerta consolida 26 de 342. Sobrevive 1 esperado de 15.
+  - Wilcoxon p ≈ 1; contra el azar, p ≈ 0,66.
+- **Lectura acordada (seq 103):**
+  - σ² mide la carga sobre los primos NSM, no la relevancia.
+  - La puerta gobierna la consolidación; no sirve para ordenar.
+  - θ_dyn es muy alto para este corpus (L4).
+
+**Resultado:** `feat/p1-engine-gate` con protocolo, script, resultado y
+lectura.
+
+**Sin resolver / decisión pendiente:**
+- Issue #92: una sola precisión de normalización en todos los caminos
+  de escritura del motor.
+- El papel del motor en el producto, si no es filtrar candidatos.
+- Sigue abierto el diseño del piloto 2 (más ítems, división
+  desarrollo/prueba, glosario).
+
+**Próximo paso:**
+1. Fusionar `feat/p1-engine-gate` en `main` y comprobar CI.
+2. Diseño del piloto 2.

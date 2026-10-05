@@ -299,6 +299,73 @@ Los dos ceros son los ítems 14 y 28 (puesto 1 en los dos modelos). Frente a las
 
 **Decisión del autor (2026-10-05):** la reescritura de la consulta con un LLM, si llega, es lo último que se prueba: mete generación en la entrada y no dejaría ver si funciona el motor. **Candidato para el piloto 2, sin decidir:** un glosario del autor, fijado y congelado antes de ejecutar, que traduzca sus términos a los habituales y se aplique por regla a la consulta. En estos 28 ítems sería exploración (ya se sabe qué ítems fallan); confirmaría solo en ítems nuevos. Siguen haciendo falta más ítems y la división desarrollo/prueba.
 
+### La puerta del motor sobre P1 (autor, 2026-10-05; exploración, comprometida antes de calcular ningún σ²)
+
+P1 y la línea base de Qwen3 no pasaron por el estado de Traianus: solo usaron el encoder y ε, y ordenaron en el script. Esta es la primera medida del producto a través del motor. Se cambia una sola cosa respecto a P1: los candidatos son los que deja pasar la puerta C1. Los 28 ítems ya están vistos, así que es exploración: no confirma nada.
+
+* **Pregunta.** ¿Restringir los candidatos a los fragmentos que la puerta consolida mejora el puesto del enunciado esperado, más que restringirlos al azar al mismo tamaño?
+* **Lo que mide la puerta (código, no hipótesis).** σ² de un fragmento es la varianza de sus 8 proyecciones sobre B_0 (`traianus/governance/gate.py`). θ_dyn es la media de las varianzas de las proyecciones cruzadas entre los ejes de B_0 (`traianus/geometry/observables.py`), un número fijo de la base que no depende del corpus.
+* **Vía.**
+  * Base nueva con `traianus-bootstrap` (B_0 `PROSTHETIC_NSM_V1`).
+  * Los 342 fragmentos entran por `/ingesta/vector`, en el proceso y sin servidor, con el vector MiniLM de P1 y su `acro` como etiqueta. Esta vía siempre deja `incubating`, porque evalúa la puerta con la clave ética en falso.
+  * Después, cada fragmento pasa por `/nodos/{id}/consolidar` con su texto y la clave ética en verdadero.
+* **Clave ética (autor): aprobación por fuente.** El autor aprueba Beezer entero como fuente, no fragmento a fragmento, porque conoce los enunciados esperados y aprobar uno a uno filtraría la respuesta. Por tanto, consolidado ⟺ σ² ≥ θ_dyn. Se declara que esta aprobación no es un HITL por fragmento.
+* **Consulta.** Se codifica como en P1 y no se escribe en la base. El ranking es el de P1 (producto escalar, mismas claves de desempate), solo sobre los nodos cuya última revisión es `consolidated`, leídos en solo lectura. El endpoint de observación queda fuera: sería una segunda variable.
+* **Puesto (autor).** Es el del mejor enunciado esperado que sobrevive, entre los candidatos. Si no sobrevive ninguno, el puesto es 343: fallo, y el peor puesto posible sobre el corpus entero.
+* **BM25 (autor):** sobre el corpus entero, como en P1.
+* **Validez.** Si falla cualquiera de estas comprobaciones, `valid = false` y no hay decisión:
+  * El ranking sobre los vectores de la última revisión de los 342 nodos del motor, sin filtro, reproduce el puesto guardado en `P1_result.json` en los 28 ítems.
+  * BM25 recalculado es igual al guardado, como en la línea base de Qwen3.
+  * Las filas de `manifold_nodes` son idénticas antes y después de las consultas (R2).
+* **Corrección antes de cualquier dato (2026-10-05).** La versión congelada en `0abb0c4` exigía además que los vectores de las dos revisiones de cada nodo fueran idénticos byte a byte al enviado. Eso no puede cumplirse: `/nodos/{id}/consolidar` vuelve a codificar el texto y normaliza en float32 antes de pasarlo a float64, mientras que P1 normaliza en float64. Pasa a solo informe: por revisión, la diferencia máxima con el vector enviado y cuántos son idénticos. La comprobación de puestos sin filtro sigue decidiendo la validez. El motor no se toca: cambiarlo sería una segunda variable.
+* **No aplica.** Si la puerta deja pasar 0 o los 342 fragmentos, no hay nada que comparar: el resultado es «no aplica» y no se decide nada.
+* **Lo que decide (autor, regla (b)).** La puerta mejora la recuperación solo si se cumplen las dos condiciones:
+  1. **Wilcoxon contra P1.** Test de rangos con signo, exacto y de una cola, como en la línea base de Qwen3. Pares: los 18 ítems de P. Diferencia: d = puesto P1 − puesto con puerta. Los ceros se descartan y los empates llevan rangos medios. Pasa si p < 0,05. El brazo P1 se lee de `P1_result.json`, verificado por su sha256.
+  2. **Control de subconjuntos al azar.** Se sortean 10 000 subconjuntos uniformes de los 342 fragmentos, del mismo tamaño que el que deja pasar la puerta, con semilla 20261005. Cada sorteo se puntúa con las mismas reglas (puesto, 343, Wilcoxon contra P1). El estadístico es el p exacto del Wilcoxon, porque W+ no es comparable cuando cambia el número de ceros. p_azar = (1 + #{p_sorteo ≤ p_puerta}) / 10 001, y la condición pasa si p_azar < 0,05.
+  * No hay corrección por multiplicidad, y se declara.
+* **Por qué hace falta el control.** Quitar candidatos solo puede mejorar el puesto de un esperado que sobrevive. Sin el control, un Wilcoxon que pasa no distingue «la puerta elige» de «hay menos competidores».
+* **Solo informe (no deciden):**
+  * Cuántos fragmentos pasan y θ_dyn.
+  * Qué enunciados esperados sobreviven.
+  * Si pasan los tres «Dimension of».
+  * La regla de P1 con la puerta, a k = 5 y k = 1, y su `holds`: el azar con los candidatos que quedan y las p_i de los esperados que sobreviven; McNemar contra BM25.
+  * McNemar de la puerta contra P1.
+  * MRR, recall@10, recall@20 y mediana del puesto.
+  * AUC de P frente a «ninguna», con la distancia al candidato más cercano.
+  * El desglose entre los 11 vaciados y los 7 no vaciados.
+  * Los ítems uno por uno.
+* **Ficheros.** El resultado va en `data/math/P1_gate_result.json`, aparte. `P1_result.json` y el script de P1 no cambian de comportamiento.
+
+**Predicciones antes de calcular ningún σ² (2026-10-05, no deciden nada):**
+* **Autor:** pasa la mitad de los fragmentos; el Wilcoxon falla; la puerta no gana al azar.
+* **Claude (a ojo, sin cálculo):** no veo un mecanismo por el que σ² separe los enunciados con contenido de los vaciados: mide cuánto de desigual carga un vector sobre los ejes NSM. Fracción que pasa entre el 30 y el 60 %. El Wilcoxon falla (65–70 %), porque los esperados que caen en el 343 pesan más que lo que suben los que quedan. Las dos condiciones a la vez, entre un 5 y un 10 %. Los tres «Dimension of» corren la misma suerte (son el mismo vector).
+
+**Resultado (2026-10-05; script `15f1135`, resultado `4d988f6`).** Válido: V1, V2 y V3 se cumplen. Una segunda ejecución dio un fichero idéntico byte a byte. **No pasa:**
+
+| | valor | pasa |
+|---|---|---|
+| Wilcoxon contra P1 | n = 18, sin ceros, W+ = 1, W− = 170, p = 262143/262144 | no |
+| Control al azar | 6636 de 10 000 sorteos con p ≤ el de la puerta; p_azar = 6637/10001 ≈ 0,66 | no |
+
+* **Fragmentos que pasan:** la puerta consolida 26 de los 342 (7,6 %). θ_dyn = 0,00429; la mediana de σ² en el corpus es 0,0019.
+* **Esperados que sobreviven:** 1 de 15. Es D, el del ítem 21, que pasa del puesto 6 al 1. Los otros 17 ítems caen al 343, incluidos los aciertos de P1 (2, 12, 14 y 28).
+* **Frente a las predicciones:** el Wilcoxon falla y la puerta no gana al azar, como predijeron los dos. La fracción que pasa se queda muy por debajo de las dos predicciones: la mitad (autor), entre el 30 y el 60 % (Claude).
+
+**Solo informe:**
+* **Azar como referencia:** 26 fragmentos al azar conservarían en promedio 15 × 26/342 ≈ 1,1 esperados; la puerta conserva 1.
+* **Los tres «Dimension of»:** quedan en `incubating`.
+* **Aciertos y puestos:** a k = 5, 1 con la puerta (P1, 4). MRR 0,058 (P1, 0,192); mediana del puesto 343 (P1, 19).
+* **La regla de P1 con la puerta:** `holds` = falso.
+* **AUC de P frente a «ninguna»:** 0,62.
+* **Clave topológica en los dos caminos:** la ingesta (float64) y la consolidación (float32) dan los mismos 26. La diferencia máxima de σ² es 7,7·10⁻¹⁰.
+* **Vectores frente al enviado:** en la revisión ingerida son idénticos 249 de 342 (diferencia máxima 5,6·10⁻¹⁷); en la consolidada, ninguno (diferencia máxima 1,9·10⁻⁸).
+
+**Lectura (autor y Claude, 2026-10-05; exploración posterior al resultado, no cambia la decisión):**
+1. **σ² no guarda relación con la recuperación.** Mide cuánto de desigual carga un vector sobre los 8 primos NSM de B_0, no si un enunciado es el que se busca. La puerta conserva los esperados como el azar.
+2. **No dice que la puerta no sirva.** Dice que no sirve como filtro de candidatos de este producto. Su papel declarado es gobernar la consolidación (`PROVISIONAL_INFORMATIONAL_SCORE`), no ordenar.
+3. **θ_dyn es muy alto para este corpus:** consolida el 7,6 %. Es la limitación L4: la base NSM es provisional. Retocar la base o el umbral para que salga bien sería ajustar mirando el resultado; si se hace, será otra medida con su regla comprometida antes.
+4. **Es exploración** sobre los 28 ítems ya vistos.
+
 ## Línea física aparcada: operaciones como dirección
 
 Aparcada hasta pasar los tres filtros de `docs/methodology/METHODOLOGY.md` (puerta de líneas físicas). Filtros 1 y 2 redactados; el 3, pendiente de verificar las citas.
