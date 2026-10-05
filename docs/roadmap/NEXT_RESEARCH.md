@@ -340,6 +340,32 @@ P1 y la línea base de Qwen3 no pasaron por el estado de Traianus: solo usaron e
 * **Autor:** pasa la mitad de los fragmentos; el Wilcoxon falla; la puerta no gana al azar.
 * **Claude (a ojo, sin cálculo):** no veo un mecanismo por el que σ² separe los enunciados con contenido de los vaciados: mide cuánto de desigual carga un vector sobre los ejes NSM. Fracción que pasa entre el 30 y el 60 %. El Wilcoxon falla (65–70 %), porque los esperados que caen en el 343 pesan más que lo que suben los que quedan. Las dos condiciones a la vez, entre un 5 y un 10 %. Los tres «Dimension of» corren la misma suerte (son el mismo vector).
 
+**Resultado (2026-10-05; script `15f1135`, resultado `4d988f6`).** Válido: V1, V2 y V3 se cumplen. Una segunda ejecución dio un fichero idéntico byte a byte. **No pasa:**
+
+| | valor | pasa |
+|---|---|---|
+| Wilcoxon contra P1 | n = 18, sin ceros, W+ = 1, W− = 170, p = 262143/262144 | no |
+| Control al azar | 6636 de 10 000 sorteos con p ≤ el de la puerta; p_azar = 6637/10001 ≈ 0,66 | no |
+
+* **Fragmentos que pasan:** la puerta consolida 26 de los 342 (7,6 %). θ_dyn = 0,00429; la mediana de σ² en el corpus es 0,0019.
+* **Esperados que sobreviven:** 1 de 15. Es D, el del ítem 21, que pasa del puesto 6 al 1. Los otros 17 ítems caen al 343, incluidos los aciertos de P1 (2, 12, 14 y 28).
+* **Frente a las predicciones:** el Wilcoxon falla y la puerta no gana al azar, como predijeron los dos. La fracción que pasa se queda muy por debajo de las dos predicciones: la mitad (autor), entre el 30 y el 60 % (Claude).
+
+**Solo informe:**
+* **Azar como referencia:** 26 fragmentos al azar conservarían en promedio 15 × 26/342 ≈ 1,1 esperados; la puerta conserva 1.
+* **Los tres «Dimension of»:** quedan en `incubating`.
+* **Aciertos y puestos:** a k = 5, 1 con la puerta (P1, 4). MRR 0,058 (P1, 0,192); mediana del puesto 343 (P1, 19).
+* **La regla de P1 con la puerta:** `holds` = falso.
+* **AUC de P frente a «ninguna»:** 0,62.
+* **Clave topológica en los dos caminos:** la ingesta (float64) y la consolidación (float32) dan los mismos 26. La diferencia máxima de σ² es 7,7·10⁻¹⁰.
+* **Vectores frente al enviado:** en la revisión ingerida son idénticos 249 de 342 (diferencia máxima 5,6·10⁻¹⁷); en la consolidada, ninguno (diferencia máxima 1,9·10⁻⁸).
+
+**Lectura (autor y Claude, 2026-10-05; exploración posterior al resultado, no cambia la decisión):**
+1. **σ² no guarda relación con la recuperación.** Mide cuánto de desigual carga un vector sobre los 8 primos NSM de B_0, no si un enunciado es el que se busca. La puerta conserva los esperados como el azar.
+2. **No dice que la puerta no sirva.** Dice que no sirve como filtro de candidatos de este producto. Su papel declarado es gobernar la consolidación (`PROVISIONAL_INFORMATIONAL_SCORE`), no ordenar.
+3. **θ_dyn es muy alto para este corpus:** consolida el 7,6 %. Es la limitación L4: la base NSM es provisional. Retocar la base o el umbral para que salga bien sería ajustar mirando el resultado; si se hace, será otra medida con su regla comprometida antes.
+4. **Es exploración** sobre los 28 ítems ya vistos.
+
 ## Línea física aparcada: operaciones como dirección
 
 Aparcada hasta pasar los tres filtros de `docs/methodology/METHODOLOGY.md` (puerta de líneas físicas). Filtros 1 y 2 redactados; el 3, pendiente de verificar las citas.

@@ -3412,3 +3412,56 @@
   so that check could never pass. It becomes report-only (maximum difference and count of
   identical vectors per revision). The unfiltered ranking reproducing P1's positions still decides
   validity. The engine is not changed.
+
+### seq 103 — 2026-10-05 — Engine gate on P1 run: valid; the gate does not improve retrieval
+
+* **Context:** seq 102 froze the protocol and the predictions at `0abb0c4`. It was corrected
+  before any data at `c848364`.
+
+* **Script:** `tools/experiments/p1_engine_gate.py` and 87 unit tests, written test-first by
+  `engine-implementer` under a validated `DelegationContract`, at `15f1135`; the report was
+  validated too. P1 and the Qwen3 baseline are unchanged. The executing agent reviewed the diff and
+  re-ran `pytest tests/` (3784 passed, 1 skipped, 6 deselected).
+
+* **Run (the executing agent):** `valid = true`.
+  - V1: the unfiltered positions equal P1's in 28 of 28 items.
+  - V2: BM25 equals the stored one.
+  - V3: the queries leave `manifold_nodes` unchanged.
+
+  A second run gave a byte-identical file. The result is committed at `4d988f6`, a commit that
+  states figures only.
+
+  | condition | figures | pass |
+  |---|---|---|
+  | Wilcoxon against P1 | n = 18, W+ = 1, W− = 170, p = 262143/262144 | no |
+  | Random control | 6636 of 10 000 draws at or below; p_random = 6637/10001 | no |
+
+  The gate consolidates 26 of 342 chunks (θ_dyn = 0.00429; the corpus median σ² is 0.0019). One
+  of the 15 expected statements survives: D, item 21, which moves from position 6 to 1. The other
+  17 items fall to 343.
+
+  Report only:
+  - Hits at k = 5: 1 (P1: 4). MRR 0.058 (P1: 0.192).
+  - The three "Dimension of" chunks stay incubating.
+  - The topological key agrees on both write paths (largest σ² difference 7.7·10⁻¹⁰).
+
+  Against the predictions: both expected the Wilcoxon to fail and the gate not to beat chance.
+  Both overestimated the fraction passing (the author said half, Claude 30–60 %).
+
+* **Reading (author and Claude, after the result; decides nothing):**
+  - σ² measures how unevenly a vector loads on B_0's 8 NSM primes, not whether a statement is the
+    one sought. The gate keeps expected statements as chance does.
+  - This does not say the gate is useless. Its declared role is governing consolidation, not
+    ranking.
+  - θ_dyn is very high for this corpus (limitation L4). Tuning the basis or the threshold to make
+    it work would be fitting on the result, and would need its own rule committed first.
+
+* **Declared:**
+  - The subagent's context pack exceeded its cap (54 609 bytes against 40 000).
+  - The contract named a `tests/conftest.py` range past the end of the file.
+  - The subagent served two packs and said so.
+  - The engine normalises in float32 on `/consolidar` and `/ingesta`, and in float64 on
+    `/ingesta/vector`. This is issue #92, not changed here.
+
+* **Status:** `Consolidated` (run and read; the gate does not improve retrieval under the committed
+  rule).
