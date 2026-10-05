@@ -3405,3 +3405,10 @@
 * **Open:** the script, by the engine implementer under a `DelegationContract`; the run; the reading.
 
 * **Status:** `Approved` (protocol frozen; no σ² computed).
+
+  **Correction before any data (2026-10-05):** the frozen version required each node's two
+  revisions to hold a vector byte-identical to the one sent. `/nodos/{id}/consolidar` re-encodes
+  the text and normalises in float32 before widening to float64, while P1 normalises in float64,
+  so that check could never pass. It becomes report-only (maximum difference and count of
+  identical vectors per revision). The unfiltered ranking reproducing P1's positions still decides
+  validity. The engine is not changed.

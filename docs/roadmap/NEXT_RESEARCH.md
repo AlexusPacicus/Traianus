@@ -314,10 +314,10 @@ P1 y la línea base de Qwen3 no pasaron por el estado de Traianus: solo usaron e
 * **Puesto (autor).** Es el del mejor enunciado esperado que sobrevive, entre los candidatos. Si no sobrevive ninguno, el puesto es 343: fallo, y el peor puesto posible sobre el corpus entero.
 * **BM25 (autor):** sobre el corpus entero, como en P1.
 * **Validez.** Si falla cualquiera de estas comprobaciones, `valid = false` y no hay decisión:
-  * Los vectores de las dos revisiones de cada nodo son idénticos byte a byte al vector enviado.
-  * El ranking sobre los 342 nodos del motor, sin filtro, reproduce el puesto guardado en `P1_result.json` en los 28 ítems.
+  * El ranking sobre los vectores de la última revisión de los 342 nodos del motor, sin filtro, reproduce el puesto guardado en `P1_result.json` en los 28 ítems.
   * BM25 recalculado es igual al guardado, como en la línea base de Qwen3.
   * Las filas de `manifold_nodes` son idénticas antes y después de las consultas (R2).
+* **Corrección antes de cualquier dato (2026-10-05).** La versión congelada en `0abb0c4` exigía además que los vectores de las dos revisiones de cada nodo fueran idénticos byte a byte al enviado. Eso no puede cumplirse: `/nodos/{id}/consolidar` vuelve a codificar el texto y normaliza en float32 antes de pasarlo a float64, mientras que P1 normaliza en float64. Pasa a solo informe: por revisión, la diferencia máxima con el vector enviado y cuántos son idénticos. La comprobación de puestos sin filtro sigue decidiendo la validez. El motor no se toca: cambiarlo sería una segunda variable.
 * **No aplica.** Si la puerta deja pasar 0 o los 342 fragmentos, no hay nada que comparar: el resultado es «no aplica» y no se decide nada.
 * **Lo que decide (autor, regla (b)).** La puerta mejora la recuperación solo si se cumplen las dos condiciones:
   1. **Wilcoxon contra P1.** Test de rangos con signo, exacto y de una cola, como en la línea base de Qwen3. Pares: los 18 ítems de P. Diferencia: d = puesto P1 − puesto con puerta. Los ceros se descartan y los empates llevan rangos medios. Pasa si p < 0,05. El brazo P1 se lee de `P1_result.json`, verificado por su sha256.
