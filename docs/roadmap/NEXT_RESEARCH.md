@@ -273,6 +273,32 @@ Primera aplicación de la línea base de proveedor de arriba. Los 28 ítems ya e
 * **Autor:** el Wilcoxon pasa en las dos versiones, pero con poca diferencia. Aciertos a k = 5: 1 o 2 más que MiniLM (de 4 a 5 o 6); entran en el top 5 los que MiniLM dejó justo fuera, en el puesto 6 (ítems 21 y 27), y quizá alguno que quedó más abajo.
 * **Claude (a ojo, sin cálculo):** Wilcoxon a 1024 pasa (65–70 %), a 384 pasa (55–60 %): los puestos mejoran en general aunque haya pocos aciertos nuevos. Aciertos a k = 5 entre 6 y 8 de 18; la regla de P1 contra BM25 entera, 10–15 %. La mejora se concentra en los 7 no vaciados; en los 11 vaciados, poca. AUC P frente a «ninguna» entre 0,5 y 0,65 en los dos modelos. La instrucción mueve la mediana del puesto uno o dos puestos.
 
+**Resultado (2026-10-05; script `6bc35ea`, resultado `78cb722`).** Válido en las dos versiones: vectores, alineación y BM25 igual al guardado en los 28 ítems; ningún texto truncado. Una segunda ejecución dio un fichero idéntico byte a byte. **El Wilcoxon falla en las dos versiones:**
+
+| versión | n | ceros | W+ | W− | p | pasa |
+|---|---|---|---|---|---|---|
+| 1024 | 16 | 2 | 74 | 62 | 12653/32768 ≈ 0,386 | no |
+| 384 | 16 | 2 | 72 | 64 | 6965/16384 ≈ 0,425 | no |
+
+Los dos ceros son los ítems 14 y 28 (puesto 1 en los dos modelos). Frente a las predicciones: el Wilcoxon falla, contra las dos.
+
+**Solo informe:**
+* Aciertos a k = 5: 7 en las dos versiones (MiniLM 4, BM25 1); a k = 1: 3 (MiniLM 2). McNemar contra MiniLM a k = 5: b = 5 (ítems 1, 6, 7, 24, 27), c = 2 (2, 12), p = 29/128.
+* La regla de P1 con Qwen3: pasa a k = 5 contra el azar y contra BM25 (6 a 0) y falla a k = 1 (2 a 0); `holds` = falso en las dos versiones.
+* MRR 0,192 (MiniLM), 0,274 (1024), 0,285 (384); mediana del puesto 19, 17 y 12,5; recall@10 0,33, 0,39 y 0,50; recall@20 0,50, 0,61 y 0,56.
+* AUC P frente a «ninguna»: 0,567 (MiniLM), 0,700 (1024), 0,689 (384).
+* Sin instrucción: 6 aciertos a k = 5 y mediana 22 (1024) y 23,5 (384).
+* Desglose: en los 11 vaciados, aciertos a k = 5 de 2 a 5 y mediana de 47 a 14 (1024); en los 7 no vaciados, aciertos 2 y 2, mediana de 6 a 19 (1024) y 7 (384).
+* Coste medido: p50 de 187 ms por fragmento y 189 ms por consulta; memoria máxima 2,06 GB.
+
+**Lectura (autor y Claude, 2026-10-05; exploración posterior al resultado, no cambia la decisión):**
+1. **Qwen3 no es claramente mejor; es distinto.** Sube 9 ítems y baja 7, con d entre −163 y +82; las caídas suman 403 puestos y las subidas 324. Con 18 ítems solo se detectaría una mejora grande y constante: el resultado es compatible con ninguna mejora y con una real.
+2. **Recortar a 384 no cuesta nada medible aquí.** Las dos versiones dan los mismos aciertos y las métricas se reparten; nada compara 384 con 1024, así que no se afirma que 384 sea mejor.
+3. **No hay evidencia de que el modelo sea el cuello de botella**, que no es lo mismo que «el modelo no es el problema»: es un solo modelo, una instrucción y 18 ítems, y los aciertos a k = 5 y el AUC suben.
+4. **Los vaciados no son la barrera para Qwen3.** 8 de las 9 subidas son ítems vaciados y 5 de las 7 caídas son no vaciados. Hipótesis sin probar: la entrada poco convencional es la consulta (el vocabulario propio del autor), no el corpus. Las mayores caídas lo ilustran: el ítem 13 («a one in one position and zeros in the rest») va a enunciados sobre ceros (ZPZT, RREF); el 16 usa «anchor» y «operator» en un sentido que Beezer no tiene.
+
+**Decisión del autor (2026-10-05):** la reescritura de la consulta con un LLM, si llega, es lo último que se prueba: mete generación en la entrada y no dejaría ver si funciona el motor. **Candidato para el piloto 2, sin decidir:** un glosario del autor, fijado y congelado antes de ejecutar, que traduzca sus términos a los habituales y se aplique por regla a la consulta. En estos 28 ítems sería exploración (ya se sabe qué ítems fallan); confirmaría solo en ítems nuevos. Siguen haciendo falta más ítems y la división desarrollo/prueba.
+
 ## Línea física aparcada: operaciones como dirección
 
 Aparcada hasta pasar los tres filtros de `docs/methodology/METHODOLOGY.md` (puerta de líneas físicas). Filtros 1 y 2 redactados; el 3, pendiente de verificar las citas.

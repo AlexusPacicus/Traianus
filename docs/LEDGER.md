@@ -3330,3 +3330,47 @@
 * **Open:** the script, by the engine implementer under a `DelegationContract`; the run; the reading.
 
 * **Status:** `Approved` (protocol frozen; nothing run).
+
+### seq 101 — 2026-10-05 — Qwen3 provider baseline run: valid; the Wilcoxon fails in both versions
+
+* **Context:** seq 100 froze the protocol and the predictions at `8cfebc5`, before any vector.
+
+* **Script:** `tools/experiments/p1_qwen3_provider.py` and 66 unit tests, test-first, by
+  `engine-implementer` under a validated `DelegationContract` (report validated), at `6bc35ea`.
+  P1 gained keyword parameters whose defaults keep its behaviour; its test file is unchanged. The
+  executing agent reviewed the diff and re-ran `pytest tests/` (3697 passed, 1 skipped, 6
+  deselected).
+
+* **Run (the executing agent, cpu, one thread, transformers 5.7.0):** `valid = true` in both
+  versions; BM25 equal to the stored one in 28 of 28 items; 0 texts truncated. A second run gave a
+  byte-identical file. Result committed at `78cb722`, a commit that states figures only.
+
+  | version | n | zeros | W+ | W− | p | pass |
+  |---|---|---|---|---|---|---|
+  | 1024 | 16 | 2 | 74 | 62 | 12653/32768 ≈ 0.386 | no |
+  | 384 | 16 | 2 | 72 | 64 | 6965/16384 ≈ 0.425 | no |
+
+  Report only: hits at k = 5 are 7 in both versions (MiniLM 4); McNemar against MiniLM at k = 5,
+  b = 5, c = 2, p = 29/128; P1's rule passes at k = 5 and fails at k = 1, `holds = false`; AUC of
+  P against «none» 0.700 and 0.689 (MiniLM 0.567); p50 187 ms per chunk, peak memory 2.06 GB.
+  Against the predictions: both expected the Wilcoxon to pass.
+
+* **Reading (author and Claude, after the result; decides nothing):** Qwen3 is not clearly better,
+  it is different (9 items up, 7 down; falls sum 403 positions, rises 324); cutting to 384 costs
+  nothing measurable here; there is no evidence that the model is the bottleneck, which is not
+  evidence that it is not; Qwen3's gains fall on the formula-emptied items (8 of 9), and the
+  untested hypothesis is that the unusual input is the author's query vocabulary, not the corpus.
+
+* **Decision (author):** query rewriting with an LLM, if ever, is the last thing tried. Candidate
+  for pilot 2, undecided: a deterministic glossary from the author's terms to standard ones, frozen
+  before any run, applied by rule to the query.
+
+* **Declared:** the contract named transformers 5.15; 5.7.0 is installed and recorded. The
+  implementer ran `context_pack`, but the pack exceeded its 40 000-byte cap and part of P1 was read
+  directly. The new files are not in CI's ruff list. A report page with the figures is a private
+  claude.ai document, not in the repository.
+
+* **Open:** pushing `feat/p1-qwen3-provider` and merging it into `main`; the design of pilot 2.
+
+* **Status:** `Consolidated` (baseline run and read; no improvement detected under the committed
+  rule).
