@@ -2388,3 +2388,54 @@ modelo está en la caché, verificado. No hay ningún vector calculado.
 1. Contrato del script de Qwen3 al engine-implementer, revisado antes.
 2. Revisar el diff, ejecutar y leer contra las predicciones.
 3. Diseño del piloto 2 con lo que salga.
+
+## 2026-10-05
+
+**Contexto:** el protocolo de Qwen3 estaba congelado (seq 100) y el
+contrato del script, validado pero sin lanzar.
+
+**Se hizo:**
+- **Contrato revisado y lanzado.** Antes se le añadieron dos cosas:
+  - Los tests no cargan nunca el modelo real, porque CI no tiene pesos.
+  - El subagente lee el protocolo sin el bloque de predicciones.
+- **Script y 66 tests**, con los tests primero (`6bc35ea`).
+  - El informe del subagente pasó la validación.
+  - P1 solo ganó parámetros cuyos valores por defecto no cambian nada.
+  - Revisado el diff; la suite, en verde (3697 pasan).
+- **Ejecución:** válida y determinista. Una segunda ejecución dio el
+  mismo fichero byte a byte (`78cb722`).
+  - El Wilcoxon falla en las dos versiones: p ≈ 0,386 en 1024 y 0,425
+    en 384.
+  - Solo informe: 7 aciertos a k = 5 frente a 4 de MiniLM.
+- **Informe de las pruebas** en un documento privado de claude.ai, con
+  el gráfico ítem por ítem. No está en el repositorio.
+- **Lectura acordada (seq 101):**
+  - Qwen3 no es claramente mejor, es distinto: sube 9 ítems y baja 7.
+  - Recortar a 384 no cuesta nada medible.
+  - No hay evidencia de que el modelo sea el cuello de botella.
+  - Mi idea de que el problema eran los vaciados no se sostiene: ahí es
+    justo donde Qwen3 mejora. La hipótesis pasa a ser la consulta, mi
+    vocabulario.
+- **Decidí que la reescritura con LLM va la última.** Mete generación en
+  la entrada.
+
+**Resultado:** `feat/p1-qwen3-provider` con el script, el resultado y la
+lectura (`9b40618`). Está en local, sin subir.
+
+**Resuelto de entradas anteriores:**
+- Del 2026-10-04: los restos `.incomplete` de la caché, borrados por mí.
+- Del 2026-10-04: el contrato de Qwen3, lanzado.
+- Del 2026-10-04: el diff, revisado; ejecutado y leído contra las
+  predicciones.
+- Del 2026-10-04: la reescritura con LLM, decidida como última opción.
+
+**Sin resolver / decisión pendiente:**
+- El glosario determinista de mis términos: candidato para el piloto 2,
+  sin decidir.
+- Los ficheros nuevos no están en la lista de ruff de CI.
+- Siguen abiertos: #89, #90 y #91 (gobernanza) y los ejes de `B_0`.
+
+**Próximo paso:**
+1. Subir la rama, fusionarla en `main` y comprobar CI.
+2. Diseño del piloto 2: más ítems, división desarrollo/prueba y si entra
+   el glosario.
