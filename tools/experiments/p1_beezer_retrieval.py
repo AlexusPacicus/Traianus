@@ -253,10 +253,10 @@ def check_epsilon(resolve: Callable[[], float]) -> None:
         raise Refusal("RF4", f"resolve_epsilon_edge() returned {value!r}, not {EPSILON!r}")
 
 
-def load_encoder(build: Callable[[], Any], revision: str) -> Any:
+def load_encoder(build: Callable[[], Any], revision: str, pinned: str = PINNED_REVISION) -> Any:
     """The encoder, moved to the cpu; it must load offline at the pinned revision (RF5)."""
-    if revision != PINNED_REVISION:
-        raise Refusal("RF5", f"revision {revision} is not the pinned {PINNED_REVISION}")
+    if revision != pinned:
+        raise Refusal("RF5", f"revision {revision} is not the pinned {pinned}")
     try:
         model = build()
         model.to("cpu")
@@ -287,14 +287,14 @@ def environment(model: Any) -> dict[str, Any]:
 # Vectors (V1) -----------------------------------------------------------------------------------
 
 
-def unit_vector(u: Any) -> np.ndarray:
+def unit_vector(u: Any, dim: int = DIM) -> np.ndarray:
     """The checks of traianus/app.py _encode_vector on the native output, then float64 and unit norm."""
     if not isinstance(u, np.ndarray) or u.ndim != 1:
         raise InvalidVector("output must be a 1-D array")
     if u.dtype != np.float32:
         raise InvalidVector(f"dtype {u.dtype} is not float32")
-    if u.size != DIM:
-        raise InvalidVector(f"size {u.size} is not {DIM}")
+    if u.size != dim:
+        raise InvalidVector(f"size {u.size} is not {dim}")
     if not np.all(np.isfinite(u)):
         raise InvalidVector("non-finite values")
     if np.linalg.norm(u) == 0.0:
@@ -306,20 +306,22 @@ def unit_vector(u: Any) -> np.ndarray:
     return v
 
 
-def encode_texts(provider: Any, texts: Sequence[str]) -> Rows:
+def encode_texts(provider: Any, texts: Sequence[str], dim: int = DIM) -> Rows:
     """One text per call; a row failing the vector checks is None, so every output is checked."""
     rows: Rows = []
     for text in texts:
         try:
-            rows.append(unit_vector(provider.encode(text)))
+            rows.append(unit_vector(provider.encode(text), dim))
         except InvalidVector:
             rows.append(None)
     return rows
 
 
-def encode_passes(provider: Any, texts: Sequence[str], queries: Sequence[str]) -> tuple[Rows, Rows]:
+def encode_passes(
+    provider: Any, texts: Sequence[str], queries: Sequence[str], dim: int = DIM
+) -> tuple[Rows, Rows]:
     """First pass: the chunks, then the queries (query i at row len(texts) + i - 1); second pass: the chunks."""
-    return encode_texts(provider, [*texts, *queries]), encode_texts(provider, texts)
+    return encode_texts(provider, [*texts, *queries], dim), encode_texts(provider, texts, dim)
 
 
 def matrix_sha256(rows: Sequence[np.ndarray]) -> str:
@@ -613,6 +615,7 @@ def measure(
     model: Any,
     env: Mapping[str, Any],
     digests: Mapping[str, str],
+    dim: int = DIM,
 ) -> dict[str, Any]:
     n = len(inp.texts)
     items = inp.items
@@ -620,7 +623,7 @@ def measure(
     targets = [frozenset(acro_index[acro] for acro in item.acros) for item in items]
     positives = [i for i, target in enumerate(targets) if target]
 
-    first, second = encode_passes(provider, inp.texts, queries)
+    first, second = encode_passes(provider, inp.texts, queries, dim)
     v1 = all(row is not None for row in [*first, *second])
     keys, shuffles = draw(n, len(items), len(positives))
 

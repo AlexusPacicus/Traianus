@@ -2330,3 +2330,112 @@ de los resultados, la viabilidad y los próximos pasos.
 2. Pasar las fórmulas a frases con reglas y repetir con el mismo script.
 3. Un proveedor más fuerte sobre el desarrollo, cambiando solo eso.
 4. Comprobar qué resultados son alcanzables antes de congelar la regla.
+
+## 2026-10-04
+
+**Contexto:** con el piloto 1 cerrado, antes de diseñar el piloto 2 quise
+probar otro modelo de embeddings: el paso 3 del cierre de ayer, adelantado.
+La sesión empezó la tarde del 3.
+
+**Se hizo:**
+- **Búsqueda del modelo**, con el navegador integrado (webfetch y websearch
+  siguen denegados en el perímetro).
+  - Criterios: pesos abiertos y locales con revisión fijada, CPU, sin
+    `trust_remote_code`, en inglés. Fuera los embeddings por API.
+  - Elegido `Qwen/Qwen3-Embedding-0.6B`: Apache 2.0, 1024 dimensiones con
+    MRL, así que también puede dar 384 y entrar en el motor.
+  - Descartados: el modelo de `math-similarity` (sin licencia),
+    MathLeap-Qwen-8B (no cabe en 8 GB y se baja de un espejo anónimo) y
+    EmbeddingGemma (licencia Gemma, acceso restringido).
+  - Referencia: MIRB (arXiv 2505.15585), donde los modelos basados en LLM
+    rinden más en la tarea parecida a la nuestra. Qwen3 no aparece.
+- **Coste y determinismo**, antes de decidir. Unas 26 veces los parámetros
+  de MiniLM, 1,2 GB en disco y unos 3 GB de RAM; la latencia, solo
+  estimada. El determinismo es el mismo que ahora si se fijan fp32, la
+  atención, un hilo y un texto por llamada; entre máquinas no es bit a bit.
+- **Descarga:** `hf` se atascó y luego se cortó por el límite de tiempo en
+  786 MB. La reanudó Claude con `curl` y comprobó el sha256 del fichero
+  contra el publicado antes de colocarlo en la caché.
+- **Protocolo congelado antes de cualquier vector** (`8cfebc5`, LEDGER 100).
+  - Dos versiones, 1024 y 384, y una instrucción de consulta propia.
+  - Pedí comparar con MiniLM y no solo con BM25. Esa comparación pasó a
+    ser la que decide: Wilcoxon de puestos, exacto y de una cola, por
+    versión. MiniLM se lee de `P1_result.json`, sin volver a ejecutarlo.
+  - Solo informe: la regla de P1, McNemar contra MiniLM, MRR y recall, la
+    consulta sin instrucción, el AUC entre P y «ninguna», la latencia y la
+    memoria medidas, y el desglose 11/7 por esperados vaciados.
+  - Predicciones fechadas. La mía: el Wilcoxon pasa en las dos versiones,
+    con poca diferencia, y 1 o 2 aciertos más a k = 5 (los ítems 21 y 27,
+    que MiniLM dejó en el puesto 6). Claude: pasa también, con 6 a 8
+    aciertos a k = 5.
+- **Contrato JSON para el engine-implementer**, redactado y validado. Paré
+  el lanzamiento: domingo, nada técnico más por hoy. El contrato no está en
+  el repositorio.
+- Aparte, en otra sesión: aparqué la «ley de continua dirección»
+  (`2a9c28a`).
+
+**Resultado:** `feat/p1-qwen3-provider` en `8cfebc5`, local y sin subir. El
+modelo está en la caché, verificado. No hay ningún vector calculado.
+
+**Sin resolver / decisión pendiente:**
+- El script de Qwen3: hay que rehacer o recuperar el contrato y lanzarlo.
+- Quedan unos 44 MB de restos `.incomplete` en la caché del modelo. `rm`
+  está denegado para Claude; los borro yo.
+- **Autor:** si se reescribe la consulta con un LLM.
+- Siguen abiertos: #91, los ejes de `B_0` y los tres puntos del 2026-09-30.
+
+**Próximo paso:**
+1. Contrato del script de Qwen3 al engine-implementer, revisado antes.
+2. Revisar el diff, ejecutar y leer contra las predicciones.
+3. Diseño del piloto 2 con lo que salga.
+
+## 2026-10-05
+
+**Contexto:** el protocolo de Qwen3 estaba congelado (seq 100) y el
+contrato del script, validado pero sin lanzar.
+
+**Se hizo:**
+- **Contrato revisado y lanzado.** Antes se le añadieron dos cosas:
+  - Los tests no cargan nunca el modelo real, porque CI no tiene pesos.
+  - El subagente lee el protocolo sin el bloque de predicciones.
+- **Script y 66 tests**, con los tests primero (`6bc35ea`).
+  - El informe del subagente pasó la validación.
+  - P1 solo ganó parámetros cuyos valores por defecto no cambian nada.
+  - Revisado el diff; la suite, en verde (3697 pasan).
+- **Ejecución:** válida y determinista. Una segunda ejecución dio el
+  mismo fichero byte a byte (`78cb722`).
+  - El Wilcoxon falla en las dos versiones: p ≈ 0,386 en 1024 y 0,425
+    en 384.
+  - Solo informe: 7 aciertos a k = 5 frente a 4 de MiniLM.
+- **Informe de las pruebas** en un documento privado de claude.ai, con
+  el gráfico ítem por ítem. No está en el repositorio.
+- **Lectura acordada (seq 101):**
+  - Qwen3 no es claramente mejor, es distinto: sube 9 ítems y baja 7.
+  - Recortar a 384 no cuesta nada medible.
+  - No hay evidencia de que el modelo sea el cuello de botella.
+  - Mi idea de que el problema eran los vaciados no se sostiene: ahí es
+    justo donde Qwen3 mejora. La hipótesis pasa a ser la consulta, mi
+    vocabulario.
+- **Decidí que la reescritura con LLM va la última.** Mete generación en
+  la entrada.
+
+**Resultado:** `feat/p1-qwen3-provider` con el script, el resultado y la
+lectura (`9b40618`). Está en local, sin subir.
+
+**Resuelto de entradas anteriores:**
+- Del 2026-10-04: los restos `.incomplete` de la caché, borrados por mí.
+- Del 2026-10-04: el contrato de Qwen3, lanzado.
+- Del 2026-10-04: el diff, revisado; ejecutado y leído contra las
+  predicciones.
+- Del 2026-10-04: la reescritura con LLM, decidida como última opción.
+
+**Sin resolver / decisión pendiente:**
+- El glosario determinista de mis términos: candidato para el piloto 2,
+  sin decidir.
+- Los ficheros nuevos no están en la lista de ruff de CI.
+- Siguen abiertos: #89, #90 y #91 (gobernanza) y los ejes de `B_0`.
+
+**Próximo paso:**
+1. Subir la rama, fusionarla en `main` y comprobar CI.
+2. Diseño del piloto 2: más ítems, división desarrollo/prueba y si entra
+   el glosario.

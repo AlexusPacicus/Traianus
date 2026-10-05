@@ -1,0 +1,3472 @@
+{
+  "valid": true,
+  "first_failed": null,
+  "failed": [],
+  "decides": "only versions.<dimension>.wilcoxon.pass decides; everything under report_only decides nothing",
+  "digests": {
+    "beezer_manifest.json": "6d1782002c7650c3c59ed26332bcef500782fab04f8b7322661d671249fb9626",
+    "pilot1_test_set.json": "9fc7ad6f875f55d63e75e71f83fb75afa9e0adf62a1f8e699c9dd830dd866d82",
+    "beezer_citations.json": "50e831d2041eec62fc728c4ddaf6d74aa1ea63c3b050d7a497958446b8304226"
+  },
+  "environment": {
+    "python": "3.11.6",
+    "numpy": "2.4.1",
+    "torch": "2.11.0",
+    "sentence_transformers": "5.2.3",
+    "platform": "macOS-15.6-arm64-arm-64bit",
+    "device": "cpu",
+    "max_seq_length": 32768,
+    "numpy_config": {
+      "Compilers": {
+        "c": {
+          "name": "clang",
+          "linker": "ld64",
+          "version": "15.0.0",
+          "commands": "cc"
+        },
+        "cython": {
+          "name": "cython",
+          "linker": "cython",
+          "version": "3.2.4",
+          "commands": "cython"
+        },
+        "c++": {
+          "name": "clang",
+          "linker": "ld64",
+          "version": "15.0.0",
+          "commands": "c++"
+        }
+      },
+      "Machine Information": {
+        "host": {
+          "cpu": "aarch64",
+          "family": "aarch64",
+          "endian": "little",
+          "system": "darwin"
+        },
+        "build": {
+          "cpu": "aarch64",
+          "family": "aarch64",
+          "endian": "little",
+          "system": "darwin"
+        }
+      },
+      "Build Dependencies": {
+        "blas": {
+          "name": "accelerate",
+          "found": true,
+          "version": "unknown",
+          "detection method": "system",
+          "include directory": "unknown",
+          "lib directory": "unknown",
+          "openblas configuration": "unknown",
+          "pc file directory": "unknown"
+        },
+        "lapack": {
+          "name": "accelerate",
+          "found": true,
+          "version": "unknown",
+          "detection method": "system",
+          "include directory": "unknown",
+          "lib directory": "unknown",
+          "openblas configuration": "unknown",
+          "pc file directory": "unknown"
+        }
+      },
+      "Python Information": {
+        "path": "/private/var/folders/pr/_3h4tm913_l56k6hrhpm89z00000gn/T/build-env-9ze0nkjb/bin/python",
+        "version": "3.11"
+      },
+      "SIMD Extensions": {
+        "baseline": [
+          "NEON",
+          "NEON_FP16",
+          "NEON_VFPV4",
+          "ASIMD"
+        ],
+        "found": [
+          "ASIMDHP",
+          "ASIMDDP"
+        ],
+        "not found": [
+          "ASIMDFHM"
+        ]
+      }
+    },
+    "torch_threads": 1,
+    "transformers": "5.7.0",
+    "model_id": "Qwen/Qwen3-Embedding-0.6B",
+    "revision": "97b0c614be4d77ee51c0cef4e5f07c00f9eb65b3",
+    "parameter_dtype": "torch.float32",
+    "attention_implementation": "eager",
+    "instruction": "Instruct: Given a description of a mathematical concept, retrieve the definition or theorem that states it\nQuery:",
+    "minilm_result_sha256": "00522a30465ae3dc21a949aca6d5464c9060f99d2a50038c05f088976c9132d8"
+  },
+  "bm25_vs_minilm_result": {
+    "items": 28,
+    "mismatched_ids": []
+  },
+  "versions": {
+    "1024": {
+      "dimension": 1024,
+      "valid": true,
+      "first_failed": null,
+      "failed": [],
+      "wilcoxon": {
+        "n": 16,
+        "dropped_zeros": 2,
+        "w_plus": 74.0,
+        "w_minus": 62.0,
+        "p": {
+          "num": 12653,
+          "den": 32768,
+          "float": 0.386138916015625
+        },
+        "pass": false,
+        "pairs": [
+          {
+            "id": 1,
+            "minilm": 47,
+            "qwen3": 2,
+            "d": 45
+          },
+          {
+            "id": 2,
+            "minilm": 2,
+            "qwen3": 14,
+            "d": -12
+          },
+          {
+            "id": 6,
+            "minilm": 15,
+            "qwen3": 1,
+            "d": 14
+          },
+          {
+            "id": 7,
+            "minilm": 16,
+            "qwen3": 2,
+            "d": 14
+          },
+          {
+            "id": 11,
+            "minilm": 26,
+            "qwen3": 49,
+            "d": -23
+          },
+          {
+            "id": 12,
+            "minilm": 4,
+            "qwen3": 19,
+            "d": -15
+          },
+          {
+            "id": 13,
+            "minilm": 52,
+            "qwen3": 215,
+            "d": -163
+          },
+          {
+            "id": 14,
+            "minilm": 1,
+            "qwen3": 1,
+            "d": 0
+          },
+          {
+            "id": 15,
+            "minilm": 69,
+            "qwen3": 24,
+            "d": 45
+          },
+          {
+            "id": 16,
+            "minilm": 58,
+            "qwen3": 186,
+            "d": -128
+          },
+          {
+            "id": 17,
+            "minilm": 17,
+            "qwen3": 70,
+            "d": -53
+          },
+          {
+            "id": 18,
+            "minilm": 215,
+            "qwen3": 133,
+            "d": 82
+          },
+          {
+            "id": 21,
+            "minilm": 6,
+            "qwen3": 15,
+            "d": -9
+          },
+          {
+            "id": 23,
+            "minilm": 56,
+            "qwen3": 19,
+            "d": 37
+          },
+          {
+            "id": 24,
+            "minilm": 21,
+            "qwen3": 4,
+            "d": 17
+          },
+          {
+            "id": 25,
+            "minilm": 119,
+            "qwen3": 52,
+            "d": 67
+          },
+          {
+            "id": 27,
+            "minilm": 6,
+            "qwen3": 3,
+            "d": 3
+          },
+          {
+            "id": 28,
+            "minilm": 1,
+            "qwen3": 1,
+            "d": 0
+          }
+        ]
+      },
+      "report_only": {
+        "p1_measurement": {
+          "valid": true,
+          "first_failed": null,
+          "failed": [],
+          "vectors_sha256": "c8cb4bc46c557deaa9c77193b3b02b9a4b8fc2506c5f5f56aedff9dadfcfb75a",
+          "alignment_vectors_sha256": "fc9ae0e54a91c3533334033cf2c3bb6b38b4e943582a1c580ad8d5e6ab828e4e",
+          "counts": {
+            "chunks": 342,
+            "distinct_texts": 340,
+            "items": 28,
+            "positives": 18,
+            "chunk_texts_over_max_seq_length": 0,
+            "query_texts_over_max_seq_length": 0
+          },
+          "alignment": {
+            "matched": 342,
+            "required": 342,
+            "bitwise_differences": 0
+          },
+          "k5": {
+            "H_engine": 7,
+            "H_bm25": 1,
+            "chance": {
+              "num": 118219759057442561744896882756015313828125,
+              "den": 11751662785285935812202389111196004311062279732736,
+              "float": 1.0059832486468518e-08,
+              "pass": true
+            },
+            "mcnemar": {
+              "b": 6,
+              "c": 0,
+              "n": 6,
+              "num": 1,
+              "den": 64,
+              "float": 0.015625,
+              "pass": true
+            },
+            "k_pass": true
+          },
+          "k1": {
+            "H_engine": 3,
+            "H_bm25": 1,
+            "chance": {
+              "num": 7847161895713406448511718252137971760369,
+              "den": 256064826038810387592107413984173582463156224,
+              "float": 3.0645215967787994e-05,
+              "pass": true
+            },
+            "mcnemar": {
+              "b": 2,
+              "c": 0,
+              "n": 2,
+              "num": 1,
+              "den": 4,
+              "float": 0.25,
+              "pass": false
+            },
+            "k_pass": false
+          },
+          "holds": false,
+          "holds_limit": "Declared limit (P1.md, Chance): items that share a target are not independent, and the chance and McNemar tails take them as independent, so both p-values can be anti-conservative, the McNemar one the more.",
+          "shuffle": {
+            "k5": {
+              "count": 0,
+              "total": 1000,
+              "fraction": 0.0
+            },
+            "k1": {
+              "count": 71,
+              "total": 1000,
+              "fraction": 0.071
+            }
+          },
+          "bm25_check": {
+            "chunks_with_unique_token": 92,
+            "passed": 92
+          },
+          "group_sensitivity": {
+            "units": [
+              [
+                1,
+                6,
+                28
+              ],
+              [
+                2,
+                15
+              ],
+              [
+                7,
+                23,
+                24
+              ],
+              [
+                11,
+                12
+              ],
+              [
+                13
+              ],
+              [
+                14
+              ],
+              [
+                16
+              ],
+              [
+                17
+              ],
+              [
+                18
+              ],
+              [
+                21
+              ],
+              [
+                25
+              ],
+              [
+                27
+              ]
+            ],
+            "k5": {
+              "H_engine": 4,
+              "H_bm25": 1,
+              "chance": {
+                "num": 19611565838299630175794121299906812007908844375,
+                "den": 125351069709716648663492150519424045984664317149184,
+                "float": 0.00015645311909755032
+              },
+              "mcnemar": {
+                "b": 3,
+                "c": 0,
+                "n": 3,
+                "num": 1,
+                "den": 8,
+                "float": 0.125
+              }
+            },
+            "k1": {
+              "H_engine": 2,
+              "H_bm25": 1,
+              "chance": {
+                "num": 104630525648457238245587801210857269374731,
+                "den": 64016206509702596898026853496043395615789056,
+                "float": 0.0016344380798727733
+              },
+              "mcnemar": {
+                "b": 1,
+                "c": 0,
+                "n": 1,
+                "num": 1,
+                "den": 2,
+                "float": 0.5
+              }
+            }
+          },
+          "report_only": {
+            "items": [
+              {
+                "id": 1,
+                "m": 1,
+                "engine": {
+                  "position": 2,
+                  "top5": [
+                    "MATH_BEEZER_DEF_ONS",
+                    "MATH_BEEZER_DEF_NV",
+                    "MATH_BEEZER_THM_CRVA",
+                    "MATH_BEEZER_THM_ZVU",
+                    "MATH_BEEZER_THM_VRRB"
+                  ],
+                  "k5": true,
+                  "k1": false
+                },
+                "bm25": {
+                  "position": 147,
+                  "top5": [
+                    "MATH_BEEZER_DEF_SET",
+                    "MATH_BEEZER_DEF_TM",
+                    "MATH_BEEZER_DEF_A",
+                    "MATH_BEEZER_DEF_EEF",
+                    "MATH_BEEZER_DEF_DM"
+                  ],
+                  "k5": false,
+                  "k1": false,
+                  "positive_scores": 297
+                }
+              },
+              {
+                "id": 2,
+                "m": 1,
+                "engine": {
+                  "position": 14,
+                  "top5": [
+                    "MATH_BEEZER_DEF_NV",
+                    "MATH_BEEZER_THM_CRVA",
+                    "MATH_BEEZER_THM_AISM",
+                    "MATH_BEEZER_THM_IPAC",
+                    "MATH_BEEZER_THM_ZSSM"
+                  ],
+                  "k5": false,
+                  "k1": false
+                },
+                "bm25": {
+                  "position": 232,
+                  "top5": [
+                    "MATH_BEEZER_THM_SSLD",
+                    "MATH_BEEZER_DEF_EEF",
+                    "MATH_BEEZER_DEF_LI",
+                    "MATH_BEEZER_DEF_CBM",
+                    "MATH_BEEZER_DEF_IDLT"
+                  ],
+                  "k5": false,
+                  "k1": false,
+                  "positive_scores": 239
+                }
+              },
+              {
+                "id": 3,
+                "m": 0,
+                "engine": {
+                  "position": null,
+                  "top5": [
+                    "MATH_BEEZER_THM_CRVA",
+                    "MATH_BEEZER_THM_EDYES",
+                    "MATH_BEEZER_THM_IVSED",
+                    "MATH_BEEZER_DEF_OV",
+                    "MATH_BEEZER_THM_CLI"
+                  ],
+                  "k5": null,
+                  "k1": null
+                },
+                "bm25": {
+                  "position": null,
+                  "top5": [
+                    "MATH_BEEZER_DEF_LT",
+                    "MATH_BEEZER_THM_NME2",
+                    "MATH_BEEZER_DEF_B",
+                    "MATH_BEEZER_DEF_ES",
+                    "MATH_BEEZER_DEF_RLD"
+                  ],
+                  "k5": null,
+                  "k1": null,
+                  "positive_scores": 318
+                }
+              },
+              {
+                "id": 4,
+                "m": 0,
+                "engine": {
+                  "position": null,
+                  "top5": [
+                    "MATH_BEEZER_THM_CRVA",
+                    "MATH_BEEZER_DEF_NV",
+                    "MATH_BEEZER_THM_AISM",
+                    "MATH_BEEZER_THM_VRRB",
+                    "MATH_BEEZER_THM_VRILT"
+                  ],
+                  "k5": null,
+                  "k1": null
+                },
+                "bm25": {
+                  "position": null,
+                  "top5": [
+                    "MATH_BEEZER_DEF_LI",
+                    "MATH_BEEZER_DEF_CBM",
+                    "MATH_BEEZER_DEF_EEF",
+                    "MATH_BEEZER_DEF_IDLT",
+                    "MATH_BEEZER_DEF_RLD"
+                  ],
+                  "k5": null,
+                  "k1": null,
+                  "positive_scores": 296
+                }
+              },
+              {
+                "id": 5,
+                "m": 0,
+                "engine": {
+                  "position": null,
+                  "top5": [
+                    "MATH_BEEZER_DEF_NV",
+                    "MATH_BEEZER_DEF_IP",
+                    "MATH_BEEZER_THM_IPAC",
+                    "MATH_BEEZER_THM_CRVA",
+                    "MATH_BEEZER_THM_PIP"
+                  ],
+                  "k5": null,
+                  "k1": null
+                },
+                "bm25": {
+                  "position": null,
+                  "top5": [
+                    "MATH_BEEZER_DEF_IVS",
+                    "MATH_BEEZER_DEF_ZCV",
+                    "MATH_BEEZER_DEF_CS",
+                    "MATH_BEEZER_DEF_EO",
+                    "MATH_BEEZER_THM_EMHE"
+                  ],
+                  "k5": null,
+                  "k1": null,
+                  "positive_scores": 341
+                }
+              },
+              {
+                "id": 6,
+                "m": 1,
+                "engine": {
+                  "position": 1,
+                  "top5": [
+                    "MATH_BEEZER_DEF_NV",
+                    "MATH_BEEZER_THM_DM",
+                    "MATH_BEEZER_THM_DP",
+                    "MATH_BEEZER_THM_DCM",
+                    "MATH_BEEZER_DEF_IP"
+                  ],
+                  "k5": true,
+                  "k1": true
+                },
+                "bm25": {
+                  "position": 155,
+                  "top5": [
+                    "MATH_BEEZER_THM_DEC",
+                    "MATH_BEEZER_THM_DER",
+                    "MATH_BEEZER_DEF_TM",
+                    "MATH_BEEZER_DEF_DM",
+                    "MATH_BEEZER_DEF_A"
+                  ],
+                  "k5": false,
+                  "k1": false,
+                  "positive_scores": 335
+                }
+              },
+              {
+                "id": 7,
+                "m": 1,
+                "engine": {
+                  "position": 2,
+                  "top5": [
+                    "MATH_BEEZER_DEF_NV",
+                    "MATH_BEEZER_DEF_IP",
+                    "MATH_BEEZER_THM_CRVA",
+                    "MATH_BEEZER_THM_PIP",
+                    "MATH_BEEZER_THM_VRRB"
+                  ],
+                  "k5": true,
+                  "k1": false
+                },
+                "bm25": {
+                  "position": 136,
+                  "top5": [
+                    "MATH_BEEZER_DEF_ZCV",
+                    "MATH_BEEZER_DEF_VS",
+                    "MATH_BEEZER_DEF_VOC",
+                    "MATH_BEEZER_DEF_SOLV",
+                    "MATH_BEEZER_DEF_NV"
+                  ],
+                  "k5": false,
+                  "k1": false,
+                  "positive_scores": 334
+                }
+              },
+              {
+                "id": 8,
+                "m": 0,
+                "engine": {
+                  "position": null,
+                  "top5": [
+                    "MATH_BEEZER_DEF_OV",
+                    "MATH_BEEZER_THM_CRVA",
+                    "MATH_BEEZER_THM_OSLI",
+                    "MATH_BEEZER_DEF_OSV",
+                    "MATH_BEEZER_THM_IPAC"
+                  ],
+                  "k5": null,
+                  "k1": null
+                },
+                "bm25": {
+                  "position": null,
+                  "top5": [
+                    "MATH_BEEZER_DEF_SU",
+                    "MATH_BEEZER_THM_VSLT",
+                    "MATH_BEEZER_THM_UTMR",
+                    "MATH_BEEZER_DEF_SQM",
+                    "MATH_BEEZER_THM_NME2"
+                  ],
+                  "k5": null,
+                  "k1": null,
+                  "positive_scores": 287
+                }
+              },
+              {
+                "id": 9,
+                "m": 0,
+                "engine": {
+                  "position": null,
+                  "top5": [
+                    "MATH_BEEZER_THM_EDYES",
+                    "MATH_BEEZER_THM_MMDAA",
+                    "MATH_BEEZER_DEF_NV",
+                    "MATH_BEEZER_THM_PIP",
+                    "MATH_BEEZER_DEF_TM"
+                  ],
+                  "k5": null,
+                  "k1": null
+                },
+                "bm25": {
+                  "position": null,
+                  "top5": [
+                    "MATH_BEEZER_DEF_IVS",
+                    "MATH_BEEZER_THM_DRCMA",
+                    "MATH_BEEZER_DEF_ES",
+                    "MATH_BEEZER_DEF_B",
+                    "MATH_BEEZER_DEF_CS"
+                  ],
+                  "k5": null,
+                  "k1": null,
+                  "positive_scores": 325
+                }
+              },
+              {
+                "id": 10,
+                "m": 0,
+                "engine": {
+                  "position": null,
+                  "top5": [
+                    "MATH_BEEZER_DEF_RREF",
+                    "MATH_BEEZER_THM_RREFU",
+                    "MATH_BEEZER_THM_DFS",
+                    "MATH_BEEZER_DEF_NV",
+                    "MATH_BEEZER_THM_PSSD"
+                  ],
+                  "k5": null,
+                  "k1": null
+                },
+                "bm25": {
+                  "position": null,
+                  "top5": [
+                    "MATH_BEEZER_DEF_CM",
+                    "MATH_BEEZER_THM_EMDRO",
+                    "MATH_BEEZER_THM_TTMI",
+                    "MATH_BEEZER_DEF_LNS",
+                    "MATH_BEEZER_THM_LNSMS"
+                  ],
+                  "k5": null,
+                  "k1": null,
+                  "positive_scores": 335
+                }
+              },
+              {
+                "id": 11,
+                "m": 1,
+                "engine": {
+                  "position": 49,
+                  "top5": [
+                    "MATH_BEEZER_THM_EDYES",
+                    "MATH_BEEZER_THM_NSMS",
+                    "MATH_BEEZER_THM_LNSMS",
+                    "MATH_BEEZER_THM_COB",
+                    "MATH_BEEZER_THM_DFS"
+                  ],
+                  "k5": false,
+                  "k1": false
+                },
+                "bm25": {
+                  "position": 21,
+                  "top5": [
+                    "MATH_BEEZER_THM_NSMS",
+                    "MATH_BEEZER_THM_RLTS",
+                    "MATH_BEEZER_THM_KLTS",
+                    "MATH_BEEZER_THM_EMS",
+                    "MATH_BEEZER_THM_CSMS"
+                  ],
+                  "k5": false,
+                  "k1": false,
+                  "positive_scores": 329
+                }
+              },
+              {
+                "id": 12,
+                "m": 2,
+                "engine": {
+                  "position": 19,
+                  "top5": [
+                    "MATH_BEEZER_THM_NSMS",
+                    "MATH_BEEZER_THM_LNSMS",
+                    "MATH_BEEZER_DEF_TS",
+                    "MATH_BEEZER_THM_ZSSM",
+                    "MATH_BEEZER_THM_DFS"
+                  ],
+                  "k5": false,
+                  "k1": false
+                },
+                "bm25": {
+                  "position": 27,
+                  "top5": [
+                    "MATH_BEEZER_DEF_TS",
+                    "MATH_BEEZER_THM_NSMS",
+                    "MATH_BEEZER_THM_KLTS",
+                    "MATH_BEEZER_THM_RLTS",
+                    "MATH_BEEZER_THM_EMS"
+                  ],
+                  "k5": false,
+                  "k1": false,
+                  "positive_scores": 289
+                }
+              },
+              {
+                "id": 13,
+                "m": 1,
+                "engine": {
+                  "position": 215,
+                  "top5": [
+                    "MATH_BEEZER_THM_ZPZT",
+                    "MATH_BEEZER_DEF_RREF",
+                    "MATH_BEEZER_THM_OSIS",
+                    "MATH_BEEZER_THM_ZVU",
+                    "MATH_BEEZER_THM_RREFU"
+                  ],
+                  "k5": false,
+                  "k1": false
+                },
+                "bm25": {
+                  "position": 54,
+                  "top5": [
+                    "MATH_BEEZER_THM_FVCS",
+                    "MATH_BEEZER_DEF_EO",
+                    "MATH_BEEZER_DEF_LICV",
+                    "MATH_BEEZER_DEF_LI",
+                    "MATH_BEEZER_DEF_REM"
+                  ],
+                  "k5": false,
+                  "k1": false,
+                  "positive_scores": 335
+                }
+              },
+              {
+                "id": 14,
+                "m": 1,
+                "engine": {
+                  "position": 1,
+                  "top5": [
+                    "MATH_BEEZER_DEF_OV",
+                    "MATH_BEEZER_DEF_OSV",
+                    "MATH_BEEZER_THM_OSLI",
+                    "MATH_BEEZER_THM_HMOE",
+                    "MATH_BEEZER_DEF_ONS"
+                  ],
+                  "k5": true,
+                  "k1": true
+                },
+                "bm25": {
+                  "position": 1,
+                  "top5": [
+                    "MATH_BEEZER_DEF_OV",
+                    "MATH_BEEZER_DEF_OSV",
+                    "MATH_BEEZER_DEF_REM",
+                    "MATH_BEEZER_THM_OSLI",
+                    "MATH_BEEZER_THM_HMOE"
+                  ],
+                  "k5": true,
+                  "k1": true,
+                  "positive_scores": 337
+                }
+              },
+              {
+                "id": 15,
+                "m": 1,
+                "engine": {
+                  "position": 24,
+                  "top5": [
+                    "MATH_BEEZER_DEF_NV",
+                    "MATH_BEEZER_THM_EDYES",
+                    "MATH_BEEZER_THM_CRVA",
+                    "MATH_BEEZER_THM_IPAC",
+                    "MATH_BEEZER_THM_VRRB"
+                  ],
+                  "k5": false,
+                  "k1": false
+                },
+                "bm25": {
+                  "position": 214,
+                  "top5": [
+                    "MATH_BEEZER_DEF_ZCV",
+                    "MATH_BEEZER_DEF_SOLV",
+                    "MATH_BEEZER_DEF_VOC",
+                    "MATH_BEEZER_DEF_VSCV",
+                    "MATH_BEEZER_DEF_MVP"
+                  ],
+                  "k5": false,
+                  "k1": false,
+                  "positive_scores": 296
+                }
+              },
+              {
+                "id": 16,
+                "m": 2,
+                "engine": {
+                  "position": 186,
+                  "top5": [
+                    "MATH_BEEZER_THM_OSIS",
+                    "MATH_BEEZER_THM_CRVA",
+                    "MATH_BEEZER_THM_IPAC",
+                    "MATH_BEEZER_THM_CRMA",
+                    "MATH_BEEZER_THM_UMPIP"
+                  ],
+                  "k5": false,
+                  "k1": false
+                },
+                "bm25": {
+                  "position": 27,
+                  "top5": [
+                    "MATH_BEEZER_DEF_LICV",
+                    "MATH_BEEZER_DEF_LI",
+                    "MATH_BEEZER_DEF_RLDCV",
+                    "MATH_BEEZER_DEF_IDLT",
+                    "MATH_BEEZER_DEF_RLD"
+                  ],
+                  "k5": false,
+                  "k1": false,
+                  "positive_scores": 282
+                }
+              },
+              {
+                "id": 17,
+                "m": 1,
+                "engine": {
+                  "position": 70,
+                  "top5": [
+                    "MATH_BEEZER_THM_EMMVP",
+                    "MATH_BEEZER_THM_CRVA",
+                    "MATH_BEEZER_THM_MMDAA",
+                    "MATH_BEEZER_DEF_MA",
+                    "MATH_BEEZER_THM_VSPM"
+                  ],
+                  "k5": false,
+                  "k1": false
+                },
+                "bm25": {
+                  "position": 143,
+                  "top5": [
+                    "MATH_BEEZER_DEF_RO",
+                    "MATH_BEEZER_THM_EMDRO",
+                    "MATH_BEEZER_DEF_EO",
+                    "MATH_BEEZER_DEF_CV",
+                    "MATH_BEEZER_THM_EOPSS"
+                  ],
+                  "k5": false,
+                  "k1": false,
+                  "positive_scores": 292
+                }
+              },
+              {
+                "id": 18,
+                "m": 1,
+                "engine": {
+                  "position": 133,
+                  "top5": [
+                    "MATH_BEEZER_THM_ZPZT",
+                    "MATH_BEEZER_THM_CCRA",
+                    "MATH_BEEZER_THM_CRVA",
+                    "MATH_BEEZER_THM_ZPCN",
+                    "MATH_BEEZER_THM_CCRM"
+                  ],
+                  "k5": false,
+                  "k1": false
+                },
+                "bm25": {
+                  "position": 50,
+                  "top5": [
+                    "MATH_BEEZER_THM_DRCMA",
+                    "MATH_BEEZER_THM_HSC",
+                    "MATH_BEEZER_DEF_EO",
+                    "MATH_BEEZER_DEF_CS",
+                    "MATH_BEEZER_DEF_RO"
+                  ],
+                  "k5": false,
+                  "k1": false,
+                  "positive_scores": 310
+                }
+              },
+              {
+                "id": 19,
+                "m": 0,
+                "engine": {
+                  "position": null,
+                  "top5": [
+                    "MATH_BEEZER_THM_SUVB",
+                    "MATH_BEEZER_THM_CUMOS",
+                    "MATH_BEEZER_THM_UMPIP",
+                    "MATH_BEEZER_DEF_SUV",
+                    "MATH_BEEZER_DEF_ONS"
+                  ],
+                  "k5": null,
+                  "k1": null
+                },
+                "bm25": {
+                  "position": null,
+                  "top5": [
+                    "MATH_BEEZER_THM_SUVB",
+                    "MATH_BEEZER_THM_LTDB",
+                    "MATH_BEEZER_THM_SSLD",
+                    "MATH_BEEZER_DEF_SUV",
+                    "MATH_BEEZER_DEF_CV"
+                  ],
+                  "k5": null,
+                  "k1": null,
+                  "positive_scores": 336
+                }
+              },
+              {
+                "id": 20,
+                "m": 0,
+                "engine": {
+                  "position": null,
+                  "top5": [
+                    "MATH_BEEZER_THM_CRVA",
+                    "MATH_BEEZER_THM_EDYES",
+                    "MATH_BEEZER_THM_PIP",
+                    "MATH_BEEZER_DEF_OV",
+                    "MATH_BEEZER_DEF_NV"
+                  ],
+                  "k5": null,
+                  "k1": null
+                },
+                "bm25": {
+                  "position": null,
+                  "top5": [
+                    "MATH_BEEZER_DEF_VS",
+                    "MATH_BEEZER_THM_SSLD",
+                    "MATH_BEEZER_THM_DRCMA",
+                    "MATH_BEEZER_DEF_EM",
+                    "MATH_BEEZER_DEF_CV"
+                  ],
+                  "k5": null,
+                  "k1": null,
+                  "positive_scores": 334
+                }
+              },
+              {
+                "id": 21,
+                "m": 2,
+                "engine": {
+                  "position": 15,
+                  "top5": [
+                    "MATH_BEEZER_THM_G",
+                    "MATH_BEEZER_THM_CFDVS",
+                    "MATH_BEEZER_THM_CSS",
+                    "MATH_BEEZER_THM_IVSED",
+                    "MATH_BEEZER_THM_CLI"
+                  ],
+                  "k5": false,
+                  "k1": false
+                },
+                "bm25": {
+                  "position": 13,
+                  "top5": [
+                    "MATH_BEEZER_DEF_EO",
+                    "MATH_BEEZER_THM_LTDB",
+                    "MATH_BEEZER_THM_EDYES",
+                    "MATH_BEEZER_DEF_TS",
+                    "MATH_BEEZER_DEF_RO"
+                  ],
+                  "k5": false,
+                  "k1": false,
+                  "positive_scores": 334
+                }
+              },
+              {
+                "id": 22,
+                "m": 0,
+                "engine": {
+                  "position": null,
+                  "top5": [
+                    "MATH_BEEZER_THM_CFDVS",
+                    "MATH_BEEZER_THM_G",
+                    "MATH_BEEZER_THM_IVSED",
+                    "MATH_BEEZER_THM_DFS",
+                    "MATH_BEEZER_THM_EDYES"
+                  ],
+                  "k5": null,
+                  "k1": null
+                },
+                "bm25": {
+                  "position": null,
+                  "top5": [
+                    "MATH_BEEZER_THM_LTDB",
+                    "MATH_BEEZER_DEF_CV",
+                    "MATH_BEEZER_DEF_LI",
+                    "MATH_BEEZER_DEF_LICV",
+                    "MATH_BEEZER_THM_EDYES"
+                  ],
+                  "k5": null,
+                  "k1": null,
+                  "positive_scores": 310
+                }
+              },
+              {
+                "id": 23,
+                "m": 1,
+                "engine": {
+                  "position": 19,
+                  "top5": [
+                    "MATH_BEEZER_DEF_NV",
+                    "MATH_BEEZER_THM_G",
+                    "MATH_BEEZER_THM_VRRB",
+                    "MATH_BEEZER_THM_CRVA",
+                    "MATH_BEEZER_THM_SUVB"
+                  ],
+                  "k5": false,
+                  "k1": false
+                },
+                "bm25": {
+                  "position": 111,
+                  "top5": [
+                    "MATH_BEEZER_DEF_ZCV",
+                    "MATH_BEEZER_DEF_TS",
+                    "MATH_BEEZER_THM_AIU",
+                    "MATH_BEEZER_DEF_EO",
+                    "MATH_BEEZER_DEF_IDLT"
+                  ],
+                  "k5": false,
+                  "k1": false,
+                  "positive_scores": 329
+                }
+              },
+              {
+                "id": 24,
+                "m": 1,
+                "engine": {
+                  "position": 4,
+                  "top5": [
+                    "MATH_BEEZER_DEF_NV",
+                    "MATH_BEEZER_THM_CRVA",
+                    "MATH_BEEZER_THM_SER",
+                    "MATH_BEEZER_DEF_IP",
+                    "MATH_BEEZER_THM_IVSED"
+                  ],
+                  "k5": true,
+                  "k1": false
+                },
+                "bm25": {
+                  "position": 46,
+                  "top5": [
+                    "MATH_BEEZER_THM_SER",
+                    "MATH_BEEZER_DEF_OV",
+                    "MATH_BEEZER_DEF_MA",
+                    "MATH_BEEZER_THM_SMEE",
+                    "MATH_BEEZER_DEF_SIM"
+                  ],
+                  "k5": false,
+                  "k1": false,
+                  "positive_scores": 259
+                }
+              },
+              {
+                "id": 25,
+                "m": 1,
+                "engine": {
+                  "position": 52,
+                  "top5": [
+                    "MATH_BEEZER_THM_DMFE",
+                    "MATH_BEEZER_THM_CFDVS",
+                    "MATH_BEEZER_THM_DFS",
+                    "MATH_BEEZER_THM_MNEM",
+                    "MATH_BEEZER_THM_IVSED"
+                  ],
+                  "k5": false,
+                  "k1": false
+                },
+                "bm25": {
+                  "position": 99,
+                  "top5": [
+                    "MATH_BEEZER_DEF_SET",
+                    "MATH_BEEZER_DEF_CV",
+                    "MATH_BEEZER_DEF_NM",
+                    "MATH_BEEZER_DEF_SQM",
+                    "MATH_BEEZER_DEF_EEM"
+                  ],
+                  "k5": false,
+                  "k1": false,
+                  "positive_scores": 314
+                }
+              },
+              {
+                "id": 26,
+                "m": 0,
+                "engine": {
+                  "position": null,
+                  "top5": [
+                    "MATH_BEEZER_DEF_OSV",
+                    "MATH_BEEZER_DEF_ONS",
+                    "MATH_BEEZER_THM_OSLI",
+                    "MATH_BEEZER_THM_GSP",
+                    "MATH_BEEZER_DEF_SUV"
+                  ],
+                  "k5": null,
+                  "k1": null
+                },
+                "bm25": {
+                  "position": null,
+                  "top5": [
+                    "MATH_BEEZER_THM_GSP",
+                    "MATH_BEEZER_THM_LIVHS",
+                    "MATH_BEEZER_DEF_SUV",
+                    "MATH_BEEZER_DEF_SSCV",
+                    "MATH_BEEZER_THM_SSLD"
+                  ],
+                  "k5": null,
+                  "k1": null,
+                  "positive_scores": 339
+                }
+              },
+              {
+                "id": 27,
+                "m": 1,
+                "engine": {
+                  "position": 3,
+                  "top5": [
+                    "MATH_BEEZER_THM_CRVA",
+                    "MATH_BEEZER_DEF_CVA",
+                    "MATH_BEEZER_DEF_LCCV",
+                    "MATH_BEEZER_DEF_MA",
+                    "MATH_BEEZER_DEF_LC"
+                  ],
+                  "k5": true,
+                  "k1": false
+                },
+                "bm25": {
+                  "position": 16,
+                  "top5": [
+                    "MATH_BEEZER_DEF_OSV",
+                    "MATH_BEEZER_THM_HMOE",
+                    "MATH_BEEZER_THM_VSPCV",
+                    "MATH_BEEZER_DEF_VSCV",
+                    "MATH_BEEZER_THM_LTDB"
+                  ],
+                  "k5": false,
+                  "k1": false,
+                  "positive_scores": 338
+                }
+              },
+              {
+                "id": 28,
+                "m": 1,
+                "engine": {
+                  "position": 1,
+                  "top5": [
+                    "MATH_BEEZER_DEF_NV",
+                    "MATH_BEEZER_THM_CRVA",
+                    "MATH_BEEZER_DEF_OV",
+                    "MATH_BEEZER_THM_PIP",
+                    "MATH_BEEZER_THM_EMMVP"
+                  ],
+                  "k5": true,
+                  "k1": true
+                },
+                "bm25": {
+                  "position": 47,
+                  "top5": [
+                    "MATH_BEEZER_DEF_IVS",
+                    "MATH_BEEZER_THM_NME2",
+                    "MATH_BEEZER_DEF_SUV",
+                    "MATH_BEEZER_THM_SUVB",
+                    "MATH_BEEZER_THM_VSPCV"
+                  ],
+                  "k5": false,
+                  "k1": false,
+                  "positive_scores": 220
+                }
+              }
+            ],
+            "acros_recovered": {
+              "distinct_expected": 15,
+              "engine": {
+                "k5": 4,
+                "k1": 2
+              },
+              "bm25": {
+                "k5": 1,
+                "k1": 1
+              }
+            },
+            "bm25_fewer_than_k_positive": {
+              "k5": 0,
+              "k1": 0
+            },
+            "nearest_chunk_distance": {
+              "n0": {
+                "values": [
+                  1.048324097978631,
+                  1.0586898956491952,
+                  0.9213625483761709,
+                  1.0147406815955458,
+                  1.143986731264611,
+                  1.0676640350559727,
+                  0.9573188562824041,
+                  0.9992188905865822,
+                  0.9467663673524018,
+                  0.9709825956869806
+                ],
+                "min": 0.9213625483761709,
+                "median": 1.006979786091064,
+                "max": 1.143986731264611
+              },
+              "p": {
+                "values": [
+                  1.0952440255720204,
+                  0.9709003204686562,
+                  1.072273258482502,
+                  1.0026436322650458,
+                  0.9505198168174543,
+                  0.8691773337522787,
+                  0.917136169249501,
+                  0.7679476304559195,
+                  1.0351380401383494,
+                  1.0219867142019832,
+                  0.9393894020677722,
+                  1.0200673688114437,
+                  0.9097650179354506,
+                  0.9203443653789098,
+                  0.968621654012357,
+                  0.9732710870635113,
+                  0.920966351500718,
+                  0.9130684043808939
+                ],
+                "min": 0.7679476304559195,
+                "median": 0.9595707354149057,
+                "max": 1.0952440255720204
+              }
+            },
+            "words_per_chunk": {
+              "min": 8,
+              "q1": 18.0,
+              "median": 25.0,
+              "q3": 35.0,
+              "max": 184,
+              "at_most_10": 9
+            },
+            "truncation": {
+              "max_seq_length": 32768,
+              "chunk_texts": 0,
+              "query_texts": 0
+            },
+            "bitwise_second_pass_differences": 0,
+            "citation_fraction": {
+              "pairs": 851,
+              "within": 267,
+              "fraction": 0.3137485311398355,
+              "epsilon": 0.8
+            }
+          }
+        },
+        "mcnemar_vs_minilm": {
+          "k5": {
+            "b": 5,
+            "c": 2,
+            "n": 7,
+            "num": 29,
+            "den": 128,
+            "float": 0.2265625
+          },
+          "k1": {
+            "b": 1,
+            "c": 0,
+            "n": 1,
+            "num": 1,
+            "den": 2,
+            "float": 0.5
+          }
+        },
+        "rank_metrics": {
+          "minilm": {
+            "mrr": 0.19225318224409513,
+            "recall_10": 0.3333333333333333,
+            "recall_20": 0.5,
+            "median_position": 19.0
+          },
+          "qwen3": {
+            "mrr": 0.2744349637022758,
+            "recall_10": 0.3888888888888889,
+            "recall_20": 0.6111111111111112,
+            "median_position": 17.0
+          },
+          "bm25": {
+            "mrr": 0.07768577703384369,
+            "recall_10": 0.05555555555555555,
+            "recall_20": 0.16666666666666666,
+            "median_position": 52.0
+          }
+        },
+        "no_instruction": {
+          "items": [
+            {
+              "id": 1,
+              "position": 1,
+              "k5": true,
+              "k1": true
+            },
+            {
+              "id": 2,
+              "position": 28,
+              "k5": false,
+              "k1": false
+            },
+            {
+              "id": 6,
+              "position": 1,
+              "k5": true,
+              "k1": true
+            },
+            {
+              "id": 7,
+              "position": 3,
+              "k5": true,
+              "k1": false
+            },
+            {
+              "id": 11,
+              "position": 115,
+              "k5": false,
+              "k1": false
+            },
+            {
+              "id": 12,
+              "position": 21,
+              "k5": false,
+              "k1": false
+            },
+            {
+              "id": 13,
+              "position": 122,
+              "k5": false,
+              "k1": false
+            },
+            {
+              "id": 14,
+              "position": 1,
+              "k5": true,
+              "k1": true
+            },
+            {
+              "id": 15,
+              "position": 61,
+              "k5": false,
+              "k1": false
+            },
+            {
+              "id": 16,
+              "position": 179,
+              "k5": false,
+              "k1": false
+            },
+            {
+              "id": 17,
+              "position": 125,
+              "k5": false,
+              "k1": false
+            },
+            {
+              "id": 18,
+              "position": 298,
+              "k5": false,
+              "k1": false
+            },
+            {
+              "id": 21,
+              "position": 28,
+              "k5": false,
+              "k1": false
+            },
+            {
+              "id": 23,
+              "position": 21,
+              "k5": false,
+              "k1": false
+            },
+            {
+              "id": 24,
+              "position": 21,
+              "k5": false,
+              "k1": false
+            },
+            {
+              "id": 25,
+              "position": 23,
+              "k5": false,
+              "k1": false
+            },
+            {
+              "id": 27,
+              "position": 5,
+              "k5": true,
+              "k1": false
+            },
+            {
+              "id": 28,
+              "position": 1,
+              "k5": true,
+              "k1": true
+            }
+          ],
+          "H_k5": 6,
+          "H_k1": 4,
+          "rank_metrics": {
+            "mrr": 0.2689625234152061,
+            "recall_10": 0.3333333333333333,
+            "recall_20": 0.3333333333333333,
+            "median_position": 22.0
+          }
+        },
+        "auc": {
+          "num": 7,
+          "den": 10,
+          "float": 0.7
+        },
+        "split": {
+          "source": "taken from P1's post-result reading (docs/roadmap/NEXT_RESEARCH.md), which came after P1's result; report-only",
+          "emptied": {
+            "ids": [
+              1,
+              2,
+              6,
+              7,
+              13,
+              15,
+              18,
+              23,
+              24,
+              25,
+              28
+            ],
+            "arms": {
+              "minilm": {
+                "hits_k5": 2,
+                "hits_k1": 1,
+                "median_position": 47,
+                "mrr": 0.16024522726152102
+              },
+              "qwen3": {
+                "hits_k5": 5,
+                "hits_k1": 2,
+                "median_position": 14,
+                "mrr": 0.31337523145968676
+              },
+              "bm25": {
+                "hits_k5": 0,
+                "hits_k1": 0,
+                "median_position": 111,
+                "mrr": 0.011839525545452794
+              }
+            }
+          },
+          "kept": {
+            "ids": [
+              11,
+              12,
+              14,
+              16,
+              17,
+              21,
+              27
+            ],
+            "arms": {
+              "minilm": {
+                "hits_k5": 2,
+                "hits_k1": 1,
+                "median_position": 6,
+                "mrr": 0.24255139721671162
+              },
+              "qwen3": {
+                "hits_k5": 2,
+                "hits_k1": 1,
+                "median_position": 19,
+                "mrr": 0.2132431143692015
+              },
+              "bm25": {
+                "hits_k5": 1,
+                "hits_k1": 1,
+                "median_position": 21,
+                "mrr": 0.18115845794417224
+              }
+            }
+          }
+        }
+      }
+    },
+    "384": {
+      "dimension": 384,
+      "valid": true,
+      "first_failed": null,
+      "failed": [],
+      "wilcoxon": {
+        "n": 16,
+        "dropped_zeros": 2,
+        "w_plus": 72.0,
+        "w_minus": 64.0,
+        "p": {
+          "num": 6965,
+          "den": 16384,
+          "float": 0.42510986328125
+        },
+        "pass": false,
+        "pairs": [
+          {
+            "id": 1,
+            "minilm": 47,
+            "qwen3": 2,
+            "d": 45
+          },
+          {
+            "id": 2,
+            "minilm": 2,
+            "qwen3": 18,
+            "d": -16
+          },
+          {
+            "id": 6,
+            "minilm": 15,
+            "qwen3": 1,
+            "d": 14
+          },
+          {
+            "id": 7,
+            "minilm": 16,
+            "qwen3": 2,
+            "d": 14
+          },
+          {
+            "id": 11,
+            "minilm": 26,
+            "qwen3": 46,
+            "d": -20
+          },
+          {
+            "id": 12,
+            "minilm": 4,
+            "qwen3": 6,
+            "d": -2
+          },
+          {
+            "id": 13,
+            "minilm": 52,
+            "qwen3": 178,
+            "d": -126
+          },
+          {
+            "id": 14,
+            "minilm": 1,
+            "qwen3": 1,
+            "d": 0
+          },
+          {
+            "id": 15,
+            "minilm": 69,
+            "qwen3": 46,
+            "d": 23
+          },
+          {
+            "id": 16,
+            "minilm": 58,
+            "qwen3": 274,
+            "d": -216
+          },
+          {
+            "id": 17,
+            "minilm": 17,
+            "qwen3": 185,
+            "d": -168
+          },
+          {
+            "id": 18,
+            "minilm": 215,
+            "qwen3": 141,
+            "d": 74
+          },
+          {
+            "id": 21,
+            "minilm": 6,
+            "qwen3": 7,
+            "d": -1
+          },
+          {
+            "id": 23,
+            "minilm": 56,
+            "qwen3": 45,
+            "d": 11
+          },
+          {
+            "id": 24,
+            "minilm": 21,
+            "qwen3": 3,
+            "d": 18
+          },
+          {
+            "id": 25,
+            "minilm": 119,
+            "qwen3": 55,
+            "d": 64
+          },
+          {
+            "id": 27,
+            "minilm": 6,
+            "qwen3": 3,
+            "d": 3
+          },
+          {
+            "id": 28,
+            "minilm": 1,
+            "qwen3": 1,
+            "d": 0
+          }
+        ]
+      },
+      "report_only": {
+        "p1_measurement": {
+          "valid": true,
+          "first_failed": null,
+          "failed": [],
+          "vectors_sha256": "387147d790122d0ea62f41dee78a7fbaca60627a193625ca8a06b023d054da31",
+          "alignment_vectors_sha256": "a64af98d4c58c8426a6fab0b253c351216e4364eec15e24703b706aa092f8618",
+          "counts": {
+            "chunks": 342,
+            "distinct_texts": 340,
+            "items": 28,
+            "positives": 18,
+            "chunk_texts_over_max_seq_length": 0,
+            "query_texts_over_max_seq_length": 0
+          },
+          "alignment": {
+            "matched": 342,
+            "required": 342,
+            "bitwise_differences": 0
+          },
+          "k5": {
+            "H_engine": 7,
+            "H_bm25": 1,
+            "chance": {
+              "num": 118219759057442561744896882756015313828125,
+              "den": 11751662785285935812202389111196004311062279732736,
+              "float": 1.0059832486468518e-08,
+              "pass": true
+            },
+            "mcnemar": {
+              "b": 6,
+              "c": 0,
+              "n": 6,
+              "num": 1,
+              "den": 64,
+              "float": 0.015625,
+              "pass": true
+            },
+            "k_pass": true
+          },
+          "k1": {
+            "H_engine": 3,
+            "H_bm25": 1,
+            "chance": {
+              "num": 7847161895713406448511718252137971760369,
+              "den": 256064826038810387592107413984173582463156224,
+              "float": 3.0645215967787994e-05,
+              "pass": true
+            },
+            "mcnemar": {
+              "b": 2,
+              "c": 0,
+              "n": 2,
+              "num": 1,
+              "den": 4,
+              "float": 0.25,
+              "pass": false
+            },
+            "k_pass": false
+          },
+          "holds": false,
+          "holds_limit": "Declared limit (P1.md, Chance): items that share a target are not independent, and the chance and McNemar tails take them as independent, so both p-values can be anti-conservative, the McNemar one the more.",
+          "shuffle": {
+            "k5": {
+              "count": 0,
+              "total": 1000,
+              "fraction": 0.0
+            },
+            "k1": {
+              "count": 71,
+              "total": 1000,
+              "fraction": 0.071
+            }
+          },
+          "bm25_check": {
+            "chunks_with_unique_token": 92,
+            "passed": 92
+          },
+          "group_sensitivity": {
+            "units": [
+              [
+                1,
+                6,
+                28
+              ],
+              [
+                2,
+                15
+              ],
+              [
+                7,
+                23,
+                24
+              ],
+              [
+                11,
+                12
+              ],
+              [
+                13
+              ],
+              [
+                14
+              ],
+              [
+                16
+              ],
+              [
+                17
+              ],
+              [
+                18
+              ],
+              [
+                21
+              ],
+              [
+                25
+              ],
+              [
+                27
+              ]
+            ],
+            "k5": {
+              "H_engine": 4,
+              "H_bm25": 1,
+              "chance": {
+                "num": 19611565838299630175794121299906812007908844375,
+                "den": 125351069709716648663492150519424045984664317149184,
+                "float": 0.00015645311909755032
+              },
+              "mcnemar": {
+                "b": 3,
+                "c": 0,
+                "n": 3,
+                "num": 1,
+                "den": 8,
+                "float": 0.125
+              }
+            },
+            "k1": {
+              "H_engine": 2,
+              "H_bm25": 1,
+              "chance": {
+                "num": 104630525648457238245587801210857269374731,
+                "den": 64016206509702596898026853496043395615789056,
+                "float": 0.0016344380798727733
+              },
+              "mcnemar": {
+                "b": 1,
+                "c": 0,
+                "n": 1,
+                "num": 1,
+                "den": 2,
+                "float": 0.5
+              }
+            }
+          },
+          "report_only": {
+            "items": [
+              {
+                "id": 1,
+                "m": 1,
+                "engine": {
+                  "position": 2,
+                  "top5": [
+                    "MATH_BEEZER_DEF_ONS",
+                    "MATH_BEEZER_DEF_NV",
+                    "MATH_BEEZER_THM_CRVA",
+                    "MATH_BEEZER_DEF_HS",
+                    "MATH_BEEZER_THM_VRRB"
+                  ],
+                  "k5": true,
+                  "k1": false
+                },
+                "bm25": {
+                  "position": 147,
+                  "top5": [
+                    "MATH_BEEZER_DEF_SET",
+                    "MATH_BEEZER_DEF_TM",
+                    "MATH_BEEZER_DEF_A",
+                    "MATH_BEEZER_DEF_EEF",
+                    "MATH_BEEZER_DEF_DM"
+                  ],
+                  "k5": false,
+                  "k1": false,
+                  "positive_scores": 297
+                }
+              },
+              {
+                "id": 2,
+                "m": 1,
+                "engine": {
+                  "position": 18,
+                  "top5": [
+                    "MATH_BEEZER_DEF_NV",
+                    "MATH_BEEZER_THM_AISM",
+                    "MATH_BEEZER_THM_CRVA",
+                    "MATH_BEEZER_THM_CRSM",
+                    "MATH_BEEZER_DEF_CCCV"
+                  ],
+                  "k5": false,
+                  "k1": false
+                },
+                "bm25": {
+                  "position": 232,
+                  "top5": [
+                    "MATH_BEEZER_THM_SSLD",
+                    "MATH_BEEZER_DEF_EEF",
+                    "MATH_BEEZER_DEF_LI",
+                    "MATH_BEEZER_DEF_CBM",
+                    "MATH_BEEZER_DEF_IDLT"
+                  ],
+                  "k5": false,
+                  "k1": false,
+                  "positive_scores": 239
+                }
+              },
+              {
+                "id": 3,
+                "m": 0,
+                "engine": {
+                  "position": null,
+                  "top5": [
+                    "MATH_BEEZER_THM_CRVA",
+                    "MATH_BEEZER_THM_CSS",
+                    "MATH_BEEZER_THM_EDYES",
+                    "MATH_BEEZER_DEF_OV",
+                    "MATH_BEEZER_THM_REMRS"
+                  ],
+                  "k5": null,
+                  "k1": null
+                },
+                "bm25": {
+                  "position": null,
+                  "top5": [
+                    "MATH_BEEZER_DEF_LT",
+                    "MATH_BEEZER_THM_NME2",
+                    "MATH_BEEZER_DEF_B",
+                    "MATH_BEEZER_DEF_ES",
+                    "MATH_BEEZER_DEF_RLD"
+                  ],
+                  "k5": null,
+                  "k1": null,
+                  "positive_scores": 318
+                }
+              },
+              {
+                "id": 4,
+                "m": 0,
+                "engine": {
+                  "position": null,
+                  "top5": [
+                    "MATH_BEEZER_THM_AISM",
+                    "MATH_BEEZER_THM_CRVA",
+                    "MATH_BEEZER_DEF_NV",
+                    "MATH_BEEZER_THM_VRRB",
+                    "MATH_BEEZER_DEF_IP"
+                  ],
+                  "k5": null,
+                  "k1": null
+                },
+                "bm25": {
+                  "position": null,
+                  "top5": [
+                    "MATH_BEEZER_DEF_LI",
+                    "MATH_BEEZER_DEF_CBM",
+                    "MATH_BEEZER_DEF_EEF",
+                    "MATH_BEEZER_DEF_IDLT",
+                    "MATH_BEEZER_DEF_RLD"
+                  ],
+                  "k5": null,
+                  "k1": null,
+                  "positive_scores": 296
+                }
+              },
+              {
+                "id": 5,
+                "m": 0,
+                "engine": {
+                  "position": null,
+                  "top5": [
+                    "MATH_BEEZER_DEF_NV",
+                    "MATH_BEEZER_DEF_IP",
+                    "MATH_BEEZER_THM_IPAC",
+                    "MATH_BEEZER_THM_CRSM",
+                    "MATH_BEEZER_THM_VRLT"
+                  ],
+                  "k5": null,
+                  "k1": null
+                },
+                "bm25": {
+                  "position": null,
+                  "top5": [
+                    "MATH_BEEZER_DEF_IVS",
+                    "MATH_BEEZER_DEF_ZCV",
+                    "MATH_BEEZER_DEF_CS",
+                    "MATH_BEEZER_DEF_EO",
+                    "MATH_BEEZER_THM_EMHE"
+                  ],
+                  "k5": null,
+                  "k1": null,
+                  "positive_scores": 341
+                }
+              },
+              {
+                "id": 6,
+                "m": 1,
+                "engine": {
+                  "position": 1,
+                  "top5": [
+                    "MATH_BEEZER_DEF_NV",
+                    "MATH_BEEZER_THM_DM",
+                    "MATH_BEEZER_THM_DP",
+                    "MATH_BEEZER_THM_DCM",
+                    "MATH_BEEZER_THM_ZSSM"
+                  ],
+                  "k5": true,
+                  "k1": true
+                },
+                "bm25": {
+                  "position": 155,
+                  "top5": [
+                    "MATH_BEEZER_THM_DEC",
+                    "MATH_BEEZER_THM_DER",
+                    "MATH_BEEZER_DEF_TM",
+                    "MATH_BEEZER_DEF_DM",
+                    "MATH_BEEZER_DEF_A"
+                  ],
+                  "k5": false,
+                  "k1": false,
+                  "positive_scores": 335
+                }
+              },
+              {
+                "id": 7,
+                "m": 1,
+                "engine": {
+                  "position": 2,
+                  "top5": [
+                    "MATH_BEEZER_DEF_NV",
+                    "MATH_BEEZER_DEF_IP",
+                    "MATH_BEEZER_THM_CRVA",
+                    "MATH_BEEZER_THM_VRRB",
+                    "MATH_BEEZER_THM_CRSM"
+                  ],
+                  "k5": true,
+                  "k1": false
+                },
+                "bm25": {
+                  "position": 136,
+                  "top5": [
+                    "MATH_BEEZER_DEF_ZCV",
+                    "MATH_BEEZER_DEF_VS",
+                    "MATH_BEEZER_DEF_VOC",
+                    "MATH_BEEZER_DEF_SOLV",
+                    "MATH_BEEZER_DEF_NV"
+                  ],
+                  "k5": false,
+                  "k1": false,
+                  "positive_scores": 334
+                }
+              },
+              {
+                "id": 8,
+                "m": 0,
+                "engine": {
+                  "position": null,
+                  "top5": [
+                    "MATH_BEEZER_DEF_OSV",
+                    "MATH_BEEZER_THM_CRVA",
+                    "MATH_BEEZER_DEF_OV",
+                    "MATH_BEEZER_THM_OSLI",
+                    "MATH_BEEZER_THM_IPAC"
+                  ],
+                  "k5": null,
+                  "k1": null
+                },
+                "bm25": {
+                  "position": null,
+                  "top5": [
+                    "MATH_BEEZER_DEF_SU",
+                    "MATH_BEEZER_THM_VSLT",
+                    "MATH_BEEZER_THM_UTMR",
+                    "MATH_BEEZER_DEF_SQM",
+                    "MATH_BEEZER_THM_NME2"
+                  ],
+                  "k5": null,
+                  "k1": null,
+                  "positive_scores": 287
+                }
+              },
+              {
+                "id": 9,
+                "m": 0,
+                "engine": {
+                  "position": null,
+                  "top5": [
+                    "MATH_BEEZER_THM_IPAC",
+                    "MATH_BEEZER_THM_MMDAA",
+                    "MATH_BEEZER_DEF_EM",
+                    "MATH_BEEZER_THM_EDYES",
+                    "MATH_BEEZER_DEF_NV"
+                  ],
+                  "k5": null,
+                  "k1": null
+                },
+                "bm25": {
+                  "position": null,
+                  "top5": [
+                    "MATH_BEEZER_DEF_IVS",
+                    "MATH_BEEZER_THM_DRCMA",
+                    "MATH_BEEZER_DEF_ES",
+                    "MATH_BEEZER_DEF_B",
+                    "MATH_BEEZER_DEF_CS"
+                  ],
+                  "k5": null,
+                  "k1": null,
+                  "positive_scores": 325
+                }
+              },
+              {
+                "id": 10,
+                "m": 0,
+                "engine": {
+                  "position": null,
+                  "top5": [
+                    "MATH_BEEZER_DEF_RREF",
+                    "MATH_BEEZER_THM_DM",
+                    "MATH_BEEZER_THM_DCM",
+                    "MATH_BEEZER_THM_DP",
+                    "MATH_BEEZER_DEF_AME"
+                  ],
+                  "k5": null,
+                  "k1": null
+                },
+                "bm25": {
+                  "position": null,
+                  "top5": [
+                    "MATH_BEEZER_DEF_CM",
+                    "MATH_BEEZER_THM_EMDRO",
+                    "MATH_BEEZER_THM_TTMI",
+                    "MATH_BEEZER_DEF_LNS",
+                    "MATH_BEEZER_THM_LNSMS"
+                  ],
+                  "k5": null,
+                  "k1": null,
+                  "positive_scores": 335
+                }
+              },
+              {
+                "id": 11,
+                "m": 1,
+                "engine": {
+                  "position": 46,
+                  "top5": [
+                    "MATH_BEEZER_THM_EDYES",
+                    "MATH_BEEZER_THM_LNSMS",
+                    "MATH_BEEZER_DEF_OSV",
+                    "MATH_BEEZER_THM_IPAC",
+                    "MATH_BEEZER_THM_NSMS"
+                  ],
+                  "k5": false,
+                  "k1": false
+                },
+                "bm25": {
+                  "position": 21,
+                  "top5": [
+                    "MATH_BEEZER_THM_NSMS",
+                    "MATH_BEEZER_THM_RLTS",
+                    "MATH_BEEZER_THM_KLTS",
+                    "MATH_BEEZER_THM_EMS",
+                    "MATH_BEEZER_THM_CSMS"
+                  ],
+                  "k5": false,
+                  "k1": false,
+                  "positive_scores": 329
+                }
+              },
+              {
+                "id": 12,
+                "m": 2,
+                "engine": {
+                  "position": 6,
+                  "top5": [
+                    "MATH_BEEZER_THM_LNSMS",
+                    "MATH_BEEZER_THM_NSMS",
+                    "MATH_BEEZER_THM_ZSSM",
+                    "MATH_BEEZER_DEF_EM",
+                    "MATH_BEEZER_THM_NMTNS"
+                  ],
+                  "k5": false,
+                  "k1": false
+                },
+                "bm25": {
+                  "position": 27,
+                  "top5": [
+                    "MATH_BEEZER_DEF_TS",
+                    "MATH_BEEZER_THM_NSMS",
+                    "MATH_BEEZER_THM_KLTS",
+                    "MATH_BEEZER_THM_RLTS",
+                    "MATH_BEEZER_THM_EMS"
+                  ],
+                  "k5": false,
+                  "k1": false,
+                  "positive_scores": 289
+                }
+              },
+              {
+                "id": 13,
+                "m": 1,
+                "engine": {
+                  "position": 178,
+                  "top5": [
+                    "MATH_BEEZER_THM_ZPZT",
+                    "MATH_BEEZER_THM_ZVU",
+                    "MATH_BEEZER_DEF_RREF",
+                    "MATH_BEEZER_THM_MIU",
+                    "MATH_BEEZER_THM_OSIS"
+                  ],
+                  "k5": false,
+                  "k1": false
+                },
+                "bm25": {
+                  "position": 54,
+                  "top5": [
+                    "MATH_BEEZER_THM_FVCS",
+                    "MATH_BEEZER_DEF_EO",
+                    "MATH_BEEZER_DEF_LICV",
+                    "MATH_BEEZER_DEF_LI",
+                    "MATH_BEEZER_DEF_REM"
+                  ],
+                  "k5": false,
+                  "k1": false,
+                  "positive_scores": 335
+                }
+              },
+              {
+                "id": 14,
+                "m": 1,
+                "engine": {
+                  "position": 1,
+                  "top5": [
+                    "MATH_BEEZER_DEF_OV",
+                    "MATH_BEEZER_DEF_OSV",
+                    "MATH_BEEZER_THM_HMOE",
+                    "MATH_BEEZER_THM_OSLI",
+                    "MATH_BEEZER_THM_CRVA"
+                  ],
+                  "k5": true,
+                  "k1": true
+                },
+                "bm25": {
+                  "position": 1,
+                  "top5": [
+                    "MATH_BEEZER_DEF_OV",
+                    "MATH_BEEZER_DEF_OSV",
+                    "MATH_BEEZER_DEF_REM",
+                    "MATH_BEEZER_THM_OSLI",
+                    "MATH_BEEZER_THM_HMOE"
+                  ],
+                  "k5": true,
+                  "k1": true,
+                  "positive_scores": 337
+                }
+              },
+              {
+                "id": 15,
+                "m": 1,
+                "engine": {
+                  "position": 46,
+                  "top5": [
+                    "MATH_BEEZER_DEF_NV",
+                    "MATH_BEEZER_THM_EDYES",
+                    "MATH_BEEZER_THM_CRVA",
+                    "MATH_BEEZER_THM_CRSM",
+                    "MATH_BEEZER_DEF_IP"
+                  ],
+                  "k5": false,
+                  "k1": false
+                },
+                "bm25": {
+                  "position": 214,
+                  "top5": [
+                    "MATH_BEEZER_DEF_ZCV",
+                    "MATH_BEEZER_DEF_SOLV",
+                    "MATH_BEEZER_DEF_VOC",
+                    "MATH_BEEZER_DEF_VSCV",
+                    "MATH_BEEZER_DEF_MVP"
+                  ],
+                  "k5": false,
+                  "k1": false,
+                  "positive_scores": 296
+                }
+              },
+              {
+                "id": 16,
+                "m": 2,
+                "engine": {
+                  "position": 274,
+                  "top5": [
+                    "MATH_BEEZER_THM_CRVA",
+                    "MATH_BEEZER_THM_IPAC",
+                    "MATH_BEEZER_THM_AISM",
+                    "MATH_BEEZER_THM_LTTZZ",
+                    "MATH_BEEZER_THM_OSIS"
+                  ],
+                  "k5": false,
+                  "k1": false
+                },
+                "bm25": {
+                  "position": 27,
+                  "top5": [
+                    "MATH_BEEZER_DEF_LICV",
+                    "MATH_BEEZER_DEF_LI",
+                    "MATH_BEEZER_DEF_RLDCV",
+                    "MATH_BEEZER_DEF_IDLT",
+                    "MATH_BEEZER_DEF_RLD"
+                  ],
+                  "k5": false,
+                  "k1": false,
+                  "positive_scores": 282
+                }
+              },
+              {
+                "id": 17,
+                "m": 1,
+                "engine": {
+                  "position": 185,
+                  "top5": [
+                    "MATH_BEEZER_THM_MMDAA",
+                    "MATH_BEEZER_THM_CRVA",
+                    "MATH_BEEZER_THM_AISM",
+                    "MATH_BEEZER_THM_VSPCV",
+                    "MATH_BEEZER_THM_VSLT"
+                  ],
+                  "k5": false,
+                  "k1": false
+                },
+                "bm25": {
+                  "position": 143,
+                  "top5": [
+                    "MATH_BEEZER_DEF_RO",
+                    "MATH_BEEZER_THM_EMDRO",
+                    "MATH_BEEZER_DEF_EO",
+                    "MATH_BEEZER_DEF_CV",
+                    "MATH_BEEZER_THM_EOPSS"
+                  ],
+                  "k5": false,
+                  "k1": false,
+                  "positive_scores": 292
+                }
+              },
+              {
+                "id": 18,
+                "m": 1,
+                "engine": {
+                  "position": 141,
+                  "top5": [
+                    "MATH_BEEZER_THM_CCRA",
+                    "MATH_BEEZER_THM_CRVA",
+                    "MATH_BEEZER_THM_ZPZT",
+                    "MATH_BEEZER_THM_PCNA",
+                    "MATH_BEEZER_THM_CCRM"
+                  ],
+                  "k5": false,
+                  "k1": false
+                },
+                "bm25": {
+                  "position": 50,
+                  "top5": [
+                    "MATH_BEEZER_THM_DRCMA",
+                    "MATH_BEEZER_THM_HSC",
+                    "MATH_BEEZER_DEF_EO",
+                    "MATH_BEEZER_DEF_CS",
+                    "MATH_BEEZER_DEF_RO"
+                  ],
+                  "k5": false,
+                  "k1": false,
+                  "positive_scores": 310
+                }
+              },
+              {
+                "id": 19,
+                "m": 0,
+                "engine": {
+                  "position": null,
+                  "top5": [
+                    "MATH_BEEZER_DEF_ONS",
+                    "MATH_BEEZER_THM_SUVB",
+                    "MATH_BEEZER_THM_CUMOS",
+                    "MATH_BEEZER_THM_GSP",
+                    "MATH_BEEZER_THM_CSS"
+                  ],
+                  "k5": null,
+                  "k1": null
+                },
+                "bm25": {
+                  "position": null,
+                  "top5": [
+                    "MATH_BEEZER_THM_SUVB",
+                    "MATH_BEEZER_THM_LTDB",
+                    "MATH_BEEZER_THM_SSLD",
+                    "MATH_BEEZER_DEF_SUV",
+                    "MATH_BEEZER_DEF_CV"
+                  ],
+                  "k5": null,
+                  "k1": null,
+                  "positive_scores": 336
+                }
+              },
+              {
+                "id": 20,
+                "m": 0,
+                "engine": {
+                  "position": null,
+                  "top5": [
+                    "MATH_BEEZER_THM_CRVA",
+                    "MATH_BEEZER_DEF_NV",
+                    "MATH_BEEZER_THM_EDYES",
+                    "MATH_BEEZER_DEF_OSV",
+                    "MATH_BEEZER_THM_VSPCV"
+                  ],
+                  "k5": null,
+                  "k1": null
+                },
+                "bm25": {
+                  "position": null,
+                  "top5": [
+                    "MATH_BEEZER_DEF_VS",
+                    "MATH_BEEZER_THM_SSLD",
+                    "MATH_BEEZER_THM_DRCMA",
+                    "MATH_BEEZER_DEF_EM",
+                    "MATH_BEEZER_DEF_CV"
+                  ],
+                  "k5": null,
+                  "k1": null,
+                  "positive_scores": 334
+                }
+              },
+              {
+                "id": 21,
+                "m": 2,
+                "engine": {
+                  "position": 7,
+                  "top5": [
+                    "MATH_BEEZER_THM_CFDVS",
+                    "MATH_BEEZER_THM_IVSED",
+                    "MATH_BEEZER_THM_G",
+                    "MATH_BEEZER_THM_CSS",
+                    "MATH_BEEZER_DEF_VSCV"
+                  ],
+                  "k5": false,
+                  "k1": false
+                },
+                "bm25": {
+                  "position": 13,
+                  "top5": [
+                    "MATH_BEEZER_DEF_EO",
+                    "MATH_BEEZER_THM_LTDB",
+                    "MATH_BEEZER_THM_EDYES",
+                    "MATH_BEEZER_DEF_TS",
+                    "MATH_BEEZER_DEF_RO"
+                  ],
+                  "k5": false,
+                  "k1": false,
+                  "positive_scores": 334
+                }
+              },
+              {
+                "id": 22,
+                "m": 0,
+                "engine": {
+                  "position": null,
+                  "top5": [
+                    "MATH_BEEZER_THM_CFDVS",
+                    "MATH_BEEZER_THM_DFS",
+                    "MATH_BEEZER_THM_CSS",
+                    "MATH_BEEZER_THM_IVSED",
+                    "MATH_BEEZER_THM_G"
+                  ],
+                  "k5": null,
+                  "k1": null
+                },
+                "bm25": {
+                  "position": null,
+                  "top5": [
+                    "MATH_BEEZER_THM_LTDB",
+                    "MATH_BEEZER_DEF_CV",
+                    "MATH_BEEZER_DEF_LI",
+                    "MATH_BEEZER_DEF_LICV",
+                    "MATH_BEEZER_THM_EDYES"
+                  ],
+                  "k5": null,
+                  "k1": null,
+                  "positive_scores": 310
+                }
+              },
+              {
+                "id": 23,
+                "m": 1,
+                "engine": {
+                  "position": 45,
+                  "top5": [
+                    "MATH_BEEZER_DEF_NV",
+                    "MATH_BEEZER_THM_G",
+                    "MATH_BEEZER_THM_SUVB",
+                    "MATH_BEEZER_THM_VRRB",
+                    "MATH_BEEZER_THM_CRSM"
+                  ],
+                  "k5": false,
+                  "k1": false
+                },
+                "bm25": {
+                  "position": 111,
+                  "top5": [
+                    "MATH_BEEZER_DEF_ZCV",
+                    "MATH_BEEZER_DEF_TS",
+                    "MATH_BEEZER_THM_AIU",
+                    "MATH_BEEZER_DEF_EO",
+                    "MATH_BEEZER_DEF_IDLT"
+                  ],
+                  "k5": false,
+                  "k1": false,
+                  "positive_scores": 329
+                }
+              },
+              {
+                "id": 24,
+                "m": 1,
+                "engine": {
+                  "position": 3,
+                  "top5": [
+                    "MATH_BEEZER_DEF_NV",
+                    "MATH_BEEZER_THM_CRVA",
+                    "MATH_BEEZER_DEF_IP",
+                    "MATH_BEEZER_THM_SMEE",
+                    "MATH_BEEZER_THM_CRSM"
+                  ],
+                  "k5": true,
+                  "k1": false
+                },
+                "bm25": {
+                  "position": 46,
+                  "top5": [
+                    "MATH_BEEZER_THM_SER",
+                    "MATH_BEEZER_DEF_OV",
+                    "MATH_BEEZER_DEF_MA",
+                    "MATH_BEEZER_THM_SMEE",
+                    "MATH_BEEZER_DEF_SIM"
+                  ],
+                  "k5": false,
+                  "k1": false,
+                  "positive_scores": 259
+                }
+              },
+              {
+                "id": 25,
+                "m": 1,
+                "engine": {
+                  "position": 55,
+                  "top5": [
+                    "MATH_BEEZER_THM_CFDVS",
+                    "MATH_BEEZER_THM_MNEM",
+                    "MATH_BEEZER_THM_DMFE",
+                    "MATH_BEEZER_DEF_GME",
+                    "MATH_BEEZER_THM_NEM"
+                  ],
+                  "k5": false,
+                  "k1": false
+                },
+                "bm25": {
+                  "position": 99,
+                  "top5": [
+                    "MATH_BEEZER_DEF_SET",
+                    "MATH_BEEZER_DEF_CV",
+                    "MATH_BEEZER_DEF_NM",
+                    "MATH_BEEZER_DEF_SQM",
+                    "MATH_BEEZER_DEF_EEM"
+                  ],
+                  "k5": false,
+                  "k1": false,
+                  "positive_scores": 314
+                }
+              },
+              {
+                "id": 26,
+                "m": 0,
+                "engine": {
+                  "position": null,
+                  "top5": [
+                    "MATH_BEEZER_DEF_ONS",
+                    "MATH_BEEZER_THM_CRVA",
+                    "MATH_BEEZER_DEF_OSV",
+                    "MATH_BEEZER_THM_GSP",
+                    "MATH_BEEZER_THM_OSLI"
+                  ],
+                  "k5": null,
+                  "k1": null
+                },
+                "bm25": {
+                  "position": null,
+                  "top5": [
+                    "MATH_BEEZER_THM_GSP",
+                    "MATH_BEEZER_THM_LIVHS",
+                    "MATH_BEEZER_DEF_SUV",
+                    "MATH_BEEZER_DEF_SSCV",
+                    "MATH_BEEZER_THM_SSLD"
+                  ],
+                  "k5": null,
+                  "k1": null,
+                  "positive_scores": 339
+                }
+              },
+              {
+                "id": 27,
+                "m": 1,
+                "engine": {
+                  "position": 3,
+                  "top5": [
+                    "MATH_BEEZER_THM_CRVA",
+                    "MATH_BEEZER_DEF_CVA",
+                    "MATH_BEEZER_DEF_LCCV",
+                    "MATH_BEEZER_DEF_NV",
+                    "MATH_BEEZER_DEF_LC"
+                  ],
+                  "k5": true,
+                  "k1": false
+                },
+                "bm25": {
+                  "position": 16,
+                  "top5": [
+                    "MATH_BEEZER_DEF_OSV",
+                    "MATH_BEEZER_THM_HMOE",
+                    "MATH_BEEZER_THM_VSPCV",
+                    "MATH_BEEZER_DEF_VSCV",
+                    "MATH_BEEZER_THM_LTDB"
+                  ],
+                  "k5": false,
+                  "k1": false,
+                  "positive_scores": 338
+                }
+              },
+              {
+                "id": 28,
+                "m": 1,
+                "engine": {
+                  "position": 1,
+                  "top5": [
+                    "MATH_BEEZER_DEF_NV",
+                    "MATH_BEEZER_THM_CRVA",
+                    "MATH_BEEZER_DEF_OV",
+                    "MATH_BEEZER_THM_VSPCV",
+                    "MATH_BEEZER_DEF_MVP"
+                  ],
+                  "k5": true,
+                  "k1": true
+                },
+                "bm25": {
+                  "position": 47,
+                  "top5": [
+                    "MATH_BEEZER_DEF_IVS",
+                    "MATH_BEEZER_THM_NME2",
+                    "MATH_BEEZER_DEF_SUV",
+                    "MATH_BEEZER_THM_SUVB",
+                    "MATH_BEEZER_THM_VSPCV"
+                  ],
+                  "k5": false,
+                  "k1": false,
+                  "positive_scores": 220
+                }
+              }
+            ],
+            "acros_recovered": {
+              "distinct_expected": 15,
+              "engine": {
+                "k5": 4,
+                "k1": 2
+              },
+              "bm25": {
+                "k5": 1,
+                "k1": 1
+              }
+            },
+            "bm25_fewer_than_k_positive": {
+              "k5": 0,
+              "k1": 0
+            },
+            "nearest_chunk_distance": {
+              "n0": {
+                "values": [
+                  1.021309369406546,
+                  0.9718153913297387,
+                  0.8790829163121977,
+                  0.9413032444219123,
+                  1.1038989450370587,
+                  1.0028272169556542,
+                  0.9196031580729945,
+                  0.9462205111325053,
+                  0.8825637697009943,
+                  0.9181880566989993
+                ],
+                "min": 0.8790829163121977,
+                "median": 0.9437618777772088,
+                "max": 1.1038989450370587
+              },
+              "p": {
+                "values": [
+                  1.0380416144025042,
+                  0.8859597432483706,
+                  1.0172747339976853,
+                  0.9690594489660904,
+                  0.8995565458704057,
+                  0.8266859667610463,
+                  0.8742030022552943,
+                  0.7019458250757074,
+                  0.958980926730797,
+                  0.9850185667680282,
+                  0.9109369492436376,
+                  0.9676071248449348,
+                  0.8286001772165187,
+                  0.8955350479264964,
+                  0.9271876259893291,
+                  0.9107461962321158,
+                  0.8676509281052031,
+                  0.8759901417769012
+                ],
+                "min": 0.7019458250757074,
+                "median": 0.9051513710512608,
+                "max": 1.0380416144025042
+              }
+            },
+            "words_per_chunk": {
+              "min": 8,
+              "q1": 18.0,
+              "median": 25.0,
+              "q3": 35.0,
+              "max": 184,
+              "at_most_10": 9
+            },
+            "truncation": {
+              "max_seq_length": 32768,
+              "chunk_texts": 0,
+              "query_texts": 0
+            },
+            "bitwise_second_pass_differences": 0,
+            "citation_fraction": {
+              "pairs": 851,
+              "within": 330,
+              "fraction": 0.38777908343125733,
+              "epsilon": 0.8
+            }
+          }
+        },
+        "mcnemar_vs_minilm": {
+          "k5": {
+            "b": 5,
+            "c": 2,
+            "n": 7,
+            "num": 29,
+            "den": 128,
+            "float": 0.2265625
+          },
+          "k1": {
+            "b": 1,
+            "c": 0,
+            "n": 1,
+            "num": 1,
+            "den": 2,
+            "float": 0.5
+          }
+        },
+        "rank_metrics": {
+          "minilm": {
+            "mrr": 0.19225318224409513,
+            "recall_10": 0.3333333333333333,
+            "recall_20": 0.5,
+            "median_position": 19.0
+          },
+          "qwen3": {
+            "mrr": 0.28541075275395494,
+            "recall_10": 0.5,
+            "recall_20": 0.5555555555555556,
+            "median_position": 12.5
+          },
+          "bm25": {
+            "mrr": 0.07768577703384369,
+            "recall_10": 0.05555555555555555,
+            "recall_20": 0.16666666666666666,
+            "median_position": 52.0
+          }
+        },
+        "no_instruction": {
+          "items": [
+            {
+              "id": 1,
+              "position": 1,
+              "k5": true,
+              "k1": true
+            },
+            {
+              "id": 2,
+              "position": 22,
+              "k5": false,
+              "k1": false
+            },
+            {
+              "id": 6,
+              "position": 1,
+              "k5": true,
+              "k1": true
+            },
+            {
+              "id": 7,
+              "position": 3,
+              "k5": true,
+              "k1": false
+            },
+            {
+              "id": 11,
+              "position": 156,
+              "k5": false,
+              "k1": false
+            },
+            {
+              "id": 12,
+              "position": 13,
+              "k5": false,
+              "k1": false
+            },
+            {
+              "id": 13,
+              "position": 196,
+              "k5": false,
+              "k1": false
+            },
+            {
+              "id": 14,
+              "position": 1,
+              "k5": true,
+              "k1": true
+            },
+            {
+              "id": 15,
+              "position": 91,
+              "k5": false,
+              "k1": false
+            },
+            {
+              "id": 16,
+              "position": 285,
+              "k5": false,
+              "k1": false
+            },
+            {
+              "id": 17,
+              "position": 222,
+              "k5": false,
+              "k1": false
+            },
+            {
+              "id": 18,
+              "position": 296,
+              "k5": false,
+              "k1": false
+            },
+            {
+              "id": 21,
+              "position": 30,
+              "k5": false,
+              "k1": false
+            },
+            {
+              "id": 23,
+              "position": 35,
+              "k5": false,
+              "k1": false
+            },
+            {
+              "id": 24,
+              "position": 25,
+              "k5": false,
+              "k1": false
+            },
+            {
+              "id": 25,
+              "position": 7,
+              "k5": false,
+              "k1": false
+            },
+            {
+              "id": 27,
+              "position": 4,
+              "k5": true,
+              "k1": false
+            },
+            {
+              "id": 28,
+              "position": 1,
+              "k5": true,
+              "k1": true
+            }
+          ],
+          "H_k5": 6,
+          "H_k1": 4,
+          "rank_metrics": {
+            "mrr": 0.2769092124167312,
+            "recall_10": 0.3888888888888889,
+            "recall_20": 0.4444444444444444,
+            "median_position": 23.5
+          }
+        },
+        "auc": {
+          "num": 31,
+          "den": 45,
+          "float": 0.6888888888888889
+        },
+        "split": {
+          "source": "taken from P1's post-result reading (docs/roadmap/NEXT_RESEARCH.md), which came after P1's result; report-only",
+          "emptied": {
+            "ids": [
+              1,
+              2,
+              6,
+              7,
+              13,
+              15,
+              18,
+              23,
+              24,
+              25,
+              28
+            ],
+            "arms": {
+              "minilm": {
+                "hits_k5": 2,
+                "hits_k1": 1,
+                "median_position": 47,
+                "mrr": 0.16024522726152102
+              },
+              "qwen3": {
+                "hits_k5": 5,
+                "hits_k1": 2,
+                "median_position": 18,
+                "mrr": 0.31488565780339656
+              },
+              "bm25": {
+                "hits_k5": 0,
+                "hits_k1": 0,
+                "median_position": 111,
+                "mrr": 0.011839525545452794
+              }
+            }
+          },
+          "kept": {
+            "ids": [
+              11,
+              12,
+              14,
+              16,
+              17,
+              21,
+              27
+            ],
+            "arms": {
+              "minilm": {
+                "hits_k5": 2,
+                "hits_k1": 1,
+                "median_position": 6,
+                "mrr": 0.24255139721671162
+              },
+              "qwen3": {
+                "hits_k5": 2,
+                "hits_k1": 1,
+                "median_position": 7,
+                "mrr": 0.23909304481911817
+              },
+              "bm25": {
+                "hits_k5": 1,
+                "hits_k1": 1,
+                "median_position": 21,
+                "mrr": 0.18115845794417224
+              }
+            }
+          }
+        }
+      }
+    }
+  },
+  "report_only": {
+    "minilm_auc": {
+      "num": 17,
+      "den": 30,
+      "float": 0.5666666666666667
+    },
+    "items": [
+      {
+        "id": 1,
+        "minilm_position": 47,
+        "bm25_position": 147,
+        "versions": {
+          "1024": {
+            "position": 2,
+            "top5": [
+              "MATH_BEEZER_DEF_ONS",
+              "MATH_BEEZER_DEF_NV",
+              "MATH_BEEZER_THM_CRVA",
+              "MATH_BEEZER_THM_ZVU",
+              "MATH_BEEZER_THM_VRRB"
+            ],
+            "no_instruction_position": 1
+          },
+          "384": {
+            "position": 2,
+            "top5": [
+              "MATH_BEEZER_DEF_ONS",
+              "MATH_BEEZER_DEF_NV",
+              "MATH_BEEZER_THM_CRVA",
+              "MATH_BEEZER_DEF_HS",
+              "MATH_BEEZER_THM_VRRB"
+            ],
+            "no_instruction_position": 1
+          }
+        }
+      },
+      {
+        "id": 2,
+        "minilm_position": 2,
+        "bm25_position": 232,
+        "versions": {
+          "1024": {
+            "position": 14,
+            "top5": [
+              "MATH_BEEZER_DEF_NV",
+              "MATH_BEEZER_THM_CRVA",
+              "MATH_BEEZER_THM_AISM",
+              "MATH_BEEZER_THM_IPAC",
+              "MATH_BEEZER_THM_ZSSM"
+            ],
+            "no_instruction_position": 28
+          },
+          "384": {
+            "position": 18,
+            "top5": [
+              "MATH_BEEZER_DEF_NV",
+              "MATH_BEEZER_THM_AISM",
+              "MATH_BEEZER_THM_CRVA",
+              "MATH_BEEZER_THM_CRSM",
+              "MATH_BEEZER_DEF_CCCV"
+            ],
+            "no_instruction_position": 22
+          }
+        }
+      },
+      {
+        "id": 6,
+        "minilm_position": 15,
+        "bm25_position": 155,
+        "versions": {
+          "1024": {
+            "position": 1,
+            "top5": [
+              "MATH_BEEZER_DEF_NV",
+              "MATH_BEEZER_THM_DM",
+              "MATH_BEEZER_THM_DP",
+              "MATH_BEEZER_THM_DCM",
+              "MATH_BEEZER_DEF_IP"
+            ],
+            "no_instruction_position": 1
+          },
+          "384": {
+            "position": 1,
+            "top5": [
+              "MATH_BEEZER_DEF_NV",
+              "MATH_BEEZER_THM_DM",
+              "MATH_BEEZER_THM_DP",
+              "MATH_BEEZER_THM_DCM",
+              "MATH_BEEZER_THM_ZSSM"
+            ],
+            "no_instruction_position": 1
+          }
+        }
+      },
+      {
+        "id": 7,
+        "minilm_position": 16,
+        "bm25_position": 136,
+        "versions": {
+          "1024": {
+            "position": 2,
+            "top5": [
+              "MATH_BEEZER_DEF_NV",
+              "MATH_BEEZER_DEF_IP",
+              "MATH_BEEZER_THM_CRVA",
+              "MATH_BEEZER_THM_PIP",
+              "MATH_BEEZER_THM_VRRB"
+            ],
+            "no_instruction_position": 3
+          },
+          "384": {
+            "position": 2,
+            "top5": [
+              "MATH_BEEZER_DEF_NV",
+              "MATH_BEEZER_DEF_IP",
+              "MATH_BEEZER_THM_CRVA",
+              "MATH_BEEZER_THM_VRRB",
+              "MATH_BEEZER_THM_CRSM"
+            ],
+            "no_instruction_position": 3
+          }
+        }
+      },
+      {
+        "id": 11,
+        "minilm_position": 26,
+        "bm25_position": 21,
+        "versions": {
+          "1024": {
+            "position": 49,
+            "top5": [
+              "MATH_BEEZER_THM_EDYES",
+              "MATH_BEEZER_THM_NSMS",
+              "MATH_BEEZER_THM_LNSMS",
+              "MATH_BEEZER_THM_COB",
+              "MATH_BEEZER_THM_DFS"
+            ],
+            "no_instruction_position": 115
+          },
+          "384": {
+            "position": 46,
+            "top5": [
+              "MATH_BEEZER_THM_EDYES",
+              "MATH_BEEZER_THM_LNSMS",
+              "MATH_BEEZER_DEF_OSV",
+              "MATH_BEEZER_THM_IPAC",
+              "MATH_BEEZER_THM_NSMS"
+            ],
+            "no_instruction_position": 156
+          }
+        }
+      },
+      {
+        "id": 12,
+        "minilm_position": 4,
+        "bm25_position": 27,
+        "versions": {
+          "1024": {
+            "position": 19,
+            "top5": [
+              "MATH_BEEZER_THM_NSMS",
+              "MATH_BEEZER_THM_LNSMS",
+              "MATH_BEEZER_DEF_TS",
+              "MATH_BEEZER_THM_ZSSM",
+              "MATH_BEEZER_THM_DFS"
+            ],
+            "no_instruction_position": 21
+          },
+          "384": {
+            "position": 6,
+            "top5": [
+              "MATH_BEEZER_THM_LNSMS",
+              "MATH_BEEZER_THM_NSMS",
+              "MATH_BEEZER_THM_ZSSM",
+              "MATH_BEEZER_DEF_EM",
+              "MATH_BEEZER_THM_NMTNS"
+            ],
+            "no_instruction_position": 13
+          }
+        }
+      },
+      {
+        "id": 13,
+        "minilm_position": 52,
+        "bm25_position": 54,
+        "versions": {
+          "1024": {
+            "position": 215,
+            "top5": [
+              "MATH_BEEZER_THM_ZPZT",
+              "MATH_BEEZER_DEF_RREF",
+              "MATH_BEEZER_THM_OSIS",
+              "MATH_BEEZER_THM_ZVU",
+              "MATH_BEEZER_THM_RREFU"
+            ],
+            "no_instruction_position": 122
+          },
+          "384": {
+            "position": 178,
+            "top5": [
+              "MATH_BEEZER_THM_ZPZT",
+              "MATH_BEEZER_THM_ZVU",
+              "MATH_BEEZER_DEF_RREF",
+              "MATH_BEEZER_THM_MIU",
+              "MATH_BEEZER_THM_OSIS"
+            ],
+            "no_instruction_position": 196
+          }
+        }
+      },
+      {
+        "id": 14,
+        "minilm_position": 1,
+        "bm25_position": 1,
+        "versions": {
+          "1024": {
+            "position": 1,
+            "top5": [
+              "MATH_BEEZER_DEF_OV",
+              "MATH_BEEZER_DEF_OSV",
+              "MATH_BEEZER_THM_OSLI",
+              "MATH_BEEZER_THM_HMOE",
+              "MATH_BEEZER_DEF_ONS"
+            ],
+            "no_instruction_position": 1
+          },
+          "384": {
+            "position": 1,
+            "top5": [
+              "MATH_BEEZER_DEF_OV",
+              "MATH_BEEZER_DEF_OSV",
+              "MATH_BEEZER_THM_HMOE",
+              "MATH_BEEZER_THM_OSLI",
+              "MATH_BEEZER_THM_CRVA"
+            ],
+            "no_instruction_position": 1
+          }
+        }
+      },
+      {
+        "id": 15,
+        "minilm_position": 69,
+        "bm25_position": 214,
+        "versions": {
+          "1024": {
+            "position": 24,
+            "top5": [
+              "MATH_BEEZER_DEF_NV",
+              "MATH_BEEZER_THM_EDYES",
+              "MATH_BEEZER_THM_CRVA",
+              "MATH_BEEZER_THM_IPAC",
+              "MATH_BEEZER_THM_VRRB"
+            ],
+            "no_instruction_position": 61
+          },
+          "384": {
+            "position": 46,
+            "top5": [
+              "MATH_BEEZER_DEF_NV",
+              "MATH_BEEZER_THM_EDYES",
+              "MATH_BEEZER_THM_CRVA",
+              "MATH_BEEZER_THM_CRSM",
+              "MATH_BEEZER_DEF_IP"
+            ],
+            "no_instruction_position": 91
+          }
+        }
+      },
+      {
+        "id": 16,
+        "minilm_position": 58,
+        "bm25_position": 27,
+        "versions": {
+          "1024": {
+            "position": 186,
+            "top5": [
+              "MATH_BEEZER_THM_OSIS",
+              "MATH_BEEZER_THM_CRVA",
+              "MATH_BEEZER_THM_IPAC",
+              "MATH_BEEZER_THM_CRMA",
+              "MATH_BEEZER_THM_UMPIP"
+            ],
+            "no_instruction_position": 179
+          },
+          "384": {
+            "position": 274,
+            "top5": [
+              "MATH_BEEZER_THM_CRVA",
+              "MATH_BEEZER_THM_IPAC",
+              "MATH_BEEZER_THM_AISM",
+              "MATH_BEEZER_THM_LTTZZ",
+              "MATH_BEEZER_THM_OSIS"
+            ],
+            "no_instruction_position": 285
+          }
+        }
+      },
+      {
+        "id": 17,
+        "minilm_position": 17,
+        "bm25_position": 143,
+        "versions": {
+          "1024": {
+            "position": 70,
+            "top5": [
+              "MATH_BEEZER_THM_EMMVP",
+              "MATH_BEEZER_THM_CRVA",
+              "MATH_BEEZER_THM_MMDAA",
+              "MATH_BEEZER_DEF_MA",
+              "MATH_BEEZER_THM_VSPM"
+            ],
+            "no_instruction_position": 125
+          },
+          "384": {
+            "position": 185,
+            "top5": [
+              "MATH_BEEZER_THM_MMDAA",
+              "MATH_BEEZER_THM_CRVA",
+              "MATH_BEEZER_THM_AISM",
+              "MATH_BEEZER_THM_VSPCV",
+              "MATH_BEEZER_THM_VSLT"
+            ],
+            "no_instruction_position": 222
+          }
+        }
+      },
+      {
+        "id": 18,
+        "minilm_position": 215,
+        "bm25_position": 50,
+        "versions": {
+          "1024": {
+            "position": 133,
+            "top5": [
+              "MATH_BEEZER_THM_ZPZT",
+              "MATH_BEEZER_THM_CCRA",
+              "MATH_BEEZER_THM_CRVA",
+              "MATH_BEEZER_THM_ZPCN",
+              "MATH_BEEZER_THM_CCRM"
+            ],
+            "no_instruction_position": 298
+          },
+          "384": {
+            "position": 141,
+            "top5": [
+              "MATH_BEEZER_THM_CCRA",
+              "MATH_BEEZER_THM_CRVA",
+              "MATH_BEEZER_THM_ZPZT",
+              "MATH_BEEZER_THM_PCNA",
+              "MATH_BEEZER_THM_CCRM"
+            ],
+            "no_instruction_position": 296
+          }
+        }
+      },
+      {
+        "id": 21,
+        "minilm_position": 6,
+        "bm25_position": 13,
+        "versions": {
+          "1024": {
+            "position": 15,
+            "top5": [
+              "MATH_BEEZER_THM_G",
+              "MATH_BEEZER_THM_CFDVS",
+              "MATH_BEEZER_THM_CSS",
+              "MATH_BEEZER_THM_IVSED",
+              "MATH_BEEZER_THM_CLI"
+            ],
+            "no_instruction_position": 28
+          },
+          "384": {
+            "position": 7,
+            "top5": [
+              "MATH_BEEZER_THM_CFDVS",
+              "MATH_BEEZER_THM_IVSED",
+              "MATH_BEEZER_THM_G",
+              "MATH_BEEZER_THM_CSS",
+              "MATH_BEEZER_DEF_VSCV"
+            ],
+            "no_instruction_position": 30
+          }
+        }
+      },
+      {
+        "id": 23,
+        "minilm_position": 56,
+        "bm25_position": 111,
+        "versions": {
+          "1024": {
+            "position": 19,
+            "top5": [
+              "MATH_BEEZER_DEF_NV",
+              "MATH_BEEZER_THM_G",
+              "MATH_BEEZER_THM_VRRB",
+              "MATH_BEEZER_THM_CRVA",
+              "MATH_BEEZER_THM_SUVB"
+            ],
+            "no_instruction_position": 21
+          },
+          "384": {
+            "position": 45,
+            "top5": [
+              "MATH_BEEZER_DEF_NV",
+              "MATH_BEEZER_THM_G",
+              "MATH_BEEZER_THM_SUVB",
+              "MATH_BEEZER_THM_VRRB",
+              "MATH_BEEZER_THM_CRSM"
+            ],
+            "no_instruction_position": 35
+          }
+        }
+      },
+      {
+        "id": 24,
+        "minilm_position": 21,
+        "bm25_position": 46,
+        "versions": {
+          "1024": {
+            "position": 4,
+            "top5": [
+              "MATH_BEEZER_DEF_NV",
+              "MATH_BEEZER_THM_CRVA",
+              "MATH_BEEZER_THM_SER",
+              "MATH_BEEZER_DEF_IP",
+              "MATH_BEEZER_THM_IVSED"
+            ],
+            "no_instruction_position": 21
+          },
+          "384": {
+            "position": 3,
+            "top5": [
+              "MATH_BEEZER_DEF_NV",
+              "MATH_BEEZER_THM_CRVA",
+              "MATH_BEEZER_DEF_IP",
+              "MATH_BEEZER_THM_SMEE",
+              "MATH_BEEZER_THM_CRSM"
+            ],
+            "no_instruction_position": 25
+          }
+        }
+      },
+      {
+        "id": 25,
+        "minilm_position": 119,
+        "bm25_position": 99,
+        "versions": {
+          "1024": {
+            "position": 52,
+            "top5": [
+              "MATH_BEEZER_THM_DMFE",
+              "MATH_BEEZER_THM_CFDVS",
+              "MATH_BEEZER_THM_DFS",
+              "MATH_BEEZER_THM_MNEM",
+              "MATH_BEEZER_THM_IVSED"
+            ],
+            "no_instruction_position": 23
+          },
+          "384": {
+            "position": 55,
+            "top5": [
+              "MATH_BEEZER_THM_CFDVS",
+              "MATH_BEEZER_THM_MNEM",
+              "MATH_BEEZER_THM_DMFE",
+              "MATH_BEEZER_DEF_GME",
+              "MATH_BEEZER_THM_NEM"
+            ],
+            "no_instruction_position": 7
+          }
+        }
+      },
+      {
+        "id": 27,
+        "minilm_position": 6,
+        "bm25_position": 16,
+        "versions": {
+          "1024": {
+            "position": 3,
+            "top5": [
+              "MATH_BEEZER_THM_CRVA",
+              "MATH_BEEZER_DEF_CVA",
+              "MATH_BEEZER_DEF_LCCV",
+              "MATH_BEEZER_DEF_MA",
+              "MATH_BEEZER_DEF_LC"
+            ],
+            "no_instruction_position": 5
+          },
+          "384": {
+            "position": 3,
+            "top5": [
+              "MATH_BEEZER_THM_CRVA",
+              "MATH_BEEZER_DEF_CVA",
+              "MATH_BEEZER_DEF_LCCV",
+              "MATH_BEEZER_DEF_NV",
+              "MATH_BEEZER_DEF_LC"
+            ],
+            "no_instruction_position": 4
+          }
+        }
+      },
+      {
+        "id": 28,
+        "minilm_position": 1,
+        "bm25_position": 47,
+        "versions": {
+          "1024": {
+            "position": 1,
+            "top5": [
+              "MATH_BEEZER_DEF_NV",
+              "MATH_BEEZER_THM_CRVA",
+              "MATH_BEEZER_DEF_OV",
+              "MATH_BEEZER_THM_PIP",
+              "MATH_BEEZER_THM_EMMVP"
+            ],
+            "no_instruction_position": 1
+          },
+          "384": {
+            "position": 1,
+            "top5": [
+              "MATH_BEEZER_DEF_NV",
+              "MATH_BEEZER_THM_CRVA",
+              "MATH_BEEZER_DEF_OV",
+              "MATH_BEEZER_THM_VSPCV",
+              "MATH_BEEZER_DEF_MVP"
+            ],
+            "no_instruction_position": 1
+          }
+        }
+      }
+    ]
+  }
+}

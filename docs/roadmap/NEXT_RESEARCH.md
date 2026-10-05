@@ -244,6 +244,61 @@ Lo que se repite:
 4. **Una vista para manipular dimensiones** puede ayudar al autor a escribir, pero cambia la entrada, no el motor. Construirla esperando que arregle la recuperación es un error (autor).
 5. **Otro proveedor de embeddings.** Ya estaba previsto como línea base. Se cambia una cosa cada vez. Los 28 ítems ya están vistos: sirven de línea base, pero una confirmación necesita ítems nuevos escritos a ciegas.
 
+### Línea base de proveedor: Qwen3-Embedding-0.6B (autor, 2026-10-03; exploración, comprometida antes de cualquier vector)
+
+Primera aplicación de la línea base de proveedor de arriba. Los 28 ítems ya están vistos, así que es exploración etiquetada (METHODOLOGY, proporcionalidad): no confirma nada y no hay auditoría completa. La pregunta es si el modelo es el cuello de botella; se prueba primero el más fuerte que cabe en la envolvente.
+
+* **Por qué este modelo (búsqueda del 2026-10-03, tarjetas y API de Hugging Face):** Apache 2.0; arquitectura `qwen3` nativa de transformers, sin `trust_remote_code`; 595,8M parámetros; salida de 1024 con entrenamiento MRL, que admite recortar a 32–1024. Descartados: `math-similarity/Bert-MLM_arXiv-MP-class_zbMath` (sin licencia declarada), `uw-math-ai/MathLeap-Qwen-8B` (8B y 4096 dimensiones, fuera de la envolvente; se descarga de un espejo anónimo) y `google/embeddinggemma-300m` (licencia Gemma y acceso restringido). Referencia externa: en MIRB (arXiv 2505.15585), tarea Informalized Mathlib4 Retrieval, BM25 31,5, bge-large-en-v1.5 42,0 y gte-Qwen2-1.5B-instruct 55,2 de nDCG@10; Qwen3 no aparece, el artículo es anterior.
+* **Proveedor:** `Qwen/Qwen3-Embedding-0.6B` en la revisión `97b0c614be4d77ee51c0cef4e5f07c00f9eb65b3`, cargado sin red desde la caché local, en la cpu, en float32 forzado (los pesos vienen en bfloat16), con la implementación de atención fijada y registrada, un hilo y un texto por llamada. El pipeline es el del modelo: Transformer, último token, normalización.
+* **Instrucción de consulta (autor, opción propia):** cada consulta se codifica como `Instruct: Given a description of a mathematical concept, retrieve the definition or theorem that states it\nQuery:` seguido de la prosa del ítem. Los fragmentos van sin instrucción. Queda fijada aquí y no se retoca mirando resultados.
+* **Dos versiones, las dos comprometidas ahora:**
+  * **1024:** la salida completa. Es el techo; no puede entrar en el motor, que trabaja en 384 (AGENTS 3.1).
+  * **384:** las primeras 384 componentes de la salida float32 de 1024, renormalizadas en float64 por la comprobación de vectores de P1. Es la versión que podría entrar en el motor.
+* **Todo lo demás, como en P1:** corpus, conjunto de prueba, tabla de macros, BM25 y su semilla, ε, las comprobaciones de rechazo y de validez, y la definición del puesto (el del mejor enunciado esperado entre los 342).
+* **Brazo MiniLM:** se lee de `data/math/P1_result.json` (commit `64e3450`), verificado por su sha256; no se vuelve a ejecutar. Así comparten ítems, empates y puestos.
+* **Lo que decide, por versión (autor):** Qwen3 coloca mejor que MiniLM si un test de Wilcoxon de rangos con signo, exacto y de una cola, da p < 0,05. Pares: los 18 ítems de P; diferencia d = puesto MiniLM − puesto Qwen3 (positiva si Qwen3 coloca mejor); las d = 0 se descartan; rangos de |d| con rangos medios en los empates; p exacto enumerando los 2ⁿ signos sobre esos rangos. Se decide por separado para 1024 y para 384, sin corrección por multiplicidad, declarado. Es la respuesta a la pregunta de arriba; no confirma nada sobre el producto.
+* **Solo informe (no deciden):**
+  * La regla de P1 por versión: (a) contra el azar y (b) McNemar contra BM25, a k = 5 y k = 1, y su `holds`, por continuidad.
+  * McNemar exacto de una cola Qwen3 frente a MiniLM, a k = 5 y k = 1.
+  * MRR, recall@10, recall@20 y mediana del puesto, en los tres brazos (MiniLM, Qwen3, BM25).
+  * Consulta sin instrucción, en las dos versiones: los mismos vectores de fragmentos y las 28 consultas sin el prefijo. Dice si la instrucción aporta; no sirve para elegir instrucción.
+  * Separación entre P y «ninguna», dentro de cada modelo: AUC = probabilidad de que la distancia al fragmento más cercano de un ítem de P sea menor que la de un ítem «ninguna», los empates cuentan 1/2. Para MiniLM, con las distancias guardadas en `P1_result.json`. Se compara el AUC, no las distancias, porque la escala del coseno cambia de un modelo a otro.
+  * Latencia por texto (p50 y p95) y memoria máxima del proceso, medidas, en un fichero aparte, porque los tiempos no son reproducibles byte a byte.
+  * Desglose por esperado vaciado: los 11 ítems cuyo esperado es NV, GSP, SUV, LT, TM o IP (1, 2, 6, 7, 13, 15, 18, 23, 24, 25 y 28) frente a los 7 restantes (11, 12, 14, 16, 17, 21 y 27). La etiqueta viene de la lectura de P1, posterior a su resultado, y por eso solo informa.
+  * Aciertos y puestos ítem por ítem frente a MiniLM, y los bloques de solo informe de P1.
+* **Ficheros:** los resultados van a ficheros aparte; `P1_result.json` y el script de P1 no cambian de comportamiento.
+* **Coste esperado:** unos 1,2 GB en disco y unos 3 GB de RAM; la latencia por texto, estimada sin medir, entre 30 y 50 veces la de MiniLM.
+
+**Predicciones antes de cualquier vector (2026-10-04, no deciden nada):**
+* **Autor:** el Wilcoxon pasa en las dos versiones, pero con poca diferencia. Aciertos a k = 5: 1 o 2 más que MiniLM (de 4 a 5 o 6); entran en el top 5 los que MiniLM dejó justo fuera, en el puesto 6 (ítems 21 y 27), y quizá alguno que quedó más abajo.
+* **Claude (a ojo, sin cálculo):** Wilcoxon a 1024 pasa (65–70 %), a 384 pasa (55–60 %): los puestos mejoran en general aunque haya pocos aciertos nuevos. Aciertos a k = 5 entre 6 y 8 de 18; la regla de P1 contra BM25 entera, 10–15 %. La mejora se concentra en los 7 no vaciados; en los 11 vaciados, poca. AUC P frente a «ninguna» entre 0,5 y 0,65 en los dos modelos. La instrucción mueve la mediana del puesto uno o dos puestos.
+
+**Resultado (2026-10-05; script `6bc35ea`, resultado `78cb722`).** Válido en las dos versiones: vectores, alineación y BM25 igual al guardado en los 28 ítems; ningún texto truncado. Una segunda ejecución dio un fichero idéntico byte a byte. **El Wilcoxon falla en las dos versiones:**
+
+| versión | n | ceros | W+ | W− | p | pasa |
+|---|---|---|---|---|---|---|
+| 1024 | 16 | 2 | 74 | 62 | 12653/32768 ≈ 0,386 | no |
+| 384 | 16 | 2 | 72 | 64 | 6965/16384 ≈ 0,425 | no |
+
+Los dos ceros son los ítems 14 y 28 (puesto 1 en los dos modelos). Frente a las predicciones: el Wilcoxon falla, contra las dos.
+
+**Solo informe:**
+* Aciertos a k = 5: 7 en las dos versiones (MiniLM 4, BM25 1); a k = 1: 3 (MiniLM 2). McNemar contra MiniLM a k = 5: b = 5 (ítems 1, 6, 7, 24, 27), c = 2 (2, 12), p = 29/128.
+* La regla de P1 con Qwen3: pasa a k = 5 contra el azar y contra BM25 (6 a 0) y falla a k = 1 (2 a 0); `holds` = falso en las dos versiones.
+* MRR 0,192 (MiniLM), 0,274 (1024), 0,285 (384); mediana del puesto 19, 17 y 12,5; recall@10 0,33, 0,39 y 0,50; recall@20 0,50, 0,61 y 0,56.
+* AUC P frente a «ninguna»: 0,567 (MiniLM), 0,700 (1024), 0,689 (384).
+* Sin instrucción: 6 aciertos a k = 5 y mediana 22 (1024) y 23,5 (384).
+* Desglose: en los 11 vaciados, aciertos a k = 5 de 2 a 5 y mediana de 47 a 14 (1024); en los 7 no vaciados, aciertos 2 y 2, mediana de 6 a 19 (1024) y 7 (384).
+* Coste medido: p50 de 187 ms por fragmento y 189 ms por consulta; memoria máxima 2,06 GB.
+
+**Lectura (autor y Claude, 2026-10-05; exploración posterior al resultado, no cambia la decisión):**
+1. **Qwen3 no es claramente mejor; es distinto.** Sube 9 ítems y baja 7, con d entre −163 y +82; las caídas suman 403 puestos y las subidas 324. Con 18 ítems solo se detectaría una mejora grande y constante: el resultado es compatible con ninguna mejora y con una real.
+2. **Recortar a 384 no cuesta nada medible aquí.** Las dos versiones dan los mismos aciertos y las métricas se reparten; nada compara 384 con 1024, así que no se afirma que 384 sea mejor.
+3. **No hay evidencia de que el modelo sea el cuello de botella**, que no es lo mismo que «el modelo no es el problema»: es un solo modelo, una instrucción y 18 ítems, y los aciertos a k = 5 y el AUC suben.
+4. **Los vaciados no son la barrera para Qwen3.** 8 de las 9 subidas son ítems vaciados y 5 de las 7 caídas son no vaciados. Hipótesis sin probar: la entrada poco convencional es la consulta (el vocabulario propio del autor), no el corpus. Las mayores caídas lo ilustran: el ítem 13 («a one in one position and zeros in the rest») va a enunciados sobre ceros (ZPZT, RREF); el 16 usa «anchor» y «operator» en un sentido que Beezer no tiene.
+
+**Decisión del autor (2026-10-05):** la reescritura de la consulta con un LLM, si llega, es lo último que se prueba: mete generación en la entrada y no dejaría ver si funciona el motor. **Candidato para el piloto 2, sin decidir:** un glosario del autor, fijado y congelado antes de ejecutar, que traduzca sus términos a los habituales y se aplique por regla a la consulta. En estos 28 ítems sería exploración (ya se sabe qué ítems fallan); confirmaría solo en ítems nuevos. Siguen haciendo falta más ítems y la división desarrollo/prueba.
+
 ## Línea física aparcada: operaciones como dirección
 
 Aparcada hasta pasar los tres filtros de `docs/methodology/METHODOLOGY.md` (puerta de líneas físicas). Filtros 1 y 2 redactados; el 3, pendiente de verificar las citas.
@@ -267,6 +322,20 @@ Aparcada hasta pasar los tres filtros de `docs/methodology/METHODOLOGY.md` (puer
 * Anisotropía de los embeddings: Mu y Viswanath (2018); Ethayarajh (2019).
 * Uniformidad en la esfera: test de Rayleigh (Mardia y Jupp, *Directional Statistics*).
 * Recuperación matemática, para el producto: Approach0, la búsqueda por fórmula de zbMATH, y buscadores de mathlib en lenguaje natural (Moogle, LeanSearch).
+
+## Línea física aparcada: ley de continua dirección
+
+Apuntado 2026-10-04 (autor). Idea, sin redactar como hipótesis; entra por la puerta de líneas físicas de `docs/methodology/METHODOLOGY.md` como el resto.
+
+* **Ley.** La continuidad de una entidad es continuidad de dirección de su trayectoria.
+* **Trayectoria.** Los caminos más cortos sobre la base de la espiral (`docs/relational-bridges/RELATIONAL_BRIDGES.md` §24), desde todas las notas a la vez; continuidad = coseno entre pasos consecutivos.
+* **Consecuencia para el postulado tiempo–fricción.** El tiempo de una ruta sería su giro acumulado, no su longitud.
+* **Subdirecciones (autor).** Todas las descomposiciones de la dirección superior en subespacios a la vez, que se deforman en conjunto.
+* **Ortogonalidad (autor, ley).** Toda descomposición en subespacios es ortogonal, respecto al producto euclídeo en 384D. Con ella las subdirecciones de Δ forman exactamente la esfera de diámetro [0, Δ] (Tales); cada partición en V y V⊥ es un diámetro, y la familia es continua si lo es Δ. Es un teorema, no una medida: va al archivo de derivaciones con su test. Familias admisibles: solo ortogonales (las celdas no lo son sin ortogonalizar; B_0 lo es solo si B_0 B_0ᵀ = I, comprobación aparcada que pasa a ser condición previa).
+* **Representaciones (autor).** Las formas de representar la dirección superior son todas a la vez; cada una es y no es: P_V Δ es la parte de Δ en V y su complemento P_{V⊥} Δ es su antípoda en la esfera de Tales, de modo que las dos juntas dan Δ. Misma forma que la capa de proyección de Ulpia sobre Traianus (un estado, todas sus observaciones, ninguna lo altera), pero solo para las observaciones que son proyecciones ortogonales lineales; la perspectiva y las polares quedan como vistas para mostrar. Pendiente: comprobar qué proyecciones de Ulpia lo son.
+* **Contenido empírico posible.** Solo si B_0 sale privilegiada frente a subespacios al azar de la misma dimensión.
+* **Pendiente.** Control de circularidad (los caminos más cortos en un grafo de proximidad tienden a ser rectos; decide un control en el mismo grafo); dependencia del proveedor; puerta de líneas físicas.
+* **Relacionada.** «Operaciones como dirección», las cuotas espectrales normalizadas y Ética II, Lemas 4–7 (cita sin verificar).
 
 ---
 
