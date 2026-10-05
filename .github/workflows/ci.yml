@@ -111,6 +111,7 @@ jobs:
             tests/unit/test_delegation_contract.py \
             tests/unit/test_load_spinoza_corpus.py \
             tests/unit/test_manifold_nodes_idempotency_migration.py \
+            tests/unit/test_p1_engine_gate.py \
             tools/hooks/confine_review_reads.py \
             tools/hooks/deny_python_escapes.py \
             tools/hooks/require_contract_context.py \
@@ -118,6 +119,7 @@ jobs:
             tools/audit/context_pack.py \
             tools/audit/delegation_contract.py \
             tools/audit/run_process.py \
+            tools/experiments/p1_engine_gate.py \
             tools/experiments/tooling/build_beezer_corpus.py \
             tools/experiments/tooling/load_spinoza_corpus.py
       - name: Mypy (strict, whole control plane)
