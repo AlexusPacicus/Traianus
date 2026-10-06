@@ -404,6 +404,30 @@ Apuntado 2026-10-04 (autor). Idea, sin redactar como hipótesis; entra por la pu
 * **Pendiente.** Control de circularidad (los caminos más cortos en un grafo de proximidad tienden a ser rectos; decide un control en el mismo grafo); dependencia del proveedor; puerta de líneas físicas.
 * **Relacionada.** «Operaciones como dirección», las cuotas espectrales normalizadas y Ética II, Lemas 4–7 (cita sin verificar).
 
+## Línea física aparcada: el umbral de consolidación como viscosidad
+
+Apuntado 2026-10-06 (autor). Idea, sin redactar como hipótesis; entra por la puerta de líneas físicas de `docs/methodology/METHODOLOGY.md` como el resto. Espera a que acabe el kit de agentes (Actuarii).
+
+* **Idea (autor).** El umbral de la puerta C1 debería salir de la física y no de una calibración, y la magnitud es la viscosidad.
+* **Por qué viscosidad y no fricción.**
+  * La fricción es de lo que se mueve; la viscosidad es una propiedad del medio.
+  * Hoy θ_dyn es la media de las varianzas de las proyecciones cruzadas entre los ejes de B_0 (`traianus/geometry/observables.py`): depende solo de la base, no del corpus. Sobre Beezer consolida el 7,6 % (LEDGER 102–103).
+  * Un umbral viscoso sería una propiedad del estado en que entra el nodo.
+* **Encaje con lo ya apuntado.** En «de fuerzas a campos de tensión», la fricción pasa a ser disipación intrínseca (residuo, no rozamiento). En un medio continuo, esa disipación es la viscosidad.
+* **Piezas que ya existen (correspondencia posible, no comprobada).** La viscosidad es el cociente entre la tensión y la velocidad de deformación.
+  * **Velocidad candidata:** K_cin, el desplazamiento de un nodo entre dos revisiones (`compute_kinetic_resistance`, `traianus/app.py`).
+  * **Tensión candidata:** el tensor simétrico de carga T del bloque Load de RefApp-01.
+* **Por fijar antes de redactarla como hipótesis.**
+  1. **Qué fluye:** los nodos entre revisiones, las consultas que recorren el espacio o la secuencia de ingestas.
+  2. **Respecto a qué se mide la velocidad:** el motor no tiene reloj, tiene `seq`. La ley de continua dirección propone que el tiempo es el giro acumulado. Se elige uno antes de medir.
+  3. **Qué tiene que hacer la puerta:** qué debe consolidarse y qué no, dicho de forma medible. Sin ese criterio, ningún umbral se puede dar por bueno o por malo.
+* **Advertencia.**
+  * La física da la forma del umbral, no su valor.
+  * El número de Reynolds es un cociente sin dimensiones entre inercia y viscosidad, sin números mágicos, pero su punto de transición (unos 2300 en una tubería) se midió; no se deduce.
+  * Aquí igual: el punto de corte saldría de una medida, con su regla comprometida antes.
+  * Retocar la base o el umbral mirando el resultado de Beezer sería ajustar a los datos (lectura de LEDGER 103).
+* **Relacionada.** «De fuerzas a campos de tensión», la ley de continua dirección (tiempo como giro), la limitación L4 y WP1 (ejes derivados del corpus).
+
 ---
 
 ## Línea de física: de fuerzas a campos de tensión (aparcada hasta acabar el piloto)
