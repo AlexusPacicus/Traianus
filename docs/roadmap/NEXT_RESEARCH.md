@@ -429,6 +429,24 @@ Apuntado 2026-09-28, fuera de scope v1.0.0. Herramienta cliente de Traianus + Ul
 
 ---
 
+# Research Direction H — Planta: k dimensiones con proveedor propio (proteínas u otro dato)
+
+Apuntado 2026-10-10 (autor). Idea, sin redactar como hipótesis; fuera del piloto y fuera de `traianus/` (AGENTS §3.2).
+
+* **Idea (palabras del autor).** «Usar una planta para k dimensiones de la inteligencia de una planta, para las proteínas o similar que sea necesario, usando Traianus con un proveedor propio de esto.»
+* **Encaje con lo que ya existe.**
+  * **Proveedor.** El contrato es `RepresentationProvider` (`traianus/representation/protocol.py`): `encode(text: str)` y `encode_batch`, salida float32 sin normalizar. Una secuencia de aminoácidos es una cadena, así que cabe en el contrato sin cambiarlo.
+  * **Vectores sin texto.** `/ingesta/vector` acepta vectores ya calculados, de dimensión exactamente igual a la de la base (`traianus/app.py:491`). El proveedor puede vivir fuera de `traianus/` y mandar solo vectores.
+  * **Dimensión.** El motor trabaja en 384 (AGENTS §3.1). Por la vía de texto, una salida más corta se rellena con ceros y una más larga se rechaza (`traianus/app.py:264-270`, L6). Un modelo de más de 384 necesita una reducción fijada antes de cualquier vector. El recorte de Qwen3 valía porque está entrenado con MRL; uno que no lo esté necesita otra regla.
+  * **Base: el bloqueo real.** Los 8 ejes salen de codificar los primos NSM en inglés con MiniLM (`traianus/bootstrap.py:33-65`, proveedor fijado en `get_provider()`). Proyectar vectores de otro modelo sobre esos ejes compara dos espacios distintos. Un proveedor propio necesita su propia base, generada con el mismo proveedor, y su propia época: nada se compara entre épocas sin reproyectar (AGENTS §3.3). En `traianus/` el cambio sería genérico (la base a partir de un proveedor y una lista de entradas ancla), sin conceptos de dominio.
+* **Lectura posible, sin decidir.** «k dimensiones de la inteligencia de una planta» como los k ejes de la base, en lugar de los 8 NSM: k capacidades de la planta (percibir luz, agua, gravedad, contacto, señales químicas…), como anclas codificadas con el mismo proveedor.
+* **k y la membrana de Varela (autor, 2026-10-10).** La inteligencia de las plantas se capta a partir de 5 dimensiones (k ≥ 5); referencia, la membrana de Varela (autopoiesis: la membrana como límite que la célula produce y que la produce). Afirmación del autor, sin fuente fijada ni verificada; queda como candidata a hipótesis con su refutador (p. ej., que con k < 5 no se pierda nada medible).
+* **Citado de memoria, sin verificar.** Modelos de lenguaje de proteínas: ESM-2 (Meta, licencia MIT), con salida de 320 en la versión de 8M parámetros y de 1280 en la de 650M. La de 320 entraría hoy rellenada con ceros.
+* **Por decidir.** Qué planta y qué dato (secuencias de proteínas, expresión génica, señales); qué son las k dimensiones y cuánto vale k; qué modelo y su licencia (una dependencia nueva necesita aprobación, AGENTS §1.5); la regla de reducción a 384; y dónde viven los datos (`data/`, como `data/spinoza/` y `data/math/`).
+* **Puerta.** Antes de cualquier vector, hipótesis + refutadores + búsqueda externa (`docs/methodology/METHODOLOGY.md`), como el resto.
+
+---
+
 # Status
 
 This document records research hypotheses only.
