@@ -2479,3 +2479,57 @@ lectura.
 **Próximo paso:**
 1. Fusionar `feat/p1-engine-gate` en `main` y comprobar CI.
 2. Diseño del piloto 2.
+
+## 2026-10-28
+
+**Contexto:** Actuarii, el kit de gobierno que salió de este repositorio,
+es público desde el 25 de octubre, pero Traianus seguía con las puertas
+de antes de la extracción. Desde la última entrada, de otras sesiones:
+la fusión de la puerta del motor (`49d2434`) y la viscosidad aparcada en
+el ROADMAP (`723db99`), que hoy se subió.
+
+**Se hizo:**
+- **Inventario de lo que no fue a Actuarii.** Lo decidido el 5 de
+  octubre: el arnés C1, el verificador de invariantes, las skills
+  `lab-analyst`, `spectral-mathematician` y `spec-first`, el MCP
+  espectral y mi AGENTS. Lo que apareció hoy: `check_doc_citations`,
+  `/bitacora`, el `scope: client` del contrato, y que el instalador no
+  trae OpenCode.
+- **Instalé Actuarii** en `chore/actuarii-install`, desde mi terminal:
+  retiré el kit viejo y OpenCode (`bb58696`), pasé el instalador
+  (`5b8d9a4`) y puse la configuración de Traianus en `.actuarii.json`
+  (`f53d813`). El bloque de INSTALL.md no servía tal cual: el clon
+  chocaba con mi carpeta `Actuarii` y el instalador no pisa ficheros.
+- **Medido tras instalar:** ningún test del motor falla; todos los
+  fallos eran de tests del kit viejo.
+- **Me quedo con los agentes genéricos** (`implementer`,
+  `blind-reviewer`). El bloqueo de la revisión ciega exige
+  `blind-reviewer.md`, y el contrato nuevo no tiene `scope`: el cliente
+  se cambia desde una sesión en `../refapp-01`.
+- **Retiré** los 20 tests del kit, los tres subagentes, `parser.py` y
+  `docstate.py` (`31e4ae7`). El implementer quitó el test del kit de
+  `test_security.py` y los ficheros del kit de la lista de ruff
+  (`42643f1`); Claude repitió el verificador, ruff y mypy.
+- **AGENTS.md v2.0.0**, la skill `instrument-audit`, el README sin
+  OpenCode y con nota de licencia (lo instalado es Apache-2.0, el resto
+  de `tools/` sigue AGPL) y la seq 104 del LEDGER (`1b83d54`).
+- **El disco:** pytest guarda tres ejecuciones de unos 234 MB cada una;
+  borré las viejas.
+
+**Resultado:** `main` avanzado a `1b83d54` sin reescribir el árbol y
+subido; CI 186 verde en los tres trabajos; seq 104 consolidada
+(`0d814ea`, sin subir). La suite: 2339 pasan.
+
+**Sin resolver / decisión pendiente:**
+- La fase C, en una sesión de Actuarii: «Where it comes from» del README
+  deja de ser verdad; la retención de temporales de pytest; el issue con
+  cuatro puntos (el instalador no actualiza, `--govern` choca con una
+  configuración propia, la licencia en `tools/`, los temporales).
+- #89: los hooks ya usan `$CLAUDE_PROJECT_DIR`; falta probarlo con un
+  `cd` y cerrar el issue.
+- Para el día de gobierno: las actions de CI sobre Node 20 y
+  `ubuntu-latest` pasando a Ubuntu 26.
+
+**Próximo paso:**
+1. Subir `0d814ea` y esta entrada.
+2. La fase C, desde una sesión en Actuarii.
