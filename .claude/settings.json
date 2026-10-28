@@ -18,7 +18,33 @@
       "Bash(git rev-parse *)",
       "Bash(git grep *)",
       "Bash(git blame *)",
-      "Bash(git ls-files *)"
+      "Bash(git ls-files *)",
+      "Bash(git merge-base *)",
+      "Bash(git rev-list *)",
+      "Bash(git for-each-ref *)",
+      "Bash(pytest)",
+      "Bash(pytest *)",
+      "Bash(ls)",
+      "Bash(ls *)",
+      "Bash(cat *)",
+      "Bash(head *)",
+      "Bash(tail *)",
+      "Bash(wc *)",
+      "Bash(grep *)",
+      "Bash(df)",
+      "Bash(df *)",
+      "Bash(echo *)",
+      "Bash(sed -n *)",
+      "Bash(sort *)",
+      "Bash(uniq *)",
+      "Bash(diff *)",
+      "Bash(cut *)",
+      "Bash(tr *)",
+      "Bash(jq *)",
+      "Bash(cmp *)",
+      "Bash(date)",
+      "Bash(date +*)",
+      "mcp__boundary-validator__validate_proposal"
     ],
     "deny": [
       "WebFetch",
@@ -51,5 +77,85 @@
       "Bash(gh pr *)"
     ]
   },
-  "enableAllProjectMcpServers": true
+  "enableAllProjectMcpServers": true,
+  "hooks": {
+    "ConfigChange": [
+      {
+        "hooks": [
+          {
+            "type": "command",
+            "command": "python3 \"$CLAUDE_PROJECT_DIR\"/tools/hooks/block_config_changes.py"
+          }
+        ]
+      }
+    ],
+    "SessionStart": [
+      {
+        "hooks": [
+          {
+            "type": "command",
+            "command": "sh \"$CLAUDE_PROJECT_DIR\"/tools/hooks/session_python_gate.sh"
+          },
+          {
+            "type": "command",
+            "command": "python3 \"$CLAUDE_PROJECT_DIR\"/tools/hooks/announce_governance.py"
+          }
+        ]
+      }
+    ],
+    "PreToolUse": [
+      {
+        "matcher": "*",
+        "hooks": [
+          {
+            "type": "command",
+            "command": "python3 \"$CLAUDE_PROJECT_DIR\"/tools/hooks/require_boundary_validation.py"
+          },
+          {
+            "type": "command",
+            "command": "python3 \"$CLAUDE_PROJECT_DIR\"/tools/hooks/require_contract_context.py"
+          }
+        ]
+      },
+      {
+        "matcher": "Read|Grep|Glob",
+        "hooks": [
+          {
+            "type": "command",
+            "command": "python3 \"$CLAUDE_PROJECT_DIR\"/tools/hooks/confine_review_reads.py"
+          }
+        ]
+      },
+      {
+        "matcher": "Bash",
+        "hooks": [
+          {
+            "type": "command",
+            "command": "python3 \"$CLAUDE_PROJECT_DIR\"/tools/hooks/deny_python_escapes.py"
+          }
+        ]
+      }
+    ]
+  },
+  "includeGitInstructions": false,
+  "sandbox": {
+    "enabled": true,
+    "failIfUnavailable": true,
+    "allowUnsandboxedCommands": false,
+    "autoAllowBashIfSandboxed": false,
+    "filesystem": {
+      "denyWrite": [
+        "./.actuarii.json",
+        "./.claude",
+        "./.data/boundary_validator_audit.db",
+        "./.mcp.json",
+        "./AGENTS.md",
+        "./CLAUDE.md",
+        "./docs/specifications",
+        "./tests",
+        "./tools",
+        "./traianus"
+      ]
+    }
+  }
 }
