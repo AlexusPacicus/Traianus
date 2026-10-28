@@ -3529,5 +3529,6 @@
   ruff over the new CI list and `mypy traianus/ tools/boundary_validator/` re-run by the executing
   agent, all passing. After the docs, `pytest tests/` 2,339 passed, 1 skipped, 6 deselected.
 
-* **Status:** `Pending merge`: the branch is complete; merging it into `main` and the CI run on
-  GitHub are the author's.
+* **Status:** `Consolidated`: `main` fast-forwarded to `1b83d54` and pushed; CI run 186
+  (`40721583943`) green on its three jobs: the hermetic suite, the model partition with the C1 audit
+  harness, and ruff, mypy and the coverage gate.
