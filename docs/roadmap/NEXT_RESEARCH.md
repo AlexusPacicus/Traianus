@@ -195,7 +195,7 @@ Pasos 0 y 1 de `docs/methodology/METHODOLOGY.md`, comprometidos antes de constru
 * **Autor:** (a) pasa; (b) a k = 5 pasa, sin certeza; (b) a k = 1, más dudas.
 * **Claude:** (a) pasa a k = 5 y probablemente a k = 1; (b) a k = 5, dudosa; (b) a k = 1, probablemente falla: los ítems con palabras técnicas los acierta también BM25, los de metáfora probablemente ninguno, y solo cuentan las paráfrasis puras. Las cuatro a la vez, entre un 25 y un 35 %, estimado a ojo, sin cálculo.
 
-**Orden:** (1) este texto y `PROVENANCE.md`; (2) el conjunto de prueba del autor; (3) contrato del builder y su test sin pérdida (engine-implementer); (4) registro de auditoría del instrumento y revisión ciega; (5) script, primera ejecución y resultado.
+**Orden:** (1) este texto y `PROVENANCE.md`; (2) el conjunto de prueba del autor; (3) contrato del builder y su test sin pérdida (implementer); (4) registro de auditoría del instrumento y revisión ciega; (5) script, primera ejecución y resultado.
 
 **Resultado (2026-10-03, `data/math/P1_result.json`, commit `64e3450`; registro `docs/methodology/instrument-audit/P1.md`, revisión 7):** válido; `holds = false`, la hipótesis no se sostiene.
 

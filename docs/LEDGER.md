@@ -3465,3 +3465,69 @@
 
 * **Status:** `Consolidated` (run and read; the gate does not improve retrieval under the committed
   rule).
+
+### seq 104 — 2026-10-28 — Traianus runs Actuarii: the pre-extraction kit, OpenCode and the three Traianus subagents leave; AGENTS v2.0.0
+
+* **Context:** the agent-governance kit was extracted from this repository on 2026-10-05 as Actuarii
+  (Apache-2.0), public since 2026-10-25. Actuarii's ADR-001 makes it canonical, with a vendored copy
+  here; until this entry Traianus still ran the gates as they were before the extraction (Actuarii
+  ADR-036).
+
+* **Decisions (the author):** install Actuarii here with its installer, replacing the old kit; drop
+  the OpenCode harness; keep the kit's generic `implementer` and `blind-reviewer` and retire
+  `instrument-auditor`, `instrument-implementer` and `engine-implementer` (the review lock of
+  `tools/audit/build_review_package.py` requires `.claude/agents/blind-reviewer.md`, and the kit's
+  `DelegationContract` has no `client` scope); AGENTS.md v2.0.0; a licence note in the README.
+
+* **Δ (branch `chore/actuarii-install`):**
+  - `bb58696` (the author): the 19 files of the old kit that the installer would refuse to
+    overwrite, `opencode.jsonc`, `.opencode/skills/` and the old hooks of `.claude/settings.json`
+    leave.
+  - `5b8d9a4` `Install Actuarii` (the installer, from the Actuarii clone at `73eaf2b`, governing
+    `traianus/**`, `tests/**` and `docs/specifications/**` besides the kit's minimum): 37 files; the
+    kit's hooks, Bash sandbox and perimeter merged into `.claude/settings.json`; the git hooks
+    `pre-commit` and `commit-msg`.
+  - `f53d813` (the author): `.actuarii.json` takes Traianus's `python_script_dirs` (`tools`,
+    `traianus`), contract registry and blind review from Actuarii's
+    `examples/traianus/actuarii.json`.
+  - `31e4ae7` (the author): the 20 test files of the old kit, whose canonical versions live in
+    Actuarii, the three subagents, `schemas/parser.py` and `schemas/docstate.py` leave.
+  - `42643f1` (implementer, contract `actuarii-b2-suite-and-ci`): `test_security.py` loses the kit's
+    `test_boundary_validator_gate` and keeps its ten engine tests; the ruff step of `ci.yml` loses the
+    12 retired test files and 6 files of the kit.
+
+* **Docs (the executing agent):** AGENTS.md v2.0.0 (1.3, 1.6, 2.5, 5, 6.1, 6.2, 6.5), each edit under
+  its receipt; the `instrument-audit` skill (the blind reviewer; blind while the lock holds); README
+  (development environment, licence note); `IMPLEMENTATION_STATUS.md`;
+  `docs/roadmap/NEXT_RESEARCH.md`.
+
+* **Declared:**
+  - Measured after the install and before `31e4ae7`: 3,453 passed, 246 failed, 48 errors, every
+    failure and error in the 20 kit test files or in `test_boundary_validator_gate`; no engine test
+    failed.
+  - The kit is not linted here: ruff 0.16.5 flags three deliberate patterns in it (`import tools`
+    twice, a documented fail-closed `except Exception`), and Actuarii's CI runs neither ruff nor
+    mypy. `mypy traianus/ tools/boundary_validator/` passes and stays.
+  - The installer copied Actuarii's Apache-2.0 `LICENSE` and `NOTICE` into `tools/`, next to
+    Traianus's AGPL files there; the README says which is which.
+  - The git hooks live in `.git/hooks` and apply to every branch: until this branch is merged, a
+    commit on `main` is refused, since `main` has no `tools/git/commit_integrity.py`.
+  - Kept here, not carried to Actuarii: `tools/audit/audit_harness.py`,
+    `traianus_invariant_verifier.py` and `check_doc_citations.py`, `tools/mcp/`
+    (spectral-math-engine), the skills `lab-analyst`, `spec-first` and `spectral-mathematician`, and
+    the `/bitacora` command.
+  - Found for Actuarii: its installer cannot update an earlier installation; a customised
+    `.actuarii.json` makes a later `--govern` conflict; it drops its licence into the target's
+    `tools/`; and pytest keeps three runs of about 234 MB each under the session's temporary
+    directory. Its README's "Where it comes from" says that Traianus does not run Actuarii, which
+    stops being true once this branch is merged.
+  - Historical records (this LEDGER, the DEVLOG, the instrument audit records, `derivations.md`,
+    REMEDIATION-01) keep the names of their day.
+
+* **Gate:** at `42643f1`, `pytest tests/` 2,339 passed, 1 skipped, 6 deselected and
+  `pytest tests/ -m model` 6 passed (implementer); `tools/audit/verify_red_green.py` on its report,
+  ruff over the new CI list and `mypy traianus/ tools/boundary_validator/` re-run by the executing
+  agent, all passing. After the docs, `pytest tests/` 2,339 passed, 1 skipped, 6 deselected.
+
+* **Status:** `Pending merge`: the branch is complete; merging it into `main` and the CI run on
+  GitHub are the author's.

@@ -139,16 +139,18 @@ For thorough theoretical, topological, and architectural specifications, consult
 
 ---
 
-## Development Environment (OpenCode)
+## Development Environment (Claude Code + Actuarii)
 
-Traianus uses OpenCode as its primary development interface, backed by a local Zero-Trust MCP validator:
+Traianus is developed with Claude Code, governed by [Actuarii](https://github.com/AlexusPacicus/actuarii), the agent-governance kit that was extracted from this repository and is installed back into it:
 
-* **AGENTS.md** — root constitution defining agent governance, single-step execution, and the 5 Code Radicals.
-* **opencode.jsonc** — process-level permission matrix (git read-only allowlist; mutations gated).
-* **In-Flight Interception** — agent mutation proposals are intercepted by the local stdio MCP validator (`tools/boundary_validator/validator.py`), executing safety, process-execution denylist, and exact UTF-8 byte grounding gates.
+* **AGENTS.md** — root constitution: agent governance, single-step execution, and the proposal schema (the 5 Code Radicals and the Rationale).
+* **`.actuarii.json`** — what the kit governs here: the governed paths, the directories Python may run from, the contract registry and the blind review.
+* **The gate** — a write to a governed path needs a receipt for that exact change from the local stdio MCP validator (`tools/boundary_validator/validator.py`); Claude Code hooks enforce it, the Bash sandbox keeps `Bash` off the governed paths, and every commit that changes a governed file carries its record (`Actuarii-Record`, `Actuarii-Rationale`).
 
 ---
 
 ## 📄 License
 
 This project is licensed under the GNU Affero General Public License v3.0 (AGPL-3.0-or-later). See the [LICENSE](./LICENSE) file for details.
+
+The agent-governance kit installed from Actuarii — the files that the `Install Actuarii` commit (`5b8d9a4`) added under `tools/` and `.claude/` — is licensed under the Apache License 2.0; see [tools/LICENSE](./tools/LICENSE) and [tools/NOTICE](./tools/NOTICE). Everything else, including the rest of `tools/`, is AGPL-3.0-or-later.
