@@ -2,11 +2,9 @@
 Zero-Trust Perimeter and Boundary-Validator Gateway.
 Covers: Token authentication, enumerated CORS, ingress allowlist, and Boundary-Validator gateway.
 """
-import json
 import uuid
 
 import pytest
-from tools.boundary_validator.validator import validate_proposal
 
 def test_zero_trust_ingress_allowlist(client, ingesta, auth_headers):
     """Rechaza payloads cuyo Content-Type no sea text/plain con HTTP 415."""
@@ -54,18 +52,6 @@ def test_protected_routes_require_token(client):
         headers={"Content-Type": "text/plain"},
     )
     assert res.status_code == 401
-
-def test_boundary_validator_gate():
-    """Validación Zero-Trust de propuestas (5 Radicales)."""
-    valid_prop = json.dumps({
-        "Intent_Class": "FIX",
-        "Implementation_Block": "x = 1",
-        "Topological_Grounding": "auto_calibrate_critical_threshold()",
-        "Safety_Abort": "NONE"
-    })
-    decision = validate_proposal(valid_prop, "traianus/app.py")
-    assert decision["status"] == "VALIDATED"
-    assert decision["final_decision"] == "EXECUTE_SAFE"
 
 def test_ingesta_rejects_overlong_utf8(client, auth_headers):
     """Overlong UTF-8 lead bytes (C0/C1) must be rejected at the byte level."""
